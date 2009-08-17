@@ -32,6 +32,9 @@
 #include <iostream>
 #include <signal.h>
 
+#define GUI_PACKAGE "freedcpp"
+#define GUI_LOCALE_DIR _DATADIR PATH_SEPARATOR_STR "locale"
+
 void callBack(void* x, const std::string& a)
 {
 	std::cout << "Loading: " << a << std::endl;
@@ -40,15 +43,15 @@ void callBack(void* x, const std::string& a)
 int main(int argc, char *argv[])
 {
 	// Initialize i18n support
-	bindtextdomain("linuxdcpp", _DATADIR "/locale");
-	textdomain("linuxdcpp");
-	bind_textdomain_codeset("linuxdcpp", "UTF-8");
+	bindtextdomain(GUI_PACKAGE, GUI_LOCALE_DIR);
+	textdomain(GUI_PACKAGE);
+	bind_textdomain_codeset(GUI_PACKAGE, "UTF-8");
 
 	// Check if profile is locked
 	if (WulforUtil::profileIsLocked())
 	{
 		gtk_init(&argc, &argv);
-		string message = _("Only one instance of LinuxDC++ is allowed per profile");
+		string message = _("Only one instance of FreeDC++ is allowed per profile");
 
 		GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "%s", message.c_str());
 		gtk_dialog_run(GTK_DIALOG(dialog));
@@ -66,7 +69,7 @@ int main(int argc, char *argv[])
 	gdk_threads_init();
 	gtk_init(&argc, &argv);
 	glade_init();
-	g_set_application_name(_("LinuxDC++"));
+	g_set_application_name("FreeDC++");
 
 	signal(SIGPIPE, SIG_IGN);
 

@@ -109,7 +109,7 @@ MainWindow::MainWindow():
 	gtk_about_dialog_set_email_hook((GtkAboutDialogActivateLinkFunc)onAboutDialogActivateLink_gui, (gpointer)this, NULL);
 	gtk_about_dialog_set_url_hook((GtkAboutDialogActivateLinkFunc)onAboutDialogActivateLink_gui, (gpointer)this, NULL);
 	// This has to be set in code in order to activate the link
-	gtk_about_dialog_set_website(GTK_ABOUT_DIALOG(getWidget("aboutDialog")), "https://launchpad.net/linuxdcpp");
+	gtk_about_dialog_set_website(GTK_ABOUT_DIALOG(getWidget("aboutDialog")), "http://freedcpp.narod.ru");
 
 	// Set all windows to the default icon
 	file = path + "linuxdcpp-icon.png";

@@ -24,6 +24,8 @@ gui_files = [
 	'wulformanager.cc',
 	'WulforUtil.cc']
 
+languages = ['ru']
+
 Import('env')
 
 # We don't want to add these CFLAGS globally so we copy the env
@@ -32,6 +34,10 @@ env.ParseConfig('pkg-config --cflags libglade-2.0')
 
 # Build the gui_files
 obj_files = env.Object(gui_files)
+
+# build the locale files
+for file in languages:
+	env.MoBuild(target = '../../locale/freedcpp/' + file, source = 'po/' + file + '.po')
 
 Return('obj_files')
 

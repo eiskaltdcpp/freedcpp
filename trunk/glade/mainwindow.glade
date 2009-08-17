@@ -6,7 +6,7 @@
     <property name="width_request">600</property>
     <property name="height_request">500</property>
     <property name="visible">False</property>
-    <property name="title" translatable="yes">LinuxDC++</property>
+    <property name="title" translatable="no">FreeDC++</property>
     <child>
       <widget class="GtkVBox" id="vbox1">
         <property name="visible">True</property>
@@ -550,7 +550,7 @@
     </child>
   </widget>
   <widget class="GtkDialog" id="exitDialog">
-    <property name="title" translatable="yes">Exit LinuxDC++?</property>
+    <property name="title" translatable="yes">Exit FreeDC++?</property>
     <property name="resizable">False</property>
     <property name="type_hint">GDK_WINDOW_TYPE_HINT_DIALOG</property>
     <property name="has_separator">False</property>
@@ -691,11 +691,11 @@
     </child>
   </widget>
   <widget class="GtkAboutDialog" id="aboutDialog">
-    <property name="name" translatable="no">LinuxDC++</property>
-    <property name="copyright" translatable="yes">Copyright © 2004-2009 Jens Oknelid</property>
-    <property name="comments" translatable="yes">A DC++ port for Linux
+    <property name="name" translatable="no">FreeDC++</property>
+    <property name="copyright" translatable="yes">Copyright © 2009 FreeDC++</property>
+    <property name="comments" translatable="yes">DC++ Client based on the source code LinuxDC++
 
-LinuxDC++ version: 1.0.3+bzr
+FreeDC++ version: 0.0.1
 Core version: 0.7091</property>
     <property name="license" translatable="yes">
 This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
@@ -706,49 +706,13 @@ You should have received a copy of the GNU General Public License along with thi
 
 In addition, as a special exception, compiling, linking, and/or using OpenSSL with this program is allowed.
 </property>
-    <property name="authors">Developers:
-  Jens Oknelid (paskharen)
-  Alexander Nordfelth (phase)
-  Steven Sheehy
-  Razzloss
+    <property name="authors" translatable="yes">Developers:
+  troll
 
 Contributors:
-  Dyluck
-  s4kk3
-  Trent Lloyd
-  Kristian Berg/Ixan
-  luusl
-  Rikard Björklind
-  clairvoyant
-  obi
-  John Armstrong
-  Naga
-  Vikram Aggarwal
-  Romain Beauxis
-  Tom Lofts
-  Matthew Ziegelbaum
-  Tobias Nygren
-  Pavlov Konstantin
-  Fredrik Ullner
-  Mikael Eman
-  Rimas Kudelis
-  dorian
-  Bart Vullings
-  Jussi Peltola
-  Mattias Webjörn Eriksson
-  Stanislav Maslovski
-  piotrp
-  kotnik
-  jikaheim
-  gasol
-  stoft
-  David Grundberg
-  Max Lapan
-  Jeremy Evans
-  Per Göransson
-  olsner
+
 </property>
-    <property name="artists">Johannes Sjölund</property>
+    <property name="artists"></property>
     <property name="wrap_license">True</property>
     <child internal-child="vbox">
       <widget class="GtkVBox" id="dialog-vbox3">
