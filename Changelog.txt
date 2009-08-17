@@ -1,21 +1,9 @@
 *** 0.0.X 2009-XX-XX ***
 * Слияние с основной веткой LinuxDC++ r311.
-  * Removed the only op check box from search tab and cleared the UI.
-    It is now indicated better that filter already in share depends on local filtering.
-  * Hub::selectedTag is not updated in some cases (thanks Eric Toombs).
-  * Show online status in PM (thanks Bart Vullings).
-  * Add missing user command variables (thanks Bart Vullings).
-  * Readme.txt missing libboost dependency.
-  * Compilation fix for Mac OS X (thanks Ximin Luo).
-  * Rewrote Transfers view (Razzloss).
-  * Fixed "Time Left" column in transfers from not updating properly (Razzloss).
-  * Fixed "User" and "Hub Name" column in transfers from not updating properly (Razzloss).
-  * Fixed compilation error introduced by transfer view rewrite (Steven).
-  * Fixed exit and about dialogs from appearing as top-level windows (Steven).
 * Исправлена ошибка сборки 'mo' файлов. Обновил Readme.txt (добавлен пункт Uninstalling).
+* Добавлен предпросмотр файлов, GUI-Preview (часть кода взято из StrongDC++).
 
 *** 0.0.1 2009-07-10 ***
+* За основу взят DC++ клиент LinuxDC++ ревизия 294.
 * Программа сменила имя на FreeDC++.
-* Исправлена ошибка c 'LOCALEDIR' (теперь PREFIX/share/locale/).
-* В SConstruct добавлена сборка, установка 'mo' файлов.
 * Русификация GUI (спасибо всем переводчикам: dcplusplus, FlylinkDC++).

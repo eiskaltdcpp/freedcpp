@@ -46,6 +46,8 @@ class WulforUtil
 		static std::string getTextFromMenu(GtkMenuItem *item);
 		static std::vector<std::string>& getCharsets();
 		static void openURI(const std::string &uri);
+		static void openURItoApp(const std::string &cmd);
+
  		// Magnet links
 		static std::string makeMagnet(const std::string &name, const int64_t size, const std::string &tth);
 		static bool splitMagnet(const std::string &magnet, std::string &name, int64_t &size, std::string &tth);

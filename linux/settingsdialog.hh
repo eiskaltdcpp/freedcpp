@@ -125,6 +125,17 @@ class Settings:
 		TreeView downloadToView, publicListView, queueView, shareView,
 			appearanceView, colorView, windowView1, windowView2,
 			windowView3, advancedView, certificatesView, userCommandView;
+
+		GtkTreeSelection *previewAppSelection;
+		TreeView previewAppToView;
+		GtkListStore *previewAppToStore;
+
+		// GUI callbacks
+		static void onAddPreview_gui(GtkWidget *widget, gpointer data);
+		static void onRemovePreview_gui(GtkWidget *widget, gpointer data);
+		static void onRenamePreview_gui(GtkWidget *widget, gpointer data);
+		static void onKeyReleasedPreview_gui(GtkWidget *widget, GdkEventKey *event, gpointer data);
+		static void onButtonReleasedPreview_gui(GtkWidget *widget, GdkEventButton *event, gpointer data);
 };
 
 #else

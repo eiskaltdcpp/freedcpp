@@ -1728,6 +1728,234 @@
                     <property name="tab_fill">False</property>
                   </packing>
                 </child>
+                <child>
+                  <widget class="GtkVBox" id="vbox67">
+                    <property name="visible">True</property>
+                    <property name="homogeneous">False</property>
+                    <property name="spacing">0</property>
+                    <child>
+                      <widget class="GtkFrame" id="frame49">
+                      <property name="visible">True</property>
+                      <property name="border_width">4</property>
+                      <property name="label_xalign">0</property>
+                      <child>
+                        <widget class="GtkVBox" id="vbox71">
+                          <property name="visible">True</property>
+                          <property name="homogeneous">True</property>
+                          <property name="spacing">0</property>
+                          <child>
+                            <widget class="GtkHBox" id="hbox25">
+                              <property name="visible">True</property>
+                              <property name="homogeneous">False</property>
+                              <property name="spacing">4</property>
+                              <child>
+                                <widget class="GtkScrolledWindow" id="scrolledwindow13">
+                                  <property name="visible">True</property>
+                                  <property name="can_focus">True</property>
+                                  <property name="hscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
+                                  <property name="vscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
+                                  <property name="shadow_type">GTK_SHADOW_IN</property>
+                                  <child>
+                                    <widget class="GtkTreeView" id="previewTreeView">
+                                      <property name="visible">True</property>
+                                      <property name="can_focus">True</property>
+                                    </widget>
+                                  </child>
+                                </widget>
+                                <packing>
+                                  <property name="padding">4</property>
+                                  <property name="expand">True</property>
+                                  <property name="fill">True</property>
+                                </packing>
+                              </child>
+                            </widget>
+                            <packing>
+                              <property name="padding">0</property>
+                              <property name="expand">False</property>
+                              <property name="fill">True</property>
+                            </packing>
+                          </child>
+                        </widget>
+                      </child>
+                      <child>
+                        <widget class="GtkLabel" id="label229">
+                          <property name="visible">True</property>
+                          <property name="label" translatable="yes">&lt;b&gt;Players list&lt;/b&gt;</property>
+                          <property name="use_markup">True</property>
+                        </widget>
+                        <packing>
+                          <property name="type">label_item</property>
+                        </packing>
+                      </child>
+                    </widget>
+                    <packing>
+                      <property name="padding">0</property>
+                      <property name="expand">True</property>
+                      <property name="fill">True</property>
+                    </packing>
+                  </child>
+                  <child>
+                    <widget class="GtkFrame" id="frame48">
+                      <property name="visible">True</property>
+                      <property name="border_width">4</property>
+                      <property name="label_xalign">0</property>
+                      <child>
+                        <widget class="GtkVBox" id="vbox70">
+                          <property name="visible">True</property>
+                          <property name="homogeneous">False</property>
+                          <property name="spacing">0</property>
+                          <child>
+                            <widget class="GtkLabel" id="label222">
+                              <property name="visible">True</property>
+                              <property name="xalign">0</property>
+                              <property name="label" translatable="yes">Name:</property>
+                            </widget>
+                            <packing>
+                              <property name="expand">False</property>
+                              <property name="fill">False</property>
+                            </packing>
+                          </child>
+                          <child>
+                            <widget class="GtkEntry" id="previewNameEntry">
+                              <property name="visible">True</property>
+                              <property name="can_focus">True</property>
+                            </widget>
+                            <packing>
+                              <property name="padding">0</property>
+                              <property name="expand">False</property>
+                              <property name="fill">False</property>
+                            </packing>
+                          </child>
+                          <child>
+                            <widget class="GtkLabel" id="label223">
+                              <property name="visible">True</property>
+                              <property name="xalign">0</property>
+                              <property name="label" translatable="yes">Application:</property>
+                            </widget>
+                            <packing>
+                              <property name="expand">False</property>
+                              <property name="fill">False</property>
+                            </packing>
+                          </child>
+                          <child>
+                            <widget class="GtkEntry" id="previewApplicationEntry">
+                              <property name="visible">True</property>
+                              <property name="can_focus">True</property>
+                            </widget>
+                            <packing>
+                              <property name="padding">0</property>
+                              <property name="expand">False</property>
+                              <property name="fill">False</property>
+                            </packing>
+                          </child>
+                          <child>
+                            <widget class="GtkLabel" id="label224">
+                              <property name="visible">True</property>
+                              <property name="xalign">0</property>
+                              <property name="label" translatable="yes">Apply to Extensions: (avi;mov;divx)</property>
+                            </widget>
+                            <packing>
+                              <property name="expand">False</property>
+                              <property name="fill">False</property>
+                            </packing>
+                          </child>
+                          <child>
+                            <widget class="GtkEntry" id="previewExtensionsEntry">
+                              <property name="visible">True</property>
+                              <property name="can_focus">True</property>
+                            </widget>
+                            <packing>
+                              <property name="padding">0</property>
+                              <property name="expand">False</property>
+                              <property name="fill">False</property>
+                            </packing>
+                          </child>
+                        </widget>
+                      </child>
+                      <child>
+                        <widget class="GtkLabel" id="label221">
+                          <property name="visible">True</property>
+                          <property name="label" translatable="yes">&lt;b&gt;Add player&lt;/b&gt;</property>
+                          <property name="use_markup">True</property>
+                        </widget>
+                        <packing>
+                          <property name="type">label_item</property>
+                        </packing>
+                      </child>
+                    </widget>
+                    <packing>
+                      <property name="padding">0</property>
+                      <property name="expand">False</property>
+                      <property name="fill">True</property>
+                    </packing>
+                  </child>
+                  <child>
+                    <widget class="GtkHBox" id="hbox26">
+                      <property name="visible">True</property>
+                      <property name="homogeneous">False</property>
+                      <property name="spacing">0</property>
+                      <child>
+                        <placeholder/>
+                      </child>
+                      <child>
+                        <widget class="GtkButton" id="previewAddButton">
+                          <property name="visible">True</property>
+                          <property name="can_focus">True</property>
+                          <property name="label">gtk-add</property>
+                          <property name="use_stock">True</property>
+                        </widget>
+                        <packing>
+                          <property name="expand">False</property>
+                          <property name="fill">False</property>
+                        </packing>
+                      </child>
+                      <child>
+                        <widget class="GtkButton" id="previewRemoveButton">
+                          <property name="visible">True</property>
+                          <property name="can_focus">True</property>
+                          <property name="label">gtk-remove</property>
+                          <property name="use_stock">True</property>
+                        </widget>
+                        <packing>
+                          <property name="expand">False</property>
+                          <property name="fill">False</property>
+                        </packing>
+                      </child>
+                      <child>
+                        <widget class="GtkButton" id="previewRenameButton">
+                          <property name="visible">True</property>
+                          <property name="can_focus">True</property>
+                          <property name="label">gtk-apply</property>
+                          <property name="use_stock">True</property>
+                        </widget>
+                        <packing>
+                          <property name="expand">False</property>
+                          <property name="fill">False</property>
+                        </packing>
+                      </child>
+                    </widget>
+                    <packing>
+                      <property name="padding">0</property>
+                      <property name="expand">False</property>
+                      <property name="fill">False</property>
+                    </packing>
+                  </child>
+                </widget>
+                <packing>
+                  <property name="position">3</property>
+                </packing>
+              </child>
+              <child>
+                <widget class="GtkLabel" id="label214">
+                  <property name="visible">True</property>
+                  <property name="label" translatable="yes">Preview</property>
+                </widget>
+                <packing>
+                  <property name="type">tab</property>
+                  <property name="position">3</property>
+                  <property name="tab_fill">False</property>
+                </packing>
+              </child>
               </widget>
               <packing>
                 <property name="position">2</property>

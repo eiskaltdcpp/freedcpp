@@ -232,6 +232,19 @@ void WulforUtil::openURI(const std::string &uri)
 	}
 }
 
+void WulforUtil::openURItoApp(const std::string &cmd)
+{
+	GError* error = NULL;
+
+	g_spawn_command_line_async((gchar *)Text::fromUtf8(cmd).c_str(), &error);
+
+	if (error != NULL)
+	{
+		cerr << "Failed to open application: " << error->message << endl;
+		g_error_free(error);
+	}
+}
+
 string WulforUtil::makeMagnet(const string &name, const int64_t size, const string &tth)
 {
 	if (name.empty() || tth.empty())

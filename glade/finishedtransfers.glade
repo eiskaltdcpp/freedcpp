@@ -121,11 +121,14 @@
   </widget>
   <widget class="GtkMenu" id="menu">
     <child>
-      <widget class="GtkImageMenuItem" id="openItem">
+      <widget class="GtkMenuItem" id="appsPreviewItem">
         <property name="visible">True</property>
-        <property name="label">gtk-open</property>
+        <property name="label" translatable="yes">Preview</property>
         <property name="use_underline">True</property>
-        <property name="use_stock">True</property>
+        <child>
+          <widget class="GtkMenu" id="appsPreviewMenu">
+          </widget>
+        </child>
       </widget>
     </child>
     <child>

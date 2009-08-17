@@ -79,6 +79,22 @@
       </widget>
     </child>
     <child>
+      <widget class="GtkSeparatorMenuItem" id="separator3">
+        <property name="visible">True</property>
+      </widget>
+    </child>
+    <child>
+      <widget class="GtkMenuItem" id="appsPreviewItem">
+        <property name="visible">True</property>
+        <property name="label" translatable="yes">Preview</property>
+        <property name="use_underline">True</property>
+        <child>
+          <widget class="GtkMenu" id="appsPreviewMenu">
+          </widget>
+        </child>
+      </widget>
+    </child>
+    <child>
       <widget class="GtkSeparatorMenuItem" id="separator4">
         <property name="visible">True</property>
       </widget>

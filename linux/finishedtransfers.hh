@@ -29,6 +29,8 @@
 #include "bookentry.hh"
 #include "treeview.hh"
 
+class PreviewMenu;
+
 class FinishedTransfers:
 	public BookEntry,
 	public dcpp::FinishedManagerListener
@@ -86,6 +88,7 @@ class FinishedTransfers:
 		int totalFiles;
 		int totalUsers;
 		int64_t totalBytes, totalTime;
+		PreviewMenu *appsPreviewMenu;
 };
 
 #else

@@ -34,6 +34,8 @@
 #include "entry.hh"
 #include "UserCommandMenu.hh"
 
+class PreviewMenu;
+
 class Transfers: 
 	public dcpp::ConnectionManagerListener,
 	public dcpp::DownloadManagerListener,
@@ -115,6 +117,7 @@ class Transfers:
 		GtkTreeSelection *transferSelection;
 		GdkPixbuf *uploadPic, *downloadPic;
 		UserCommandMenu* userCommandMenu;
+		PreviewMenu *appsPreviewMenu;
 };
 
 #endif // WULFOR_TRANSFERS_HH
