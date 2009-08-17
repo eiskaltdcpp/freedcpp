@@ -12,6 +12,7 @@
   * Fixed "User" and "Hub Name" column in transfers from not updating properly (Razzloss).
   * Fixed compilation error introduced by transfer view rewrite (Steven).
   * Fixed exit and about dialogs from appearing as top-level windows (Steven).
+* Исправлена ошибка сборки 'mo' файлов. Обновил Readme.txt (добавлен пункт Uninstalling).
 
 *** 0.0.1 2009-07-10 ***
 * Программа сменила имя на FreeDC++.
