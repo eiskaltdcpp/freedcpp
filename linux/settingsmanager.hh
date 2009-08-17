@@ -31,6 +31,23 @@
 #define WSET(key, value) WulforSettingsManager::getInstance()->set(key, value)
 #define WGETI(key) WulforSettingsManager::getInstance()->getInt(key)
 #define WGETS(key) WulforSettingsManager::getInstance()->getString(key)
+#define WGETB(key) WulforSettingsManager::getInstance()->getBool(key)
+
+class PreviewApp
+{
+	public:
+
+	typedef std::vector<PreviewApp*> List;
+	typedef List::size_type size;
+	typedef List::const_iterator Iter;
+
+	PreviewApp(std::string name, std::string app, std::string ext) : name(name), app(app), ext(ext) {}
+	~PreviewApp() {}
+
+	std::string name;
+	std::string app;
+	std::string ext;
+};
 
 class WulforSettingsManager : public dcpp::Singleton<WulforSettingsManager>
 {
@@ -39,11 +56,21 @@ class WulforSettingsManager : public dcpp::Singleton<WulforSettingsManager>
 		virtual ~WulforSettingsManager();
 
 		int getInt(const std::string &key);
+		bool getBool(const std::string &key);
 		std::string getString(const std::string &key);
 		void set(const std::string &key, int value);
+		void set(const std::string &key, bool value);
 		void set(const std::string &key, const std::string &value);
 		void load();
 		void save();
+
+		PreviewApp* applyPreviewApp(std::string &oldName, std::string &newName, std::string &app, std::string &ext);
+		PreviewApp* addPreviewApp(std::string name, std::string app, std::string ext);
+		bool getPreviewApp(std::string &name, PreviewApp::size &index);
+		bool getPreviewApp(std::string &name);
+		bool removePreviewApp(std::string &name);
+
+		const PreviewApp::List& getPreviewApps() const {return previewApps;}
 
 	private:
 		std::map<std::string, int> intMap;
@@ -51,6 +78,8 @@ class WulforSettingsManager : public dcpp::Singleton<WulforSettingsManager>
 		std::map<std::string, int> defaultInt;
 		std::map<std::string, std::string> defaultString;
 		std::string configFile;
+
+		PreviewApp::List previewApps;
 };
 
 #else

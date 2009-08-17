@@ -260,7 +260,7 @@ void Hub::updateUser_gui(ParamMap params)
 
 		if (BOOLSETTING(SHOW_JOINS))
 		{
-			addStatusMessage_gui(params["Nick"] + _(" has joined"));
+			addStatusMessage_gui(params["Nick"] + _(" has joined"), Sound::NONE);
 			string line = params["Nick"] + _(" has joined hub ") + client->getHubName();
 			WulforManager::get()->getMainWindow()->addPrivateStatusMessage_gui(cid, line);
 		}
@@ -378,24 +378,28 @@ void Hub::getPassword_gui()
 		client->disconnect(TRUE);
 }
 
-void Hub::addStatusMessage_gui(string message)
+void Hub::addStatusMessage_gui(string message, Sound::TypeSound sound)
 {
 	if (!message.empty())
 	{
+		playSound_gui(sound);
+
 		setStatus_gui("statusMain", message);
 
 		if (BOOLSETTING(STATUS_IN_CHAT))
 		{
 			string line = "*** " + message;
-			addMessage_gui(line);
+			addMessage_gui(line, Sound::NONE);
 		}
 	}
 }
 
-void Hub::addMessage_gui(string message)
+void Hub::addMessage_gui(string message, Sound::TypeSound sound)
 {
 	if (message.empty())
 		return;
+
+	playSound_gui(sound);
 
 	GtkTextIter iter;
 	string line = "";
@@ -538,6 +542,12 @@ void Hub::updateCursor_gui(GtkWidget *widget)
 		}
 		selectedTag = newTag;
 	}
+}
+
+void Hub::playSound_gui(Sound::TypeSound sound)
+{
+	if (sound != Sound::NONE)
+		Sound::get()->playSound(sound);
 }
 
 gboolean Hub::onFocusIn_gui(GtkWidget *widget, GdkEventFocus *event, gpointer data)
@@ -887,20 +897,20 @@ void Hub::onSendMessage_gui(GtkEntry *entry, gpointer data)
 			{
 				Util::setAway(FALSE);
 				Util::setManualAway(FALSE);
-				hub->addStatusMessage_gui(_("Away mode off"));
+				hub->addStatusMessage_gui(_("Away mode off"), Sound::NONE);
 			}
 			else
 			{
 				Util::setAway(TRUE);
 				Util::setManualAway(TRUE);
 				Util::setAwayMessage(param);
-				hub->addStatusMessage_gui(_("Away mode on: ") + Util::getAwayMessage());
+				hub->addStatusMessage_gui(_("Away mode on: ") + Util::getAwayMessage(), Sound::NONE);
 			}
 		}
 		else if (command == _("back"))
 		{
 			Util::setAway(FALSE);
-			hub->addStatusMessage_gui(_("Away mode off"));
+			hub->addStatusMessage_gui(_("Away mode off"), Sound::NONE);
 		}
 		else if (command == _("clear"))
 		{
@@ -926,7 +936,7 @@ void Hub::onSendMessage_gui(GtkEntry *entry, gpointer data)
 				WulforManager::get()->dispatchClientFunc(func2);
 			}
 			else
-				hub->addStatusMessage_gui(_("User not found"));
+				hub->addStatusMessage_gui(_("User not found"), Sound::NONE);
 		}
 		else if (command == _("grant"))
 		{
@@ -936,12 +946,12 @@ void Hub::onSendMessage_gui(GtkEntry *entry, gpointer data)
 				WulforManager::get()->dispatchClientFunc(func);
 			}
 			else
-				hub->addStatusMessage_gui(_("User not found"));
+				hub->addStatusMessage_gui(_("User not found"), Sound::NONE);
 		}
 		else if (command == _("help"))
 		{
 			hub->addStatusMessage_gui(_("Available commands: /away <message>, /back, /clear, /close, /favorite, "\
-				 "/getlist <nick>, /grant <nick>, /help, /join <address>, /me <message>, /pm <nick>, /rebuild, /refresh, /userlist"));
+				 "/getlist <nick>, /grant <nick>, /help, /join <address>, /me <message>, /pm <nick>, /rebuild, /refresh, /userlist"), Sound::NONE);
 		}
 		else if (command == _("join") && !param.empty())
 		{
@@ -967,7 +977,7 @@ void Hub::onSendMessage_gui(GtkEntry *entry, gpointer data)
 			if (hub->userMap.find(param) != hub->userMap.end())
 				WulforManager::get()->getMainWindow()->addPrivateMessage_gui(hub->userMap[param]);
 			else
-				hub->addStatusMessage_gui(_("User not found"));
+				hub->addStatusMessage_gui(_("User not found"), Sound::NONE);
 		}
 		else if (command == _("rebuild"))
 		{
@@ -991,7 +1001,7 @@ void Hub::onSendMessage_gui(GtkEntry *entry, gpointer data)
 		}
 		else
 		{
-			hub->addStatusMessage_gui(_("Unknown command '") + text + _("': type /help for a list of available commands"));
+			hub->addStatusMessage_gui(_("Unknown command '") + text + _("': type /help for a list of available commands"), Sound::NONE);
 		}
 
 	}
@@ -1299,8 +1309,8 @@ void Hub::getFileList_client(string cid, bool match)
 
 	if (!message.empty())
 	{
-		typedef Func1<Hub, string> F1;
-		F1 *func = new F1(this, &Hub::addStatusMessage_gui, message);
+		typedef Func2<Hub, string, Sound::TypeSound> F2;
+		F2 *func = new F2(this, &Hub::addStatusMessage_gui, message, Sound::NONE);
 		WulforManager::get()->dispatchGuiFunc(func);
 	}
 }
@@ -1319,8 +1329,8 @@ void Hub::grantSlot_client(string cid)
 		}
 	}
 
-	typedef Func1<Hub, string> F1;
-	F1 *func = new F1(this, &Hub::addStatusMessage_gui, message);
+	typedef Func2<Hub, string, Sound::TypeSound> F2;
+	F2 *func = new F2(this, &Hub::addStatusMessage_gui, message, Sound::NONE);
 	WulforManager::get()->dispatchGuiFunc(func);
 }
 
@@ -1341,9 +1351,9 @@ void Hub::redirect_client(string address, bool follow)
 		if (ClientManager::getInstance()->isConnected(address))
 		{
 			string error = _("Unable to connect: already connected to the requested hub");
-			typedef Func1<Hub, string> F1;
-			F1 *f1 = new F1(this, &Hub::addStatusMessage_gui, error);
-			WulforManager::get()->dispatchGuiFunc(f1);
+			typedef Func2<Hub, string, Sound::TypeSound> F2;
+			F2 *f2 = new F2(this, &Hub::addStatusMessage_gui, error, Sound::NONE);
+			WulforManager::get()->dispatchGuiFunc(f2);
 			return;
 		}
 
@@ -1379,8 +1389,8 @@ void Hub::refreshFileList_client()
 
 void Hub::addAsFavorite_client()
 {
-	typedef Func1<Hub, string> F1;
-	F1 *func;
+	typedef Func2<Hub, string, Sound::TypeSound> F2;
+	F2 *func;
 
 	FavoriteHubEntry *existingHub = FavoriteManager::getInstance()->getFavoriteHubEntry(client->getHubUrl());
 
@@ -1394,12 +1404,12 @@ void Hub::addAsFavorite_client()
 		aEntry.setNick(client->getMyNick());
 		aEntry.setEncoding(encoding);
 		FavoriteManager::getInstance()->addFavorite(aEntry);
-		func = new F1(this, &Hub::addStatusMessage_gui, _("Favorite hub added"));
+		func = new F2(this, &Hub::addStatusMessage_gui, _("Favorite hub added"), Sound::NONE);
 		WulforManager::get()->dispatchGuiFunc(func);
 	}
 	else
 	{
-		func = new F1(this, &Hub::addStatusMessage_gui, _("Favorite hub already exists"));
+		func = new F2(this, &Hub::addStatusMessage_gui, _("Favorite hub already exists"), Sound::NONE);
 		WulforManager::get()->dispatchGuiFunc(func);
 	}
 }
@@ -1420,15 +1430,15 @@ void Hub::checkFavoriteUserJoin_client(string cid)
 	if (user && FavoriteManager::getInstance()->isFavoriteUser(user))
 	{
 		string message = WulforUtil::getNicks(user) + _(" has joined");
-		typedef Func1<Hub, std::string> F1;
-		F1 *func = new F1(this, &Hub::addStatusMessage_gui, message);
-		WulforManager::get()->dispatchGuiFunc(func);
+		typedef Func2<Hub, std::string, Sound::TypeSound> F2a;
+		F2a *func2a = new F2a(this, &Hub::addStatusMessage_gui, message, Sound::NONE);
+		WulforManager::get()->dispatchGuiFunc(func2a);
 
 		string statusMessage = WulforUtil::getNicks(user) + _(" has joined hub ") + client->getHubName();
-		typedef Func2<MainWindow, string, string> F2;
-		F2 *func2 = new F2(WulforManager::get()->getMainWindow(),
+		typedef Func2<MainWindow, string, string> F2b;
+		F2b *func2b = new F2b(WulforManager::get()->getMainWindow(),
 			&MainWindow::addPrivateStatusMessage_gui, cid, statusMessage);
-		WulforManager::get()->dispatchGuiFunc(func2);
+		WulforManager::get()->dispatchGuiFunc(func2b);
 	}
 }
 
@@ -1463,15 +1473,15 @@ void Hub::getParams_client(ParamMap &params, Identity &id)
 
 void Hub::on(ClientListener::Connecting, Client *) throw()
 {
-	typedef Func1<Hub, string> F1;
-	F1 *f1 = new F1(this, &Hub::addStatusMessage_gui, _("Connecting to ") + client->getHubUrl() + "...");
-	WulforManager::get()->dispatchGuiFunc(f1);
+	typedef Func2<Hub, string, Sound::TypeSound> F2;
+	F2 *f2 = new F2(this, &Hub::addStatusMessage_gui, _("Connecting to ") + client->getHubUrl() + "...", Sound::NONE);
+	WulforManager::get()->dispatchGuiFunc(f2);
 }
 
 void Hub::on(ClientListener::Connected, Client *) throw()
 {
-	typedef Func1<Hub, string> F1;
-	F1 *func = new F1(this, &Hub::addStatusMessage_gui, _("Connected"));
+	typedef Func2<Hub, string, Sound::TypeSound> F2;
+	F2 *func = new F2(this, &Hub::addStatusMessage_gui, _("Connected"), Sound::HUB_CONNECT);
 	WulforManager::get()->dispatchGuiFunc(func);
 }
 
@@ -1517,14 +1527,15 @@ void Hub::on(ClientListener::UserRemoved, Client *, const OnlineUser &user) thro
 	if (BOOLSETTING(SHOW_JOINS) || (BOOLSETTING(FAV_SHOW_JOINS) &&
 		FavoriteManager::getInstance()->isFavoriteUser(user.getUser())))
 	{
-		func = new F1(this, &Hub::addStatusMessage_gui, nick + _(" has quit"));
-		WulforManager::get()->dispatchGuiFunc(func);
+		typedef Func2<Hub, string, Sound::TypeSound> F2a;
+		F2a *func2a = new F2a(this, &Hub::addStatusMessage_gui, nick + _(" has quit"), Sound::NONE);
+		WulforManager::get()->dispatchGuiFunc(func2a);
 
 		string statusMessage = nick + _(" has quit hub ") + client->getHubName();
-		typedef Func2<MainWindow, string, string> F2;
-		F2 *func2 = new F2(WulforManager::get()->getMainWindow(),
+		typedef Func2<MainWindow, string, string> F2b;
+		F2b *func2b = new F2b(WulforManager::get()->getMainWindow(),
 			&MainWindow::addPrivateStatusMessage_gui, cid, statusMessage);
-		WulforManager::get()->dispatchGuiFunc(func2);
+		WulforManager::get()->dispatchGuiFunc(func2b);
 	}
 
 	func = new F1(this, &Hub::removeUser_gui, cid);
@@ -1544,9 +1555,9 @@ void Hub::on(ClientListener::Failed, Client *, const string &reason) throw()
 	Func0<Hub> *f0 = new Func0<Hub>(this, &Hub::clearNickList_gui);
 	WulforManager::get()->dispatchGuiFunc(f0);
 
-	typedef Func1<Hub, string> F1;
-	F1 *f1 = new F1(this, &Hub::addStatusMessage_gui, _("Connect failed: ") + reason);
-	WulforManager::get()->dispatchGuiFunc(f1);
+	typedef Func2<Hub, string, Sound::TypeSound> F2;
+	F2 *f2 = new F2(this, &Hub::addStatusMessage_gui, _("Connect failed: ") + reason, Sound::HUB_DISCONNECT);
+	WulforManager::get()->dispatchGuiFunc(f2);
 }
 
 void Hub::on(ClientListener::GetPassword, Client *) throw()
@@ -1593,8 +1604,8 @@ void Hub::on(ClientListener::Message, Client *, const OnlineUser &from, const st
 			if ((message.find("Hub-Security") != string::npos && message.find("was kicked by") != string::npos) ||
 				(message.find("is kicking") != string::npos && message.find("because:") != string::npos))
 			{
-				typedef Func1<Hub, string> F1;
-				F1 *func = new F1(this, &Hub::addStatusMessage_gui, line);
+				typedef Func2<Hub, string, Sound::TypeSound> F2;
+				F2 *func = new F2(this, &Hub::addStatusMessage_gui, line, Sound::NONE);
 				WulforManager::get()->dispatchGuiFunc(func);
 				return;
 			}
@@ -1610,8 +1621,8 @@ void Hub::on(ClientListener::Message, Client *, const OnlineUser &from, const st
 			LOG(LogManager::CHAT, params);
 		}
 
-		typedef Func1<Hub, string> F1;
-		F1 *func = new F1(this, &Hub::addMessage_gui, line);
+		typedef Func2<Hub, string, Sound::TypeSound> F2;
+		F2 *func = new F2(this, &Hub::addMessage_gui, line, Sound::NONE);
 		WulforManager::get()->dispatchGuiFunc(func);
 
 		// Set urgency hint if message contains user's nick
@@ -1636,8 +1647,8 @@ void Hub::on(ClientListener::StatusMessage, Client *, const string &message, int
 			if ((message.find("Hub-Security") != string::npos && message.find("was kicked by") != string::npos) ||
 				(message.find("is kicking") != string::npos && message.find("because:") != string::npos))
 			{
-				typedef Func1<Hub, string> F1;
-				F1 *func = new F1(this, &Hub::addStatusMessage_gui, message);
+				typedef Func2<Hub, string, Sound::TypeSound> F2;
+				F2 *func = new F2(this, &Hub::addStatusMessage_gui, message, Sound::NONE);
 				WulforManager::get()->dispatchGuiFunc(func);
 				return;
 			}
@@ -1653,8 +1664,8 @@ void Hub::on(ClientListener::StatusMessage, Client *, const string &message, int
 			LOG(LogManager::STATUS, params);
 		}
 
-		typedef Func1<Hub, string> F1;
-		F1 *func = new F1(this, &Hub::addMessage_gui, message);
+		typedef Func2<Hub, string, Sound::TypeSound> F2;
+		F2 *func = new F2(this, &Hub::addMessage_gui, message, Sound::NONE);
 		WulforManager::get()->dispatchGuiFunc(func);
 	}
 }
@@ -1674,15 +1685,15 @@ void Hub::on(ClientListener::PrivateMessage, Client *, const OnlineUser &from,
 	if (user.getIdentity().isHub() && BOOLSETTING(IGNORE_HUB_PMS))
 	{
 		error = _("Ignored private message from hub");
-		typedef Func1<Hub, string> F1;
-		F1 *func = new F1(this, &Hub::addStatusMessage_gui, error);
+		typedef Func2<Hub, string, Sound::TypeSound> F2;
+		F2 *func = new F2(this, &Hub::addStatusMessage_gui, error, Sound::NONE);
 		WulforManager::get()->dispatchGuiFunc(func);
 	}
 	else if (user.getIdentity().isBot() && BOOLSETTING(IGNORE_BOT_PMS))
 	{
 		error = _("Ignored private message from bot ") + user.getIdentity().getNick();
-		typedef Func1<Hub, string> F1;
-		F1 *func = new F1(this, &Hub::addStatusMessage_gui, error);
+		typedef Func2<Hub, string, Sound::TypeSound> F2;
+		F2 *func = new F2(this, &Hub::addStatusMessage_gui, error, Sound::NONE);
 		WulforManager::get()->dispatchGuiFunc(func);
 	}
 	else
@@ -1696,15 +1707,15 @@ void Hub::on(ClientListener::PrivateMessage, Client *, const OnlineUser &from,
 
 void Hub::on(ClientListener::NickTaken, Client *) throw()
 {
-	typedef Func1<Hub, string> F1;
-	F1 *func = new F1(this, &Hub::addStatusMessage_gui, _("Nick already taken"));
+	typedef Func2<Hub, string, Sound::TypeSound> F2;
+	F2 *func = new F2(this, &Hub::addStatusMessage_gui, _("Nick already taken"), Sound::NONE);
 	WulforManager::get()->dispatchGuiFunc(func);
 }
 
 void Hub::on(ClientListener::SearchFlood, Client *, const string &msg) throw()
 {
-	typedef Func1<Hub, string> F1;
-	F1 *func = new F1(this, &Hub::addStatusMessage_gui, _("Search spam detected from ") + msg);
+	typedef Func2<Hub, string, Sound::TypeSound> F2;
+	F2 *func = new F2(this, &Hub::addStatusMessage_gui, _("Search spam detected from ") + msg, Sound::NONE);
 	WulforManager::get()->dispatchGuiFunc(func);
 }
 

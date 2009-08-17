@@ -37,7 +37,6 @@
 
 class BookEntry;
 class Search;
-class UserCommandMenu;
 
 class MainWindow:
 	public Entry,

@@ -19,10 +19,10 @@
  * using OpenSSL with this program is allowed.
  */
 
+#include "settingsmanager.hh"
 #include "WulforUtil.hh"
 #include "wulformanager.hh"
 #include "previewmenu.hh"
-#include <dcpp/ShareManager.h>
 
 using namespace std;
 using namespace dcpp;
@@ -56,21 +56,23 @@ bool PreviewMenu::buildMenu_gui(const string &target)
 	GtkWidget* itemApp;
 	string appExtensions = "";
 	ext = Text::toLower(ext);
-	const PreviewApplication::List& Apps = ShareManager::getInstance()->getPreviewApps();
 
-	for (PreviewApplication::Iter item = Apps.begin(); item != Apps.end(); ++item)
+	const PreviewApp::List &Apps = WulforSettingsManager::getInstance()->getPreviewApps();
+
+	for (PreviewApp::Iter item = Apps.begin(); item != Apps.end(); ++item)
 	{
-		appExtensions = Text::toLower((*item)->getExtension());
+		appExtensions = Text::toLower((*item)->ext);
 
 		if (appExtensions.find(ext) != string::npos)
 		{
-			itemApp = gtk_menu_item_new_with_label(((*item)->getName()).c_str());
+			itemApp = gtk_menu_item_new_with_label(((*item)->name).c_str());
+
 			gtk_menu_shell_append(GTK_MENU_SHELL(appsPreviewMenu), itemApp);
 
 			g_signal_connect(itemApp, "activate", G_CALLBACK(onPreviewAppClicked_gui), (gpointer) this);
 
 			g_object_set_data_full(G_OBJECT(itemApp), "command", g_strdup("application"), g_free);
-			g_object_set_data_full(G_OBJECT(itemApp), "application", g_strdup(((*item)->getApplication()).c_str()), g_free);
+			g_object_set_data_full(G_OBJECT(itemApp), "application", g_strdup(((*item)->app).c_str()), g_free);
 			g_object_set_data_full(G_OBJECT(itemApp), "target", g_strdup(target.c_str()), g_free);
 		}
 	}

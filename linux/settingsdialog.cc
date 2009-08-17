@@ -26,6 +26,7 @@
 #include <dcpp/NmdcHub.h>
 #include <dcpp/ShareManager.h>
 #include "settingsmanager.hh"
+#include "sound.hh"
 #include "wulformanager.hh"
 #include "WulforUtil.hh"
 
@@ -195,27 +196,37 @@ void Settings::saveSettings_client()
 		sm->set(SettingsManager::DEFAULT_AWAY_MESSAGE, string(gtk_entry_get_text(GTK_ENTRY(getWidget("awayMessageEntry")))));
 		sm->set(SettingsManager::TIME_STAMPS_FORMAT, string(gtk_entry_get_text(GTK_ENTRY(getWidget("timestampEntry")))));
 
-		{ // Colors and sounds
-			// Colors - not implemented
-
-			// Sounds
-			/* FIXME: These settings have been replaced by SOUND_PM and SOUND_PM_WINDOW
-			 *
-			sm->set(SettingsManager::PRIVATE_MESSAGE_BEEP, gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(getWidget("soundPMReceivedCheckButton"))));
-			sm->set(SettingsManager::PRIVATE_MESSAGE_BEEP_OPEN, gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(getWidget("soundPMWindowCheckButton"))));
-			*/
-			// Tab bolding
-			m = GTK_TREE_MODEL(colorStore);
+		{ // Tabs
+			m = GTK_TREE_MODEL(tabStore);
 			valid = gtk_tree_model_get_iter_first(m, &iter);
 
 			while (valid)
 			{
-				setting = (SettingsManager::IntSetting)colorView.getValue<gint>(&iter, "Setting");
-				toggled = colorView.getValue<gboolean>(&iter, "Use");
+				setting = (SettingsManager::IntSetting)tabView.getValue<gint>(&iter, "Setting");
+				toggled = tabView.getValue<gboolean>(&iter, "Use");
 				sm->set(setting, toggled);
 				valid = gtk_tree_model_iter_next(m, &iter);
 			}
 		}
+
+		{ // Sound
+			m = GTK_TREE_MODEL(soundStore);
+			valid = gtk_tree_model_get_iter_first(m, &iter);
+			string sample, target;
+
+			while (valid)
+			{
+				sample = soundView.getString(&iter, "Sample");
+				target = soundView.getString(&iter, _("File"));
+				WSET(sample, target);
+				valid = gtk_tree_model_iter_next(m, &iter);
+			}
+
+			WSET("sound-pm",gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(getWidget("soundPMReceivedCheckButton"))));
+			WSET("sound-pm-open", gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(getWidget("soundPMWindowCheckButton"))));
+		}
+
+		{/*Colors - not implemented*/}
 
 		{ // Window
 			// Auto-open on startup
@@ -327,6 +338,29 @@ void Settings::addOption_gui(GtkListStore *store, const string &name, SettingsMa
 	GtkTreeIter iter;
 	gtk_list_store_append(store, &iter);
 	gtk_list_store_set(store, &iter, 0, SettingsManager::getInstance()->get(setting), 1, name.c_str(), 2, setting, -1);
+}
+
+void Settings::addOption_gui(GtkListStore *store, const string &name, const string &key1)
+{
+	GtkTreeIter iter;
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter,
+		0, name.c_str(),
+		1, WulforSettingsManager::getInstance()->getString(key1).c_str(),
+		2, key1.c_str(),
+		-1);
+}
+
+void Settings::addOption_gui(GtkListStore *store, const string &name, const string &key1, const string &key2)
+{
+	GtkTreeIter iter;
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter,
+		0, name.c_str(),
+		1, WulforSettingsManager::getInstance()->getString(key1).c_str(),
+		2, key1.c_str(),
+		3, key2.c_str(),
+		-1);
 }
 
 void Settings::initPersonal_gui()
@@ -456,7 +490,6 @@ void Settings::initDownloads_gui()
 		g_signal_connect(downloadToView.get(), "button-release-event", G_CALLBACK(onFavoriteButtonReleased_gui), (gpointer)this);
 		gtk_widget_set_sensitive(getWidget("favoriteRemoveButton"), FALSE);
 
-		//GtkTreeIter iter;
 		StringPairList directories = FavoriteManager::getInstance()->getFavoriteDirs();
 		for (StringPairIter j = directories.begin(); j != directories.end(); ++j)
 		{
@@ -469,50 +502,45 @@ void Settings::initDownloads_gui()
 	}
 
 	{ // Preview
-		previewAppToView.setView(GTK_TREE_VIEW(getWidget("previewTreeView")));
-		previewAppToView.insertColumn(_("Name"), G_TYPE_STRING, TreeView::STRING, -1);
-		previewAppToView.insertColumn(_("Application"), G_TYPE_STRING, TreeView::STRING, -1);
-		previewAppToView.insertColumn(_("Extensions"), G_TYPE_STRING, TreeView::STRING, -1);
+		previewAppView.setView(GTK_TREE_VIEW(getWidget("previewTreeView")));
+		previewAppView.insertColumn(_("Name"), G_TYPE_STRING, TreeView::STRING, -1);
+		previewAppView.insertColumn(_("Application"), G_TYPE_STRING, TreeView::STRING, -1);
+		previewAppView.insertColumn(_("Extensions"), G_TYPE_STRING, TreeView::STRING, -1);
+		previewAppView.finalize();
 
-		previewAppToView.finalize();
+		g_signal_connect(getWidget("previewAddButton"), "clicked", G_CALLBACK(onPreviewAdd_gui), (gpointer)this);
+		g_signal_connect(getWidget("previewRemoveButton"), "clicked", G_CALLBACK(onPreviewRemove_gui), (gpointer)this);
+		g_signal_connect(getWidget("previewApplyButton"), "clicked", G_CALLBACK(onPreviewApply_gui), (gpointer)this);
+		g_signal_connect(getWidget("previewTreeView"), "key-release-event", G_CALLBACK(onPreviewKeyReleased_gui), (gpointer)this);
+		g_signal_connect(previewAppView.get(), "button-release-event", G_CALLBACK(onPreviewButtonReleased_gui), (gpointer)this);
 
-		g_signal_connect(getWidget("previewAddButton"), "clicked", G_CALLBACK(onAddPreview_gui), (gpointer)this);
-		g_signal_connect(getWidget("previewRemoveButton"), "clicked", G_CALLBACK(onRemovePreview_gui), (gpointer)this);
-		g_signal_connect(getWidget("previewRenameButton"), "clicked", G_CALLBACK(onRenamePreview_gui), (gpointer)this);
-		g_signal_connect(getWidget("previewTreeView"), "key-release-event", G_CALLBACK(onKeyReleasedPreview_gui), (gpointer)this);
-		g_signal_connect(previewAppToView.get(), "button-release-event", G_CALLBACK(onButtonReleasedPreview_gui), (gpointer)this);
-
-		previewAppToStore = gtk_list_store_newv(previewAppToView.getColCount(), previewAppToView.getGTypes());
-		gtk_tree_view_set_model(previewAppToView.get(), GTK_TREE_MODEL(previewAppToStore));
+		previewAppToStore = gtk_list_store_newv(previewAppView.getColCount(), previewAppView.getGTypes());
+		gtk_tree_view_set_model(previewAppView.get(), GTK_TREE_MODEL(previewAppToStore));
 		g_object_unref(previewAppToStore);
 
-		previewAppSelection = gtk_tree_view_get_selection(previewAppToView.get());
-
-		// set sensitive buttons
 		gtk_widget_set_sensitive(getWidget("previewAddButton"), TRUE);
 		gtk_widget_set_sensitive(getWidget("previewRemoveButton"), TRUE);
-		gtk_widget_set_sensitive(getWidget("previewRenameButton"), TRUE);
+		gtk_widget_set_sensitive(getWidget("previewApplyButton"), TRUE);
 
-		//GtkTreeIter it;
-		ShareManager *shm = ShareManager::getInstance();
-		const PreviewApplication::List& previewAppsList = shm->getPreviewApps();
+		WulforSettingsManager *wsm = WulforSettingsManager::getInstance();
+		const PreviewApp::List &Apps = wsm->getPreviewApps();
 
 		// add default applications players
-		if (previewAppsList.empty())
+		if (Apps.empty())
 		{
-			shm->addPreviewApp(_("Xine player"), "xine --no-logo --session volume=50", "avi; mov; vob; mpg; mp3");
-			shm->addPreviewApp(_("Kaffeine player"), "kaffeine -p", "avi; mov; mpg; vob; mp3");
-			shm->addPreviewApp(_("Mplayer player"), "mplayer", "avi; mov; vob; mp3");
-			shm->addPreviewApp(_("Amarok player"), "amarok", "mp3");
+			wsm->addPreviewApp(_("Xine player"), "xine --no-logo --session volume=50", "avi; mov; vob; mpg; mp3");
+			wsm->addPreviewApp(_("Kaffeine player"), "kaffeine -p", "avi; mov; mpg; vob; mp3");
+			wsm->addPreviewApp(_("Mplayer player"), "mplayer", "avi; mov; vob; mp3");
+			wsm->addPreviewApp(_("Amarok player"), "amarok", "mp3");
 		}
 
-		for (PreviewApplication::Iter item = previewAppsList.begin(); item != previewAppsList.end(); ++item)
+		for (PreviewApp::Iter item = Apps.begin(); item != Apps.end(); ++item)
 		{
 			gtk_list_store_append(previewAppToStore, &iter);
 			gtk_list_store_set(previewAppToStore, &iter,
-				previewAppToView.col(_("Name")), ((*item)->getName()).c_str(),
-				previewAppToView.col(_("Application")), ((*item)->getApplication()).c_str(),
-				previewAppToView.col(_("Extensions")), ((*item)->getExtension()).c_str(),
+				previewAppView.col(_("Name")), ((*item)->name).c_str(),
+				previewAppView.col(_("Application")), ((*item)->app).c_str(),
+				previewAppView.col(_("Extensions")), ((*item)->ext).c_str(),
 				-1);
 		}
 	}
@@ -557,135 +585,6 @@ void Settings::initDownloads_gui()
 		addOption_gui(queueStore, _("Skip zero-byte files"), SettingsManager::SKIP_ZERO_BYTE);
 		addOption_gui(queueStore, _("Don't download files already in share"), SettingsManager::DONT_DL_ALREADY_SHARED);
 		addOption_gui(queueStore, _("Don't download files already in the queue"), SettingsManager::DONT_DL_ALREADY_QUEUED);
-	}
-}
-
-void Settings::onAddPreview_gui(GtkWidget *widget, gpointer data)
-{
-	Settings *s = (Settings*)data;
-
-	string name = gtk_entry_get_text(GTK_ENTRY(s->getWidget("previewNameEntry")));
-	string app = gtk_entry_get_text(GTK_ENTRY(s->getWidget("previewApplicationEntry")));
-	string ext = gtk_entry_get_text(GTK_ENTRY(s->getWidget("previewExtensionsEntry")));
-
-	if (name.empty() || app.empty() || ext.empty())
-	{
-		s->showErrorDialog(_("Name and command must not be empty"));
-		return;
-	}
-
-	ShareManager *shm = ShareManager::getInstance();
-	const PreviewApplication::List& previewAppsList = shm->getPreviewApps();
-
-	for (PreviewApplication::Iter item = previewAppsList.begin(); item != previewAppsList.end(); ++item)
-	{
-		if ((*item)->getName() == name)
-		{
-			s->showErrorDialog(_("Add item failed"));
-			return;
-		}
-	}
-
-	if (shm->addPreviewApp(name, app, ext) != NULL)
-	{
-		GtkTreeIter it;
-		gtk_list_store_append(s->previewAppToStore, &it);
-		gtk_list_store_set(s->previewAppToStore, &it,
-			s->previewAppToView.col(_("Name")), name.c_str(),
-			s->previewAppToView.col(_("Application")), app.c_str(),
-			s->previewAppToView.col(_("Extensions")), ext.c_str(),
-			-1);
-	}
-	else s->showErrorDialog(_(":("));
-}
-
-void Settings::onRemovePreview_gui(GtkWidget *widget, gpointer data)
-{
-	Settings *s = (Settings *)data;
-
-	GtkTreeIter iter;
-	GtkTreeSelection *selection = gtk_tree_view_get_selection(s->previewAppToView.get());
-
-	if (gtk_tree_selection_get_selected(selection, NULL, &iter))
-	{
-		string name = s->previewAppToView.getString(&iter, _("Name"));
-
-		if (ShareManager::getInstance()->removePreviewApp(name))
-		{
-			gtk_list_store_remove(s->previewAppToStore, &iter);
-		}
-	}
-}
-
-void Settings::onKeyReleasedPreview_gui(GtkWidget *widget, GdkEventKey *event, gpointer data)
-{
-	Settings *s = (Settings *)data;
-
-	if (event->keyval == GDK_Up || event->keyval == GDK_Down)
-	{
-		GtkTreeIter iter;
-		GtkTreeSelection *selection = gtk_tree_view_get_selection(s->previewAppToView.get());
-
-		if (gtk_tree_selection_get_selected(selection, NULL, &iter))
-		{
-			// set text
-			gtk_entry_set_text(GTK_ENTRY(s->getWidget("previewNameEntry")), s->previewAppToView.getString(&iter, _("Name")).c_str() );
-			gtk_entry_set_text(GTK_ENTRY(s->getWidget("previewApplicationEntry")), s->previewAppToView.getString(&iter, _("Application")).c_str());
-			gtk_entry_set_text(GTK_ENTRY(s->getWidget("previewExtensionsEntry")), s->previewAppToView.getString(&iter, _("Extensions")).c_str());
-		}
-	}
-}
-
-void Settings::onButtonReleasedPreview_gui(GtkWidget *widget, GdkEventButton *event, gpointer data)
-{
-	Settings *s = (Settings *)data;
-
-	if (event->button == 3 || event->button == 1)
-	{
-		GtkTreeIter iter;
-		GtkTreeSelection *selection = gtk_tree_view_get_selection(s->previewAppToView.get());
-
-		if (gtk_tree_selection_get_selected(selection, NULL, &iter))
-		{
-			gtk_entry_set_text(GTK_ENTRY(s->getWidget("previewNameEntry")), s->previewAppToView.getString(&iter, _("Name")).c_str());
-			gtk_entry_set_text(GTK_ENTRY(s->getWidget("previewApplicationEntry")), s->previewAppToView.getString(&iter, _("Application")).c_str());
-			gtk_entry_set_text(GTK_ENTRY(s->getWidget("previewExtensionsEntry")), s->previewAppToView.getString(&iter, _("Extensions")).c_str());
-		}
-	}
-}
-
-void Settings::onRenamePreview_gui(GtkWidget *widget, gpointer data)
-{
-	Settings *s = (Settings *)data;
-
-	string name = gtk_entry_get_text(GTK_ENTRY(s->getWidget("previewNameEntry")));
-	string app = gtk_entry_get_text(GTK_ENTRY(s->getWidget("previewApplicationEntry")));
-	string ext = gtk_entry_get_text(GTK_ENTRY(s->getWidget("previewExtensionsEntry")));
-
-	if (name.empty() || app.empty() || ext.empty())
-	{
-		s->showErrorDialog(_("Name and command must not be empty"));
-		return;
-	}
-
-	GtkTreeIter iter;
-	GtkTreeSelection *selection = gtk_tree_view_get_selection(s->previewAppToView.get());
-
-	if (gtk_tree_selection_get_selected(selection, NULL, &iter))
-	{
-		string oldName = s->previewAppToView.getString(&iter, _("Name"));
-
-		if (ShareManager::getInstance()->renamePreviewApp(oldName, name, app, ext))
-		{
-			gtk_list_store_remove(s->previewAppToStore, &iter);
-
-			gtk_list_store_append(s->previewAppToStore, &iter);
-			gtk_list_store_set(s->previewAppToStore, &iter,
-			s->previewAppToView.col(_("Name")), name.c_str(),
-			s->previewAppToView.col(_("Application")), app.c_str(),
-			s->previewAppToView.col(_("Extensions")), ext.c_str(),
-			-1);
-		}
 	}
 }
 
@@ -766,47 +665,61 @@ void Settings::initAppearance_gui()
 		gtk_entry_set_text(GTK_ENTRY(getWidget("timestampEntry")), SETTING(TIME_STAMPS_FORMAT).c_str());
 	}
 
-	{ // Colors and sounds
-		///@todo uncomment when implemented
-		//g_signal_connect(getWidget("appearanceColor"), "clicked", G_CALLBACK(onWinColorClicked_gui), (gpointer)this);
-		//g_signal_connect(getWidget("upColor"), "clicked", G_CALLBACK(onUpColorClicked_gui), (gpointer)this);
-		//g_signal_connect(getWidget("downColor"), "clicked", G_CALLBACK(onDownColorClicked_gui), (gpointer)this);
-		//g_signal_connect(getWidget("textStyle"), "clicked", G_CALLBACK(onTextStyleClicked_gui), (gpointer)this);
-		/* FIXME: BEEPS Replaced by SOUND_PM_*
-		 *
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(getWidget("soundPMReceivedCheckButton")), BOOLSETTING(PRIVATE_MESSAGE_BEEP));
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(getWidget("soundPMWindowCheckButton")), BOOLSETTING(PRIVATE_MESSAGE_BEEP_OPEN));
-		*/
-		gtk_widget_set_sensitive(getWidget("soundPMReceivedCheckButton"), FALSE);
-		gtk_widget_set_sensitive(getWidget("soundPMWindowCheckButton"), FALSE);
+	{ // Tabs
+		tabView.setView(GTK_TREE_VIEW(getWidget("tabBoldingTreeView")));
+		tabView.insertColumn("Use", G_TYPE_BOOLEAN, TreeView::BOOL, -1);
+		tabView.insertColumn("Name", G_TYPE_STRING, TreeView::STRING, -1);
+		tabView.insertHiddenColumn("Setting", G_TYPE_INT);
+		tabView.finalize();
+		tabStore = gtk_list_store_newv(tabView.getColCount(), tabView.getGTypes());
+		gtk_tree_view_set_model(tabView.get(), GTK_TREE_MODEL(tabStore));
+		g_object_unref(tabStore);
+		gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(tabStore), tabView.col("Name"), GTK_SORT_ASCENDING);
 
-		gtk_widget_set_sensitive(getWidget("appearanceColor"), FALSE);
-		gtk_widget_set_sensitive(getWidget("upColor"), FALSE);
-		gtk_widget_set_sensitive(getWidget("downColor"), FALSE);
-		gtk_widget_set_sensitive(getWidget("textStyle"), FALSE);
-
-		colorView.setView(GTK_TREE_VIEW(getWidget("tabBoldingTreeView")));
-		colorView.insertColumn("Use", G_TYPE_BOOLEAN, TreeView::BOOL, -1);
-		colorView.insertColumn("Name", G_TYPE_STRING, TreeView::STRING, -1);
-		colorView.insertHiddenColumn("Setting", G_TYPE_INT);
-		colorView.finalize();
-		colorStore = gtk_list_store_newv(colorView.getColCount(), colorView.getGTypes());
-		gtk_tree_view_set_model(colorView.get(), GTK_TREE_MODEL(colorStore));
-		g_object_unref(colorStore);
-		gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(colorStore), colorView.col("Name"), GTK_SORT_ASCENDING);
-
-		list = gtk_tree_view_column_get_cell_renderers(gtk_tree_view_get_column(colorView.get(), colorView.col("Use")));
+		list = gtk_tree_view_column_get_cell_renderers(gtk_tree_view_get_column(tabView.get(), tabView.col("Use")));
 		renderer = (GObject *)g_list_nth_data(list, 0);
-		g_signal_connect(renderer, "toggled", G_CALLBACK(onColorToggledClicked_gui), (gpointer)this);
+		g_signal_connect(renderer, "toggled", G_CALLBACK(onTabToggledClicked_gui), (gpointer)this);
 		g_list_free(list);
 
-		addOption_gui(colorStore, _("Finished Downloads"), SettingsManager::BOLD_FINISHED_DOWNLOADS);
-		addOption_gui(colorStore, _("Finished Uploads"), SettingsManager::BOLD_FINISHED_UPLOADS);
-		addOption_gui(colorStore, _("Download Queue"), SettingsManager::BOLD_QUEUE);
-		addOption_gui(colorStore, _("Hub (also sets urgency hint)"), SettingsManager::BOLD_HUB);
-		addOption_gui(colorStore, _("Private Message (also sets urgency hint)"), SettingsManager::BOLD_PM);
-		addOption_gui(colorStore, _("Search"), SettingsManager::BOLD_SEARCH);
+		addOption_gui(tabStore, _("Finished Downloads"), SettingsManager::BOLD_FINISHED_DOWNLOADS);
+		addOption_gui(tabStore, _("Finished Uploads"), SettingsManager::BOLD_FINISHED_UPLOADS);
+		addOption_gui(tabStore, _("Download Queue"), SettingsManager::BOLD_QUEUE);
+		addOption_gui(tabStore, _("Hub (also sets urgency hint)"), SettingsManager::BOLD_HUB);
+		addOption_gui(tabStore, _("Private Message (also sets urgency hint)"), SettingsManager::BOLD_PM);
+		addOption_gui(tabStore, _("Search"), SettingsManager::BOLD_SEARCH);
 	}
+
+	{ // Sounds
+		g_signal_connect(getWidget("soundPlayButton"), "clicked", G_CALLBACK(onSoundPlayButton_gui), (gpointer)this);
+		g_signal_connect(getWidget("soundNoneButton"), "clicked", G_CALLBACK(onSoundNoneButton_gui), (gpointer)this);
+		g_signal_connect(getWidget("soundFileBrowseButton"), "clicked", G_CALLBACK(onSoundFileBrowseClicked_gui), (gpointer)this);
+
+		soundView.setView(GTK_TREE_VIEW(getWidget("soundsTreeView")));
+		soundView.insertColumn(_("Sounds"), G_TYPE_STRING, TreeView::STRING, -1);
+		soundView.insertColumn(_("File"), G_TYPE_STRING, TreeView::STRING, -1);
+		soundView.insertHiddenColumn("Sample", G_TYPE_STRING);
+		soundView.finalize();
+
+		soundStore = gtk_list_store_newv(soundView.getColCount(), soundView.getGTypes());
+		gtk_tree_view_set_model(soundView.get(), GTK_TREE_MODEL(soundStore));
+		g_object_unref(soundStore);
+
+		addOption_gui(soundStore, _("Download begins"), "sound-download-begins");
+		addOption_gui(soundStore, _("Download finished"), "sound-download-finished");
+		addOption_gui(soundStore, _("Upload finished"), "sound-upload-finished");
+		addOption_gui(soundStore, _("Private message"), "sound-private-message");
+		addOption_gui(soundStore, _("Hub connected"), "sound-hub-connect");
+		addOption_gui(soundStore, _("Hub disconnected"), "sound-hub-disconnect");
+
+		gtk_widget_set_sensitive(getWidget("soundPlayButton"), TRUE);
+		gtk_widget_set_sensitive(getWidget("soundNoneButton"), TRUE);
+		gtk_widget_set_sensitive(getWidget("soundFileBrowseButton"), TRUE);
+
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(getWidget("soundPMReceivedCheckButton")), WGETB("sound-pm"));
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(getWidget("soundPMWindowCheckButton")), WGETB("sound-pm-open"));
+	}
+
+	{/*Colors - not implemented*/}
 
 	{ // Window
 		// Auto-open
@@ -1022,6 +935,178 @@ void Settings::initAdvanced_gui()
 		addOption_gui(certificatesStore, _("Allow TLS connections to clients without trusted certificate"), SettingsManager::ALLOW_UNTRUSTED_CLIENTS);
 
 		g_signal_connect(getWidget("generateCertificatesButton"), "clicked", G_CALLBACK(onGenerateCertificatesClicked_gui), (gpointer)this);
+	}
+}
+
+void Settings::onSoundFileBrowseClicked_gui(GtkWidget *widget, gpointer data)
+{
+	Settings *s = (Settings *)data;
+
+	gint response = gtk_dialog_run(GTK_DIALOG(s->getWidget("fileChooserDialog")));
+	gtk_widget_hide(s->getWidget("fileChooserDialog"));
+
+	if (response == GTK_RESPONSE_OK)
+	{
+		gchar *path = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(s->getWidget("fileChooserDialog")));
+
+		if (path)
+		{
+			GtkTreeIter iter;
+			GtkTreeSelection *selection = gtk_tree_view_get_selection(s->soundView.get());
+
+			if (gtk_tree_selection_get_selected(selection, NULL, &iter))
+			{
+				string sample = s->soundView.getString(&iter, "Sample");
+				string target = Text::toUtf8(path);
+
+				gtk_list_store_set(s->soundStore, &iter, s->soundView.col(_("File")), target.c_str(), -1);
+			}
+			g_free(path);
+		}
+	}
+}
+
+void Settings::onSoundPlayButton_gui(GtkWidget *widget, gpointer data)
+{
+	Settings *s = (Settings *)data;
+
+	GtkTreeIter iter;
+	GtkTreeSelection *selection = gtk_tree_view_get_selection(s->soundView.get());
+
+	if (gtk_tree_selection_get_selected(selection, NULL, &iter))
+	{
+		string target = s->soundView.getString(&iter, _("File"));
+		Sound::get()->playSound(target);
+	}
+}
+
+void Settings::onSoundNoneButton_gui(GtkWidget *widget, gpointer data)
+{
+	Settings *s = (Settings *)data;
+
+	GtkTreeIter iter;
+	GtkTreeSelection *selection = gtk_tree_view_get_selection(s->soundView.get());
+
+	if (gtk_tree_selection_get_selected(selection, NULL, &iter))
+		gtk_list_store_set(s->soundStore, &iter, s->soundView.col(_("File")), "", -1);
+}
+
+void Settings::onPreviewAdd_gui(GtkWidget *widget, gpointer data)
+{
+	Settings *s = (Settings*)data;
+
+	string name = gtk_entry_get_text(GTK_ENTRY(s->getWidget("previewNameEntry")));
+	string app = gtk_entry_get_text(GTK_ENTRY(s->getWidget("previewApplicationEntry")));
+	string ext = gtk_entry_get_text(GTK_ENTRY(s->getWidget("previewExtensionsEntry")));
+
+	if (name.empty() || app.empty() || ext.empty())
+	{
+		s->showErrorDialog(_("Name and command must not be empty"));
+		return;
+	}
+
+	WulforSettingsManager *wsm = WulforSettingsManager::getInstance();
+
+	if (wsm->getPreviewApp(name))
+	{
+		s->showErrorDialog(_("Add player failed"));
+		return;
+	}
+
+	if (wsm->addPreviewApp(name, app, ext) != NULL)
+	{
+		GtkTreeIter it;
+		gtk_list_store_append(s->previewAppToStore, &it);
+		gtk_list_store_set(s->previewAppToStore, &it,
+			s->previewAppView.col(_("Name")), name.c_str(),
+			s->previewAppView.col(_("Application")), app.c_str(),
+			s->previewAppView.col(_("Extensions")), ext.c_str(),
+			-1);
+	}
+	else s->showErrorDialog(_(":("));
+}
+
+void Settings::onPreviewRemove_gui(GtkWidget *widget, gpointer data)
+{
+	Settings *s = (Settings *)data;
+
+	GtkTreeIter iter;
+	GtkTreeSelection *selection = gtk_tree_view_get_selection(s->previewAppView.get());
+
+	if (gtk_tree_selection_get_selected(selection, NULL, &iter))
+	{
+		string name = s->previewAppView.getString(&iter, _("Name"));
+
+		if (WulforSettingsManager::getInstance()->removePreviewApp(name))
+			gtk_list_store_remove(s->previewAppToStore, &iter);
+	}
+}
+
+void Settings::onPreviewKeyReleased_gui(GtkWidget *widget, GdkEventKey *event, gpointer data)
+{
+	Settings *s = (Settings *)data;
+
+	if (event->keyval == GDK_Up || event->keyval == GDK_Down)
+	{
+		GtkTreeIter iter;
+		GtkTreeSelection *selection = gtk_tree_view_get_selection(s->previewAppView.get());
+
+		if (gtk_tree_selection_get_selected(selection, NULL, &iter))
+		{
+			gtk_entry_set_text(GTK_ENTRY(s->getWidget("previewNameEntry")), s->previewAppView.getString(&iter, _("Name")).c_str() );
+			gtk_entry_set_text(GTK_ENTRY(s->getWidget("previewApplicationEntry")), s->previewAppView.getString(&iter, _("Application")).c_str());
+			gtk_entry_set_text(GTK_ENTRY(s->getWidget("previewExtensionsEntry")), s->previewAppView.getString(&iter, _("Extensions")).c_str());
+		}
+	}
+}
+
+void Settings::onPreviewButtonReleased_gui(GtkWidget *widget, GdkEventButton *event, gpointer data)
+{
+	Settings *s = (Settings *)data;
+
+	if (event->button == 3 || event->button == 1)
+	{
+		GtkTreeIter iter;
+		GtkTreeSelection *selection = gtk_tree_view_get_selection(s->previewAppView.get());
+
+		if (gtk_tree_selection_get_selected(selection, NULL, &iter))
+		{
+			gtk_entry_set_text(GTK_ENTRY(s->getWidget("previewNameEntry")), s->previewAppView.getString(&iter, _("Name")).c_str());
+			gtk_entry_set_text(GTK_ENTRY(s->getWidget("previewApplicationEntry")), s->previewAppView.getString(&iter, _("Application")).c_str());
+			gtk_entry_set_text(GTK_ENTRY(s->getWidget("previewExtensionsEntry")), s->previewAppView.getString(&iter, _("Extensions")).c_str());
+		}
+	}
+}
+
+void Settings::onPreviewApply_gui(GtkWidget *widget, gpointer data)
+{
+	Settings *s = (Settings *)data;
+
+	string name = gtk_entry_get_text(GTK_ENTRY(s->getWidget("previewNameEntry")));
+	string app = gtk_entry_get_text(GTK_ENTRY(s->getWidget("previewApplicationEntry")));
+	string ext = gtk_entry_get_text(GTK_ENTRY(s->getWidget("previewExtensionsEntry")));
+
+	if (name.empty() || app.empty() || ext.empty())
+	{
+		s->showErrorDialog(_("Name and command must not be empty"));
+		return;
+	}
+
+	GtkTreeIter iter;
+	GtkTreeSelection *selection = gtk_tree_view_get_selection(s->previewAppView.get());
+
+	if (gtk_tree_selection_get_selected(selection, NULL, &iter))
+	{
+		string oldName = s->previewAppView.getString(&iter, _("Name"));
+
+		if (WulforSettingsManager::getInstance()->applyPreviewApp(oldName, name, app, ext))
+		{
+			gtk_list_store_set(s->previewAppToStore, &iter,
+				s->previewAppView.col(_("Name")), name.c_str(),
+				s->previewAppView.col(_("Application")), app.c_str(),
+				s->previewAppView.col(_("Extensions")), ext.c_str(),
+				-1);
+		}
 	}
 }
 
@@ -1607,15 +1692,15 @@ void Settings::onAppearanceToggledClicked_gui(GtkCellRendererToggle *cell, gchar
 	}
 }
 
-void Settings::onColorToggledClicked_gui(GtkCellRendererToggle *cell, gchar *path, gpointer data)
+void Settings::onTabToggledClicked_gui(GtkCellRendererToggle *cell, gchar *path, gpointer data)
 {
 	Settings *s = (Settings *)data;
 	GtkTreeIter iter;
 
-	if (gtk_tree_model_get_iter_from_string(GTK_TREE_MODEL(s->colorStore), &iter, path))
+	if (gtk_tree_model_get_iter_from_string(GTK_TREE_MODEL(s->tabStore), &iter, path))
 	{
-		gboolean fixed = s->colorView.getValue<gboolean>(&iter, "Use");
-		gtk_list_store_set(s->colorStore, &iter, s->colorView.col("Use"), !fixed, -1);
+		gboolean fixed = s->tabView.getValue<gboolean>(&iter, "Use");
+		gtk_list_store_set(s->tabStore, &iter, s->tabView.col("Use"), !fixed, -1);
 	}
 }
 

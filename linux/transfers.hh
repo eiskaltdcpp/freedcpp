@@ -32,9 +32,10 @@
 
 #include "treeview.hh"
 #include "entry.hh"
-#include "UserCommandMenu.hh"
+#include "sound.hh"
 
 class PreviewMenu;
+class UserCommandMenu;
 
 class Transfers: 
 	public dcpp::ConnectionManagerListener,
@@ -56,15 +57,16 @@ class Transfers:
 		void removeConnection_gui(const std::string cid, bool download);
 		
 		void initTransfer_gui(dcpp::StringMap params);
-		void updateTransfer_gui(dcpp::StringMap params, bool download);
+		void updateTransfer_gui(dcpp::StringMap params, bool download, Sound::TypeSound sound);
 		void updateFilePosition_gui(const std::string cid, int64_t filePosition);
 		void updateParent_gui(GtkTreeIter* iter);
-		void finishParent_gui(const std::string target, const std::string status);
+		void finishParent_gui(const std::string target, const std::string status, Sound::TypeSound sound);
 
 		bool findParent_gui(const std::string& target, GtkTreeIter* iter);
 		bool findTransfer_gui(const std::string& cid, bool download, GtkTreeIter* iter);
 
 		void popupTransferMenu_gui();
+		void playSound_gui(Sound::TypeSound sound);
 
 		// GUI callbacks
 		static gboolean onTransferButtonPressed_gui(GtkWidget *widget, GdkEventButton *event, gpointer data);

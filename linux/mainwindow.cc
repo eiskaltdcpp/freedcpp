@@ -192,6 +192,8 @@ MainWindow::MainWindow():
 	setToolbarStyle_gui(WGETI("toolbar-style"));
 
 	createStatusIcon_gui();
+
+	Sound::start();
 }
 
 MainWindow::~MainWindow()
@@ -229,6 +231,8 @@ MainWindow::~MainWindow()
 
 	gtk_widget_destroy(GTK_WIDGET(window));
 	g_object_unref(statusIcon);
+
+	Sound::stop();
 }
 
 GtkWidget *MainWindow::getContainer()

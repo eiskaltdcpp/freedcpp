@@ -40,6 +40,8 @@ class Settings:
 	private:
 		// GUI functions
 		void addOption_gui(GtkListStore *store, const std::string &name, dcpp::SettingsManager::IntSetting setting);
+		void addOption_gui(GtkListStore *store, const std::string &name, const std::string &key1, const std::string &key2);
+		void addOption_gui(GtkListStore *store, const std::string &name, const std::string &key1);
 		void initPersonal_gui();
 		void initConnection_gui();
 		void initDownloads_gui();
@@ -79,7 +81,7 @@ class Settings:
 		static gboolean onShareButtonReleased_gui(GtkWidget *widget, GdkEventButton *event, gpointer data);
 		static gboolean onShareHiddenPressed_gui(GtkToggleButton *button, gpointer data);
 		static void onAppearanceToggledClicked_gui(GtkCellRendererToggle *cell, gchar *path, gpointer data);
-		static void onColorToggledClicked_gui(GtkCellRendererToggle *cell, gchar *path, gpointer data);
+		static void onTabToggledClicked_gui(GtkCellRendererToggle *cell, gchar *path, gpointer data);
 		///@todo Uncomment when implemented
 		//static void onWinColorClicked_gui(GtkCellRendererToggle *cell, gchar *path, gpointer data);
 		//static void onDownColorClicked_gui(GtkCellRendererToggle *cell, gchar *path, gpointer data);
@@ -109,6 +111,14 @@ class Settings:
 		static void onCertificatesPathBrowseClicked_gui(GtkWidget *widget, gpointer data);
 		static void onCertificatesToggledClicked_gui(GtkCellRendererToggle *cell, gchar *path, gpointer data);
 		static void onGenerateCertificatesClicked_gui(GtkWidget *widget, gpointer data);
+		static void onPreviewAdd_gui(GtkWidget *widget, gpointer data);
+		static void onPreviewRemove_gui(GtkWidget *widget, gpointer data);
+		static void onPreviewApply_gui(GtkWidget *widget, gpointer data);
+		static void onPreviewKeyReleased_gui(GtkWidget *widget, GdkEventKey *event, gpointer data);
+		static void onPreviewButtonReleased_gui(GtkWidget *widget, GdkEventButton *event, gpointer data);
+		static void onSoundFileBrowseClicked_gui(GtkWidget *widget, gpointer data);
+		static void onSoundPlayButton_gui(GtkWidget *widget, gpointer data);
+		static void onSoundNoneButton_gui(GtkWidget *widget, gpointer data);
 
 		// Client functions
 		void saveSettings_client();
@@ -120,22 +130,13 @@ class Settings:
 
 		GtkComboBox *connectionSpeedComboBox;
 		GtkListStore *downloadToStore, *publicListStore, *queueStore,
-			*shareStore, *appearanceStore, *colorStore, *windowStore1,
-			*windowStore2, *windowStore3, *advancedStore, *certificatesStore, *userCommandStore;
+			*shareStore, *appearanceStore, *tabStore, *windowStore1,
+			*windowStore2, *windowStore3, *advancedStore, *certificatesStore, *userCommandStore,
+			*previewAppToStore, *soundStore;
 		TreeView downloadToView, publicListView, queueView, shareView,
-			appearanceView, colorView, windowView1, windowView2,
-			windowView3, advancedView, certificatesView, userCommandView;
-
-		GtkTreeSelection *previewAppSelection;
-		TreeView previewAppToView;
-		GtkListStore *previewAppToStore;
-
-		// GUI callbacks
-		static void onAddPreview_gui(GtkWidget *widget, gpointer data);
-		static void onRemovePreview_gui(GtkWidget *widget, gpointer data);
-		static void onRenamePreview_gui(GtkWidget *widget, gpointer data);
-		static void onKeyReleasedPreview_gui(GtkWidget *widget, GdkEventKey *event, gpointer data);
-		static void onButtonReleasedPreview_gui(GtkWidget *widget, GdkEventButton *event, gpointer data);
+			appearanceView, tabView, windowView1, windowView2,
+			windowView3, advancedView, certificatesView, userCommandView,
+			previewAppView, soundView;
 };
 
 #else
