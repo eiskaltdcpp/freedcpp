@@ -27,6 +27,7 @@
 #include "WulforUtil.hh"
 
 using namespace std;
+using namespace dcpp;
 
 UserCommandMenu::UserCommandMenu(GtkWidget *userCommandMenu, int ctx):
 	Entry(Entry::USER_COMMAND_MENU, "", generateID()),
@@ -47,14 +48,31 @@ void UserCommandMenu::addHub(const StringList &hubs2)
 
 void UserCommandMenu::addUser(const string &cid)
 {
-	users.push_back(cid);
+	UCParam u;
+	u.cid = cid;
+	ucParams.push_back(u);
+}
+
+void UserCommandMenu::addFile(const std::string &cid, const std::string &name,
+	const int64_t &size, const std::string &tth)
+{
+	UCParam u;
+	u.cid = cid;
+	u.name = name;
+	u.size = size;
+	u.tth = tth;
+	if (u.tth.empty())
+		u.type = _("Directory");
+	else
+		u.type = _("File");
+	ucParams.push_back(u);
 }
 
 void UserCommandMenu::cleanMenu_gui()
 {
 	gtk_container_foreach(GTK_CONTAINER(userCommandMenu), (GtkCallback)gtk_widget_destroy, NULL);
 	hubs.clear();
-	users.clear();
+	ucParams.clear();
 }
 
 void UserCommandMenu::buildMenu_gui()
@@ -145,9 +163,22 @@ void UserCommandMenu::onUserCommandClick_gui(GtkMenuItem *item, gpointer data)
 		string commandName = (gchar *)g_object_get_data(G_OBJECT(item), "name");
 		string hub = (gchar *)g_object_get_data(G_OBJECT(item), "hub");
 
-		for (StringList::const_iterator i = ucm->users.begin(); i != ucm->users.end(); ++i)
-		{
-			F4 *func = new F4(ucm, &UserCommandMenu::sendUserCommand_client, *i, commandName, hub, params);
+ 		for (vector<UCParam>::iterator i = ucm->ucParams.begin(); i != ucm->ucParams.end(); ++i)
+  		{
+			if (!i->name.empty() && !i->type.empty())
+			{
+				params["type"] = i->type;
+	 			params["fileFN"] = i->name;
+	 			params["fileSI"] = Util::toString(i->size);
+	 			params["fileSIshort"] = Util::formatBytes(i->size);
+	 			params["fileTR"] = i->tth;
+	 			params["file"] = params["fileFN"];
+	 			params["filesize"] = params["fileSI"];
+	 			params["filesizeshort"] = params["fileSIshort"];
+	 			params["tth"] = params["fileTR"];
+			}
+			F4 *func = new F4(ucm, &UserCommandMenu::sendUserCommand_client, 
+				i->cid, commandName, hub, params);
 			WulforManager::get()->dispatchClientFunc(func);
 		}
 	}

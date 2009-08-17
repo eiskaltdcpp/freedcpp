@@ -28,6 +28,7 @@
 #include "WulforUtil.hh"
 
 using namespace std;
+using namespace dcpp;
 
 DownloadQueue::DownloadQueue():
 	BookEntry(Entry::DOWNLOAD_QUEUE, _("Download Queue"), "downloadqueue.glade"),

@@ -29,11 +29,9 @@
 #include "bookentry.hh"
 #include "treeview.hh"
 
-using namespace dcpp;
-
 class DownloadQueue:
 	public BookEntry,
-	public QueueManagerListener
+	public dcpp::QueueManagerListener
 {
 	public:
 		DownloadQueue();
@@ -45,10 +43,10 @@ class DownloadQueue:
 		void buildDynamicMenu_gui();
 		void setStatus_gui(std::string text, std::string statusItem);
 		void updateStatus_gui();
-		void addFiles_gui(vector<StringMap> files, bool firstUpdate);
-		void addFile_gui(StringMap params, bool updateDirs);
+		void addFiles_gui(std::vector<dcpp::StringMap> files, bool firstUpdate);
+		void addFile_gui(dcpp::StringMap params, bool updateDirs);
 		void addDir_gui(const std::string &path, GtkTreeIter *parent);
-		void updateFile_gui(StringMap params);
+		void updateFile_gui(dcpp::StringMap params);
 		void removeFile_gui(std::string path, int64_t size);
 		void removeDir_gui(const std::string &path, GtkTreeIter *parent);
 		void updateFileView_gui();
@@ -79,8 +77,8 @@ class DownloadQueue:
 		void buildList_client();
 		void move_client(std::string source, std::string target);
 		void moveDir_client(std::string source, std::string target);
-		void setPriority_client(std::string target, QueueItem::Priority p);
-		void setPriorityDir_client(std::string path, QueueItem::Priority p);
+		void setPriority_client(std::string target, dcpp::QueueItem::Priority p);
+		void setPriorityDir_client(std::string path, dcpp::QueueItem::Priority p);
 		void addList_client(std::string target, std::string nick);
 		void sendMessage_client(std::string target, std::string nick);
 		void reAddSource_client(std::string target, std::string nick);
@@ -89,14 +87,14 @@ class DownloadQueue:
 		void remove_client(std::string target);
 		void removeDir_client(std::string path);
 		void updateFileView_client(std::string path);
-		void getQueueParams_client(QueueItem *item, StringMap &params);
+		void getQueueParams_client(dcpp::QueueItem *item, dcpp::StringMap &params);
 
 		// Client callbacks
-		virtual void on(QueueManagerListener::Added, QueueItem *item) throw();
-		virtual void on(QueueManagerListener::Moved, QueueItem *item, const std::string &oldTarget) throw();
-		virtual void on(QueueManagerListener::Removed, QueueItem *item) throw();
-		virtual void on(QueueManagerListener::SourcesUpdated, QueueItem *item) throw();
-		virtual void on(QueueManagerListener::StatusUpdated, QueueItem *item) throw();
+		virtual void on(dcpp::QueueManagerListener::Added, dcpp::QueueItem *item) throw();
+		virtual void on(dcpp::QueueManagerListener::Moved, dcpp::QueueItem *item, const std::string &oldTarget) throw();
+		virtual void on(dcpp::QueueManagerListener::Removed, dcpp::QueueItem *item) throw();
+		virtual void on(dcpp::QueueManagerListener::SourcesUpdated, dcpp::QueueItem *item) throw();
+		virtual void on(dcpp::QueueManagerListener::StatusUpdated, dcpp::QueueItem *item) throw();
 
 		// Private variables
 		TreeView dirView;
@@ -107,14 +105,14 @@ class DownloadQueue:
 		GtkTreeSelection *fileSelection;
 		GdkEventType dirPrevious;
 		std::string currentDir;
-		unordered_map<std::string, std::map<std::string, std::string> > sources;
-		unordered_map<std::string, std::map<std::string, std::string> > badSources;
+		std::tr1::unordered_map<std::string, std::map<std::string, std::string> > sources;
+		std::tr1::unordered_map<std::string, std::map<std::string, std::string> > badSources;
 		int currentItems;
 		int totalItems;
 		int64_t currentSize;
 		int64_t totalSize;
 
-		typedef map<std::string, std::string>::const_iterator SourceIter;
+		typedef std::map<std::string, std::string>::const_iterator SourceIter;
 };
 
 #else

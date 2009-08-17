@@ -25,6 +25,7 @@
 #include "WulforUtil.hh"
 
 using namespace std;
+using namespace dcpp;
 
 FavoriteHubs::FavoriteHubs():
 	BookEntry(Entry::FAVORITE_HUBS, _("Favorite Hubs"), "favoritehubs.glade")

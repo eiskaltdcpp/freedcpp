@@ -26,6 +26,7 @@
 #include "WulforUtil.hh"
 
 using namespace std;
+using namespace dcpp;
 
 FinishedTransfers* FinishedTransfers::createFinishedDownloads()
 {

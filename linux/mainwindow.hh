@@ -33,8 +33,7 @@
 
 #include "entry.hh"
 #include "treeview.hh"
-
-using namespace dcpp;
+#include "transfers.hh"
 
 class BookEntry;
 class Search;
@@ -42,12 +41,9 @@ class UserCommandMenu;
 
 class MainWindow:
 	public Entry,
-	public ConnectionManagerListener,
-	public DownloadManagerListener,
-	public LogManagerListener,
-	public QueueManagerListener,
-	public TimerManagerListener,
-	public UploadManagerListener
+	public dcpp::LogManagerListener,
+	public dcpp::QueueManagerListener,
+	public dcpp::TimerManagerListener
 {
 	public:
 		MainWindow();
@@ -58,23 +54,24 @@ class MainWindow:
 
 		// GUI functions
 		void show();
-		void setTitle(const string& text);
+		void setTitle(const std::string& text);
 		void setUrgent_gui();
 		bool isActive_gui();
 		void removeBookEntry_gui(BookEntry *entry);
 		GtkWidget *currentPage_gui();
 		void raisePage_gui(GtkWidget *page);
-		bool getUserCommandLines_gui(const std::string &command, StringMap &ucParams);
+		bool getUserCommandLines_gui(const std::string &command, dcpp::StringMap &ucParams);
 		void openMagnetDialog_gui(const std::string &magnet);
-		void showMessageDialog_gui(const string primaryText, const string secondaryText);
+		void showMessageDialog_gui(const std::string primaryText, const std::string secondaryText);
 		void showDownloadQueue_gui();
 		void showFavoriteHubs_gui();
 		void showFinishedDownloads_gui();
 		void showFinishedUploads_gui();
 		void showHub_gui(std::string address, std::string encoding = "");
 		void addPrivateMessage_gui(std::string cid, std::string message = "", bool useSetting = FALSE);
+		void addPrivateStatusMessage_gui(std::string cid, std::string message = "");
 		void showPublicHubs_gui();
-		void showShareBrowser_gui(UserPtr user, std::string file, std::string dir, bool useSetting);
+		void showShareBrowser_gui(dcpp::UserPtr user, std::string file, std::string dir, bool useSetting);
 		Search *addSearch_gui();
 		void setMainStatus_gui(std::string text, time_t t = time(NULL));
 
@@ -83,6 +80,7 @@ class MainWindow:
 
 	private:
 		// GUI functions
+		void showTransfersPane_gui();
 		void autoOpen_gui();
 		void addTabMenuItem_gui(GtkWidget* menuItem, GtkWidget* page);
 		void removeTabMenuItem_gui(GtkWidget *menuItem);
@@ -95,15 +93,8 @@ class MainWindow:
 		void setStatus_gui(std::string statusBar, std::string text);
 		void setStats_gui(std::string hub, std::string slot,
 			std::string dTot, std::string uTot, std::string dl, std::string ul);
-		bool findTransfer_gui(const std::string &cid, bool download, GtkTreeIter *iter);
-		bool findParent_gui(const std::string &filename, GtkTreeIter* iter);
-		void updateTransfer_gui(StringMap params, bool download);
-		void updateParent_gui(StringMap params);
-		void finishParent_gui(string filename);
-		void removeTransfer_gui(std::string cid, bool download);
 		void setTabPosition_gui(int position);
 		void setToolbarStyle_gui(int style);
-		void popupTransferMenu_gui();
 
 		// GUI Callbacks
 		static gboolean onWindowState_gui(GtkWidget *widget, GdkEventWindowState *event, gpointer data);
@@ -111,8 +102,6 @@ class MainWindow:
 		static gboolean onCloseWindow_gui(GtkWidget *widget, GdkEvent *event, gpointer data);
 		static gboolean onKeyPressed_gui(GtkWidget *widget, GdkEventKey *event, gpointer data);
 		static gboolean onButtonReleasePage_gui(GtkWidget *widget, GdkEventButton *event, gpointer data);
-		static gboolean onTransferButtonPressed_gui(GtkWidget *widget, GdkEventButton *event, gpointer data);
-		static gboolean onTransferButtonReleased_gui(GtkWidget *widget, GdkEventButton *event, gpointer data);
 		static void onRaisePage_gui(GtkMenuItem *item, gpointer data);
 		static void onPageSwitched_gui(GtkNotebook *notebook, GtkNotebookPage *page, guint num, gpointer data);
 		static void onPaneRealized_gui(GtkWidget *pane, gpointer data);
@@ -136,14 +125,6 @@ class MainWindow:
 		static void onAboutClicked_gui(GtkWidget *widget, gpointer data);
 		static void onAboutDialogActivateLink_gui(GtkAboutDialog *dialog, const gchar *link, gpointer data);
 		static void onCloseBookEntry_gui(GtkWidget *widget, gpointer data);
-		static void onGetFileListClicked_gui(GtkMenuItem *item, gpointer data);
-		static void onMatchQueueClicked_gui(GtkMenuItem *item, gpointer data);
-		static void onPrivateMessageClicked_gui(GtkMenuItem *item, gpointer data);
-		static void onAddFavoriteUserClicked_gui(GtkMenuItem *item, gpointer data);
-		static void onGrantExtraSlotClicked_gui(GtkMenuItem *item, gpointer data);
-		static void onRemoveUserFromQueueClicked_gui(GtkMenuItem *item, gpointer data);
-		static void onForceAttemptClicked_gui(GtkMenuItem *item, gpointer data);
-		static void onCloseConnectionClicked_gui(GtkMenuItem *item, gpointer data);
 		static void onStatusIconActivated_gui(GtkStatusIcon *statusIcon, gpointer data);
 		static void onStatusIconPopupMenu_gui(GtkStatusIcon *statusIcon, guint button, guint time, gpointer data);
 		static void onToggleWindowVisibility_gui(GtkMenuItem *item, gpointer data);
@@ -152,44 +133,19 @@ class MainWindow:
 		void autoConnect_client();
 		void startSocket_client();
 		void refreshFileList_client();
-		void getFileList_client(std::string cid);
-		void matchQueue_client(std::string cid);
-		void addFavoriteUser_client(std::string cid);
-		void grantExtraSlot_client(std::string cid);
-		void removeUserFromQueue_client(std::string cid);
-		void forceAttempt_client(std::string cid);
-		void closeConnection_client(std::string cid, bool download);
-		string getFilename_client(Transfer *t);
-		void transferComplete_client(Transfer *t);
+		std::string getFilename_client(dcpp::Transfer *t);
 
 		// Client callbacks
-		virtual void on(ConnectionManagerListener::Added, ConnectionQueueItem *item) throw();
-		virtual void on(ConnectionManagerListener::Removed, ConnectionQueueItem *item) throw();
-		virtual void on(ConnectionManagerListener::Failed, ConnectionQueueItem *item, const string &reason) throw();
-		virtual void on(ConnectionManagerListener::StatusChanged, ConnectionQueueItem *item) throw();
-		virtual void on(DownloadManagerListener::Starting, Download *dl) throw();
-		virtual void on(DownloadManagerListener::Tick, const DownloadList &list) throw();
-		virtual void on(DownloadManagerListener::Complete, Download *dl) throw();
-		virtual void on(DownloadManagerListener::Failed, Download *dl, const string &reason) throw();
-		/* FIXME implement virtual void on(DownloadManagerListener::Requesting, Download *dl) throw(); */
-		virtual void on(UploadManagerListener::Starting, Upload *ul) throw();
-		virtual void on(UploadManagerListener::Tick, const UploadList &list) throw();
-		virtual void on(UploadManagerListener::Complete, Upload *ul) throw();
-		virtual void on(LogManagerListener::Message, time_t t, const std::string &m) throw();
-		virtual void on(QueueManagerListener::Finished, QueueItem *item, const string& dir, int64_t avSpeed) throw();
-		virtual void on(QueueManagerListener::Removed, QueueItem *item) throw();
-		virtual void on(TimerManagerListener::Second, uint32_t ticks) throw();
+		virtual void on(dcpp::LogManagerListener::Message, time_t t, const std::string &m) throw();
+		virtual void on(dcpp::QueueManagerListener::Finished, dcpp::QueueItem *item, const std::string& dir, int64_t avSpeed) throw();
+		virtual void on(dcpp::TimerManagerListener::Second, uint32_t ticks) throw();
 
 		GtkWindow *window;
-		TreeView transferView;
-		GtkTreeStore *transferStore;
-		GtkTreeSelection *transferSelection;
-		GdkPixbuf *uploadPic, *downloadPic;
+		Transfers* transfers;
 		GtkStatusIcon *statusIcon;
 		int64_t lastUpdate, lastUp, lastDown;
 		int emptyStatusWidth;
 		bool minimized;
-		UserCommandMenu *userCommandMenu;
 };
 
 #else

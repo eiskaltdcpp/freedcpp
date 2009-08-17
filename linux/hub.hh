@@ -29,13 +29,11 @@
 #include "bookentry.hh"
 #include "treeview.hh"
 
-using namespace dcpp;
-
 class UserCommandMenu;
 
 class Hub:
 	public BookEntry,
-	public ClientListener
+	public dcpp::ClientListener
 {
 	public:
 		Hub(const std::string &address, const std::string &encoding);
@@ -46,7 +44,7 @@ class Hub:
 		void reconnect_client();
 
 	private:
-		typedef std::map<string, string> ParamMap;
+		typedef std::map<std::string, std::string> ParamMap;
 
 		// GUI functions
 		void setStatus_gui(std::string statusBar, std::string text);
@@ -59,7 +57,7 @@ class Hub:
 		void popupNickMenu_gui();
 		void getPassword_gui();
 		void addMessage_gui(std::string message);
-		void applyTags_gui(const string &line);
+		void applyTags_gui(const std::string &line);
 		void addStatusMessage_gui(std::string message);
 		void updateCursor_gui(GtkWidget *widget);
 
@@ -91,7 +89,7 @@ class Hub:
 		static void onMagnetPropertiesClicked_gui(GtkMenuItem *item, gpointer data);
 
 		// Client functions
-		void connectClient_client(string address, string encoding);
+		void connectClient_client(std::string address, std::string encoding);
 		void disconnect_client();
 		void setPassword_client(std::string password);
 		void sendMessage_client(std::string message, bool thirdPerson);
@@ -103,30 +101,30 @@ class Hub:
 		void refreshFileList_client();
 		void addAsFavorite_client();
 		void checkFavoriteUserJoin_client(std::string cid);
-		void getParams_client(ParamMap &user, Identity &id);
+		void getParams_client(ParamMap &user, dcpp::Identity &id);
 
 		// Client callbacks
-		virtual void on(ClientListener::Connecting, Client *) throw();
-		virtual void on(ClientListener::Connected, Client *) throw();
-		virtual void on(ClientListener::UserUpdated, Client *, const OnlineUser &user) throw();
-		virtual void on(ClientListener::UsersUpdated, Client *, const OnlineUserList &list) throw();
-		virtual void on(ClientListener::UserRemoved, Client *, const OnlineUser &user) throw();
-		virtual void on(ClientListener::Redirect, Client *, const string &address) throw();
-		virtual void on(ClientListener::Failed, Client *, const string &reason) throw();
-		virtual void on(ClientListener::GetPassword, Client *) throw();
-		virtual void on(ClientListener::HubUpdated, Client *) throw();
-		virtual void on(ClientListener::Message, Client *, const OnlineUser &user, const string &message, bool thirdPerson) throw();
-		virtual void on(ClientListener::StatusMessage, Client *, const string &message, int flag) throw();
-		virtual void on(ClientListener::PrivateMessage, Client *, const OnlineUser &from,
-			const OnlineUser &to, const OnlineUser &replyTo, const string &message, bool thirdPerson) throw();
-		virtual void on(ClientListener::NickTaken, Client *) throw();
-		virtual void on(ClientListener::SearchFlood, Client *, const string &message) throw();
+		virtual void on(dcpp::ClientListener::Connecting, dcpp::Client *) throw();
+		virtual void on(dcpp::ClientListener::Connected, dcpp::Client *) throw();
+		virtual void on(dcpp::ClientListener::UserUpdated, dcpp::Client *, const dcpp::OnlineUser &user) throw();
+		virtual void on(dcpp::ClientListener::UsersUpdated, dcpp::Client *, const dcpp::OnlineUserList &list) throw();
+		virtual void on(dcpp::ClientListener::UserRemoved, dcpp::Client *, const dcpp::OnlineUser &user) throw();
+		virtual void on(dcpp::ClientListener::Redirect, dcpp::Client *, const std::string &address) throw();
+		virtual void on(dcpp::ClientListener::Failed, dcpp::Client *, const std::string &reason) throw();
+		virtual void on(dcpp::ClientListener::GetPassword, dcpp::Client *) throw();
+		virtual void on(dcpp::ClientListener::HubUpdated, dcpp::Client *) throw();
+		virtual void on(dcpp::ClientListener::Message, dcpp::Client *, const dcpp::OnlineUser &user, const std::string &message, bool thirdPerson) throw();
+		virtual void on(dcpp::ClientListener::StatusMessage, dcpp::Client *, const std::string &message, int flag) throw();
+		virtual void on(dcpp::ClientListener::PrivateMessage, dcpp::Client *, const dcpp::OnlineUser &from,
+			const dcpp::OnlineUser &to, const dcpp::OnlineUser &replyTo, const std::string &message, bool thirdPerson) throw();
+		virtual void on(dcpp::ClientListener::NickTaken, dcpp::Client *) throw();
+		virtual void on(dcpp::ClientListener::SearchFlood, dcpp::Client *, const std::string &message) throw();
 
-		unordered_map<std::string, std::string> userMap;
-		unordered_map<std::string, GdkPixbuf *> userIcons;
-		unordered_map<std::string, GtkTreeIter> userIters;
+		std::tr1::unordered_map<std::string, std::string> userMap;
+		std::tr1::unordered_map<std::string, GdkPixbuf *> userIcons;
+		std::tr1::unordered_map<std::string, GtkTreeIter> userIters;
 		std::string completionKey;
-		Client *client;
+		dcpp::Client *client;
 		TreeView nickView;
 		GtkListStore *nickStore;
 		GtkTreeSelection *nickSelection;
@@ -139,8 +137,8 @@ class Hub:
 		static const int maxHistory = 20;
 		int64_t totalShared;
 		GdkCursor *handCursor;
-		bool aboveTag;
-		std::string selectedTag;
+		GtkTextTag *selectedTag;
+		std::string selectedTagStr;
 		UserCommandMenu *userCommandMenu;
 		std::string address;
 		std::string encoding;

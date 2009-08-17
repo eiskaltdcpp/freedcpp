@@ -28,13 +28,11 @@
 #include <dcpp/DCPlusPlus.h>
 #include <dcpp/Singleton.h>
 
-using namespace dcpp;
-
 #define WSET(key, value) WulforSettingsManager::getInstance()->set(key, value)
 #define WGETI(key) WulforSettingsManager::getInstance()->getInt(key)
 #define WGETS(key) WulforSettingsManager::getInstance()->getString(key)
 
-class WulforSettingsManager : public Singleton<WulforSettingsManager>
+class WulforSettingsManager : public dcpp::Singleton<WulforSettingsManager>
 {
 	public:
 		WulforSettingsManager();

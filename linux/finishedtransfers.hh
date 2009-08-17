@@ -29,11 +29,9 @@
 #include "bookentry.hh"
 #include "treeview.hh"
 
-using namespace dcpp;
-
 class FinishedTransfers:
 	public BookEntry,
-	public FinishedManagerListener
+	public dcpp::FinishedManagerListener
 {
 	public:
 		static FinishedTransfers* createFinishedUploads();
@@ -45,13 +43,13 @@ class FinishedTransfers:
 		FinishedTransfers(const EntryType type, const std::string &title, bool isUpload);
 
 		// GUI functions
-		void addFile_gui(StringMap params, bool update);
-		void addUser_gui(StringMap params, bool update);
+		void addFile_gui(dcpp::StringMap params, bool update);
+		void addUser_gui(dcpp::StringMap params, bool update);
 		void removeFile_gui(std::string target);
 		void removeUser_gui(std::string cid);
 		void updateStatus_gui();
-		bool findFile_gui(GtkTreeIter* iter, const string& item);
-		bool findUser_gui(GtkTreeIter* iter, const string& cid);
+		bool findFile_gui(GtkTreeIter* iter, const std::string& item);
+		bool findUser_gui(GtkTreeIter* iter, const std::string& cid);
 
 		// GUI callbacks
 		static gboolean onButtonPressed_gui(GtkWidget *widget, GdkEventButton *event, gpointer data);
@@ -65,20 +63,20 @@ class FinishedTransfers:
 
 		// Client functions
 		void initializeList_client();
-		void getFinishedParams_client(const FinishedFileItemPtr& item, const string& file,  StringMap &params);
-		void getFinishedParams_client(const FinishedUserItemPtr& item, const UserPtr& user,  StringMap &params);
+		void getFinishedParams_client(const dcpp::FinishedFileItemPtr &item, const std::string &file,  dcpp::StringMap &params);
+		void getFinishedParams_client(const dcpp::FinishedUserItemPtr &item, const dcpp::UserPtr &user,  dcpp::StringMap &params);
 		void removeFile_client(std::string target);
 		void removeUser_client(std::string cid);
 		void removeAll_client();
 
 		// Client callbacks
-		virtual void on(FinishedManagerListener::AddedFile, bool upload, const string& file, const FinishedFileItemPtr& item) throw();
-		virtual void on(FinishedManagerListener::AddedUser, bool upload, const UserPtr& user, const FinishedUserItemPtr& item) throw();
-		virtual void on(FinishedManagerListener::UpdatedFile, bool upload, const string& file, const FinishedFileItemPtr& item) throw();
-		virtual void on(FinishedManagerListener::RemovedFile, bool, const string& file) throw();
-		virtual void on(FinishedManagerListener::UpdatedUser, bool upload, const UserPtr& user) throw();
-		virtual void on(FinishedManagerListener::RemovedUser, bool, const UserPtr&) throw();
-		/* virtual void on(FinishedManagerListener::RemoveAll, bool) throw();  Implement? */
+		virtual void on(dcpp::FinishedManagerListener::AddedFile, bool upload, const std::string &file, const dcpp::FinishedFileItemPtr &item) throw();
+		virtual void on(dcpp::FinishedManagerListener::AddedUser, bool upload, const dcpp::UserPtr &user, const dcpp::FinishedUserItemPtr &item) throw();
+		virtual void on(dcpp::FinishedManagerListener::UpdatedFile, bool upload, const std::string &file, const dcpp::FinishedFileItemPtr &item) throw();
+		virtual void on(dcpp::FinishedManagerListener::RemovedFile, bool upload, const std::string &file) throw();
+		virtual void on(dcpp::FinishedManagerListener::UpdatedUser, bool upload, const dcpp::UserPtr &user) throw();
+		virtual void on(dcpp::FinishedManagerListener::RemovedUser, bool upload, const dcpp::UserPtr &user) throw();
+		/* virtual void on(dcpp::FinishedManagerListener::RemoveAll, bool upload) throw();  Implement? */
 
 		GtkListStore *fileStore, *userStore;
 		TreeView userView;

@@ -30,6 +30,7 @@
 #include "WulforUtil.hh"
 
 using namespace std;
+using namespace dcpp;
 
 Settings::Settings(GtkWindow* parent):
 	DialogEntry(Entry::SETTINGS_DIALOG, "settingsdialog.glade", parent)

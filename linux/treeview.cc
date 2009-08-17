@@ -35,7 +35,7 @@ TreeView::TreeView()
 
 TreeView::~TreeView()
 {
-	if (!name.empty() && name != "main")
+	if (!name.empty())
 		saveSettings();
 	if (gtypes)
 		delete [] gtypes;
@@ -187,7 +187,7 @@ void TreeView::speedDataFunc(GtkTreeViewColumn *col, GtkCellRenderer *renderer, 
 	gtk_tree_model_get(model, iter, static_cast<Column*>(column)->pos, &speed, -1);
 	if (speed >= 0)
 	{
-		std::string speed_str = Util::formatBytes(speed);
+		std::string speed_str = dcpp::Util::formatBytes(speed);
 		speed_str.append("/s");
 
 		g_object_set(renderer, "text", speed_str.c_str(), NULL);
@@ -201,7 +201,7 @@ void TreeView::byteDataFunc(GtkTreeViewColumn *col, GtkCellRenderer *renderer, G
 	gtk_tree_model_get(model, iter, static_cast<Column*>(column)->pos, &size, -1);
 	if (size >= 0)
 	{
-		std::string size_str = Util::formatBytes(size);
+		std::string size_str = dcpp::Util::formatBytes(size);
 		g_object_set(renderer, "text", size_str.c_str(), NULL);
 	}
 	else
@@ -428,12 +428,12 @@ void TreeView::saveSettings()
 		if (title.empty())
 			return;
 
-		columnOrder += Util::toString(columns[title].id) + ",";
+		columnOrder += dcpp::Util::toString(columns[title].id) + ",";
 		if (width >= 20)
-			columnWidth += Util::toString(width) + ",";
+			columnWidth += dcpp::Util::toString(width) + ",";
 		else
-			columnWidth += Util::toString(columns[title].width) + ",";
-		columnVisibility += Util::toString(gtk_tree_view_column_get_visible(col)) + ",";
+			columnWidth += dcpp::Util::toString(columns[title].width) + ",";
+		columnVisibility += dcpp::Util::toString(gtk_tree_view_column_get_visible(col)) + ",";
 	}
 
 	if (columnOrder.size() > 0)

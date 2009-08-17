@@ -76,8 +76,8 @@ class PrivateMessage:
 		static const int maxLines = 500; ///@todo: make these preferences
 		static const int maxHistory = 20;
 		GdkCursor* handCursor;
-		bool aboveURI;
 		std::string selectedURI;
+		GtkTextTag* selectedTag;
 		bool scrollToBottom;
 };
 

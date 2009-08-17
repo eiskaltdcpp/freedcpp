@@ -194,7 +194,6 @@ if not 'install' in COMMAND_LINE_TARGETS:
 
 	if os.name == 'mac' or os.sys.platform == 'darwin':
 		env['ICONV_CONST'] = ''
-		env.Append(LINKFLAGS = ['-L/usr/lib'])
 
 	if env.has_key('ICONV_CONST') and env['ICONV_CONST']:
 		env.Append(CXXFLAGS = '-DICONV_CONST=' + env['ICONV_CONST'])
@@ -227,6 +226,7 @@ if not 'install' in COMMAND_LINE_TARGETS:
 	mo_args = ['msgfmt', '-c', '-o', '$TARGET', '$SOURCE']
 	mo_bld = Builder(action = Action([mo_args], 'Create $TARGET from $SOURCE'))
 	env.Append(BUILDERS = {'MoBuild' : mo_bld})
+
 
 # ----------------------------------------------------------------------
 # Build
@@ -289,4 +289,3 @@ else:
 
 	# install locale
 	env.Alias('install', env.InstallAs(target = locale, source = mo_files))
-

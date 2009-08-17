@@ -23,6 +23,9 @@
 #include <dcpp/HashManager.h>
 #include "wulformanager.hh"
 
+using namespace std;
+using namespace dcpp;
+
 Hash::Hash(GtkWindow* parent):
 	DialogEntry(Entry::HASH_DIALOG, "hash.glade", parent)
 {

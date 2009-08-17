@@ -27,8 +27,6 @@
 #include <dcpp/DCPlusPlus.h>
 #include "entry.hh"
 
-using namespace dcpp;
-
 class UserCommandMenu : public Entry
 {
 	public:
@@ -37,8 +35,10 @@ class UserCommandMenu : public Entry
 
 		GtkWidget *getContainer() { return userCommandMenu; }
 		void addHub(const std::string &hub);
-		void addHub(const StringList &hubs2);
+		void addHub(const dcpp::StringList &hubs2);
 		void addUser(const std::string &cid);
+		void addFile(const std::string &cid, const std::string &name,
+			const int64_t &size, const std::string &tth);
 		void cleanMenu_gui();
 		void buildMenu_gui();
 
@@ -50,12 +50,20 @@ class UserCommandMenu : public Entry
 		static void onUserCommandClick_gui(GtkMenuItem *item, gpointer data);
 
 		// Client functions
-		void sendUserCommand_client(std::string cid, string commandName, string hub, StringMap params);
+		void sendUserCommand_client(std::string cid, std::string commandName, std::string hub, dcpp::StringMap params);
 
 		GtkWidget *userCommandMenu;
 		int ctx;
-		StringList hubs;
-		StringList users;
+		dcpp::StringList hubs;
+ 		struct UCParam
+		{
+ 			std::string cid;
+ 			std::string name;
+ 			int64_t size;
+ 			std::string tth;
+ 			std::string type;
+ 		};
+ 		std::vector<UCParam> ucParams;
 };
 
 #else

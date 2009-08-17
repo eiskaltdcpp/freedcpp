@@ -34,6 +34,7 @@
 #endif
 
 using namespace std;
+using namespace dcpp;
 
 const string WulforUtil::ENCODING_SYSTEM_DEFAULT = _("System default");
 const string WulforUtil::ENCODING_GLOBAL_HUB_DEFAULT = _("Global hub default");
@@ -211,6 +212,7 @@ void WulforUtil::openURI(const std::string &uri)
 {
 	GError* error = NULL;
 	gchar *argv[3];
+
 #if defined(__APPLE__)
 	argv[0] = (gchar *)"open";
 #elif defined(_WIN32)

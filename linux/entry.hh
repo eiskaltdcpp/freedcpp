@@ -46,6 +46,7 @@ class Entry
 			SEARCH,
 			SETTINGS_DIALOG,
 			SHARE_BROWSER,
+			TRANSFERS,
 			USER_COMMAND_MENU
 		} EntryType;
 
@@ -57,6 +58,7 @@ class Entry
 		const std::string& getID();
 		virtual GtkWidget *getContainer() = 0;
 		void remove();
+		virtual void show() {};
 
 	protected:
 		std::string generateID();
