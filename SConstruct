@@ -210,6 +210,8 @@ if not 'install' in COMMAND_LINE_TARGETS:
 		env.Append(CXXFLAGS = ['-O3', '-fomit-frame-pointer', '-DNDEBUG'])
 		BUILD_PATH = BUILD_PATH + 'release/'
 
+	else: BUILD_PATH = BUILD_PATH + 'default/'
+
 	if env.has_key('profile') and env['profile']:
 		env.Append(CXXFLAGS = '-pg')
 		env.Append(LINKFLAGS= '-pg')

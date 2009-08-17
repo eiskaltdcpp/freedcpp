@@ -29,6 +29,16 @@ Running:
 --------
 $ freedcpp
 
+Uninstalling:
+-------------
+To uninstall FreeDC++, simply delete the directory you installed it in. To uninstall using scons, run:
+
+$ scons -c
+
+or if you used scons to install into the file system then use the same scons command that you used to install and add the option -c:
+
+# scons -c install
+
 License:
 --------
 The GPL (couldn't be any other, could it?)
