@@ -28,6 +28,7 @@
 #include "wulformanager.hh"
 #include "settingsmanager.hh"
 #include "func.hh"
+#include "previewmenu.hh"
 #include <dcpp/Download.h>
 #include <dcpp/Upload.h>
 #include <dcpp/ClientManager.h>
@@ -62,6 +63,9 @@ Transfers::Transfers() :
 	userCommandMenu = new UserCommandMenu(getWidget("userCommandMenu"), ::UserCommand::CONTEXT_CHAT);
 	addChild(userCommandMenu);
 
+	// Initialize the preview menu
+	appsPreviewMenu = new PreviewMenu(getWidget("appsPreviewMenu"));
+
 	// Initialize transfer treeview
 	transferView.setView(GTK_TREE_VIEW(getWidget("transfers")), TRUE, "transfers");
 	transferView.insertColumn("User", G_TYPE_STRING, TreeView::PIXBUF_STRING, 150, "Icon");
@@ -80,6 +84,7 @@ Transfers::Transfers() :
 	transferView.insertHiddenColumn("Download Position", G_TYPE_INT64);	// For keeping track of and calculating parent pos
 	transferView.insertHiddenColumn("Failed", G_TYPE_BOOLEAN);
 	transferView.insertHiddenColumn("Target", G_TYPE_STRING);
+	transferView.insertHiddenColumn("tmpTarget", G_TYPE_STRING);
 	transferView.finalize();
 
 	transferStore = gtk_tree_store_newv(transferView.getColCount(), transferView.getGTypes());
@@ -113,6 +118,8 @@ Transfers::~Transfers()
 		
 	g_object_unref(G_OBJECT(uploadPic));
 	g_object_unref(G_OBJECT(downloadPic));
+
+	delete appsPreviewMenu;
 }	
 
 void Transfers::show()
@@ -126,11 +133,13 @@ void Transfers::show()
 void Transfers::popupTransferMenu_gui()
 {
 	// Build user command menu
+	appsPreviewMenu->cleanMenu_gui();
 	userCommandMenu->cleanMenu_gui();
 
 	GtkTreePath *path;
 	GtkTreeIter iter;
 	GList *list = gtk_tree_selection_get_selected_rows(transferSelection, NULL);
+	string target = "";
 
 	for (GList *i = list; i; i = i->next)
 	{
@@ -141,6 +150,9 @@ void Transfers::popupTransferMenu_gui()
 
 			do
 			{
+				if (target.empty())
+					target = transferView.getString(&iter, "tmpTarget");
+
 				string cid = transferView.getString(&iter, "CID");
 				userCommandMenu->addUser(cid);
 				userCommandMenu->addHub(WulforUtil::getHubAddress(CID(cid)));
@@ -152,6 +164,10 @@ void Transfers::popupTransferMenu_gui()
 	g_list_free(list);
 
 	userCommandMenu->buildMenu_gui();
+
+	if (appsPreviewMenu->buildMenu_gui(target))
+		gtk_widget_set_sensitive(getWidget("appsPreviewItem"), TRUE);
+	else gtk_widget_set_sensitive(getWidget("appsPreviewItem"), FALSE);
 
 	gtk_menu_popup(GTK_MENU(getWidget("transferMenu")), NULL, NULL, NULL, NULL, 0, gtk_get_current_event_time());
 	gtk_widget_show_all(getWidget("transferMenu"));
@@ -907,6 +923,7 @@ void Transfers::on(DownloadManagerListener::Starting, Download* dl) throw()
 	params["Status"] = _("Download starting...");
 	params["Sort Order"] = "d" + params["User"];
 	params["Failed"] = "0";
+	params["tmpTarget"] = dl->getTempTarget();
 
 	typedef Func2<Transfers, StringMap, bool> F2;
 	F2* f2 = new F2(this, &Transfers::updateTransfer_gui, params, TRUE);
@@ -1073,6 +1090,7 @@ void Transfers::on(UploadManagerListener::Starting, Upload* ul) throw()
 	params["Status"] = _("Upload starting...");
 	params["Sort Order"] = "u" + params["User"];
 	params["Failed"] = "0";
+	params["tmpTarget"] = "none"; //fix open 'tmp' file
 
 	typedef Func2<Transfers, StringMap, bool> F2;
 	F2* f2 = new F2(this, &Transfers::updateTransfer_gui, params, FALSE);

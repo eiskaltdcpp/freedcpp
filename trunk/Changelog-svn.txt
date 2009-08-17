@@ -1,0 +1,39 @@
+r7: 0.0.1.3
+* Добавлен предпросмотр файлов (часть кода взято из StrongDC++)
+  * GUI-Preview (Preferences/Downloads/Preview).
+  * В transfer-меню добавлен пункт 'Preview'.
+  * Предпросмотр завершённых скачиваний/отдач.
+
+r6: 0.0.1.2
+* Исправлена ошибка сборки без ключа debug=true или release=true.
+* Обновил Readme.txt (добавлен пункт Uninstalling).
+
+r5: 0.0.1.1
+* Слияние с основной веткой LinuxDC++ r311:
+  * Quick fix for user/hub not showing in transferview.
+  * Removed the only op check box from search tab and cleared the UI.
+    It is now indicated better that filter already in share depends on local filtering.
+  * Remove using namespace dcpp from header files.
+  * Use GTK+'s URI launcher instead of xdg-open, if possible.
+  * Fixed wrong link opening in some cases (thanks Eric Toombs).
+  * Show online status in PM (thanks Bart Vullings).
+  * Fix link handling in PM window also.
+  * Add missing user command variables (thanks Bart Vullings).
+  * Fixed unnecessary cursor updating in pm (Thanks Eric Toombs).
+  * Readme.txt missing libboost dependency.
+  * Remove gtk_show_uri, reverts revision 298.
+  * Compilation fix for Mac OS X (thanks Ximin Luo).
+  * Move transferView from mainwindow to a new file.
+  * Fixed compilation error introduced by transfer view rewrite.
+  * Minor Transfers cleanup.
+  * Fixed exit and about dialogs from appearing as top-level windows.
+  * Fix transferview sorting.
+
+r3: 0.0.1
+* Программа сменила имя на FreeDC++.
+* Исправлена ошибка c 'LOCALEDIR' (теперь PREFIX/share/locale/).
+* В SConstruct добавлена сборка, установка 'mo' файлов.
+* Русификация GUI (спасибо всем переводчикам: dcplusplus, FlylinkDC++).
+
+r2:
+* Initial import linuxdcpp-1.0.3 revision 294.

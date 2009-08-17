@@ -12,6 +12,7 @@ gui_files = [
 	'hashdialog.cc',
 	'hub.cc',
 	'mainwindow.cc',
+	'previewmenu.cc',
 	'privatemessage.cc',
 	'publichubs.cc',
 	'search.cc',

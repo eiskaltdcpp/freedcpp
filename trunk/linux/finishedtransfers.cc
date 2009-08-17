@@ -20,6 +20,7 @@
  */
 
 #include "finishedtransfers.hh"
+#include "previewmenu.hh"
 #include <dcpp/Text.h>
 #include <dcpp/ClientManager.h>
 #include "wulformanager.hh"
@@ -87,8 +88,10 @@ FinishedTransfers::FinishedTransfers(const EntryType type, const string &title, 
 	gtk_tree_view_set_fixed_height_mode(userView.get(), TRUE);
 	gtk_tree_selection_set_mode(gtk_tree_view_get_selection(userView.get()), GTK_SELECTION_MULTIPLE);
 
+	// Initialize the preview menu
+	appsPreviewMenu = new PreviewMenu(getWidget("appsPreviewMenu"));
+
 	// Connect the signals to their callback functions.
-	g_signal_connect(getWidget("openItem"), "activate", G_CALLBACK(onOpen_gui), (gpointer)this);
 	g_signal_connect(getWidget("openFolderItem"), "activate", G_CALLBACK(onOpenFolder_gui), (gpointer)this);
 	g_signal_connect(getWidget("removeItem"), "activate", G_CALLBACK(onRemoveItems_gui), (gpointer)this);
 	g_signal_connect(getWidget("removeAllItem"), "activate", G_CALLBACK(onRemoveAll_gui), (gpointer)this);
@@ -105,6 +108,7 @@ FinishedTransfers::FinishedTransfers(const EntryType type, const string &title, 
 FinishedTransfers::~FinishedTransfers()
 {
 	FinishedManager::getInstance()->removeListener(this);
+	delete appsPreviewMenu;
 }
 
 void FinishedTransfers::show()
@@ -298,18 +302,36 @@ gboolean FinishedTransfers::onButtonReleased_gui(GtkWidget *widget, GdkEventButt
 
 	if (event->button == 3 && count > 0)
 	{
-		gtk_menu_popup(GTK_MENU(ft->getWidget("menu")), NULL, NULL, NULL, NULL, 0, gtk_get_current_event_time());
+		ft->appsPreviewMenu->cleanMenu_gui();
+
 		if (view == &ft->fileView)
 		{
-			gtk_widget_set_sensitive(ft->getWidget("openItem"), TRUE);
+			GtkTreeIter iter;
+			GList *list = gtk_tree_selection_get_selected_rows(ft->fileSelection, NULL);
+			GtkTreePath *path = (GtkTreePath *)list->data;
+
+			if (gtk_tree_model_get_iter(GTK_TREE_MODEL(ft->fileStore), &iter, path))
+			{
+				string target = ft->fileView.getString(&iter, "Target");
+
+				if (ft->appsPreviewMenu->buildMenu_gui(target))
+					gtk_widget_set_sensitive(ft->getWidget("appsPreviewItem"), TRUE);
+				else gtk_widget_set_sensitive(ft->getWidget("appsPreviewItem"), FALSE);
+			}
+
+			gtk_tree_path_free(path);
+			g_list_free(list);
+
 			gtk_widget_set_sensitive(ft->getWidget("openFolderItem"), TRUE);
 		}
 		else
 		{
-			gtk_widget_set_sensitive(ft->getWidget("openItem"), FALSE);
+			gtk_widget_set_sensitive(ft->getWidget("appsPreviewItem"), FALSE);
 			gtk_widget_set_sensitive(ft->getWidget("openFolderItem"), FALSE);
 		}
+
 		gtk_widget_show_all(ft->getWidget("menu"));
+		gtk_menu_popup(GTK_MENU(ft->getWidget("menu")), NULL, NULL, NULL, NULL, 0, gtk_get_current_event_time());
 	}
 
 	return FALSE;
@@ -345,8 +367,36 @@ gboolean FinishedTransfers::onKeyReleased_gui(GtkWidget *widget, GdkEventKey *ev
 		}
 		else if (event->keyval == GDK_Menu || (event->keyval == GDK_F10 && event->state & GDK_SHIFT_MASK))
 		{
-			gtk_menu_popup(GTK_MENU(ft->getWidget("menu")), NULL, NULL, NULL, NULL, 1, event->time);
+			ft->appsPreviewMenu->cleanMenu_gui();
+
+			if (view == &ft->fileView)
+			{
+				GtkTreeIter iter;
+				GList *list = gtk_tree_selection_get_selected_rows(ft->fileSelection, NULL);
+				GtkTreePath *path = (GtkTreePath *)list->data;
+
+				if (gtk_tree_model_get_iter(GTK_TREE_MODEL(ft->fileStore), &iter, path))
+				{
+					string target = ft->fileView.getString(&iter, "Target");
+
+					if (ft->appsPreviewMenu->buildMenu_gui(target))
+						gtk_widget_set_sensitive(ft->getWidget("appsPreviewItem"), TRUE);
+					else gtk_widget_set_sensitive(ft->getWidget("appsPreviewItem"), FALSE);
+				}
+
+				gtk_tree_path_free(path);
+				g_list_free(list);
+
+				gtk_widget_set_sensitive(ft->getWidget("openFolderItem"), TRUE);
+			}
+			else
+			{
+				gtk_widget_set_sensitive(ft->getWidget("appsPreviewItem"), FALSE);
+				gtk_widget_set_sensitive(ft->getWidget("openFolderItem"), FALSE);
+			}
+
 			gtk_widget_show_all(ft->getWidget("menu"));
+			gtk_menu_popup(GTK_MENU(ft->getWidget("menu")), NULL, NULL, NULL, NULL, 1, event->time);
 		}
 	}
 

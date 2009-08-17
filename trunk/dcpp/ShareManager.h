@@ -43,6 +43,21 @@ class File;
 class OutputStream;
 class MemoryInputStream;
 
+class PreviewApplication
+{
+	public:
+
+	typedef vector<PreviewApplication*> List;
+	typedef List::const_iterator Iter;
+
+	PreviewApplication(string name, string app, string ext) : name(name), application(app), extension(ext) {}
+       ~PreviewApplication() {}
+
+	GETSET(string, name, Name);
+	GETSET(string, application, Application);
+	GETSET(string, extension, Extension);
+};
+
 struct ShareLoader;
 class ShareManager : public Singleton<ShareManager>, private SettingsManagerListener, private Thread, private TimerManagerListener,
 	private HashManagerListener, private DownloadManagerListener
@@ -104,6 +119,46 @@ public:
 
 	GETSET(uint32_t, hits, Hits);
 	GETSET(string, bzXmlFile, BZXmlFile);
+
+	PreviewApplication* addPreviewApp(string name, string application, string extension)
+	{
+		PreviewApplication* pa = new PreviewApplication(name, application, extension);
+		previewApplications.push_back(pa);
+		return pa;
+	}
+
+	bool removePreviewApp(string &name)
+	{
+		PreviewApplication::List::size_type index;
+
+		if (getPreviewAppIndex(name, index))
+		{
+			delete previewApplications[index];
+			previewApplications.erase(previewApplications.begin() + index);
+
+			return true;
+		}
+
+		return false;
+	}
+
+	bool renamePreviewApp(string& oldName, string& newName, string& application, string& extension)
+	{
+		PreviewApplication::List::size_type index;
+
+		if(getPreviewAppIndex(oldName, index))
+		{
+			delete previewApplications[index];
+			previewApplications[index] = new PreviewApplication(newName, application, extension);
+
+			return true;
+		}
+
+		return false;
+	}
+
+	const PreviewApplication::List& getPreviewApps() const { return previewApplications; }
+
 private:
 	struct AdcSearch;
 	class Directory : public FastAlloc<Directory> {
@@ -309,6 +364,19 @@ private:
 	void load(SimpleXML& aXml);
 	void save(SimpleXML& aXml);
 
+	PreviewApplication::List previewApplications;
+
+	bool getPreviewAppIndex(string &name, PreviewApplication::List::size_type &index)
+	{
+		index = 0;
+
+		for (PreviewApplication::Iter item = previewApplications.begin(); item != previewApplications.end(); ++item, ++index)
+		{
+			if((*item)->getName() == name) return true;
+		}
+
+		return false;
+	}
 };
 
 } // namespace dcpp
