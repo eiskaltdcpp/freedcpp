@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
 	if (WulforUtil::profileIsLocked())
 	{
 		gtk_init(&argc, &argv);
-		string message = _("Only one instance of FreeDC++ is allowed per profile");
+		std::string message = _("Only one instance of FreeDC++ is allowed per profile");
 
 		GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "%s", message.c_str());
 		gtk_dialog_run(GTK_DIALOG(dialog));
@@ -61,9 +61,9 @@ int main(int argc, char *argv[])
 	}
 
 	// Start the DC++ client core
-	startup(callBack, NULL);
+	dcpp::startup(callBack, NULL);
 
-	TimerManager::getInstance()->start();
+	dcpp::TimerManager::getInstance()->start();
 
 	g_thread_init(NULL);
 	gdk_threads_init();
@@ -82,7 +82,7 @@ int main(int argc, char *argv[])
 	WulforSettingsManager::deleteInstance();
 
 	std::cout << "Shutting down..." << std::endl;
-	shutdown();
+	dcpp::shutdown();
 
 	return 0;
 }

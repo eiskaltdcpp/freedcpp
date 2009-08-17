@@ -32,8 +32,8 @@
 #include "WulforUtil.hh"
 
 using namespace std;
+using namespace dcpp;
 
-bool Search::onlyOp = FALSE;
 GtkTreeModel* Search::searchEntriesModel = NULL;
 
 Search::Search():
@@ -55,7 +55,8 @@ Search::Search():
 	// Initialize check button options.
 	onlyFree = BOOLSETTING(SEARCH_ONLY_FREE_SLOTS);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(getWidget("checkbuttonSlots")), onlyFree);
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(getWidget("checkbuttonOp")), onlyOp);
+	gtk_widget_set_sensitive(GTK_WIDGET(getWidget("checkbuttonSlots")), FALSE);
+	gtk_widget_set_sensitive(GTK_WIDGET(getWidget("checkbuttonShared")), FALSE);
 
 	gtk_combo_box_set_active(GTK_COMBO_BOX(getWidget("comboboxSize")), 1);
 	gtk_combo_box_set_active(GTK_COMBO_BOX(getWidget("comboboxUnit")), 2);
@@ -75,8 +76,6 @@ Search::Search():
 	hubView.insertColumn("Search", G_TYPE_BOOLEAN, TreeView::BOOL, -1);
 	hubView.insertColumn("Name", G_TYPE_STRING, TreeView::STRING, -1);
 	hubView.insertHiddenColumn("Url", G_TYPE_STRING);
-	hubView.insertHiddenColumn("Op", G_TYPE_BOOLEAN);
-	hubView.insertHiddenColumn("Editable", G_TYPE_BOOLEAN);
 	hubView.finalize();
 	hubStore = gtk_list_store_newv(hubView.getColCount(), hubView.getGTypes());
 	gtk_tree_view_set_model(hubView.get(), GTK_TREE_MODEL(hubStore));
@@ -84,7 +83,6 @@ Search::Search():
 	GtkTreeViewColumn *col = gtk_tree_view_get_column(hubView.get(), hubView.col("Search"));
 	GList *list = gtk_tree_view_column_get_cell_renderers(col);
 	GtkCellRenderer *renderer = (GtkCellRenderer *)g_list_nth_data(list, 0);
-	gtk_tree_view_column_add_attribute(col, renderer, "sensitive", hubView.col("Editable"));
 	g_list_free(list);
 
 	// Initialize search result treeview
@@ -134,7 +132,6 @@ Search::Search():
 	g_signal_connect(getContainer(), "focus-in-event", G_CALLBACK(onFocusIn_gui), (gpointer)this);
 	g_signal_connect(getWidget("checkbuttonFilter"), "toggled", G_CALLBACK(onFilterButtonToggled_gui), (gpointer)this);
 	g_signal_connect(getWidget("checkbuttonSlots"), "toggled", G_CALLBACK(onSlotsButtonToggled_gui), (gpointer)this);
-	g_signal_connect(getWidget("checkbuttonOp"), "toggled", G_CALLBACK(onOpButtonToggled_gui), (gpointer)this);
 	g_signal_connect(getWidget("checkbuttonShared"), "toggled", G_CALLBACK(onSharedButtonToggled_gui), (gpointer)this);
 	g_signal_connect(renderer, "toggled", G_CALLBACK(onToggledClicked_gui), (gpointer)this);
 	g_signal_connect(resultView.get(), "button-press-event", G_CALLBACK(onButtonPressed_gui), (gpointer)this);
@@ -206,13 +203,13 @@ void Search::initHubs_gui()
 	{
 		client = *it;
 		if (client->isConnected())
-			addHub_gui(client->getHubName(), client->getHubUrl(), client->getMyIdentity().isOp());
+			addHub_gui(client->getHubName(), client->getHubUrl());
 	}
 
 	ClientManager::getInstance()->unlock();
 }
 
-void Search::addHub_gui(string name, string url, bool op)
+void Search::addHub_gui(string name, string url)
 {
 	GtkTreeIter iter;
 	gtk_list_store_append(hubStore, &iter);
@@ -220,12 +217,10 @@ void Search::addHub_gui(string name, string url, bool op)
 		hubView.col("Search"), TRUE,
 		hubView.col("Name"), name.empty() ? url.c_str() : name.c_str(),
 		hubView.col("Url"), url.c_str(),
-		hubView.col("Op"), op,
-		hubView.col("Editable"), onlyOp ? op : TRUE,
 		-1);
 }
 
-void Search::modifyHub_gui(string name, string url, bool op)
+void Search::modifyHub_gui(string name, string url)
 {
 	GtkTreeIter iter;
 	GtkTreeModel *m = GTK_TREE_MODEL(hubStore);
@@ -238,8 +233,6 @@ void Search::modifyHub_gui(string name, string url, bool op)
 			gtk_list_store_set(hubStore, &iter,
 				hubView.col("Name"), name.empty() ? url.c_str() : name.c_str(),
 				hubView.col("Url"), url.c_str(),
-				hubView.col("Op"), op,
-				hubView.col("Editable"), onlyOp ? op : TRUE,
 				-1);
 			return;
 		}
@@ -333,7 +326,10 @@ void Search::popupMenu_gui()
 		if (gtk_tree_model_get_iter(sortedFilterModel, &iter, path))
 		{
 			userCommandMenu->addHub(resultView.getString(&iter, "Hub URL"));
-			userCommandMenu->addUser(resultView.getString(&iter, "CID"));
+			userCommandMenu->addFile(resultView.getString(&iter, "CID"),
+				resultView.getString(&iter, "Filename"),
+				resultView.getValue<int64_t>(&iter, "Real Size"),
+				resultView.getString(&iter, "TTH"));
 
 			if (firstTTH)
 			{
@@ -415,7 +411,7 @@ void Search::search_gui()
 	gboolean valid = gtk_tree_model_get_iter_first(GTK_TREE_MODEL(hubStore), &iter);
  	while (valid)
  	{
- 		if (hubView.getValue<gboolean>(&iter, "Editable") && hubView.getValue<gboolean>(&iter, "Search"))
+ 		if (hubView.getValue<gboolean>(&iter, "Search"))
  			clients.push_back(hubView.getString(&iter, "Url"));
 		valid = gtk_tree_model_iter_next(GTK_TREE_MODEL(hubStore), &iter);
 	}
@@ -987,10 +983,16 @@ void Search::onGroupByComboBoxChanged_gui(GtkWidget *comboBox, gpointer data)
 	if (groupBy != NOGROUPING)
 	{
 		gtk_widget_set_sensitive(s->getWidget("checkbuttonFilter"), FALSE);
+		gtk_widget_set_sensitive(s->getWidget("checkbuttonSlots"), FALSE);
+		gtk_widget_set_sensitive(s->getWidget("checkbuttonShared"), FALSE);
 		s->regroup_gui();
 	}
 	else
+	{
 		gtk_widget_set_sensitive(s->getWidget("checkbuttonFilter"), TRUE);
+		gtk_widget_set_sensitive(s->getWidget("checkbuttonSlots"), FALSE);
+		gtk_widget_set_sensitive(s->getWidget("checkbuttonShared"), FALSE);
+	}
 }
 
 void Search::onSearchButtonClicked_gui(GtkWidget *widget, gpointer data)
@@ -1010,11 +1012,16 @@ void Search::onFilterButtonToggled_gui(GtkToggleButton *button, gpointer data)
 		s->previousGrouping = (GroupType)gtk_combo_box_get_active(comboBox);
 		gtk_combo_box_set_active(comboBox, (int)NOGROUPING);
 		gtk_widget_set_sensitive(GTK_WIDGET(comboBox), FALSE);
+		gtk_widget_set_sensitive(s->getWidget("checkbuttonSlots"), TRUE);
+		gtk_widget_set_sensitive(s->getWidget("checkbuttonShared"), TRUE);
 	}
 	else
 	{
 		gtk_combo_box_set_active(comboBox, (int)s->previousGrouping);
 		gtk_widget_set_sensitive(GTK_WIDGET(comboBox), TRUE);
+		gtk_widget_set_sensitive(s->getWidget("checkbuttonSlots"), FALSE);
+		gtk_widget_set_sensitive(s->getWidget("checkbuttonShared"), FALSE);
+
 	}
 
 	gtk_tree_model_filter_refilter(GTK_TREE_MODEL_FILTER(s->searchFilterModel));
@@ -1027,27 +1034,6 @@ void Search::onSlotsButtonToggled_gui(GtkToggleButton *button, gpointer data)
 	s->onlyFree = gtk_toggle_button_get_active(button);
 	if (s->onlyFree != BOOLSETTING(SEARCH_ONLY_FREE_SLOTS))
 		SettingsManager::getInstance()->set(SettingsManager::SEARCH_ONLY_FREE_SLOTS, s->onlyFree);
-
-	// Refilter current view only if "Search within local results" is enabled
-	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(s->getWidget("checkbuttonFilter"))))
-		gtk_tree_model_filter_refilter(GTK_TREE_MODEL_FILTER(s->searchFilterModel));
-}
-
-void Search::onOpButtonToggled_gui(GtkToggleButton *button, gpointer data)
-{
-	Search *s = (Search *)data;
-
-	onlyOp = gtk_toggle_button_get_active(button);
-	GtkTreeIter iter;
-	GtkTreeModel *m = GTK_TREE_MODEL(s->hubStore);
-	bool valid = gtk_tree_model_get_iter_first(m, &iter);
-	while (valid)
-	{
-		if (!s->hubView.getValue<gboolean>(&iter, "Op"))
-			gtk_list_store_set(s->hubStore, &iter, s->hubView.col("Editable"), !onlyOp, -1);
-
-		valid = gtk_tree_model_iter_next(m, &iter);
-	}
 
 	// Refilter current view only if "Search within local results" is enabled
 	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(s->getWidget("checkbuttonFilter"))))
@@ -1070,11 +1056,8 @@ void Search::onToggledClicked_gui(GtkCellRendererToggle *cell, gchar *path, gpoi
 
 	if (gtk_tree_model_get_iter_from_string(GTK_TREE_MODEL(s->hubStore), &iter, path))
 	{
-		if (s->hubView.getValue<gboolean>(&iter, "Editable"))
-		{
-			gboolean toggled = s->hubView.getValue<gboolean>(&iter, "Search");
-			gtk_list_store_set(s->hubStore, &iter, s->hubView.col("Search"), !toggled, -1);
-		}
+		gboolean toggled = s->hubView.getValue<gboolean>(&iter, "Search");
+		gtk_list_store_set(s->hubStore, &iter, s->hubView.col("Search"), !toggled, -1);
 	}
 
 	// Refilter current view only if "Search within local results" is enabled
@@ -1795,8 +1778,8 @@ void Search::on(ClientManagerListener::ClientConnected, Client *client) throw()
 {
 	if (client)
 	{
-		typedef Func3<Search, string, string, bool> F3;
-		F3 *func = new F3(this, &Search::addHub_gui, client->getHubName(), client->getHubUrl(), client->getMyIdentity().isOp());
+		typedef Func2<Search, string, string> F2;
+		F2 *func = new F2(this, &Search::addHub_gui, client->getHubName(), client->getHubUrl());
 		WulforManager::get()->dispatchGuiFunc(func);
 	}
 }
@@ -1805,8 +1788,8 @@ void Search::on(ClientManagerListener::ClientUpdated, Client *client) throw()
 {
 	if (client)
 	{
-		typedef Func3<Search, string, string, bool> F3;
-		F3 *func = new F3(this, &Search::modifyHub_gui, client->getHubName(), client->getHubUrl(), client->getMyIdentity().isOp());
+		typedef Func2<Search, string, string> F2;
+		F2 *func = new F2(this, &Search::modifyHub_gui, client->getHubName(), client->getHubUrl());
 		WulforManager::get()->dispatchGuiFunc(func);
 	}
 }
@@ -1855,15 +1838,6 @@ void Search::on(SearchManagerListener::SR, const SearchResultPtr& result) throw(
 		}
 	}
 
-	// Reject results without free slots
-	if (onlyFree && result->getFreeSlots() < 1)
-	{
-		++droppedResult;
-		func = new F2(this, &Search::setStatus_gui, "statusbar3", Util::toString(droppedResult) + _(" filtered"));
-		WulforManager::get()->dispatchGuiFunc(func);
-		return;
-	}
-
 	if (result->getType() != SearchResult::TYPE_DIRECTORY)
 		isShared = ShareManager::getInstance()->isTTHShared(result->getTTH());
 
@@ -1899,9 +1873,7 @@ gboolean Search::searchFilterFunc_gui(GtkTreeModel *model, GtkTreeIter *iter, gp
 	{
 		if (hub == s->hubView.getString(&hubIter, "Url"))
 		{
-			if (!s->hubView.getValue<gboolean>(&hubIter, "Editable"))
-				return FALSE;
-			else if (!s->hubView.getValue<gboolean>(&hubIter, "Search"))
+			if (!s->hubView.getValue<gboolean>(&hubIter, "Search"))
 				return FALSE;
 			else
 				break;

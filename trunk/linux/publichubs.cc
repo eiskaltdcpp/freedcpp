@@ -23,6 +23,7 @@
 #include "wulformanager.hh"
 
 using namespace std;
+using namespace dcpp;
 
 PublicHubs::PublicHubs():
 	BookEntry(Entry::PUBLIC_HUBS, _("Public Hubs"), "publichubs.glade"),

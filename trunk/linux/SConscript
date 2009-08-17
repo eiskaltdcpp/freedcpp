@@ -18,11 +18,13 @@ gui_files = [
 	'settingsdialog.cc',
 	'settingsmanager.cc',
 	'sharebrowser.cc',
+	'transfers.cc',
 	'treeview.cc',
 	'UserCommandMenu.cc',
 	'wulfor.cc',
 	'wulformanager.cc',
-	'WulforUtil.cc']
+	'WulforUtil.cc'
+]
 
 languages = ['ru']
 
@@ -40,4 +42,3 @@ for file in languages:
 	env.MoBuild(target = '../../locale/freedcpp/' + file, source = 'po/' + file + '.po')
 
 Return('obj_files')
-

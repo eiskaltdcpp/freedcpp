@@ -31,21 +31,19 @@
 #include "bookentry.hh"
 #include "treeview.hh"
 
-using namespace dcpp;
-
 class UserCommandMenu;
 
 class Search:
 	public BookEntry,
-	public SearchManagerListener,
-	public ClientManagerListener
+	public dcpp::SearchManagerListener,
+	public dcpp::ClientManagerListener
 {
 	public:
 		Search();
 		virtual ~Search();
 		virtual void show();
 
-		void putValue_gui(const std::string &str, int64_t size, SearchManager::SizeModes mode, SearchManager::TypeModes type);
+		void putValue_gui(const std::string &str, int64_t size, dcpp::SearchManager::SizeModes mode, dcpp::SearchManager::TypeModes type);
 
 	private:
 		// Keep these and the items in .glade file in same order, otherwise it will break
@@ -64,14 +62,14 @@ class Search:
 
 		// GUI functions
 		void initHubs_gui();
-		void addHub_gui(std::string name, std::string url, bool op);
-		void modifyHub_gui(std::string name, std::string url, bool op);
+		void addHub_gui(std::string name, std::string url);
+		void modifyHub_gui(std::string name, std::string url);
 		void removeHub_gui(std::string url);
 		void popupMenu_gui();
 		void setStatus_gui(std::string statusBar, std::string text);
 		void search_gui();
-		void parseSearchResult(SearchResult *result, StringMap &resultMap, GdkPixbuf **icon, int *actualSlots);
-		void addResult_gui(SearchResult *result, bool inShare);
+		void parseSearchResult(dcpp::SearchResult *result, dcpp::StringMap &resultMap, GdkPixbuf **icon, int *actualSlots);
+		void addResult_gui(dcpp::SearchResult *result, bool inShare);
 		void clearList_gui();
 		void updateParentRow_gui(GtkTreeIter *parent, GtkTreeIter *child = NULL);
 		void ungroup_gui();
@@ -90,7 +88,6 @@ class Search:
 		static void onSearchButtonClicked_gui(GtkWidget *widget, gpointer data);
 		static void onFilterButtonToggled_gui(GtkToggleButton *button, gpointer data);
 		static void onSlotsButtonToggled_gui(GtkToggleButton *button, gpointer data);
-		static void onOpButtonToggled_gui(GtkToggleButton *button, gpointer data);
 		static void onSharedButtonToggled_gui(GtkToggleButton *button, gpointer data);
 		static void onToggledClicked_gui(GtkCellRendererToggle *cell, gchar *path, gpointer data);
 		static void onDownloadClicked_gui(GtkMenuItem *item, gpointer data);
@@ -111,19 +108,19 @@ class Search:
 		static void onRemoveClicked_gui(GtkMenuItem *item, gpointer data);
 
 		// Client functions
-		void download_client(std::string target, SearchResult *result);
-		void downloadDir_client(std::string target, SearchResult *result);
-		void addSource_client(std::string source, SearchResult *result);
+		void download_client(std::string target, dcpp::SearchResult *result);
+		void downloadDir_client(std::string target, dcpp::SearchResult *result);
+		void addSource_client(std::string source, dcpp::SearchResult *result);
 		void getFileList_client(std::string cid, std::string dir, bool match);
 		void addFavUser_client(std::string cid);
 		void grantSlot_client(std::string cid);
 		void removeSource_client(std::string cid);
 
 		// Client callbacks
-		virtual void on(ClientManagerListener::ClientConnected, Client *client) throw();
-	 	virtual void on(ClientManagerListener::ClientUpdated, Client *client) throw();
-		virtual void on(ClientManagerListener::ClientDisconnected, Client *client) throw();
-		virtual void on(SearchManagerListener::SR, const SearchResultPtr& result) throw();
+		virtual void on(dcpp::ClientManagerListener::ClientConnected, dcpp::Client *client) throw();
+	 	virtual void on(dcpp::ClientManagerListener::ClientUpdated, dcpp::Client *client) throw();
+		virtual void on(dcpp::ClientManagerListener::ClientDisconnected, dcpp::Client *client) throw();
+		virtual void on(dcpp::SearchManagerListener::SR, const dcpp::SearchResultPtr &result) throw();
 
 		TreeView hubView, resultView;
 		GtkListStore *hubStore;
@@ -133,7 +130,7 @@ class Search:
 		GtkTreeSelection *selection;
 		GdkEventType oldEventType;
 		GtkWidget *searchEntry;
-		TStringList searchlist;
+		dcpp::TStringList searchlist;
 		static GtkTreeModel *searchEntriesModel;
 		GdkPixbuf *iconFile;
 		GdkPixbuf *iconDirectory;
@@ -142,7 +139,6 @@ class Search:
 		int searchHits;
 		bool isHash;
 		bool onlyFree;
-		static bool onlyOp;
 		UserCommandMenu *userCommandMenu;
 		GroupType previousGrouping;
 };

@@ -46,21 +46,29 @@
 #include "WulforUtil.hh"
 
 using namespace std;
+using namespace dcpp;
 
 MainWindow::MainWindow():
 	Entry(Entry::MAIN_WINDOW, "mainwindow.glade"),
+	transfers(NULL),
 	lastUpdate(0),
 	lastUp(0),
 	lastDown(0),
 	minimized(FALSE)
 {
+	window = GTK_WINDOW(getWidget("mainWindow"));
+	gtk_window_set_role(window, getID().c_str());
+
 	// Configure the dialogs
 	gtk_dialog_set_alternative_button_order(GTK_DIALOG(getWidget("exitDialog")), GTK_RESPONSE_OK, GTK_RESPONSE_CANCEL, -1);
 	gtk_dialog_set_alternative_button_order(GTK_DIALOG(getWidget("connectDialog")), GTK_RESPONSE_OK, GTK_RESPONSE_CANCEL, -1);
 	gtk_dialog_set_alternative_button_order(GTK_DIALOG(getWidget("flistDialog")), GTK_RESPONSE_OK, GTK_RESPONSE_CANCEL, -1);
-
-	window = GTK_WINDOW(getWidget("mainWindow"));
-	gtk_window_set_role(window, getID().c_str());
+	gtk_dialog_set_alternative_button_order(GTK_DIALOG(getWidget("ucLineDialog")), GTK_RESPONSE_OK, GTK_RESPONSE_CANCEL, -1);
+	gtk_window_set_transient_for(GTK_WINDOW(getWidget("exitDialog")), window);
+	gtk_window_set_transient_for(GTK_WINDOW(getWidget("connectDialog")), window);
+	gtk_window_set_transient_for(GTK_WINDOW(getWidget("flistDialog")), window);
+	gtk_window_set_transient_for(GTK_WINDOW(getWidget("ucLineDialog")), window);
+	gtk_window_set_transient_for(GTK_WINDOW(getWidget("magnetDialog")), window);
 
 	// Load icons. We need to do this in the code and not in the .glade file,
 	// otherwise we won't always find the images.
@@ -90,15 +98,6 @@ MainWindow::MainWindow():
 		file = path + "quit.png";
 		gtk_tool_button_set_icon_widget(GTK_TOOL_BUTTON(getWidget("quit")), gtk_image_new_from_file(file.c_str()));
 
-		file = path + "upload.png";
-		uploadPic = gdk_pixbuf_new_from_file(file.c_str(), NULL);
-		file = path + "download.png";
-		downloadPic = gdk_pixbuf_new_from_file(file.c_str(), NULL);
-	}
-	else
-	{
-		uploadPic = gtk_icon_theme_load_icon(gtk_icon_theme_get_default(), GTK_STOCK_GO_UP, 16, (GtkIconLookupFlags)0, NULL);
-		downloadPic = gtk_icon_theme_load_icon(gtk_icon_theme_get_default(), GTK_STOCK_GO_DOWN, 16, (GtkIconLookupFlags)0, NULL);
 	}
 
 	// Set the about menu icon
@@ -110,6 +109,7 @@ MainWindow::MainWindow():
 	gtk_about_dialog_set_url_hook((GtkAboutDialogActivateLinkFunc)onAboutDialogActivateLink_gui, (gpointer)this, NULL);
 	// This has to be set in code in order to activate the link
 	gtk_about_dialog_set_website(GTK_ABOUT_DIALOG(getWidget("aboutDialog")), "http://freedcpp.narod.ru");
+	gtk_window_set_transient_for(GTK_WINDOW(getWidget("aboutDialog")), window);
 
 	// Set all windows to the default icon
 	file = path + "linuxdcpp-icon.png";
@@ -118,35 +118,6 @@ MainWindow::MainWindow():
 
 	// Disable un-implemented menu items.
 	gtk_widget_set_sensitive(getWidget("favoriteUsersMenuItem"), FALSE);
-	gtk_widget_set_sensitive(getWidget("addToFavoritesItem"), FALSE);
-
-	// Initialize transfer treeview
-	transferView.setView(GTK_TREE_VIEW(getWidget("transfers")), TRUE, "main");
-	transferView.insertColumn("User", G_TYPE_STRING, TreeView::PIXBUF_STRING, 150, "Icon");
-	transferView.insertColumn("Hub Name", G_TYPE_STRING, TreeView::STRING, 100);
-	transferView.insertColumn("Status", G_TYPE_STRING, TreeView::PROGRESS, 250, "Progress");
-	transferView.insertColumn("Time Left", G_TYPE_STRING, TreeView::STRING, 85);
-	transferView.insertColumn("Speed", G_TYPE_INT64, TreeView::SPEED, 125);
-	transferView.insertColumn("Filename", G_TYPE_STRING, TreeView::STRING, 200);
-	transferView.insertColumn("Size", G_TYPE_INT64, TreeView::BYTE, 125);
-	transferView.insertColumn("Path", G_TYPE_STRING, TreeView::STRING, 200);
-	transferView.insertColumn("IP", G_TYPE_STRING, TreeView::STRING, 175);
-	transferView.insertHiddenColumn("Icon", GDK_TYPE_PIXBUF);
-	transferView.insertHiddenColumn("Progress", G_TYPE_INT);
-	transferView.insertHiddenColumn("Sort Order", G_TYPE_STRING);
-	transferView.insertHiddenColumn("CID", G_TYPE_STRING);
-	transferView.insertHiddenColumn("Download Position", G_TYPE_INT64);	// For keeping track of and calculating parent pos
-	transferView.insertHiddenColumn("Failed", G_TYPE_BOOLEAN);
-	transferView.finalize();
-	transferStore = gtk_tree_store_newv(transferView.getColCount(), transferView.getGTypes());
-	gtk_tree_view_set_model(transferView.get(), GTK_TREE_MODEL(transferStore));
-	g_object_unref(transferStore);
-	transferSelection = gtk_tree_view_get_selection(transferView.get());
-	gtk_tree_selection_set_mode(transferSelection, GTK_SELECTION_MULTIPLE);
-	transferView.setSortColumn_gui("User", "Sort Order");
-	gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(transferStore), transferView.col("Sort Order"), GTK_SORT_ASCENDING);
-	gtk_tree_view_column_set_sort_indicator(gtk_tree_view_get_column(transferView.get(), transferView.col("User")), TRUE);
-	gtk_tree_view_set_fixed_height_mode(transferView.get(), TRUE);
 
 	// All notebooks created in glade need one page.
 	// In our case, this is just a placeholder, so we remove it.
@@ -154,17 +125,11 @@ MainWindow::MainWindow():
 	g_object_set_data(G_OBJECT(getWidget("book")), "page-rotation-list", NULL);
 	gtk_widget_set_sensitive(getWidget("closeMenuItem"), FALSE);
 
-	// Initialize the user command menu
-	userCommandMenu = new UserCommandMenu(getWidget("userCommandMenu"), ::UserCommand::CONTEXT_CHAT);
-	addChild(userCommandMenu);
-
 	// Connect the signals to their callback functions.
 	g_signal_connect(window, "delete-event", G_CALLBACK(onCloseWindow_gui), (gpointer)this);
 	g_signal_connect(window, "window-state-event", G_CALLBACK(onWindowState_gui), (gpointer)this);
 	g_signal_connect(window, "focus-in-event", G_CALLBACK(onFocusIn_gui), (gpointer)this);
 	g_signal_connect(window, "key-press-event", G_CALLBACK(onKeyPressed_gui), (gpointer)this);
-	g_signal_connect(transferView.get(), "button-press-event", G_CALLBACK(onTransferButtonPressed_gui), (gpointer)this);
-	g_signal_connect(transferView.get(), "button-release-event", G_CALLBACK(onTransferButtonReleased_gui), (gpointer)this);
 	g_signal_connect(getWidget("book"), "switch-page", G_CALLBACK(onPageSwitched_gui), (gpointer)this);
 	g_signal_connect_after(getWidget("pane"), "realize", G_CALLBACK(onPaneRealized_gui), (gpointer)this);
 	g_signal_connect(getWidget("connect"), "clicked", G_CALLBACK(onConnectClicked_gui), (gpointer)this);
@@ -195,14 +160,6 @@ MainWindow::MainWindow():
 	g_signal_connect(getWidget("previousTabMenuItem"), "activate", G_CALLBACK(onPreviousTabClicked_gui), (gpointer)this);
 	g_signal_connect(getWidget("nextTabMenuItem"), "activate", G_CALLBACK(onNextTabClicked_gui), (gpointer)this);
 	g_signal_connect(getWidget("aboutMenuItem"), "activate", G_CALLBACK(onAboutClicked_gui), (gpointer)this);
-	g_signal_connect(getWidget("getFileListItem"), "activate", G_CALLBACK(onGetFileListClicked_gui), (gpointer)this);
-	g_signal_connect(getWidget("matchQueueItem"), "activate", G_CALLBACK(onMatchQueueClicked_gui), (gpointer)this);
-	g_signal_connect(getWidget("sendPrivateMessageItem"), "activate", G_CALLBACK(onPrivateMessageClicked_gui), (gpointer)this);
-	g_signal_connect(getWidget("addToFavoritesItem"), "activate", G_CALLBACK(onAddFavoriteUserClicked_gui), (gpointer)this);
-	g_signal_connect(getWidget("grantExtraSlotItem"), "activate", G_CALLBACK(onGrantExtraSlotClicked_gui), (gpointer)this);
-	g_signal_connect(getWidget("removeUserItem"), "activate", G_CALLBACK(onRemoveUserFromQueueClicked_gui), (gpointer)this);
-	g_signal_connect(getWidget("forceAttemptItem"), "activate", G_CALLBACK(onForceAttemptClicked_gui), (gpointer)this);
-	g_signal_connect(getWidget("closeConnectionItem"), "activate", G_CALLBACK(onCloseConnectionClicked_gui), (gpointer)this);
 
 	// Load window state and position from settings manager
 	gint posX = WGETI("main-window-pos-x");
@@ -224,8 +181,11 @@ MainWindow::MainWindow():
 
 	setMainStatus_gui(_("Welcome to ") + string(g_get_application_name()));
 
+	showTransfersPane_gui();
+
 	// Putting this after all the resizing and moving makes the window appear
-	// in the correct position instantly, looking slightly more cool
+	// in the correct position instantly, looking slightly more cool 
+	// (seems we have rather poor standards for cool?)
 	gtk_widget_show_all(GTK_WIDGET(window));
 
 	setTabPosition_gui(WGETI("tab-position"));
@@ -238,10 +198,7 @@ MainWindow::~MainWindow()
 {
 	QueueManager::getInstance()->removeListener(this);
 	TimerManager::getInstance()->removeListener(this);
-	DownloadManager::getInstance()->removeListener(this);
 	LogManager::getInstance()->removeListener(this);
-	UploadManager::getInstance()->removeListener(this);
-	ConnectionManager::getInstance()->removeListener(this);
 
 	GList *list = (GList *)g_object_get_data(G_OBJECT(getWidget("book")), "page-rotation-list");
 	g_list_free(list);
@@ -270,19 +227,8 @@ MainWindow::~MainWindow()
 	if (transferPanePosition > 10)
 		WSET("transfer-pane-position", transferPanePosition);
 
-	transferView.saveSettings();
-
-	// Make sure all windows are deallocated
-	gtk_widget_destroy(getWidget("connectDialog"));
-	gtk_widget_destroy(getWidget("exitDialog"));
-	gtk_widget_destroy(getWidget("flistDialog"));
-	gtk_widget_destroy(getWidget("aboutDialog"));
 	gtk_widget_destroy(GTK_WIDGET(window));
 	g_object_unref(statusIcon);
-
-	// Make sure the pixmaps are freed (using gtk's ref counting).
-	g_object_unref(G_OBJECT(uploadPic));
-	g_object_unref(G_OBJECT(downloadPic));
 }
 
 GtkWidget *MainWindow::getContainer()
@@ -294,10 +240,7 @@ void MainWindow::show()
 {
 	QueueManager::getInstance()->addListener(this);
 	TimerManager::getInstance()->addListener(this);
-	DownloadManager::getInstance()->addListener(this);
 	LogManager::getInstance()->addListener(this);
-	UploadManager::getInstance()->addListener(this);
-	ConnectionManager::getInstance()->addListener(this);
 
 	typedef Func0<MainWindow> F0;
 	F0 *f0 = new F0(this, &MainWindow::startSocket_client);
@@ -329,6 +272,19 @@ bool MainWindow::isActive_gui()
 void MainWindow::setUrgent_gui()
 {
 	gtk_window_set_urgency_hint(window, true);
+}
+
+/*
+ * Create and show Transfers pane
+ */
+void MainWindow::showTransfersPane_gui()
+{
+	dcassert(transfers == NULL);
+
+	transfers = new Transfers();
+	gtk_paned_pack2(GTK_PANED(getWidget("pane")), transfers->getContainer(), TRUE, TRUE);
+	addChild(transfers);
+	transfers->show();
 }
 
 void MainWindow::autoOpen_gui()
@@ -628,6 +584,14 @@ void MainWindow::addPrivateMessage_gui(string cid, string message, bool useSetti
 		raisePage_gui(entry->getContainer());
 }
 
+void MainWindow::addPrivateStatusMessage_gui(string cid, string message)
+{
+	BookEntry *entry = findBookEntry(Entry::PRIVATE_MESSAGE, cid);
+
+	if (entry != NULL)
+		dynamic_cast<PrivateMessage*>(entry)->addStatusMessage_gui(message);
+}
+
 void MainWindow::showPublicHubs_gui()
 {
 	BookEntry *entry = findBookEntry(Entry::PUBLIC_HUBS);
@@ -662,238 +626,6 @@ Search *MainWindow::addSearch_gui()
 	addBookEntry_gui(entry);
 	raisePage_gui(entry->getContainer());
 	return entry;
-}
-
-bool MainWindow::findTransfer_gui(const string &cid, bool download, GtkTreeIter *iter)
-{
-	GtkTreeModel *m = GTK_TREE_MODEL(transferStore);
-	bool valid = gtk_tree_model_get_iter_first(m, iter);
-
-	while (valid)
-	{
-		if (gtk_tree_model_iter_has_child(m, iter))
-		{
-			valid = WulforUtil::getNextIter_gui(m, iter, TRUE, TRUE);
-			continue;
-		}
-		if (cid == transferView.getString(iter, "CID"))
-		{
-			if (download && transferView.getValue<GdkPixbuf*>(iter, "Icon") == downloadPic)
-				return TRUE;
-			if (!download && transferView.getValue<GdkPixbuf*>(iter, "Icon") == uploadPic)
-				return TRUE;
-		}
-		valid = WulforUtil::getNextIter_gui(m, iter, TRUE, TRUE);
-	}
-
-	return FALSE;
-}
-
-bool MainWindow::findParent_gui(const string &filename, GtkTreeIter *iter)
-{
-	GtkTreeModel *m = GTK_TREE_MODEL(transferStore);
-	bool valid = gtk_tree_model_get_iter_first(m, iter);
-	string aName = filename;
-	const string tth = _("TTH: ");
-
-	// Strip TTH: from the beginning so that TTH downloads are grouped under the real file...
-	if (filename.find(tth) == 0)
-		aName = filename.substr(tth.length());
-
-	while (valid)
-	{
-		if (transferView.getValue<GdkPixbuf*>(iter, "Icon") == downloadPic &&
-				aName == transferView.getString(iter, "Filename"))
-			return TRUE;
-
-		valid = WulforUtil::getNextIter_gui(m, iter, FALSE, FALSE);
-	}
-
-	return FALSE;
-}
-
-void MainWindow::finishParent_gui(string filename)
-{
-	GtkTreeIter iter;
-
-	if (findParent_gui(filename, &iter))
-	{
-		gtk_tree_store_set(transferStore, &iter,
-				transferView.col("Status"),  _("Download finished, idle..."),
-				transferView.col("Sort Order"), "w",
-				transferView.col("Speed"), static_cast<int64_t>(0),
-				transferView.col("Progress"), 100,
-				-1);
-	}
-}
-
-void MainWindow::updateParent_gui(StringMap params)
-{
-	int active = 0;
-	GtkTreeIter iter, child;
-	string users;
-	std::set<string> hubs;
-	bool valid;
-	int64_t speed = 0, position = 0, totalSize = 0, timeLeft = 0;
-	double progress = 0.0;
-	string filename = params["Filename"];
-	ostringstream stream, tmpHubs;
-
-	// Strip TTH: from the beginning so that TTH downloads are grouped under the real file...
-	if (filename.find(_("TTH: ")) == 0)
-		filename = filename.substr(string(_("TTH: ")).length());
-
-	if (!findParent_gui(filename, &iter)) 
-	{
-		gtk_tree_store_append(transferStore, &iter, NULL);
-		gtk_tree_store_set(transferStore, &iter, 
-				transferView.col("Filename"), filename.c_str(),
-				transferView.col("Path"), params["Path"].c_str(),
-				transferView.col("Size"), Util::toInt64(params["File Size"]),
-				transferView.col("Icon"), downloadPic,
-				-1);
-	} 
-
-	if (params.find("File Position") != params.end())
-	{
-		// Download Position in the parent row holds overall (completed) position for the file. It's retrived from
-		// QueueManager::getPos. Download Position for child objects is set to position that download/connection (eg. for 1MB
-		// chunk it would be in the range of [0, 1MB]). So current progress of a download is parent position + sum(child positions).
-		gtk_tree_store_set(transferStore, &iter, transferView.col("Download Position"), Util::toInt64(params["File Position"]), -1);
-	}
-
-	position = transferView.getValue<int64_t>(&iter, "Download Position");
-	totalSize = transferView.getValue<int64_t>(&iter, "Size");
-
-	// Get Totals 
-	if (gtk_tree_model_iter_has_child(GTK_TREE_MODEL(transferStore), &iter))
-	{
-		child = iter;
-		valid = WulforUtil::getNextIter_gui(GTK_TREE_MODEL(transferStore), &child, TRUE, FALSE);
-		while (valid)
-		{
-			if (transferView.getValue<int>(&child, "Failed") == 0 && 
-				transferView.getString(&child, "Sort Order").substr(0,1) == "d")
-			{
-				active++;
-				position += transferView.getValue<int64_t>(&child, "Download Position");
-				speed += transferView.getValue<int64_t>(&child, "Speed");
-			}
-			users += transferView.getString(&child, "User") + string(", ");
-			hubs.insert(transferView.getString(&child, "Hub Name"));
-			valid = WulforUtil::getNextIter_gui(GTK_TREE_MODEL(transferStore), &child, TRUE, FALSE);
-		}
-	}
-
-	if (totalSize > 0)
-		progress = (double)(position * 100.0) / totalSize;
-	if (speed > 0)
-		timeLeft = (totalSize-position)/speed;
-
-	stream << setiosflags(ios::fixed) << setprecision(1);
-	if (active)
-		stream << _("Downloaded ");
-	else
-		stream << _("Waiting for slot ");
-	stream << Util::formatBytes(position) << " (" << progress;
-	stream << _("%) from ") << active << "/" << gtk_tree_model_iter_n_children(GTK_TREE_MODEL(transferStore), &iter) << _(" user(s)");
-
-	std::copy(hubs.begin(), hubs.end(), std::ostream_iterator<string>(tmpHubs, ", "));
-
-	gtk_tree_store_set(transferStore, &iter, 
-		transferView.col("User"), users.substr(0, users.length()-2).c_str(),
-		transferView.col("Hub Name"), tmpHubs.str().substr(0, tmpHubs.str().length()-2).c_str(),
-		transferView.col("Speed"), speed, 
-		transferView.col("Time Left"), Util::formatSeconds(timeLeft).c_str(),
-		transferView.col("Status"), stream.str().c_str(), 
-		transferView.col("Progress"), static_cast<int>(progress),
-		transferView.col("Sort Order"), active ? (string("d").append(users)).c_str() : (string("w").append(users)).c_str(), 
-		-1);
-}
-
-void MainWindow::updateTransfer_gui(StringMap params, bool download)
-{
-	dcassert(params.find("CID") != params.end());
-
-	bool needParent = (download && !params["Filename"].empty() && params["Filename"] != _("File list"));
-	GtkTreeIter iter, parent;
-
-	// Create parent row
-	if (needParent && !findParent_gui(params["Filename"], &parent))
-	{
-		updateParent_gui(params);
-		findParent_gui(params["Filename"], &parent);
-	}
-
-	// Create child row
-	if (!findTransfer_gui(params["CID"], download, &iter))
-	{
-		gtk_tree_store_append(transferStore, &iter, needParent ? &parent : NULL);
-
-		if (download)
-			gtk_tree_store_set(transferStore, &iter, transferView.col("Icon"), downloadPic, transferView.col("Failed"), 0, -1);
-		else
-			gtk_tree_store_set(transferStore, &iter, transferView.col("Icon"), uploadPic, transferView.col("Failed"), 0, -1);
-	}
-	else if (needParent) // Let's check that the file hasn't changed
-	{
-		GtkTreeIter tParent;
-		bool needMove = TRUE;
-		bool hasParent = gtk_tree_model_iter_parent(GTK_TREE_MODEL(transferStore), &tParent, &iter);
-
-		if (hasParent)
-			needMove = transferView.getString(&tParent, "Filename") != transferView.getString(&parent, "Filename");
-
-		if (needMove)
-		{
-			GtkTreeIter oldRow = iter;
-			iter = WulforUtil::copyRow_gui(transferStore, &oldRow, &parent);
-			gtk_tree_store_remove(transferStore, &oldRow);
-
-			// Remove the parent row if it has no children
-			if (hasParent && !gtk_tree_model_iter_has_child(GTK_TREE_MODEL(transferStore), &tParent))
-				gtk_tree_store_remove(transferStore, &tParent);
-		}
-	}
-
-	int failed = transferView.getValue<int>(&iter, "Failed");
-	if (failed && params.find("Failed") != params.end())
-		failed = Util::toInt(params["Failed"]);
-
-	if (failed)	// Transfer had failed already. We won't update the transfer before the fail status changes.
-		return;
-
-	for (StringMap::const_iterator it = params.begin(); it != params.end(); ++it)
-	{
-		if (it->first == "Size" || it->first == "Speed" || it->first == "Download Position")
-			gtk_tree_store_set(transferStore, &iter, transferView.col(it->first), Util::toInt64(it->second), -1);
-		else if (it->first == "Progress" || it->first == "Failed")
-			gtk_tree_store_set(transferStore, &iter, transferView.col(it->first), Util::toInt(it->second), -1);
-		else if (it->first == "File Size" || it->first == "File Position")	// Used by updateParent_gui
-			continue;
-		else if (!it->second.empty())
-			gtk_tree_store_set(transferStore, &iter, transferView.col(it->first), it->second.c_str(), -1);
-	}
-
-	// And lets update the totals...
-	if (needParent)
-		updateParent_gui(params);
-}
-
-void MainWindow::removeTransfer_gui(string cid, bool download)
-{
-	GtkTreeIter iter;
-
-	if (findTransfer_gui(cid, download, &iter))
-	{
-		GtkTreeIter parent;
-		bool hasParent = gtk_tree_model_iter_parent(GTK_TREE_MODEL(transferStore), &parent, &iter);
-		gtk_tree_store_remove(transferStore, &iter);
-
-		// Remove the parent row if it has no children
-		if (hasParent && !gtk_tree_model_iter_has_child(GTK_TREE_MODEL(transferStore), &parent))
-			gtk_tree_store_remove(transferStore, &parent);
-	}
 }
 
 void MainWindow::setTabPosition_gui(int position)
@@ -953,40 +685,6 @@ void MainWindow::setToolbarStyle_gui(int style)
 		gtk_widget_show(getWidget("toolbar1"));
 		gtk_toolbar_set_style(GTK_TOOLBAR(getWidget("toolbar1")), toolbarStyle);
 	}
-}
-
-void MainWindow::popupTransferMenu_gui()
-{
-	// Build user command menu
-	userCommandMenu->cleanMenu_gui();
-
-	GtkTreePath *path;
-	GtkTreeIter iter;
-	GList *list = gtk_tree_selection_get_selected_rows(transferSelection, NULL);
-
-	for (GList *i = list; i; i = i->next)
-	{
-		path = (GtkTreePath *)i->data;
-		if (gtk_tree_model_get_iter(GTK_TREE_MODEL(transferStore), &iter, path))
-		{
-			bool parent = gtk_tree_model_iter_has_child(GTK_TREE_MODEL(transferStore), &iter);
-
-			do
-			{
-				string cid = transferView.getString(&iter, "CID");
-				userCommandMenu->addUser(cid);
-				userCommandMenu->addHub(WulforUtil::getHubAddress(CID(cid)));
-			}
-			while (parent && WulforUtil::getNextIter_gui(GTK_TREE_MODEL(transferStore), &iter, TRUE, FALSE));
-		}
-		gtk_tree_path_free(path);
-	}
-	g_list_free(list);
-
-	userCommandMenu->buildMenu_gui();
-
-	gtk_menu_popup(GTK_MENU(getWidget("transferMenu")), NULL, NULL, NULL, NULL, 0, gtk_get_current_event_time());
-	gtk_widget_show_all(getWidget("transferMenu"));
 }
 
 bool MainWindow::getUserCommandLines_gui(const string &command, StringMap &ucParams)
@@ -1161,37 +859,6 @@ gboolean MainWindow::onButtonReleasePage_gui(GtkWidget *widget, GdkEventButton *
 		WulforManager::get()->getMainWindow()->removeBookEntry_gui(entry);
 		return TRUE;
 	}
-
-	return FALSE;
-}
-
-gboolean MainWindow::onTransferButtonPressed_gui(GtkWidget *widget, GdkEventButton *event, gpointer data)
-{
-	MainWindow *mw = (MainWindow *)data;
-
-	if (event->button == 3)
-	{
-		GtkTreePath *path;
-		if (gtk_tree_view_get_path_at_pos(mw->transferView.get(), (gint)event->x, (gint)event->y, &path, NULL, NULL, NULL))
-		{
-			bool selected = gtk_tree_selection_path_is_selected(mw->transferSelection, path);
-			gtk_tree_path_free(path);
-
-			if (selected)
-				return TRUE;
-		}
-	}
-
-	return FALSE;
-}
-
-gboolean MainWindow::onTransferButtonReleased_gui(GtkWidget *widget, GdkEventButton *event, gpointer data)
-{
-	MainWindow *mw = (MainWindow *)data;
-	int count = gtk_tree_selection_count_selected_rows(mw->transferSelection);
-
-	if (count > 0 && event->type == GDK_BUTTON_RELEASE && event->button == 3)
-		mw->popupTransferMenu_gui();
 
 	return FALSE;
 }
@@ -1434,265 +1101,6 @@ void MainWindow::onCloseBookEntry_gui(GtkWidget *widget, gpointer data)
 	WulforManager::get()->getMainWindow()->removeBookEntry_gui(entry);
 }
 
-void MainWindow::onGetFileListClicked_gui(GtkMenuItem *item, gpointer data)
-{
-	MainWindow *mw = (MainWindow *)data;
-	string cid;
-	GtkTreeIter iter;
-	GtkTreePath *path;
-	GList *list = gtk_tree_selection_get_selected_rows(mw->transferSelection, NULL);
-	typedef Func1<MainWindow, string > F1;
-	F1 *func;
-
-	for (GList *i = list; i; i = i->next)
-	{
-		path = (GtkTreePath *)i->data;
-		if (gtk_tree_model_get_iter(GTK_TREE_MODEL(mw->transferStore), &iter, path))
-		{
-			bool parent = gtk_tree_model_iter_has_child(GTK_TREE_MODEL(mw->transferStore), &iter);
-			
-			do 
-			{
-				cid = mw->transferView.getString(&iter, "CID");
-				if (!cid.empty())
-				{
-					func = new F1(mw, &MainWindow::getFileList_client, cid);
-					WulforManager::get()->dispatchClientFunc(func);
-				}
-			} 
-			while (parent && WulforUtil::getNextIter_gui(GTK_TREE_MODEL(mw->transferStore), &iter, TRUE, FALSE));
-		}
-		gtk_tree_path_free(path);
-	}
-	g_list_free(list);
-}
-
-void MainWindow::onMatchQueueClicked_gui(GtkMenuItem *item, gpointer data)
-{
-	MainWindow *mw = (MainWindow *)data;
-	string cid;
-	GtkTreeIter iter;
-	GtkTreePath *path;
-	GList *list = gtk_tree_selection_get_selected_rows(mw->transferSelection, NULL);
-	typedef Func1<MainWindow, string > F1;
-	F1 *func;
-
-	for (GList *i = list; i; i = i->next)
-	{
-		path = (GtkTreePath *)i->data;
-		if (gtk_tree_model_get_iter(GTK_TREE_MODEL(mw->transferStore), &iter, path))
-		{
-			bool parent = gtk_tree_model_iter_has_child(GTK_TREE_MODEL(mw->transferStore), &iter);
-
-			do
-			{
-				cid = mw->transferView.getString(&iter, "CID");
-				if (!cid.empty())
-				{
-					func = new F1(mw, &MainWindow::matchQueue_client, cid);
-					WulforManager::get()->dispatchClientFunc(func);
-				}
-			}
-			while (parent && WulforUtil::getNextIter_gui(GTK_TREE_MODEL(mw->transferStore), &iter, TRUE, FALSE));
-		}
-		gtk_tree_path_free(path);
-	}
-	g_list_free(list);
-}
-
-void MainWindow::onPrivateMessageClicked_gui(GtkMenuItem *item, gpointer data)
-{
-	MainWindow *mw = (MainWindow *)data;
-	string cid;
-	GtkTreeIter iter;
-	GtkTreePath *path;
-	GList *list = gtk_tree_selection_get_selected_rows(mw->transferSelection, NULL);
-
-	for (GList *i = list; i; i = i->next)
-	{
-		path = (GtkTreePath *)i->data;
-		if (gtk_tree_model_get_iter(GTK_TREE_MODEL(mw->transferStore), &iter, path))
-		{
-			bool parent = gtk_tree_model_iter_has_child(GTK_TREE_MODEL(mw->transferStore), &iter);
-
-			do 
-			{
-				cid = mw->transferView.getString(&iter, "CID");
-				if (!cid.empty())
-					mw->addPrivateMessage_gui(cid);
-			}
-			while (parent && WulforUtil::getNextIter_gui(GTK_TREE_MODEL(mw->transferStore), &iter, TRUE, FALSE));
-		}
-		gtk_tree_path_free(path);
-	}
-	g_list_free(list);
-}
-
-void MainWindow::onAddFavoriteUserClicked_gui(GtkMenuItem *item, gpointer data)
-{
-	MainWindow *mw = (MainWindow *)data;
-	string cid;
-	GtkTreeIter iter;
-	GtkTreePath *path;
-	GList *list = gtk_tree_selection_get_selected_rows(mw->transferSelection, NULL);
-	typedef Func1<MainWindow, string > F1;
-	F1 *func;
-
-	for (GList *i = list; i; i = i->next)
-	{
-		path = (GtkTreePath *)i->data;
-		if (gtk_tree_model_get_iter(GTK_TREE_MODEL(mw->transferStore), &iter, path))
-		{
-			bool parent = gtk_tree_model_iter_has_child(GTK_TREE_MODEL(mw->transferStore), &iter);
-
-			do
-			{
-				cid = mw->transferView.getString(&iter, "CID");
-				if (!cid.empty())
-				{
-					func = new F1(mw, &MainWindow::addFavoriteUser_client, cid);
-					WulforManager::get()->dispatchClientFunc(func);
-				}
-			}
-			while (parent && WulforUtil::getNextIter_gui(GTK_TREE_MODEL(mw->transferStore), &iter, TRUE, FALSE));
-		}
-		gtk_tree_path_free(path);
-	}
-	g_list_free(list);
-}
-
-void MainWindow::onGrantExtraSlotClicked_gui(GtkMenuItem *item, gpointer data)
-{
-	MainWindow *mw = (MainWindow *)data;
-	string cid;
-	GtkTreeIter iter;
-	GtkTreePath *path;
-	GList *list = gtk_tree_selection_get_selected_rows(mw->transferSelection, NULL);
-	typedef Func1<MainWindow, string > F1;
-	F1 *func;
-
-	for (GList *i = list; i; i = i->next)
-	{
-		path = (GtkTreePath *)i->data;
-		if (gtk_tree_model_get_iter(GTK_TREE_MODEL(mw->transferStore), &iter, path))
-		{
-			bool parent = gtk_tree_model_iter_has_child(GTK_TREE_MODEL(mw->transferStore), &iter);
-
-			do
-			{
-				cid = mw->transferView.getString(&iter, "CID");
-				if (!cid.empty())
-				{
-					func = new F1(mw, &MainWindow::grantExtraSlot_client, cid);
-					WulforManager::get()->dispatchClientFunc(func);
-				}
-			}
-			while (parent && WulforUtil::getNextIter_gui(GTK_TREE_MODEL(mw->transferStore), &iter, TRUE, FALSE));
-		}
-		gtk_tree_path_free(path);
-	}
-	g_list_free(list);
-}
-
-void MainWindow::onRemoveUserFromQueueClicked_gui(GtkMenuItem *item, gpointer data)
-{
-	MainWindow *mw = (MainWindow *)data;
-	string cid;
-	GtkTreeIter iter;
-	GtkTreePath *path;
-	GList *list = gtk_tree_selection_get_selected_rows(mw->transferSelection, NULL);
-	typedef Func1<MainWindow, string > F1;
-	F1 *func;
-
-	for (GList *i = list; i; i = i->next)
-	{
-		path = (GtkTreePath *)i->data;
-		if (gtk_tree_model_get_iter(GTK_TREE_MODEL(mw->transferStore), &iter, path))
-		{
-			bool parent = gtk_tree_model_iter_has_child(GTK_TREE_MODEL(mw->transferStore), &iter);
-
-			do
-			{
-				cid = mw->transferView.getString(&iter, "CID");
-				if (!cid.empty())
-				{
-					func = new F1(mw, &MainWindow::removeUserFromQueue_client, cid);
-					WulforManager::get()->dispatchClientFunc(func);
-				}
-			}
-			while (parent && WulforUtil::getNextIter_gui(GTK_TREE_MODEL(mw->transferStore), &iter, TRUE, FALSE));
-		}
-		gtk_tree_path_free(path);
-	}
-	g_list_free(list);
-}
-
-void MainWindow::onForceAttemptClicked_gui(GtkMenuItem *menuItem, gpointer data)
-{
-	MainWindow *mw = (MainWindow *)data;
-	string cid;
-	GtkTreeIter iter;
-	GtkTreePath *path;
-	GList *list = gtk_tree_selection_get_selected_rows(mw->transferSelection, NULL);
-	typedef Func1<MainWindow, string> F1;
-	F1 *func;
-
-	for (GList *i = list; i; i = i->next)
-	{
-		path = (GtkTreePath *)i->data;
-		if (gtk_tree_model_get_iter(GTK_TREE_MODEL(mw->transferStore), &iter, path))
-		{
-			cid = mw->transferView.getString(&iter, "CID");
-			gtk_tree_store_set(mw->transferStore, &iter, mw->transferView.col("Status"), _("Connecting (forced)..."), -1);
-
-			func = new F1(mw, &MainWindow::forceAttempt_client, cid);
-			WulforManager::get()->dispatchClientFunc(func);
-		}
-		gtk_tree_path_free(path);
-	}
-	g_list_free(list);
-}
-
-void MainWindow::onCloseConnectionClicked_gui(GtkMenuItem *menuItem, gpointer data)
-{
-	MainWindow *mw = (MainWindow *)data;
-	string cid;
-	GtkTreeIter iter;
-	GtkTreePath *path;
-	bool download;
-	GList *list = gtk_tree_selection_get_selected_rows(mw->transferSelection, NULL);
-	typedef Func2<MainWindow, string, bool> F2;
-	F2 *func;
-
-	for (GList *i = list; i; i = i->next)
-	{
-		path = (GtkTreePath *)i->data;
-		if (gtk_tree_model_get_iter(GTK_TREE_MODEL(mw->transferStore), &iter, path))
-		{
-			bool parent = gtk_tree_model_iter_has_child(GTK_TREE_MODEL(mw->transferStore), &iter);
-
-			do
-			{
-				cid = mw->transferView.getString(&iter, "CID");
-				if (!cid.empty())
-				{
-					gtk_tree_store_set(mw->transferStore, &iter, mw->transferView.col("Status"), _("Closing connection..."), -1);
-					if (mw->transferView.getValue<GdkPixbuf*>(&iter,"Icon") == mw->downloadPic)
-						download = TRUE;
-					else
-						download = FALSE;
-
-					func = new F2(mw, &MainWindow::closeConnection_client, cid, download);
-					WulforManager::get()->dispatchClientFunc(func);
-				}
-			}
-			while (parent && WulforUtil::getNextIter_gui(GTK_TREE_MODEL(mw->transferStore), &iter, TRUE, FALSE));
-		}
-		gtk_tree_path_free(path);
-	}
-	g_list_free(list);
-}
-
 void MainWindow::onStatusIconActivated_gui(GtkStatusIcon *statusIcon, gpointer data)
 {
 	onToggleWindowVisibility_gui(NULL, data);
@@ -1809,81 +1217,6 @@ void MainWindow::openOwnList_client(bool useSetting)
 	WulforManager::get()->dispatchGuiFunc(func);
 }
 
-void MainWindow::getFileList_client(string cid)
-{
-	try
-	{
-		if (!cid.empty())
-		{
-			UserPtr user = ClientManager::getInstance()->getUser(CID(cid));
-			QueueManager::getInstance()->addList(user, QueueItem::FLAG_CLIENT_VIEW);
-		}
-	}
-	catch (const Exception&)
-	{
-	}
-}
-
-void MainWindow::matchQueue_client(string cid)
-{
-	try
-	{
-		if (!cid.empty())
-		{
-			UserPtr user = ClientManager::getInstance()->getUser(CID(cid));
-			QueueManager::getInstance()->addList(user, QueueItem::FLAG_MATCH_QUEUE);
-		}
-	}
-	catch (const Exception&)
-	{
-	}
-}
-
-void MainWindow::addFavoriteUser_client(string cid)
-{
-	if (!cid.empty())
-	{
-		UserPtr user = ClientManager::getInstance()->getUser(CID(cid));
-		FavoriteManager::getInstance()->addFavoriteUser(user);
-	}
-}
-
-void MainWindow::grantExtraSlot_client(string cid)
-{
-	if (!cid.empty())
-	{
-		UserPtr user = ClientManager::getInstance()->getUser(CID(cid));
-		UploadManager::getInstance()->reserveSlot(user);
-	}
-}
-
-void MainWindow::removeUserFromQueue_client(string cid)
-{
-	if (!cid.empty())
-	{
-		UserPtr user = ClientManager::getInstance()->getUser(CID(cid));
-		QueueManager::getInstance()->removeSource(user, QueueItem::Source::FLAG_REMOVED);
-	}
-}
-
-void MainWindow::forceAttempt_client(string cid)
-{
-	if (!cid.empty())
-	{
-		UserPtr user = ClientManager::getInstance()->findUser(CID(cid));
-		ConnectionManager::getInstance()->force(user);
-	}
-}
-
-void MainWindow::closeConnection_client(string cid, bool download)
-{
-	if (!cid.empty())
-	{
-		UserPtr user = ClientManager::getInstance()->findUser(CID(cid));
-		ConnectionManager::getInstance()->disconnect(user, download);
-	}
-}
-
 string MainWindow::getFilename_client(Transfer *t)
 {
 	string filename;
@@ -1896,273 +1229,6 @@ string MainWindow::getFilename_client(Transfer *t)
 		filename = Util::getFileName(t->getPath());
 
 	return filename;
-}
-
-void MainWindow::transferComplete_client(Transfer *t)
-{
-	bool download;
-	StringMap params;
-	UserPtr user = t->getUserConnection().getUser();
-
-	params["CID"] = user->getCID().toBase32();
-	params["Progress"] = "100";
-	params["Time Left"] = _("Done");
-	params["Speed"] = "-1"; // Setting speed < 0 clears the TreeView::SPEED column.
-	params["Sort Order"] = "w" + WulforUtil::getNicks(user) + WulforUtil::getHubNames(user);
-	params["Download Position"] = "0";
-
-	if (t->getUserConnection().isSet(UserConnection::FLAG_DOWNLOAD))
-	{
-		params["Status"] = _("Download finished, idle...");
-		download = TRUE;
-	}
-	else
-	{
-		params["Status"] = _("Upload finished, idle...");
-		download = FALSE;
-	}
-
-	typedef Func2<MainWindow, StringMap, bool> F2;
-	F2 *func = new F2(this, &MainWindow::updateTransfer_gui, params, download);
-	WulforManager::get()->dispatchGuiFunc(func);
-}
-
-void MainWindow::on(ConnectionManagerListener::Added, ConnectionQueueItem *cqi) throw()
-{
-	StringMap params;
-
-	params["CID"] = cqi->getUser()->getCID().toBase32();
-	params["User"] = WulforUtil::getNicks(cqi->getUser());
-	params["Hub Name"] = WulforUtil::getHubNames(cqi->getUser());
-	params["Status"] = _("Connecting...");
-	params["Progress"] = "0";
-	params["Time Left"] = " ";
-	params["Speed"] = "-1";
-	params["Sort Order"] = "w" + params["User"] + params["Hub Name"];
-	params["Failed"] = "0";
-	params["Download Position"] = "0";
-
-	typedef Func2<MainWindow, StringMap, bool> F2;
-	F2 *func = new F2(this, &MainWindow::updateTransfer_gui, params, cqi->getDownload());
-	WulforManager::get()->dispatchGuiFunc(func);
-}
-
-void MainWindow::on(ConnectionManagerListener::Removed, ConnectionQueueItem *cqi) throw()
-{
-	string cid = cqi->getUser()->getCID().toBase32();
-
-	typedef Func2 <MainWindow, string, bool> F2;
-	F2 *func = new F2(this, &MainWindow::removeTransfer_gui, cid, cqi->getDownload());
-	WulforManager::get()->dispatchGuiFunc(func);
-}
-
-void MainWindow::on(ConnectionManagerListener::Failed, ConnectionQueueItem *cqi, const string &reason) throw()
-{
-	StringMap params;
-	UserPtr user = cqi->getUser();
-
-	params["CID"] = user->getCID().toBase32();
-	params["Status"] = reason;
-	params["Time Left"] = " ";
-	params["Speed"] = "-1";
-	params["Sort Order"] = "w" + WulforUtil::getNicks(user) + WulforUtil::getHubNames(user);
-	params["Failed"] = "1";
-	params["Download Position"] = "0";
-
-	typedef Func2<MainWindow, StringMap, bool> F2;
-	F2 *func = new F2(this, &MainWindow::updateTransfer_gui, params, cqi->getDownload());
-	WulforManager::get()->dispatchGuiFunc(func);
-}
-
-void MainWindow::on(ConnectionManagerListener::StatusChanged, ConnectionQueueItem *cqi) throw()
-{
-	StringMap params;
-
-	params["CID"] = cqi->getUser()->getCID().toBase32();
-	params["Time Left"] = " ";
-	params["Speed"] = "-1";
-	params["Failed"] = "0";
-	params["Download Position"] = "0";
-
-	if (cqi->getState() == ConnectionQueueItem::CONNECTING)
-		params["Status"] = _("Connecting...");
-	else
-		params["Status"] = _("Waiting to retry...");
-
-	typedef Func2<MainWindow, StringMap, bool> F2;
-	F2 *func = new F2(this, &MainWindow::updateTransfer_gui, params, cqi->getDownload());
-	WulforManager::get()->dispatchGuiFunc(func);
-}
-
-void MainWindow::on(DownloadManagerListener::Starting, Download *dl) throw()
-{
-	StringMap params;
-	UserPtr user = dl->getUserConnection().getUser();
-
-	params["Filename"] = getFilename_client(dl);
-	params["CID"] = user->getCID().toBase32();
-	params["Path"] = Util::getFilePath(dl->getPath());
-	params["Status"] = _("Download starting...");
-	params["Size"] = Util::toString(dl->getSize());
-	params["Sort Order"] = "d" + WulforUtil::getNicks(user) + WulforUtil::getHubNames(user);
-	params["IP"] = dl->getUserConnection().getRemoteIp();
-	params["Failed"] = "0";
-	params["Download Position"] = Util::toString(dl->getPos());
-	params["File Size"] = Util::toString(QueueManager::getInstance()->getSize(dl->getPath()));
-	params["File Position"] = Util::toString(QueueManager::getInstance()->getPos(dl->getPath()));
-
-	typedef Func2<MainWindow, StringMap, bool> F2;
-	F2 *func = new F2(this, &MainWindow::updateTransfer_gui, params, TRUE);
-	WulforManager::get()->dispatchGuiFunc(func);
-}
-
-void MainWindow::on(DownloadManagerListener::Tick, const DownloadList &list) throw()
-{
-	Download *dl;
-	StringMap params;
-	string status;
-	double percent;
-	typedef Func2<MainWindow, StringMap, bool> F2;
-	F2 *func;
-
-	for (DownloadList::const_iterator it = list.begin(); it != list.end(); ++it)
-	{
-		ostringstream stream;
-		params.clear();
-		status.clear();
-		dl = *it;
-		percent = 0.0;
-
-		if (dl->getUserConnection().isSecure())
-		{
-			if (dl->getUserConnection().isTrusted())
-				status += "[S]";
-			else
-				status += "[U]";
-		}
-		if (dl->isSet(Download::FLAG_TTH_CHECK))
-			status += "[T]";
-		if (dl->isSet(Download::FLAG_ZDOWNLOAD))
-			status += "[Z]";
-		if (!status.empty())
-			status += " ";
-
-		if (dl->getSize() > 0)
-			percent = (double)(dl->getPos() * 100.0) / dl->getSize();
-
-		stream << setiosflags(ios::fixed) << setprecision(1);
-		stream << _("Downloaded ") << Util::formatBytes((dl->getPos())) << " (" << percent;
-		stream << "%) in " << Util::formatSeconds((GET_TICK() - dl->getStart()) / 1000);
-
-		params["Filename"] = getFilename_client(dl);
-		params["CID"] = dl->getUserConnection().getUser()->getCID().toBase32();
-		params["Status"] = status + stream.str();
-		params["Time Left"] = Util::formatSeconds(dl->getSecondsLeft());
-		params["Progress"] = Util::toString(static_cast<int>(percent));
-		params["Speed"] = Util::toString(dl->getAverageSpeed());
-		params["Download Position"] = Util::toString(dl->getPos());
-		params["File Position"] = Util::toString(QueueManager::getInstance()->getPos(dl->getPath()));
-
-		func = new F2(this, &MainWindow::updateTransfer_gui, params, TRUE);
-		WulforManager::get()->dispatchGuiFunc(func);
-	}
-}
-
-void MainWindow::on(DownloadManagerListener::Complete, Download *dl) throw()
-{
-	transferComplete_client(dl);
-}
-
-void MainWindow::on(DownloadManagerListener::Failed, Download *dl, const string &reason) throw()
-{
-	StringMap params;
-	UserPtr user = dl->getUserConnection().getUser();
-
-	params["Filename"] = getFilename_client(dl);
-	params["CID"] = user->getCID().toBase32();
-	params["Path"] = Util::getFilePath(dl->getPath());
-	params["Status"] = reason;
-	params["Time Left"] = " ";
-	params["Speed"] = "-1";
-	params["Size"] = Util::toString(dl->getSize());
-	params["Sort Order"] = "w" + WulforUtil::getNicks(user) + WulforUtil::getHubNames(user);
-	params["Failed"] = "1";
-
-	typedef Func2<MainWindow, StringMap, bool> F2;
-	F2 *func = new F2(this, &MainWindow::updateTransfer_gui, params, TRUE);
-	WulforManager::get()->dispatchGuiFunc(func);
-}
-
-void MainWindow::on(UploadManagerListener::Starting, Upload *ul) throw()
-{
-	StringMap params;
-	UserPtr user = ul->getUser();
-
-	params["Filename"] = getFilename_client(ul);
-	params["CID"] = user->getCID().toBase32();
-	params["Path"] = Util::getFilePath(ul->getPath());
-	params["Status"] = _("Upload starting...");
-	params["Size"] = Util::toString(ul->getSize());
-	params["Sort Order"] = "u" + WulforUtil::getNicks(user) + WulforUtil::getHubNames(user);
-	params["IP"] = ul->getUserConnection().getRemoteIp();
-	params["Failed"] = "0";
-
-	typedef Func2<MainWindow, StringMap, bool> F2;
-	F2 *func = new F2(this, &MainWindow::updateTransfer_gui, params, FALSE);
-	WulforManager::get()->dispatchGuiFunc(func);
-}
-
-void MainWindow::on(UploadManagerListener::Tick, const UploadList &list) throw()
-{
-	Upload *ul;
-	StringMap params;
-	string status;
-	double percent;
-	typedef Func2<MainWindow, StringMap, bool> F2;
-	F2 *func;
-
-	for (UploadList::const_iterator it = list.begin(); it != list.end(); ++it)
-	{
-		ostringstream stream;
-		params.clear();
-		status.clear();
-		ul = *it;
-		percent = 0.0;
-
-		if (ul->getUserConnection().isSecure())
-		{
-			if (ul->getUserConnection().isTrusted())
-				status += "[S]";
-			else
-				status += "[U]";
-		}
-		if (ul->isSet(Upload::FLAG_ZUPLOAD))
-			status += "[Z]";
-		if (!status.empty())
-			status += " ";
-
-		if (ul->getSize() > 0)
-			percent = (double)(ul->getPos() * 100.0) / ul->getSize();
-
-		stream << setiosflags(ios::fixed) << setprecision(1);
-		stream << _("Uploaded ") << Util::formatBytes((ul->getPos())) << " (" << percent;
-		stream << _("%) in ") << Util::formatSeconds((GET_TICK() - ul->getStart()) / 1000);
-
-		params["Filename"] = getFilename_client(ul);
-		params["CID"] = ul->getUser()->getCID().toBase32();
-		params["Status"] = status + stream.str();
-		params["Time Left"] = Util::formatSeconds(ul->getSecondsLeft());
-		params["Progress"] = Util::toString((int)percent);
-		params["Speed"] = Util::toString(ul->getAverageSpeed());
-
-		func = new F2(this, &MainWindow::updateTransfer_gui, params, FALSE);
-		WulforManager::get()->dispatchGuiFunc(func);
-	}
-}
-
-void MainWindow::on(UploadManagerListener::Complete, Upload *ul) throw()
-{
-	transferComplete_client(ul);
 }
 
 void MainWindow::on(LogManagerListener::Message, time_t t, const string &message) throw()
@@ -2183,25 +1249,6 @@ void MainWindow::on(QueueManagerListener::Finished, QueueItem *item, const strin
 		F4 *func = new F4(this, &MainWindow::showShareBrowser_gui, user, listName, dir, TRUE);
 		WulforManager::get()->dispatchGuiFunc(func);
 	}
-	else
-	{
-		string file = Util::getFileName(item->getTargetFileName());
-		typedef Func1<MainWindow, string> F1;
-		F1 *func = new F1(this, &MainWindow::finishParent_gui, file);
-		WulforManager::get()->dispatchGuiFunc(func);
-	}
-}
-
-void MainWindow::on(QueueManagerListener::Removed, QueueItem *item) throw()
-{
-	if (item->getDownloads().empty())
-		return;
-
-	string cid = item->getDownloads()[0]->getUser()->getCID().toBase32();
-
-	typedef Func2 <MainWindow, string, bool> F2;
-	F2 *func = new F2(this, &MainWindow::removeTransfer_gui, cid, TRUE);
-	WulforManager::get()->dispatchGuiFunc(func);
 }
 
 void MainWindow::on(TimerManagerListener::Second, uint32_t ticks) throw()

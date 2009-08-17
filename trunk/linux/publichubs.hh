@@ -30,11 +30,9 @@
 #include "bookentry.hh"
 #include "treeview.hh"
 
-using namespace dcpp;
-
 class PublicHubs:
 	public BookEntry,
-	public FavoriteManagerListener
+	public dcpp::FavoriteManagerListener
 {
 	public:
 		PublicHubs();
@@ -66,15 +64,15 @@ class PublicHubs:
 		// Client functions
 		void downloadList_client();
 		void refresh_client(int pos);
-		void addFav_client(FavoriteHubEntry entry);
+		void addFav_client(dcpp::FavoriteHubEntry entry);
 
 		// Client callbacks
-		virtual void on(FavoriteManagerListener::DownloadStarting, const std::string &file) throw();
-		virtual void on(FavoriteManagerListener::DownloadFailed, const std::string &file) throw();
-		virtual void on(FavoriteManagerListener::DownloadFinished, const std::string &file) throw();
+		virtual void on(dcpp::FavoriteManagerListener::DownloadStarting, const std::string &file) throw();
+		virtual void on(dcpp::FavoriteManagerListener::DownloadFailed, const std::string &file) throw();
+		virtual void on(dcpp::FavoriteManagerListener::DownloadFinished, const std::string &file) throw();
 
-		HubEntryList hubs;
-		StringSearch filter;
+		dcpp::HubEntryList hubs;
+		dcpp::StringSearch filter;
 		TreeView listsView, hubView;
 		GtkTreeSelection *hubSelection, *listsSelection;
 		GtkListStore *hubStore, *listsStore;

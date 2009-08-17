@@ -31,6 +31,7 @@
 #include "WulforUtil.hh"
 
 using namespace std;
+using namespace dcpp;
 
 ShareBrowser::ShareBrowser(UserPtr user, const std::string &file, const std::string &initialDirectory):
 	BookEntry(Entry::SHARE_BROWSER, _("List: ") + WulforUtil::getNicks(user), "sharebrowser.glade", user->getCID().toBase32()),
@@ -270,7 +271,7 @@ void ShareBrowser::updateFiles_gui(DirectoryListing::Directory *dir)
 			fileView.col("Size"), Util::formatBytes(size).c_str(),
 			fileView.col("Exact Size"), Util::formatExactSize(size).c_str(),
 			fileView.col("Size Order"), size,
-			fileView.col("Type"), _("Folder"),
+			fileView.col("Type"), _("Directory"),
 			fileView.col("DL File"), (gpointer)(*it_dir),
 			fileView.col("TTH"), "",
 			-1);
@@ -469,7 +470,23 @@ void ShareBrowser::popupFileMenu_gui()
 	// Build user command menu
 	StringList hubs = WulforUtil::getHubAddress(listing.getUser()->getCID());
 	fileUserCommandMenu->addHub(hubs);
-	fileUserCommandMenu->addUser(listing.getUser()->getCID().toBase32());
+	GtkTreeIter iter;
+	GList *list = gtk_tree_selection_get_selected_rows(fileSelection, NULL);
+	string cid = listing.getUser()->getCID().toBase32();
+
+	for (GList *i = list; i; i = i->next)
+	{
+		GtkTreePath *path = (GtkTreePath *)i->data;
+		if (gtk_tree_model_get_iter(GTK_TREE_MODEL(fileStore), &iter, path))
+		{
+			fileUserCommandMenu->addFile(cid,
+				fileView.getString(&iter, "Filename"),
+				fileView.getValue<int64_t>(&iter, "Size Order"),
+				fileView.getString(&iter, "TTH"));
+		}
+		gtk_tree_path_free(path);
+	}
+	g_list_free(list);
 	fileUserCommandMenu->buildMenu_gui();
 
 	gtk_menu_popup(GTK_MENU(getWidget("fileMenu")), NULL, NULL, NULL, NULL, 0, gtk_get_current_event_time());
@@ -505,7 +522,20 @@ void ShareBrowser::popupDirMenu_gui()
 	// Add user commands.
 	StringList hubs = WulforUtil::getHubAddress(listing.getUser()->getCID());
 	dirUserCommandMenu->addHub(hubs);
-	dirUserCommandMenu->addUser(listing.getUser()->getCID().toBase32());
+	GtkTreeIter iter;
+	GList *list = gtk_tree_selection_get_selected_rows(dirSelection, NULL);
+	string cid = listing.getUser()->getCID().toBase32();
+
+	for (GList *i = list; i; i = i->next)
+	{
+		GtkTreePath *path = (GtkTreePath *)i->data;
+		if (gtk_tree_model_get_iter(GTK_TREE_MODEL(dirStore), &iter, path))
+		{
+			dirUserCommandMenu->addFile(cid, dirView.getString(&iter, "Dir"), 0, "");
+		}
+		gtk_tree_path_free(path);
+	}
+	g_list_free(list);
 	dirUserCommandMenu->buildMenu_gui();
 
 	gtk_menu_popup(GTK_MENU(getWidget("dirMenu")), NULL, NULL, NULL, NULL, 0, gtk_get_current_event_time());

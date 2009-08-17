@@ -29,15 +29,13 @@
 #include "bookentry.hh"
 #include "treeview.hh"
 
-using namespace dcpp;
-
 class UserCommandMenu;
 
 class ShareBrowser:
 	public BookEntry
 {
 	public:
-		ShareBrowser(UserPtr user, const std::string &file, const std::string &initialDirectory);
+		ShareBrowser(dcpp::UserPtr user, const std::string &file, const std::string &initialDirectory);
 		virtual ~ShareBrowser();
 		virtual void show();
 
@@ -46,8 +44,8 @@ class ShareBrowser:
 		void buildList_gui();
 		void openDir_gui(const std::string &dir);
 		bool findDir_gui(const std::string &dir, GtkTreeIter *parent);
-		void buildDirs_gui(DirectoryListing::Directory *dir, GtkTreeIter *iter);
-		void updateFiles_gui(DirectoryListing::Directory *dir);
+		void buildDirs_gui(dcpp::DirectoryListing::Directory *dir, GtkTreeIter *iter);
+		void updateFiles_gui(dcpp::DirectoryListing::Directory *dir);
 		void updateStatus_gui();
 		void setStatus_gui(std::string statusBar, std::string msg);
 		void fileViewSelected_gui();
@@ -76,15 +74,15 @@ class ShareBrowser:
 		static void onCopyMagnetClicked_gui(GtkMenuItem* item, gpointer data);
 
 		// Client functions
-		void downloadFile_client(DirectoryListing::File *file, std::string target);
-		void downloadDir_client(DirectoryListing::Directory *dir, std::string target);
+		void downloadFile_client(dcpp::DirectoryListing::File *file, std::string target);
+		void downloadDir_client(dcpp::DirectoryListing::Directory *dir, std::string target);
 		void matchQueue_client();
 
 		GdkEventType oldType;
-		UserPtr user;
+		dcpp::UserPtr user;
 		std::string file;
 		std::string initialDirectory;
-		DirectoryListing listing;
+		dcpp::DirectoryListing listing;
 		int64_t shareSize;
 		int64_t currentSize;
 		int shareItems;

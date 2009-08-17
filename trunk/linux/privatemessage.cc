@@ -28,6 +28,7 @@
 #include "search.hh"
 
 using namespace std;
+using namespace dcpp;
 
 PrivateMessage::PrivateMessage(const string &cid):
 	BookEntry(Entry::PRIVATE_MESSAGE, _("PM: ") + WulforUtil::getNicks(cid), "privatemessage.glade", cid),
@@ -220,7 +221,7 @@ void PrivateMessage::updateCursor(GtkWidget *widget)
 	gint x, y, buf_x, buf_y;
 	GtkTextIter iter;
 	GSList *tagList;
-	bool above;
+	GtkTextTag *newTag = NULL;
 
 	gdk_window_get_pointer(widget->window, &x, &y, NULL);
 
@@ -229,23 +230,36 @@ void PrivateMessage::updateCursor(GtkWidget *widget)
 	gtk_text_view_get_iter_at_location(GTK_TEXT_VIEW(widget), &iter, buf_x, buf_y);
 	tagList = gtk_text_iter_get_tags(&iter);
 
-	above = tagList != NULL;
-
-	if (aboveURI != above)
+	if (tagList != NULL)
 	{
-		aboveURI = above;
-		if (aboveURI)
-		{
-			selectedURI = GTK_TEXT_TAG(tagList->data)->name;
-			gdk_window_set_cursor(gtk_text_view_get_window(GTK_TEXT_VIEW(widget), GTK_TEXT_WINDOW_TEXT), handCursor);
-		}
-		else
-			gdk_window_set_cursor(gtk_text_view_get_window(GTK_TEXT_VIEW(widget), GTK_TEXT_WINDOW_TEXT), NULL);
+		newTag = GTK_TEXT_TAG(tagList->data);
+		g_slist_free(tagList);
 	}
 
-	if (tagList)
-		g_slist_free(tagList);
-}
+
+	if (newTag != selectedTag) 
+	{
+		// Cursor is in transition.
+		if (newTag != NULL)
+		{
+			// Cursor is entering a tag.
+			selectedURI = newTag->name;
+			if (selectedTag == NULL)
+			{
+				// Cursor was in neutral space.
+				gdk_window_set_cursor(gtk_text_view_get_window(GTK_TEXT_VIEW(widget), GTK_TEXT_WINDOW_TEXT), handCursor);
+			}
+		}
+		else  
+		{
+			// Cursor is entering neutral space.
+			gdk_window_set_cursor(gtk_text_view_get_window(GTK_TEXT_VIEW(widget), GTK_TEXT_WINDOW_TEXT), NULL);
+		}
+
+		selectedTag = newTag;
+	}
+}       
+
 
 gboolean PrivateMessage::onFocusIn_gui(GtkWidget *widget, GdkEventFocus *event, gpointer data)
 {

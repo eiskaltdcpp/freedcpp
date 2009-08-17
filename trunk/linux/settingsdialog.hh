@@ -30,8 +30,6 @@
 #include "dialogentry.hh"
 #include "treeview.hh"
 
-using namespace dcpp;
-
 class Settings:
 	public DialogEntry
 {
@@ -41,7 +39,7 @@ class Settings:
 
 	private:
 		// GUI functions
-		void addOption_gui(GtkListStore *store, const std::string &name, SettingsManager::IntSetting setting);
+		void addOption_gui(GtkListStore *store, const std::string &name, dcpp::SettingsManager::IntSetting setting);
 		void initPersonal_gui();
 		void initConnection_gui();
 		void initDownloads_gui();
@@ -51,7 +49,7 @@ class Settings:
 		void initAdvanced_gui();
 		void addShare_gui(std::string path, std::string name, std::string error);
 		void loadUserCommands_gui();
-		void saveUserCommand(UserCommand *uc);
+		void saveUserCommand(dcpp::UserCommand *uc);
 		void updateUserCommandTextSent_gui();
 		bool validateUserCommandInput(const std::string &oldName = "");
 		void showErrorDialog(const std::string &error);

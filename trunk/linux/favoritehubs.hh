@@ -29,11 +29,9 @@
 #include "bookentry.hh"
 #include "treeview.hh"
 
-using namespace dcpp;
-
 class FavoriteHubs:
 	public BookEntry,
-	public FavoriteManagerListener
+	public dcpp::FavoriteManagerListener
 {
 	public:
 		FavoriteHubs();
@@ -42,8 +40,8 @@ class FavoriteHubs:
 
 	private:
 		// GUI functions
-		void addEntry_gui(StringMap params);
-		void editEntry_gui(StringMap &params, GtkTreeIter *iter);
+		void addEntry_gui(dcpp::StringMap params);
+		void editEntry_gui(dcpp::StringMap &params, GtkTreeIter *iter);
 		void removeEntry_gui(std::string address);
 		void showErrorDialog_gui(const std::string &description);
 		void popupMenu_gui();
@@ -60,15 +58,15 @@ class FavoriteHubs:
 
 		// Client functions
 		void initializeList_client();
-		void getFavHubParams_client(const FavoriteHubEntry *entry, StringMap &params);
-		void addEntry_client(StringMap params);
-		void editEntry_client(string address, StringMap params);
-		void removeEntry_client(string address);
-		void setConnect_client(string address, bool active);
+		void getFavHubParams_client(const dcpp::FavoriteHubEntry *entry, dcpp::StringMap &params);
+		void addEntry_client(dcpp::StringMap params);
+		void editEntry_client(std::string address, dcpp::StringMap params);
+		void removeEntry_client(std::string address);
+		void setConnect_client(std::string address, bool active);
 
 		// Client callbacks
-		virtual void on(FavoriteManagerListener::FavoriteAdded, const FavoriteHubEntryPtr entry) throw();
-		virtual void on(FavoriteManagerListener::FavoriteRemoved, const FavoriteHubEntryPtr entry) throw();
+		virtual void on(dcpp::FavoriteManagerListener::FavoriteAdded, const dcpp::FavoriteHubEntryPtr entry) throw();
+		virtual void on(dcpp::FavoriteManagerListener::FavoriteRemoved, const dcpp::FavoriteHubEntryPtr entry) throw();
 
 		TreeView favoriteView;
 		GtkListStore *favoriteStore;

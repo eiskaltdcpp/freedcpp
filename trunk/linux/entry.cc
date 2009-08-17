@@ -30,7 +30,7 @@ using namespace std;
 Entry::Entry(const EntryType type, const string &glade, const string &id):
 	xml(NULL),
 	type(type),
-	id(Util::toString(type) + ":" + id)
+	id(dcpp::Util::toString(type) + ":" + id)
 {
 	// Load the Glade XML file, if applicable
 	if (!glade.empty())
@@ -72,7 +72,7 @@ void Entry::remove()
  */
 string Entry::generateID()
 {
-	return Util::toString((long)this);
+	return dcpp::Util::toString((long)this);
 }
 
 GtkWidget *Entry::getWidget(const string &name)
@@ -91,7 +91,7 @@ void Entry::addChild(Entry *entry)
 
 Entry *Entry::getChild(const EntryType childType, const string &childId)
 {
-	string id = Util::toString(childType) + ":" + childId;
+	string id = dcpp::Util::toString(childType) + ":" + childId;
 	map<string, Entry *>::const_iterator it = children.find(id);
 
 	if (it == children.end())

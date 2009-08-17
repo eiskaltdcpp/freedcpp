@@ -28,8 +28,6 @@
 #include <dcpp/CID.h>
 #include <dcpp/User.h>
 
-using namespace dcpp;
-
 class WulforUtil
 {
 	public:
@@ -38,13 +36,13 @@ class WulforUtil
 		static std::string windowsSeparator(const std::string &ps);
 		static std::vector<std::string> getLocalIPs();
 		static std::string getNicks(const std::string &cid);
-		static std::string getNicks(const CID& cid);
-		static std::string getNicks(const UserPtr& user);
+		static std::string getNicks(const dcpp::CID& cid);
+		static std::string getNicks(const dcpp::UserPtr& user);
 		static std::string getHubNames(const std::string &cid);
-		static std::string getHubNames(const CID& cid);
-		static std::string getHubNames(const UserPtr& user);
-		static StringList getHubAddress(const CID& cid);
-		static StringList getHubAddress(const UserPtr& user);
+		static std::string getHubNames(const dcpp::CID& cid);
+		static std::string getHubNames(const dcpp::UserPtr& user);
+		static dcpp::StringList getHubAddress(const dcpp::CID& cid);
+		static dcpp::StringList getHubAddress(const dcpp::UserPtr& user);
 		static std::string getTextFromMenu(GtkMenuItem *item);
 		static std::vector<std::string>& getCharsets();
 		static void openURI(const std::string &uri);

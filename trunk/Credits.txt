@@ -45,6 +45,8 @@ Max Lapan
 Jeremy Evans
 Per G�ansson
 olsner
+Eric Toombs
+Ximin Luo
 
 DC++:
 -----
@@ -57,4 +59,9 @@ sedulus, sandos, henrik engstr�, dwomac, robert777, saurod, atomicjo, bzbetty,
 distiller, citruz, dan fulger, cologic, christer palm, twink, ilkka sepp�� johnny, ciber,
 theparanoidone, gadget, naga, tremor, joakim tosteberg, pofis, psf8500, lauris ievins,
 defr, ullner, fleetcommand, liny, xan, olle svensson, mark gillespie, jeremy huddleston,
-bsod, sulan, jonathan stone, tim burton, izzzo, guitarm, paka, nils maier
+bsod, sulan, jonathan stone, tim burton, izzzo, guitarm, paka, nils maier, jens oknelid, yoji,
+krzysztof tyszecki, poison, mikejj, pur, bigmuscle, martin, jove, bart vullings,
+steven sheehy, tobias nygren, poy, dorian, stephan hohe, mafa_45, mikael eman, james ross,
+stanislav maslovski, david grundberg, pavel andreev, yakov suraev, kulmegil, smir, emtee, individ,
+pseudonym, crise, ben, ximin luo
+

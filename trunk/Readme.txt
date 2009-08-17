@@ -37,4 +37,3 @@ See License.txt for details.
 Contact:
 --------
 Website: http://freedcpp.narod.ru
-

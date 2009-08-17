@@ -34,13 +34,14 @@
 #include "WulforUtil.hh"
 
 using namespace std;
+using namespace dcpp;
 
 Hub::Hub(const string &address, const string &encoding):
 	BookEntry(Entry::HUB, _("Hub: ") + address, "hub.glade", address),
 	client(NULL),
 	historyIndex(0),
 	totalShared(0),
-	aboveTag(FALSE),
+	selectedTag(NULL),
 	address(address),
 	encoding(encoding),
 	scrollToBottom(TRUE)
@@ -260,6 +261,8 @@ void Hub::updateUser_gui(ParamMap params)
 		if (BOOLSETTING(SHOW_JOINS))
 		{
 			addStatusMessage_gui(params["Nick"] + _(" has joined"));
+			string line = params["Nick"] + _(" has joined hub ") + client->getHubName();
+			WulforManager::get()->getMainWindow()->addPrivateStatusMessage_gui(cid, line);
 		}
 		else if (BOOLSETTING(FAV_SHOW_JOINS))
 		{
@@ -500,7 +503,7 @@ void Hub::updateCursor_gui(GtkWidget *widget)
 	gint x, y, buf_x, buf_y;
 	GtkTextIter iter;
 	GSList *tagList;
-	bool above;
+	GtkTextTag *newTag = NULL;
 
 	gdk_window_get_pointer(widget->window, &x, &y, NULL);
 
@@ -509,22 +512,32 @@ void Hub::updateCursor_gui(GtkWidget *widget)
 	gtk_text_view_get_iter_at_location(GTK_TEXT_VIEW(widget), &iter, buf_x, buf_y);
 	tagList = gtk_text_iter_get_tags(&iter);
 
-	above = tagList != NULL;
-
-	if (aboveTag != above)
+	if (tagList != NULL) 
 	{
-		aboveTag = above;
-		if (aboveTag)
-		{
-			selectedTag = GTK_TEXT_TAG(tagList->data)->name;
-			gdk_window_set_cursor(gtk_text_view_get_window(GTK_TEXT_VIEW(widget), GTK_TEXT_WINDOW_TEXT), handCursor);
-		}
-		else
-			gdk_window_set_cursor(gtk_text_view_get_window(GTK_TEXT_VIEW(widget), GTK_TEXT_WINDOW_TEXT), NULL);
+		newTag = GTK_TEXT_TAG(tagList->data);
+		g_slist_free(tagList);
 	}
 
-	if (tagList)
-		g_slist_free(tagList);
+	if (newTag != selectedTag) 
+	{
+		// Cursor is in transition.
+		if (newTag != NULL) 
+		{
+			// Cursor is entering a tag.
+			selectedTagStr = newTag->name;
+			if (selectedTag == NULL)
+			{
+				// Cursor was in neutral space.
+				gdk_window_set_cursor(gtk_text_view_get_window(GTK_TEXT_VIEW(widget), GTK_TEXT_WINDOW_TEXT), handCursor);
+			}
+		}
+		else 
+		{
+			// Cursor is entering neutral space.
+			gdk_window_set_cursor(gtk_text_view_get_window(GTK_TEXT_VIEW(widget), GTK_TEXT_WINDOW_TEXT), NULL);
+		}
+		selectedTag = newTag;
+	}
 }
 
 gboolean Hub::onFocusIn_gui(GtkWidget *widget, GdkEventFocus *event, gpointer data)
@@ -1160,21 +1173,21 @@ void Hub::onCopyURIClicked_gui(GtkMenuItem *item, gpointer data)
 {
 	Hub *hub = (Hub *)data;
 
-	gtk_clipboard_set_text(gtk_clipboard_get(GDK_SELECTION_CLIPBOARD), hub->selectedTag.c_str(), hub->selectedTag.length());
+	gtk_clipboard_set_text(gtk_clipboard_get(GDK_SELECTION_CLIPBOARD), hub->selectedTagStr.c_str(), hub->selectedTagStr.length());
 }
 
 void Hub::onOpenLinkClicked_gui(GtkMenuItem *item, gpointer data)
 {
 	Hub *hub = (Hub *)data;
 
-	WulforUtil::openURI(hub->selectedTag);
+	WulforUtil::openURI(hub->selectedTagStr);
 }
 
 void Hub::onOpenHubClicked_gui(GtkMenuItem *item, gpointer data)
 {
 	Hub *hub = (Hub *)data;
 
-	WulforManager::get()->getMainWindow()->showHub_gui(hub->selectedTag);
+	WulforManager::get()->getMainWindow()->showHub_gui(hub->selectedTagStr);
 }
 
 void Hub::onSearchMagnetClicked_gui(GtkMenuItem *item, gpointer data)
@@ -1184,7 +1197,7 @@ void Hub::onSearchMagnetClicked_gui(GtkMenuItem *item, gpointer data)
 	int64_t size;
 	string tth;
 
-	if (WulforUtil::splitMagnet(hub->selectedTag, name, size, tth))
+	if (WulforUtil::splitMagnet(hub->selectedTagStr, name, size, tth))
 	{
 		Search *s = WulforManager::get()->getMainWindow()->addSearch_gui();
 		s->putValue_gui(tth, 0, SearchManager::SIZE_DONTCARE, SearchManager::TYPE_TTH);
@@ -1195,7 +1208,7 @@ void Hub::onMagnetPropertiesClicked_gui(GtkMenuItem *item, gpointer data)
 {
 	Hub *hub = (Hub *)data;
 
-	WulforManager::get()->getMainWindow()->openMagnetDialog_gui(hub->selectedTag);
+	WulforManager::get()->getMainWindow()->openMagnetDialog_gui(hub->selectedTagStr);
 }
 
 void Hub::connectClient_client(string address, string encoding)
@@ -1410,6 +1423,12 @@ void Hub::checkFavoriteUserJoin_client(string cid)
 		typedef Func1<Hub, std::string> F1;
 		F1 *func = new F1(this, &Hub::addStatusMessage_gui, message);
 		WulforManager::get()->dispatchGuiFunc(func);
+
+		string statusMessage = WulforUtil::getNicks(user) + _(" has joined hub ") + client->getHubName();
+		typedef Func2<MainWindow, string, string> F2;
+		F2 *func2 = new F2(WulforManager::get()->getMainWindow(),
+			&MainWindow::addPrivateStatusMessage_gui, cid, statusMessage);
+		WulforManager::get()->dispatchGuiFunc(func2);
 	}
 }
 
@@ -1500,6 +1519,12 @@ void Hub::on(ClientListener::UserRemoved, Client *, const OnlineUser &user) thro
 	{
 		func = new F1(this, &Hub::addStatusMessage_gui, nick + _(" has quit"));
 		WulforManager::get()->dispatchGuiFunc(func);
+
+		string statusMessage = nick + _(" has quit hub ") + client->getHubName();
+		typedef Func2<MainWindow, string, string> F2;
+		F2 *func2 = new F2(WulforManager::get()->getMainWindow(),
+			&MainWindow::addPrivateStatusMessage_gui, cid, statusMessage);
+		WulforManager::get()->dispatchGuiFunc(func2);
 	}
 
 	func = new F1(this, &Hub::removeUser_gui, cid);

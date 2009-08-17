@@ -28,6 +28,7 @@
 #include "WulforUtil.hh"
 
 using namespace std;
+using namespace dcpp;
 
 WulforSettingsManager::WulforSettingsManager():
 	configFile(Util::getConfigPath() + "FreeDC++.xml")
@@ -56,9 +57,9 @@ WulforSettingsManager::WulforSettingsManager():
 	defaultString["hub-order"] = "";
 	defaultString["hub-width"] = "";
 	defaultString["hub-visibility"] = "";
-	defaultString["main-order"] = "";
-	defaultString["main-width"] = "";
-	defaultString["main-visibility"] = "";
+	defaultString["transfers-order"] = "";
+	defaultString["transfers-width"] = "";
+	defaultString["transfers-visibility"] = "";
 	defaultString["publichubs-order"] = "";
 	defaultString["publichubs-width"] = "";
 	defaultString["publichubs-visibility"] = "";
