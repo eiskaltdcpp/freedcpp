@@ -1,0 +1,77 @@
+# -*- coding: utf-8 -*-
+
+# todo: Replace this with env.Glob('*.cpp') when Scons 0.98 is widespread enough 
+# (glob.glob() doesn't work here due to the use of a variant dir).
+dcpp_files = [
+	'AdcCommand.cpp',
+	'AdcHub.cpp',
+	'ADLSearch.cpp',
+	'BufferedSocket.cpp',
+	'BZUtils.cpp',
+	'Client.cpp',
+	'ClientManager.cpp',
+	'ConnectionManager.cpp',
+	'CryptoManager.cpp',
+	'DCPlusPlus.cpp',
+	'DirectoryListing.cpp',
+	'Download.cpp',
+	'DownloadManager.cpp',
+	'Encoder.cpp',
+	'Exception.cpp',
+	'FavoriteManager.cpp',
+	'File.cpp',
+	'FinishedItem.cpp',
+	'FinishedManager.cpp',
+	'HashBloom.cpp',
+	'HashManager.cpp',
+	'HttpConnection.cpp',
+	'LogManager.cpp',
+	'NmdcHub.cpp',
+	'QueueItem.cpp',
+	'QueueManager.cpp',
+	'ResourceManager.cpp',
+	'SearchManager.cpp',
+	'SearchResult.cpp',
+	'ServerSocket.cpp',
+	'SettingsManager.cpp',
+	'SFVReader.cpp',
+	'ShareManager.cpp',
+	'SimpleXML.cpp',
+	'Socket.cpp',
+	'SSL.cpp',
+	'SSLSocket.cpp',
+	'stdinc.cpp',
+	'StringTokenizer.cpp',
+	'Text.cpp',
+	'Thread.cpp',
+	'TigerHash.cpp',
+	'TimerManager.cpp',
+	'Transfer.cpp',
+	'Upload.cpp',
+	'UploadManager.cpp',
+	'UserConnection.cpp',
+	'User.cpp',
+	'Util.cpp',
+	'ZUtils.cpp']
+
+languages = ['ar', 'bg', 'bs', 'ca', 'cs', 'da', 'de', 'el', 'en_GB', 'es',
+             'et', 'fi', 'fr', 'gl', 'he', 'hr', 'hu', 'id', 'is', 'it',
+             'ja', 'km', 'ko', 'lt', 'lv', 'mk', 'ml', 'ms', 'nb', 'nl',
+             'pl', 'pt_BR', 'pt', 'ro', 'ru', 'sk', 'sl', 'sq', 'sr', 'sv',
+             'tr', 'uk', 'zh_CN', 'zh_TW']
+
+Import('env')
+
+# We don't want to add this CXXFLAG globally so we copy the env
+env = env.Clone()
+env.Append(CXXFLAGS = ['-DBUILDING_DCPP'])
+
+# Build the dcpp files and create the library
+libdcpp  = env.StaticLibrary(target = 'dcpp', source = dcpp_files)
+
+# build the locale files
+for file in languages:
+	env.MoBuild(target = '../../locale/libdcpp/' + file, source = 'po/' + file + '.po')
+
+Return('libdcpp')
+
