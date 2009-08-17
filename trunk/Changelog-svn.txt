@@ -1,3 +1,11 @@
+r8: 0.0.1.4
+* Добавлена поддержка звука (Esound).
+* Вкладка "Colors and Sounds" разделена на "Tabs", "Sounds" и "Colors".
+* GUI-Sound (сделан по шаблону StrongDC++).
+* Из ядра удалён "file-preview" код.
+* Мелкие правки GUI-Preview: смещение кнопок вправо с интервалом 4; удалил "hbox25", "vbox71";
+  vbox70 (интервал 2, ширина границы 4); scrolledwindow13 (ширина границы 4).
+
 r7: 0.0.1.3
 * Добавлен предпросмотр файлов (часть кода взято из StrongDC++)
   * GUI-Preview (Preferences/Downloads/Preview).

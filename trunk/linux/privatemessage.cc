@@ -23,9 +23,11 @@
 
 #include <dcpp/ClientManager.h>
 #include <dcpp/FavoriteManager.h>
+#include "settingsmanager.hh"
 #include "wulformanager.hh"
 #include "WulforUtil.hh"
 #include "search.hh"
+#include "sound.hh"
 
 using namespace std;
 using namespace dcpp;
@@ -144,6 +146,16 @@ void PrivateMessage::addMessage_gui(string message)
 			gdk_beep();
 	}
 	*/
+
+	if (WGETB("sound-pm"))
+	{
+		MainWindow *mw = WulforManager::get()->getMainWindow();
+		GdkWindowState state = gdk_window_get_state(mw->getContainer()->window);
+
+		if ((state & GDK_WINDOW_STATE_ICONIFIED) || mw->currentPage_gui() != getContainer())
+			Sound::get()->playSound(Sound::PRIVATE_MESSAGE);
+		else if (WGETB("sound-pm-open")) Sound::get()->playSound(Sound::PRIVATE_MESSAGE);
+	}
 }
 
 void PrivateMessage::addStatusMessage_gui(string message)

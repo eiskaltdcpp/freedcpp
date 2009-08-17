@@ -72,9 +72,6 @@ ShareManager::~ShareManager() {
 	for_each(lists.begin(), lists.end(), File::deleteFile);
 
 	for_each(directories.begin(), directories.end(), DeleteFunction());
-
-	if(previewApplications.size() > 0)
-		for_each(previewApplications.begin(), previewApplications.end(), DeleteFunction());
 }
 
 ShareManager::Directory::Directory(const string& aName, Directory* aParent) :
@@ -308,16 +305,6 @@ void ShareManager::load(SimpleXML& aXml) {
 		}
 		aXml.stepOut();
 	}
-
-	if (aXml.findChild("PreviewApps"))
-	{
-		aXml.stepIn();
-
-		for (;aXml.findChild("Application");)
-			addPreviewApp(aXml.getChildAttrib("Name"), aXml.getChildAttrib("Application"), aXml.getChildAttrib("Extension"));
-
-		aXml.stepOut();
-	}
 }
 
 static const string SDIRECTORY = "Directory";
@@ -419,19 +406,6 @@ void ShareManager::save(SimpleXML& aXml) {
 		aXml.addTag("Directory", i->first);
 		aXml.addChildAttrib("Virtual", i->second);
 	}
-	aXml.stepOut();
-
-	aXml.addTag("PreviewApps");
-	aXml.stepIn();
-
-	for(PreviewApplication::Iter i = previewApplications.begin(); i != previewApplications.end(); ++i)
-	{
-		aXml.addTag("Application");
-		aXml.addChildAttrib("Name", (*i)->getName());
-		aXml.addChildAttrib("Application", (*i)->getApplication());
-		aXml.addChildAttrib("Extension", (*i)->getExtension());
-	}
-
 	aXml.stepOut();
 }
 

@@ -45,6 +45,8 @@ WulforSettingsManager::WulforSettingsManager():
 	defaultInt["use-stock-icons"] = 0;
 	defaultInt["tab-position"] = 0;
 	defaultInt["toolbar-style"] = 5;
+	defaultInt["sound-pm-open"] = 0;
+	defaultInt["sound-pm"] = 1;
 	defaultString["downloadqueue-order"] = "";
 	defaultString["downloadqueue-width"] = "";
 	defaultString["downloadqueue-visibility"] = "";
@@ -70,6 +72,12 @@ WulforSettingsManager::WulforSettingsManager():
 	defaultString["sharebrowser-width"] = "";
 	defaultString["sharebrowser-visibility"] = "";
 	defaultString["default-charset"] = WulforUtil::ENCODING_SYSTEM_DEFAULT;
+	defaultString["sound-download-begins"] = "";
+	defaultString["sound-download-finished"] = "";
+	defaultString["sound-upload-finished"] = "";
+	defaultString["sound-private-message"] = "";
+	defaultString["sound-hub-connect"] = "";
+	defaultString["sound-hub-disconnect"] = "";
 
 	load();
 }
@@ -77,6 +85,8 @@ WulforSettingsManager::WulforSettingsManager():
 WulforSettingsManager::~WulforSettingsManager()
 {
 	save();
+
+	for_each(previewApps.begin(), previewApps.end(), DeleteFunction());
 }
 
 int WulforSettingsManager::getInt(const string &key)
@@ -99,10 +109,20 @@ string WulforSettingsManager::getString(const string &key)
 		return stringMap[key];
 }
 
+bool WulforSettingsManager::getBool(const string &key)
+{
+	return (getInt(key) != 0);
+}
+
 void WulforSettingsManager::set(const string &key, int value)
 {
 	dcassert(defaultInt.find(key) != defaultInt.end());
 	intMap[key] = value;
+}
+
+void WulforSettingsManager::set(const string &key, bool value)
+{
+	set(key, (int)value);
 }
 
 void WulforSettingsManager::set(const string &key, const string &value)
@@ -142,6 +162,16 @@ void WulforSettingsManager::load()
 
 			xml.stepOut();
 		}
+
+		if (xml.findChild("PreviewApps"))
+		{
+			xml.stepIn();
+
+			for (;xml.findChild("Application");)
+				addPreviewApp(xml.getChildAttrib("Name"), xml.getChildAttrib("Application"), xml.getChildAttrib("Extension"));
+
+			xml.stepOut();
+		}
 	}
 	catch (const Exception&)
 	{
@@ -172,6 +202,19 @@ void WulforSettingsManager::save()
 
 	xml.stepOut();
 
+	xml.addTag("PreviewApps");
+	xml.stepIn();
+
+	for(PreviewApp::Iter i = previewApps.begin(); i != previewApps.end(); ++i)
+	{
+		xml.addTag("Application");
+		xml.addChildAttrib("Name", (*i)->name);
+		xml.addChildAttrib("Application", (*i)->app);
+		xml.addChildAttrib("Extension", (*i)->ext);
+	}
+
+	xml.stepOut();
+
 	try
 	{
 		File out(configFile + ".tmp", File::WRITE, File::CREATE | File::TRUNCATE);
@@ -186,4 +229,58 @@ void WulforSettingsManager::save()
 	catch (const FileException &)
 	{
 	}
+}
+
+PreviewApp* WulforSettingsManager::addPreviewApp(string name, string app, string ext)
+{
+	PreviewApp* pa = new PreviewApp(name, app, ext);
+	previewApps.push_back(pa);
+
+	return pa;
+}
+
+bool WulforSettingsManager::removePreviewApp(string &name)
+{
+	PreviewApp::size index;
+
+	if (getPreviewApp(name, index))
+	{
+		delete previewApps[index];
+		previewApps.erase(previewApps.begin() + index);
+
+		return true;
+	}
+
+	return false;
+}
+
+PreviewApp* WulforSettingsManager::applyPreviewApp(string &oldName, string &newName, string &app, string &ext)
+{
+	PreviewApp::size index;
+	PreviewApp *pa = NULL;
+
+	if(getPreviewApp(oldName, index))
+	{
+		delete previewApps[index];
+		pa = new PreviewApp(newName, app, ext);
+		previewApps[index] = pa;
+	}
+
+	return pa;
+}
+
+bool WulforSettingsManager::getPreviewApp(string &name)
+{
+	PreviewApp::size index;
+	return getPreviewApp(name, index);
+}
+
+bool WulforSettingsManager::getPreviewApp(string &name, PreviewApp::size &index)
+{
+	index = 0;
+
+	for (PreviewApp::Iter item = previewApps.begin(); item != previewApps.end(); ++item, ++index)
+		if((*item)->name == name) return true;
+
+	return false;
 }

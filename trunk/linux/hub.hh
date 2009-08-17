@@ -28,6 +28,7 @@
 
 #include "bookentry.hh"
 #include "treeview.hh"
+#include "sound.hh"
 
 class UserCommandMenu;
 
@@ -56,10 +57,11 @@ class Hub:
 		void clearNickList_gui();
 		void popupNickMenu_gui();
 		void getPassword_gui();
-		void addMessage_gui(std::string message);
+		void addMessage_gui(std::string message, Sound::TypeSound sound);
 		void applyTags_gui(const std::string &line);
-		void addStatusMessage_gui(std::string message);
+		void addStatusMessage_gui(std::string message, Sound::TypeSound sound);
 		void updateCursor_gui(GtkWidget *widget);
+		void playSound_gui(Sound::TypeSound sound);
 
 		// GUI callbacks
 		static gboolean onFocusIn_gui(GtkWidget *widget, GdkEventFocus *event, gpointer data);

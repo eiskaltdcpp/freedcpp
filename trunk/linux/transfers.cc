@@ -29,6 +29,7 @@
 #include "settingsmanager.hh"
 #include "func.hh"
 #include "previewmenu.hh"
+#include "UserCommandMenu.hh"
 #include <dcpp/Download.h>
 #include <dcpp/Upload.h>
 #include <dcpp/ClientManager.h>
@@ -615,7 +616,7 @@ void Transfers::updateParent_gui(GtkTreeIter* iter)
 		-1);
 }
 
-void Transfers::updateTransfer_gui(StringMap params, bool download)
+void Transfers::updateTransfer_gui(StringMap params, bool download, Sound::TypeSound sound)
 {
 	dcassert(!params["CID"].empty());
 
@@ -648,6 +649,8 @@ void Transfers::updateTransfer_gui(StringMap params, bool download)
 
 	if (gtk_tree_model_iter_parent(GTK_TREE_MODEL(transferStore), &parent, &iter))
 		updateParent_gui(&parent);
+
+	playSound_gui(sound);
 }
 
 void Transfers::updateFilePosition_gui(const string cid, int64_t filePosition)
@@ -755,7 +758,7 @@ void Transfers::initTransfer_gui(StringMap params)
 	}
 }
 
-void Transfers::finishParent_gui(const string target, const string status)
+void Transfers::finishParent_gui(const string target, const string status, Sound::TypeSound sound)
 {
 	GtkTreeIter iter;
 	if (findParent_gui(target, &iter))
@@ -772,6 +775,14 @@ void Transfers::finishParent_gui(const string target, const string status)
 				-1);
 		}
 	}
+
+	playSound_gui(sound);
+}
+
+void Transfers::playSound_gui(Sound::TypeSound sound)
+{
+	if (sound != Sound::NONE)
+		Sound::get()->playSound(sound);
 }
 
 void Transfers::getFileList_client(string cid)
@@ -925,9 +936,9 @@ void Transfers::on(DownloadManagerListener::Starting, Download* dl) throw()
 	params["Failed"] = "0";
 	params["tmpTarget"] = dl->getTempTarget();
 
-	typedef Func2<Transfers, StringMap, bool> F2;
-	F2* f2 = new F2(this, &Transfers::updateTransfer_gui, params, TRUE);
-	WulforManager::get()->dispatchGuiFunc(f2);
+	typedef Func3<Transfers, StringMap, bool, Sound::TypeSound> F3;
+	F3* f3 = new F3(this, &Transfers::updateTransfer_gui, params, TRUE, Sound::NONE);
+	WulforManager::get()->dispatchGuiFunc(f3);
 }
 
 void Transfers::on(DownloadManagerListener::Tick, const DownloadList& dls) throw()
@@ -957,9 +968,9 @@ void Transfers::on(DownloadManagerListener::Tick, const DownloadList& dls) throw
 		<< "%) in " << Util::formatSeconds((GET_TICK() - dl->getStart()) / 1000);
 		params["Status"] = stream.str();
 
-		typedef Func2<Transfers, StringMap, bool> F2;
-		F2* f2 = new F2(this, &Transfers::updateTransfer_gui, params, TRUE);
-		WulforManager::get()->dispatchGuiFunc(f2);
+		typedef Func3<Transfers, StringMap, bool, Sound::TypeSound> F3;
+		F3* f3 = new F3(this, &Transfers::updateTransfer_gui, params, TRUE, Sound::NONE);
+		WulforManager::get()->dispatchGuiFunc(f3);
 	}	
 }
 
@@ -974,9 +985,9 @@ void Transfers::on(DownloadManagerListener::Complete, Download* dl) throw()
 
 	int64_t pos = QueueManager::getInstance()->getPos(dl->getPath()) + dl->getPos();
 
-	typedef Func2<Transfers, StringMap, bool> F2;
-	F2* f2 = new F2(this, &Transfers::updateTransfer_gui, params, TRUE);
-	WulforManager::get()->dispatchGuiFunc(f2);
+	typedef Func3<Transfers, StringMap, bool, Sound::TypeSound> F3;
+	F3* f3 = new F3(this, &Transfers::updateTransfer_gui, params, TRUE, Sound::NONE);
+	WulforManager::get()->dispatchGuiFunc(f3);
 
 	typedef Func2<Transfers, const string, int64_t> F2b;
 	F2b* f2b = new F2b(this, &Transfers::updateFilePosition_gui, params["CID"], pos);
@@ -995,9 +1006,9 @@ void Transfers::on(DownloadManagerListener::Failed, Download* dl, const std::str
 
 	int64_t pos = QueueManager::getInstance()->getPos(dl->getPath()) + dl->getPos();
 
-	typedef Func2<Transfers, StringMap, bool> F2;
-	F2* f2 = new F2(this, &Transfers::updateTransfer_gui, params, TRUE);
-	WulforManager::get()->dispatchGuiFunc(f2);
+	typedef Func3<Transfers, StringMap, bool, Sound::TypeSound> F3;
+	F3* f3 = new F3(this, &Transfers::updateTransfer_gui, params, TRUE, Sound::NONE);
+	WulforManager::get()->dispatchGuiFunc(f3);
 
 	typedef Func2<Transfers, const string, int64_t> F2b;
 	F2b* f2b = new F2b(this, &Transfers::updateFilePosition_gui, params["CID"], pos);
@@ -1021,9 +1032,9 @@ void Transfers::on(ConnectionManagerListener::Connected, ConnectionQueueItem* cq
 	getParams_client(params, cqi);
 	params["Status"] = _("Connected");
 
-	typedef Func2<Transfers, StringMap, bool> F2;
-	F2* f2 = new F2(this, &Transfers::updateTransfer_gui, params, cqi->getDownload());
-	WulforManager::get()->dispatchGuiFunc(f2);
+	typedef Func3<Transfers, StringMap, bool, Sound::TypeSound> F3;
+	F3* f3 = new F3(this, &Transfers::updateTransfer_gui, params, cqi->getDownload(), Sound::NONE);
+	WulforManager::get()->dispatchGuiFunc(f3);
 }
 
 void Transfers::on(ConnectionManagerListener::Removed, ConnectionQueueItem* cqi) throw()
@@ -1043,9 +1054,9 @@ void Transfers::on(ConnectionManagerListener::Failed, ConnectionQueueItem* cqi, 
 	params["Speed"] = "-1";
 	params["Time Left"] = "";
 
-	typedef Func2<Transfers, StringMap, bool> F2;
-	F2* f2 = new F2(this, &Transfers::updateTransfer_gui, params, cqi->getDownload());
-	WulforManager::get()->dispatchGuiFunc(f2);
+	typedef Func3<Transfers, StringMap, bool, Sound::TypeSound> F3;
+	F3* f3 = new F3(this, &Transfers::updateTransfer_gui, params, cqi->getDownload(), Sound::NONE);
+	WulforManager::get()->dispatchGuiFunc(f3);
 }
 
 void Transfers::on(ConnectionManagerListener::StatusChanged, ConnectionQueueItem* cqi) throw()
@@ -1059,27 +1070,27 @@ void Transfers::on(ConnectionManagerListener::StatusChanged, ConnectionQueueItem
 		params["Status"] = _("Waiting to retry");
 	params["Sort Order"] = "w" + params["User"];
 
-	typedef Func2<Transfers, StringMap, bool> F2;
-	F2* f2 = new F2(this, &Transfers::updateTransfer_gui, params, cqi->getDownload());
-	WulforManager::get()->dispatchGuiFunc(f2);
+	typedef Func3<Transfers, StringMap, bool, Sound::TypeSound> F3;
+	F3* f3 = new F3(this, &Transfers::updateTransfer_gui, params, cqi->getDownload(), Sound::NONE);
+	WulforManager::get()->dispatchGuiFunc(f3);
 }
 
 void Transfers::on(QueueManagerListener::Finished, QueueItem* qi, const std::string& dir, int64_t size) throw()
 {
 	string target = qi->getTarget();
 
-	typedef Func2<Transfers, const string, const string> F2;
-	F2* f2 = new F2(this, &Transfers::finishParent_gui, target, _("Download finished"));
-	WulforManager::get()->dispatchGuiFunc(f2);
+	typedef Func3<Transfers, const string, const string, Sound::TypeSound> F3;
+	F3* f3 = new F3(this, &Transfers::finishParent_gui, target, _("Download finished"), Sound::DOWNLOAD_FINISHED);
+	WulforManager::get()->dispatchGuiFunc(f3);
 }
 
 void Transfers::on(QueueManagerListener::Removed, QueueItem* qi) throw()
 {
 	string target = qi->getTarget();
 
-	typedef Func2<Transfers, const string, const string> F2;
-	F2* f2 = new F2(this, &Transfers::finishParent_gui, target, _("Download removed"));
-	WulforManager::get()->dispatchGuiFunc(f2);
+	typedef Func3<Transfers, const string, const string, Sound::TypeSound> F3;
+	F3* f3 = new F3(this, &Transfers::finishParent_gui, target, _("Download removed"), Sound::NONE);
+	WulforManager::get()->dispatchGuiFunc(f3);
 }
 
 void Transfers::on(UploadManagerListener::Starting, Upload* ul) throw()
@@ -1092,9 +1103,9 @@ void Transfers::on(UploadManagerListener::Starting, Upload* ul) throw()
 	params["Failed"] = "0";
 	params["tmpTarget"] = "none"; //fix open 'tmp' file
 
-	typedef Func2<Transfers, StringMap, bool> F2;
-	F2* f2 = new F2(this, &Transfers::updateTransfer_gui, params, FALSE);
-	WulforManager::get()->dispatchGuiFunc(f2);
+	typedef Func3<Transfers, StringMap, bool, Sound::TypeSound> F3;
+	F3* f3 = new F3(this, &Transfers::updateTransfer_gui, params, FALSE, Sound::NONE);
+	WulforManager::get()->dispatchGuiFunc(f3);
 }
 
 void Transfers::on(UploadManagerListener::Tick, const UploadList& uls) throw()
@@ -1122,9 +1133,9 @@ void Transfers::on(UploadManagerListener::Tick, const UploadList& uls) throw()
 		<< "%) in " << Util::formatSeconds((GET_TICK() - ul->getStart()) / 1000);
 		params["Status"] = stream.str();
 
-		typedef Func2<Transfers, StringMap, bool> F2;
-		F2* f2 = new F2(this, &Transfers::updateTransfer_gui, params, FALSE);
-		WulforManager::get()->dispatchGuiFunc(f2);
+		typedef Func3<Transfers, StringMap, bool, Sound::TypeSound> F3;
+		F3* f3 = new F3(this, &Transfers::updateTransfer_gui, params, FALSE, Sound::NONE);
+		WulforManager::get()->dispatchGuiFunc(f3);
 	}	
 }
 
@@ -1137,9 +1148,9 @@ void Transfers::on(UploadManagerListener::Complete, Upload* ul) throw()
 	params["Sort Order"] = "w" + params["User"];
 	params["Speed"] = "-1";
 
-	typedef Func2<Transfers, StringMap, bool> F2;
-	F2* f2 = new F2(this, &Transfers::updateTransfer_gui, params, FALSE);
-	WulforManager::get()->dispatchGuiFunc(f2);
+	typedef Func3<Transfers, StringMap, bool, Sound::TypeSound> F3;
+	F3* f3 = new F3(this, &Transfers::updateTransfer_gui, params, FALSE, Sound::UPLOAD_FINISHED);
+	WulforManager::get()->dispatchGuiFunc(f3);
 }
 
 void Transfers::on(UploadManagerListener::Failed, Upload* ul, const std::string& reason) throw()
@@ -1152,8 +1163,8 @@ void Transfers::on(UploadManagerListener::Failed, Upload* ul, const std::string&
 	params["Speed"] = "-1";
 	params["Time Left"] = "";
 
-	typedef Func2<Transfers, StringMap, bool> F2;
-	F2* f2 = new F2(this, &Transfers::updateTransfer_gui, params, FALSE);
-	WulforManager::get()->dispatchGuiFunc(f2);
+	typedef Func3<Transfers, StringMap, bool, Sound::TypeSound> F3;
+	F3* f3 = new F3(this, &Transfers::updateTransfer_gui, params, FALSE, Sound::NONE);
+	WulforManager::get()->dispatchGuiFunc(f3);
 }
 
