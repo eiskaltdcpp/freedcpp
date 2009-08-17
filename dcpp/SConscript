@@ -54,6 +54,12 @@ dcpp_files = [
 	'Util.cpp',
 	'ZUtils.cpp']
 
+languages = ['ar', 'bg', 'bs', 'ca', 'cs', 'da', 'de', 'el', 'en_GB', 'es',
+             'et', 'fi', 'fr', 'gl', 'he', 'hr', 'hu', 'id', 'is', 'it',
+             'ja', 'km', 'ko', 'lt', 'lv', 'mk', 'ml', 'ms', 'nb', 'nl',
+             'pl', 'pt_BR', 'pt', 'ro', 'ru', 'sk', 'sl', 'sq', 'sr', 'sv',
+             'tr', 'uk', 'zh_CN', 'zh_TW']
+
 Import('env')
 
 # We don't want to add this CXXFLAG globally so we copy the env
@@ -62,6 +68,10 @@ env.Append(CXXFLAGS = ['-DBUILDING_DCPP'])
 
 # Build the dcpp files and create the library
 libdcpp  = env.StaticLibrary(target = 'dcpp', source = dcpp_files)
+
+# build the locale files
+for file in languages:
+	env.MoBuild(target = '../../locale/libdcpp/' + file, source = 'po/' + file + '.po')
 
 Return('libdcpp')
 

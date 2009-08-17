@@ -30,7 +30,7 @@
 using namespace std;
 
 WulforSettingsManager::WulforSettingsManager():
-	configFile(Util::getConfigPath() + "LinuxDC++.xml")
+	configFile(Util::getConfigPath() + "FreeDC++.xml")
 {
 	defaultInt["main-window-maximized"] = 0;
 	defaultInt["main-window-size-x"] = 875;

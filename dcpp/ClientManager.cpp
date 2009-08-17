@@ -183,13 +183,14 @@ string ClientManager::findHubEncoding(const string& aUrl) const {
 
 UserPtr ClientManager::findLegacyUser(const string& aNick) const throw() {
 	Lock l(cs);
-	dcassert(aNick.size() > 0);
 
-	for(OnlineMap::const_iterator i = onlineUsers.begin(); i != onlineUsers.end(); ++i) {
-		const OnlineUser* ou = i->second;
-		if(ou->getUser()->isSet(User::NMDC) && Util::stricmp(ou->getIdentity().getNick(), aNick) == 0)
+	if (aNick.size() > 0)
+		for(OnlineMap::const_iterator i = onlineUsers.begin(); i != onlineUsers.end(); ++i)
+		{
+			const OnlineUser* ou = i->second;
+			if(ou->getUser()->isSet(User::NMDC) && Util::stricmp(ou->getIdentity().getNick(), aNick) == 0)
 			return ou->getUser();
-	}
+		}
 	return UserPtr();
 }
 

@@ -7,8 +7,10 @@ import glob
 
 EnsureSConsVersion(0, 96)
 
-APP_NAME = 'linuxdcpp'
+APP_NAME = 'freedcpp'
+LIB_NAME = 'libdcpp'
 BUILD_PATH = '#/build/'
+BUILD_LOCALE_PATH = 'build/locale/'
 
 # ----------------------------------------------------------------------
 # Function definitions
@@ -219,9 +221,12 @@ if not 'install' in COMMAND_LINE_TARGETS:
 	env.ParseConfig('pkg-config --libs libglade-2.0')
 	env.ParseConfig('pkg-config --libs gthread-2.0')
 
-	env.Append(LIBPATH = BUILD_PATH + 'dcpp')
-	env.Prepend(LIBS = 'dcpp')
+	env.Append(LIBPATH = BUILD_PATH + LIB_NAME)
+	env.Prepend(LIBS = LIB_NAME)
 
+	mo_args = ['msgfmt', '-c', '-o', '$TARGET', '$SOURCE']
+	mo_bld = Builder(action = Action([mo_args], 'Create $TARGET from $SOURCE'))
+	env.Append(BUILDERS = {'MoBuild' : mo_bld})
 
 # ----------------------------------------------------------------------
 # Build
@@ -233,15 +238,13 @@ if not 'install' in COMMAND_LINE_TARGETS:
 	# 	(variant_dir doesn't seem to work with 0.97 and everything is built in ./dcpp/ and ./linux/
 	#	 -> libdcpp.a is not found when linking, as it is in ./dcpp/libdcpp.a instead of build/dcpp..)
 	# Build the dcpp library
-	libdcpp = SConscript(dirs = 'dcpp', build_dir = BUILD_PATH + 'dcpp', duplicate = 0)
+	libdcpp = SConscript(dirs = 'dcpp', build_dir = BUILD_PATH + LIB_NAME, duplicate = 0)
 
 	# Build the GUI
-	obj_files = SConscript(dirs = 'linux', build_dir = BUILD_PATH + 'gui', duplicate = 0)
+	obj_files = SConscript(dirs = 'linux', build_dir = BUILD_PATH + APP_NAME, duplicate = 0)
 
 	# Create the executable
 	env.Program(target = APP_NAME, source = [libdcpp, obj_files])
-	Default(APP_NAME)
-
 
 # ----------------------------------------------------------------------
 # Install
@@ -250,10 +253,40 @@ if not 'install' in COMMAND_LINE_TARGETS:
 else:
 
 	glade_files = glob.glob('glade/*.glade')
-	pixmap_files =	glob.glob('pixmaps/*.png')
+	pixmap_files = glob.glob('pixmaps/*.png')
 	text_files = glob.glob('*.txt')
 
+	mo_files = []
+	locale = []
+
+	# freedcpp gui
+	path = BUILD_LOCALE_PATH + APP_NAME + '/'
+	languages = os.listdir(path)
+
+	for lang in languages:
+		locale.append(env['FAKE_ROOT'] + env['PREFIX'] + '/share/locale/' + lang + '/LC_MESSAGES/' + APP_NAME + '.mo')
+		mo_files.append(path + lang)
+
+	# dcpp library
+	path = BUILD_LOCALE_PATH + LIB_NAME + '/'
+	languages = os.listdir(path)
+	
+	for lang in languages:
+		locale.append(env['FAKE_ROOT'] + env['PREFIX'] + '/share/locale/' + lang + '/LC_MESSAGES/' + LIB_NAME + '.mo')
+		mo_files.append(path + lang)
+
+	# install glade files
 	env.Alias('install', env.Install(dir = env['FAKE_ROOT'] + env['PREFIX'] + '/share/' + APP_NAME + '/glade', source = glade_files))
+
+	# install pixmap files
 	env.Alias('install', env.Install(dir = env['FAKE_ROOT'] + env['PREFIX'] + '/share/' + APP_NAME + '/pixmaps', source = pixmap_files))
+
+	# install text files
 	env.Alias('install', env.Install(dir = env['FAKE_ROOT'] + env['PREFIX'] + '/share/doc/' + APP_NAME, source = text_files))
+	
+	# install app file
 	env.Alias('install', env.Install(dir = env['FAKE_ROOT'] + env['PREFIX'] + '/bin', source = APP_NAME))
+
+	# install locale
+	env.Alias('install', env.InstallAs(target = locale, source = mo_files))
+
