@@ -42,6 +42,8 @@ class Settings:
 		void addOption_gui(GtkListStore *store, const std::string &name, dcpp::SettingsManager::IntSetting setting);
 		void addOption_gui(GtkListStore *store, const std::string &name, const std::string &key1, const std::string &key2);
 		void addOption_gui(GtkListStore *store, const std::string &name, const std::string &key1);
+		void createOptionsView_gui(TreeView &treeView, GtkListStore *&store, const std::string &widgetName);
+		void saveOptionsView_gui(TreeView &treeView, dcpp::SettingsManager *sm);
 		void initPersonal_gui();
 		void initConnection_gui();
 		void initDownloads_gui();
@@ -57,6 +59,7 @@ class Settings:
 		void showErrorDialog(const std::string &error);
 
 		// GUI callbacks
+		static void onOptionsViewToggled_gui(GtkCellRendererToggle *cell, gchar *path, gpointer data);
 		static void onInDirect_gui(GtkToggleButton *button, gpointer data);
 		///@todo Uncomment when implemented
 		//static void onInFW_UPnP_gui(GtkToggleButton *button, gpointer data);
@@ -75,27 +78,20 @@ class Settings:
 		static void onAddFavorite_gui(GtkWidget *widget, gpointer data);
 		static void onRemoveFavorite_gui(GtkWidget *widget, gpointer data);
 		static gboolean onFavoriteButtonReleased_gui(GtkWidget *widget, GdkEventButton *event, gpointer data);
-		static void onQueueToggledClicked_gui(GtkCellRendererToggle *cell, gchar *path, gpointer data);
 		static void onAddShare_gui(GtkWidget *widget, gpointer data);
 		static void onRemoveShare_gui(GtkWidget *widget, gpointer data);
 		static gboolean onShareButtonReleased_gui(GtkWidget *widget, GdkEventButton *event, gpointer data);
 		static gboolean onShareHiddenPressed_gui(GtkToggleButton *button, gpointer data);
-		static void onAppearanceToggledClicked_gui(GtkCellRendererToggle *cell, gchar *path, gpointer data);
-		static void onTabToggledClicked_gui(GtkCellRendererToggle *cell, gchar *path, gpointer data);
 		///@todo Uncomment when implemented
 		//static void onWinColorClicked_gui(GtkCellRendererToggle *cell, gchar *path, gpointer data);
 		//static void onDownColorClicked_gui(GtkCellRendererToggle *cell, gchar *path, gpointer data);
 		//static void onUpColorClicked_gui(GtkCellRendererToggle *cell, gchar *path, gpointer data);
 		//static void onTextStyleClicked_gui(GtkCellRendererToggle *cell, gchar *path, gpointer data);
-		static void onWindowView1ToggledClicked_gui(GtkCellRendererToggle *cell, gchar *path, gpointer data);
-		static void onWindowView2ToggledClicked_gui(GtkCellRendererToggle *cell, gchar *path, gpointer data);
-		static void onWindowView3ToggledClicked_gui(GtkCellRendererToggle *cell, gchar *path, gpointer data);
 		static void onLogBrowseClicked_gui(GtkWidget *widget, gpointer data);
 		static void onLogMainClicked_gui(GtkToggleButton *button, gpointer data);
 		static void onLogPrivateClicked_gui(GtkToggleButton *button, gpointer data);
 		static void onLogDownloadClicked_gui(GtkToggleButton *button, gpointer data);
 		static void onLogUploadClicked_gui(GtkToggleButton *button, gpointer data);
-		static void onAdvancedToggledClicked_gui(GtkCellRendererToggle *cell, gchar *path, gpointer data);
 		static void onUserCommandAdd_gui(GtkWidget *widget, gpointer data);
 		static void onUserCommandEdit_gui(GtkWidget *widget, gpointer data);
 		static void onUserCommandMoveUp_gui(GtkWidget *widget, gpointer data);
@@ -109,7 +105,6 @@ class Settings:
 		static void onCertificatesPrivateBrowseClicked_gui(GtkWidget *widget, gpointer data);
 		static void onCertificatesFileBrowseClicked_gui(GtkWidget *widget, gpointer data);
 		static void onCertificatesPathBrowseClicked_gui(GtkWidget *widget, gpointer data);
-		static void onCertificatesToggledClicked_gui(GtkCellRendererToggle *cell, gchar *path, gpointer data);
 		static void onGenerateCertificatesClicked_gui(GtkWidget *widget, gpointer data);
 		static void onPreviewAdd_gui(GtkWidget *widget, gpointer data);
 		static void onPreviewRemove_gui(GtkWidget *widget, gpointer data);

@@ -70,11 +70,7 @@ Settings::~Settings()
 void Settings::saveSettings_client()
 {
 	SettingsManager *sm = SettingsManager::getInstance();
-	GtkTreeIter iter;
-	GtkTreeModel *m;
 	string path;
-	gboolean valid, toggled;
-	SettingsManager::IntSetting setting;
 
 	{ // Personal
 		sm->set(SettingsManager::NICK, gtk_entry_get_text(GTK_ENTRY(getWidget("nickEntry"))));
@@ -159,16 +155,7 @@ void Settings::saveSettings_client()
 			sm->set(SettingsManager::AUTODROP_FILESIZE, Util::toString(gtk_spin_button_get_value(GTK_SPIN_BUTTON(getWidget("dropSizeSpinButton")))));
 
 			// Other queue options
-			m = GTK_TREE_MODEL(queueStore);
-			valid = gtk_tree_model_get_iter_first(m, &iter);
-
-			while (valid)
-			{
-				setting = (SettingsManager::IntSetting)queueView.getValue<gint>(&iter, "Setting");
-				toggled = queueView.getValue<gboolean>(&iter, "Use");
-				sm->set(setting, toggled);
-				valid = gtk_tree_model_iter_next(m, &iter);
-			}
+			saveOptionsView_gui(queueView, sm);
 		}
 	}
 
@@ -179,16 +166,7 @@ void Settings::saveSettings_client()
 	}
 
 	{ // Appearance
-		m = GTK_TREE_MODEL(appearanceStore);
-		valid = gtk_tree_model_get_iter_first(m, &iter);
-
-		while (valid)
-		{
-			setting = (SettingsManager::IntSetting)appearanceView.getValue<gint>(&iter, "Setting");
-			toggled = appearanceView.getValue<gboolean>(&iter, "Use");
-			sm->set(setting, toggled);
-			valid = gtk_tree_model_iter_next(m, &iter);
-		}
+		saveOptionsView_gui(appearanceView, sm);
 
 		WSET("tab-position", gtk_combo_box_get_active(GTK_COMBO_BOX(getWidget("tabPositionComboBox"))));
 		WSET("toolbar-style", gtk_combo_box_get_active(GTK_COMBO_BOX(getWidget("toolbarStyleComboBox"))));
@@ -197,21 +175,13 @@ void Settings::saveSettings_client()
 		sm->set(SettingsManager::TIME_STAMPS_FORMAT, string(gtk_entry_get_text(GTK_ENTRY(getWidget("timestampEntry")))));
 
 		{ // Tabs
-			m = GTK_TREE_MODEL(tabStore);
-			valid = gtk_tree_model_get_iter_first(m, &iter);
-
-			while (valid)
-			{
-				setting = (SettingsManager::IntSetting)tabView.getValue<gint>(&iter, "Setting");
-				toggled = tabView.getValue<gboolean>(&iter, "Use");
-				sm->set(setting, toggled);
-				valid = gtk_tree_model_iter_next(m, &iter);
-			}
+			saveOptionsView_gui(tabView, sm);
 		}
 
-		{ // Sound
-			m = GTK_TREE_MODEL(soundStore);
-			valid = gtk_tree_model_get_iter_first(m, &iter);
+		{ // Sounds
+			GtkTreeIter iter;
+			GtkTreeModel *m = GTK_TREE_MODEL(soundStore);
+			gboolean valid = gtk_tree_model_get_iter_first(m, &iter);
 			string sample, target;
 
 			while (valid)
@@ -230,40 +200,13 @@ void Settings::saveSettings_client()
 
 		{ // Window
 			// Auto-open on startup
-			m = GTK_TREE_MODEL(windowStore1);
-			valid = gtk_tree_model_get_iter_first(m, &iter);
-
-			while (valid)
-			{
-				setting = (SettingsManager::IntSetting)windowView1.getValue<gint>(&iter, "Setting");
-				toggled = windowView1.getValue<gboolean>(&iter, "Use");
-				sm->set(setting, toggled);
-				valid = gtk_tree_model_iter_next(m, &iter);
-			}
+			saveOptionsView_gui(windowView1, sm);
 
 			// Window options
-			m = GTK_TREE_MODEL(windowStore2);
-			valid = gtk_tree_model_get_iter_first(m, &iter);
-
-			while (valid)
-			{
-				setting = (SettingsManager::IntSetting)windowView2.getValue<gint>(&iter, "Setting");
-				toggled = windowView2.getValue<gboolean>(&iter, "Use");
-				sm->set(setting, toggled);
-				valid = gtk_tree_model_iter_next(m, &iter);
-			}
+			saveOptionsView_gui(windowView2, sm);
 
 			// Confirm dialog options
-			m = GTK_TREE_MODEL(windowStore3);
-			valid = gtk_tree_model_get_iter_first(m, &iter);
-
-			while (valid)
-			{
-				setting = (SettingsManager::IntSetting)windowView3.getValue<gint>(&iter, "Setting");
-				toggled = windowView3.getValue<gboolean>(&iter, "Use");
-				sm->set(setting, toggled);
-				valid = gtk_tree_model_iter_next(m, &iter);
-			}
+			saveOptionsView_gui(windowView3, sm);
 		}
 	}
 
@@ -286,16 +229,7 @@ void Settings::saveSettings_client()
 	}
 
 	{ // Advanced
-		m = GTK_TREE_MODEL(advancedStore);
-		valid = gtk_tree_model_get_iter_first(m, &iter);
-
-		while (valid)
-		{
-			setting = (SettingsManager::IntSetting)advancedView.getValue<gint>(&iter, "Setting");
-			toggled = advancedView.getValue<gboolean>(&iter, "Use");
-			sm->set(setting, toggled);
-			valid = gtk_tree_model_iter_next(m, &iter);
-		}
+		saveOptionsView_gui(advancedView, sm);
 
 		// Expert
 		sm->set(SettingsManager::MAX_HASH_SPEED, Util::toString(gtk_spin_button_get_value(GTK_SPIN_BUTTON(getWidget("hashSpeedSpinButton")))));
@@ -317,17 +251,7 @@ void Settings::saveSettings_client()
 		sm->set(SettingsManager::TLS_CERTIFICATE_FILE, string(gtk_entry_get_text(GTK_ENTRY(getWidget("certificateFileEntry")))));
 		sm->set(SettingsManager::TLS_TRUSTED_CERTIFICATES_PATH, path);
 
-		m = GTK_TREE_MODEL(certificatesStore);
-		valid = gtk_tree_model_get_iter_first(m, &iter);
-
-		while (valid)
-		{
-			setting = (SettingsManager::IntSetting)certificatesView.getValue<gint>(&iter, "Setting");
-			toggled = certificatesView.getValue<gboolean>(&iter, "Use");
-			sm->set(setting, toggled);
-			valid = gtk_tree_model_iter_next(m, &iter);
-		}
-
+		saveOptionsView_gui(certificatesView, sm);
 	}
 
 	sm->save();
@@ -340,6 +264,8 @@ void Settings::addOption_gui(GtkListStore *store, const string &name, SettingsMa
 	gtk_list_store_set(store, &iter, 0, SettingsManager::getInstance()->get(setting), 1, name.c_str(), 2, setting, -1);
 }
 
+/* Creates a generic sounds options GtkTreeView */
+
 void Settings::addOption_gui(GtkListStore *store, const string &name, const string &key1)
 {
 	GtkTreeIter iter;
@@ -351,6 +277,8 @@ void Settings::addOption_gui(GtkListStore *store, const string &name, const stri
 		-1);
 }
 
+/* Creates a generic colors and fonts options GtkTreeView */
+/*
 void Settings::addOption_gui(GtkListStore *store, const string &name, const string &key1, const string &key2)
 {
 	GtkTreeIter iter;
@@ -361,6 +289,46 @@ void Settings::addOption_gui(GtkListStore *store, const string &name, const stri
 		2, key1.c_str(),
 		3, key2.c_str(),
 		-1);
+}
+*/
+/* Creates a generic checkbox-based options GtkTreeView */
+
+void Settings::createOptionsView_gui(TreeView &treeView, GtkListStore *&store, const string &widgetName)
+{
+	// Create the view
+	treeView.setView(GTK_TREE_VIEW(getWidget(widgetName.c_str())));
+	treeView.insertColumn("Use", G_TYPE_BOOLEAN, TreeView::BOOL, -1);
+	treeView.insertColumn("Name", G_TYPE_STRING, TreeView::STRING, -1);
+	treeView.insertHiddenColumn("Setting", G_TYPE_INT);
+	treeView.finalize();
+
+	// Create the store
+	store = gtk_list_store_newv(treeView.getColCount(), treeView.getGTypes());
+	gtk_tree_view_set_model(treeView.get(), GTK_TREE_MODEL(store));
+	g_object_unref(store);
+	gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(store), treeView.col("Name"), GTK_SORT_ASCENDING);
+
+	// Connect the signal handlers
+	GList *list = gtk_tree_view_column_get_cell_renderers(gtk_tree_view_get_column(treeView.get(), treeView.col("Use")));
+	GObject *renderer = (GObject *)g_list_nth_data(list, 0);
+	g_signal_connect(renderer, "toggled", G_CALLBACK(onOptionsViewToggled_gui), (gpointer)store);
+	g_list_free(list);
+}
+
+void Settings::saveOptionsView_gui(TreeView &treeView, SettingsManager *sm)
+{
+	GtkTreeIter iter;
+	GtkTreeModel *m = gtk_tree_view_get_model(treeView.get());
+	gboolean valid = gtk_tree_model_get_iter_first(m, &iter);
+
+	while (valid)
+	{
+		gboolean toggled = treeView.getValue<gboolean>(&iter, "Use");
+		gint setting = treeView.getValue<gint>(&iter, "Setting");
+
+		sm->set((SettingsManager::IntSetting)setting, toggled);
+		valid = gtk_tree_model_iter_next(m, &iter);
+	}
 }
 
 void Settings::initPersonal_gui()
@@ -561,20 +529,7 @@ void Settings::initDownloads_gui()
 		gtk_spin_button_set_value(GTK_SPIN_BUTTON(getWidget("dropSizeSpinButton")), (double)SETTING(AUTODROP_FILESIZE));
 
 		// Other queue options
-		queueView.setView(GTK_TREE_VIEW(getWidget("queueOtherTreeView")));
-		queueView.insertColumn("Use", G_TYPE_BOOLEAN, TreeView::BOOL, -1);
-		queueView.insertColumn("Name", G_TYPE_STRING, TreeView::STRING, -1);
-		queueView.insertHiddenColumn("Setting", G_TYPE_INT);
-		queueView.finalize();
-		queueStore = gtk_list_store_newv(queueView.getColCount(), queueView.getGTypes());
-		gtk_tree_view_set_model(queueView.get(), GTK_TREE_MODEL(queueStore));
-		g_object_unref(queueStore);
-		gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(queueStore), queueView.col("Name"), GTK_SORT_ASCENDING);
-
-		GList *list = gtk_tree_view_column_get_cell_renderers(gtk_tree_view_get_column(queueView.get(), queueView.col("Use")));
-		GtkCellRenderer *renderer = (GtkCellRenderer*)g_list_nth_data(list, 0);
-		g_signal_connect(renderer, "toggled", G_CALLBACK(onQueueToggledClicked_gui), (gpointer)this);
-		g_list_free(list);
+		createOptionsView_gui(queueView, queueStore, "queueOtherTreeView");
 
 		addOption_gui(queueStore, _("Set lowest priority for newly added files larger than low priority size"), SettingsManager::PRIO_LOWEST);
 		addOption_gui(queueStore, _("Auto-drop slow sources for all queue items (except filelists)"), SettingsManager::AUTODROP_ALL);
@@ -629,23 +584,8 @@ void Settings::initSharing_gui()
 
 void Settings::initAppearance_gui()
 {
-	GList *list;
-	GObject *renderer;
 	{ // Appearance
-		appearanceView.setView(GTK_TREE_VIEW(getWidget("appearanceOptionsTreeView")));
-		appearanceView.insertColumn("Use", G_TYPE_BOOLEAN, TreeView::BOOL, -1);
-		appearanceView.insertColumn("Name", G_TYPE_STRING, TreeView::STRING, -1);
-		appearanceView.insertHiddenColumn("Setting", G_TYPE_INT);
-		appearanceView.finalize();
-		appearanceStore = gtk_list_store_newv(appearanceView.getColCount(), appearanceView.getGTypes());
-		gtk_tree_view_set_model(appearanceView.get(), GTK_TREE_MODEL(appearanceStore));
-		g_object_unref(appearanceStore);
-		gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(appearanceStore), appearanceView.col("Name"), GTK_SORT_ASCENDING);
-
-		list = gtk_tree_view_column_get_cell_renderers(gtk_tree_view_get_column(appearanceView.get(), appearanceView.col("Use")));
-		renderer = (GObject *)g_list_nth_data(list, 0);
-		g_signal_connect(renderer, "toggled", G_CALLBACK(onAppearanceToggledClicked_gui), (gpointer)this);
-		g_list_free(list);
+		createOptionsView_gui(appearanceView, appearanceStore, "appearanceOptionsTreeView");
 
 		addOption_gui(appearanceStore, _("Filter kick and NMDC debug messages"), SettingsManager::FILTER_MESSAGES);
 		addOption_gui(appearanceStore, _("Show status icon"), SettingsManager::ALWAYS_TRAY);
@@ -666,20 +606,7 @@ void Settings::initAppearance_gui()
 	}
 
 	{ // Tabs
-		tabView.setView(GTK_TREE_VIEW(getWidget("tabBoldingTreeView")));
-		tabView.insertColumn("Use", G_TYPE_BOOLEAN, TreeView::BOOL, -1);
-		tabView.insertColumn("Name", G_TYPE_STRING, TreeView::STRING, -1);
-		tabView.insertHiddenColumn("Setting", G_TYPE_INT);
-		tabView.finalize();
-		tabStore = gtk_list_store_newv(tabView.getColCount(), tabView.getGTypes());
-		gtk_tree_view_set_model(tabView.get(), GTK_TREE_MODEL(tabStore));
-		g_object_unref(tabStore);
-		gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(tabStore), tabView.col("Name"), GTK_SORT_ASCENDING);
-
-		list = gtk_tree_view_column_get_cell_renderers(gtk_tree_view_get_column(tabView.get(), tabView.col("Use")));
-		renderer = (GObject *)g_list_nth_data(list, 0);
-		g_signal_connect(renderer, "toggled", G_CALLBACK(onTabToggledClicked_gui), (gpointer)this);
-		g_list_free(list);
+		createOptionsView_gui(tabView, tabStore, "tabBoldingTreeView");
 
 		addOption_gui(tabStore, _("Finished Downloads"), SettingsManager::BOLD_FINISHED_DOWNLOADS);
 		addOption_gui(tabStore, _("Finished Uploads"), SettingsManager::BOLD_FINISHED_UPLOADS);
@@ -723,20 +650,7 @@ void Settings::initAppearance_gui()
 
 	{ // Window
 		// Auto-open
-		windowView1.setView(GTK_TREE_VIEW(getWidget("windowsAutoOpenTreeView")));
-		windowView1.insertColumn("Use", G_TYPE_BOOLEAN, TreeView::BOOL, -1);
-		windowView1.insertColumn("Name", G_TYPE_STRING, TreeView::STRING, -1);
-		windowView1.insertHiddenColumn("Setting", G_TYPE_INT);
-		windowView1.finalize();
-		windowStore1 = gtk_list_store_newv(windowView1.getColCount(), windowView1.getGTypes());
-		gtk_tree_view_set_model(windowView1.get(), GTK_TREE_MODEL(windowStore1));
-		g_object_unref(windowStore1);
-		gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(windowStore1), windowView1.col("Name"), GTK_SORT_ASCENDING);
-
-		list = gtk_tree_view_column_get_cell_renderers(gtk_tree_view_get_column(windowView1.get(), windowView1.col("Use")));
-		renderer = (GObject *)g_list_nth_data(list, 0);
-		g_signal_connect(renderer, "toggled", G_CALLBACK(onWindowView1ToggledClicked_gui), (gpointer)this);
-		g_list_free(list);
+		createOptionsView_gui(windowView1, windowStore1, "windowsAutoOpenTreeView");
 
 		addOption_gui(windowStore1, _("Public Hubs"), SettingsManager::OPEN_PUBLIC);
 		addOption_gui(windowStore1, _("Favorite Hubs"), SettingsManager::OPEN_FAVORITE_HUBS);
@@ -747,20 +661,7 @@ void Settings::initAppearance_gui()
 		//addOption_gui(windowStore1, _("Favorite Users"), SettingsManager::OPEN_FAVORITE_USERS);
 
 		// Window options
-		windowView2.setView(GTK_TREE_VIEW(getWidget("windowsOptionsTreeView")));
-		windowView2.insertColumn("Use", G_TYPE_BOOLEAN, TreeView::BOOL, -1);
-		windowView2.insertColumn("Name", G_TYPE_STRING, TreeView::STRING, -1);
-		windowView2.insertHiddenColumn("Setting", G_TYPE_INT);
-		windowView2.finalize();
-		windowStore2 = gtk_list_store_newv(windowView2.getColCount(), windowView2.getGTypes());
-		gtk_tree_view_set_model(windowView2.get(), GTK_TREE_MODEL(windowStore2));
-		g_object_unref(windowStore2);
-		gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(windowStore2), windowView2.col("Name"), GTK_SORT_ASCENDING);
-
-		list = gtk_tree_view_column_get_cell_renderers(gtk_tree_view_get_column(windowView2.get(), windowView2.col("Use")));
-		renderer = (GObject *)g_list_nth_data(list, 0);
-		g_signal_connect(renderer, "toggled", G_CALLBACK(onWindowView2ToggledClicked_gui), (gpointer)this);
-		g_list_free(list);
+		createOptionsView_gui(windowView2, windowStore2, "windowsOptionsTreeView");
 
 		addOption_gui(windowStore2, _("Open file list window in the background"), SettingsManager::POPUNDER_FILELIST);
 		addOption_gui(windowStore2, _("Open new private messages from other users in the background"), SettingsManager::POPUNDER_PM);
@@ -769,20 +670,7 @@ void Settings::initAppearance_gui()
 		addOption_gui(windowStore2, _("Ignore private messages from bots"), SettingsManager::IGNORE_BOT_PMS);
 
 		// Confirmation dialog
-		windowView3.setView(GTK_TREE_VIEW(getWidget("windowsConfirmTreeView")));
-		windowView3.insertColumn("Use", G_TYPE_BOOLEAN, TreeView::BOOL, -1);
-		windowView3.insertColumn("Name", G_TYPE_STRING, TreeView::STRING, -1);
-		windowView3.insertHiddenColumn("Setting", G_TYPE_INT);
-		windowView3.finalize();
-		windowStore3 = gtk_list_store_newv(windowView3.getColCount(), windowView3.getGTypes());
-		gtk_tree_view_set_model(windowView3.get(), GTK_TREE_MODEL(windowStore3));
-		g_object_unref(windowStore3);
-		gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(windowStore3), windowView3.col("Name"), GTK_SORT_ASCENDING);
-
-		list = gtk_tree_view_column_get_cell_renderers(gtk_tree_view_get_column(windowView3.get(), windowView3.col("Use")));
-		renderer = (GObject *)g_list_nth_data(list, 0);
-		g_signal_connect(renderer, "toggled", G_CALLBACK(onWindowView3ToggledClicked_gui), (gpointer)this);
-		g_list_free(list);
+		createOptionsView_gui(windowView3, windowStore3, "windowsConfirmTreeView");
 
 		addOption_gui(windowStore3, _("Confirm application exit"), SettingsManager::CONFIRM_EXIT);
 		addOption_gui(windowStore3, _("Confirm favorite hub removal"), SettingsManager::CONFIRM_HUB_REMOVAL);
@@ -828,20 +716,7 @@ void Settings::initLog_gui()
 void Settings::initAdvanced_gui()
 {
 	{ // Advanced
-		advancedView.setView(GTK_TREE_VIEW(getWidget("advancedTreeView")));
-		advancedView.insertColumn("Use", G_TYPE_BOOLEAN, TreeView::BOOL, -1);
-		advancedView.insertColumn("Name", G_TYPE_STRING, TreeView::STRING, -1);
-		advancedView.insertHiddenColumn("Setting", G_TYPE_INT);
-		advancedView.finalize();
-		advancedStore = gtk_list_store_newv(advancedView.getColCount(), advancedView.getGTypes());
-		gtk_tree_view_set_model(advancedView.get(), GTK_TREE_MODEL(advancedStore));
-		g_object_unref(advancedStore);
-		gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(advancedStore), advancedView.col("Name"), GTK_SORT_ASCENDING);
-
-		GList *list = gtk_tree_view_column_get_cell_renderers(gtk_tree_view_get_column(advancedView.get(), advancedView.col("Use")));
-		GtkCellRenderer *renderer = (GtkCellRenderer*)g_list_nth_data(list, 0);
-		g_signal_connect(renderer, "toggled", G_CALLBACK(onAdvancedToggledClicked_gui), (gpointer)this);
-		g_list_free(list);
+		createOptionsView_gui(advancedView, advancedStore, "advancedTreeView");
 
 		addOption_gui(advancedStore, _("Auto-away on minimize (and back on restore)"), SettingsManager::AUTO_AWAY);
 		addOption_gui(advancedStore, _("Automatically follow redirects"), SettingsManager::AUTO_FOLLOW);
@@ -915,20 +790,7 @@ void Settings::initAdvanced_gui()
 		g_signal_connect(getWidget("certificateFileButton"), "clicked", G_CALLBACK(onCertificatesFileBrowseClicked_gui), (gpointer)this);
 		g_signal_connect(getWidget("trustedCertificatesPathButton"), "clicked", G_CALLBACK(onCertificatesPathBrowseClicked_gui), (gpointer)this);
 
-		certificatesView.setView(GTK_TREE_VIEW(getWidget("certificatesTreeView")));
-		certificatesView.insertColumn("Use", G_TYPE_BOOLEAN, TreeView::BOOL, -1);
-		certificatesView.insertColumn("Name", G_TYPE_STRING, TreeView::STRING, -1);
-		certificatesView.insertHiddenColumn("Setting", G_TYPE_INT);
-		certificatesView.finalize();
-		certificatesStore = gtk_list_store_newv(certificatesView.getColCount(), certificatesView.getGTypes());
-		gtk_tree_view_set_model(certificatesView.get(), GTK_TREE_MODEL(certificatesStore));
-		g_object_unref(certificatesStore);
-		gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(certificatesStore), certificatesView.col("Name"), GTK_SORT_ASCENDING);
-
-		GList *list = gtk_tree_view_column_get_cell_renderers(gtk_tree_view_get_column(certificatesView.get(), certificatesView.col("Use")));
-		GtkCellRenderer *renderer = (GtkCellRenderer*)g_list_nth_data(list, 0);
-		g_signal_connect(renderer, "toggled", G_CALLBACK(onCertificatesToggledClicked_gui), (gpointer)this);
-		g_list_free(list);
+		createOptionsView_gui(certificatesView, certificatesStore, "certificatesTreeView");
 
 		addOption_gui(certificatesStore, _("Use TLS when remote client supports it"), SettingsManager::USE_TLS);
 		addOption_gui(certificatesStore, _("Allow TLS connections to hubs without trusted certificate"), SettingsManager::ALLOW_UNTRUSTED_HUBS);
@@ -1294,6 +1156,20 @@ void Settings::showErrorDialog(const std::string &error)
 	gtk_widget_destroy(errorDialog);
 }
 
+void Settings::onOptionsViewToggled_gui(GtkCellRendererToggle *cell, gchar *path, gpointer data)
+{
+	GtkTreeIter iter;
+	GtkListStore *store = (GtkListStore *)data;
+	GtkTreeModel *model = GTK_TREE_MODEL(store);
+
+	if (gtk_tree_model_get_iter_from_string(model, &iter, path))
+	{
+		gboolean fixed;
+		gtk_tree_model_get(model, &iter, 0, &fixed, -1);
+		gtk_list_store_set(store, &iter, 0, !fixed, -1);
+	}
+}
+
 void Settings::onInDirect_gui(GtkToggleButton *button, gpointer data)
 {
 	Settings *s = (Settings *)data;
@@ -1586,18 +1462,6 @@ gboolean Settings::onFavoriteButtonReleased_gui(GtkWidget *widget, GdkEventButto
 	return FALSE;
 }
 
-void Settings::onQueueToggledClicked_gui(GtkCellRendererToggle *cell, gchar *path, gpointer data)
-{
-	Settings *s = (Settings *)data;
-	GtkTreeIter iter;
-
-	if (gtk_tree_model_get_iter_from_string(GTK_TREE_MODEL(s->queueStore), &iter, path))
-	{
-		gboolean fixed = s->queueView.getValue<gboolean>(&iter,"Use");
-		gtk_list_store_set(s->queueStore, &iter, s->queueView.col("Use"), !fixed, -1);
-	}
-}
-
 void Settings::addShare_gui(string path, string name, string error)
 {
 	if (error.empty())
@@ -1680,66 +1544,6 @@ gboolean Settings::onShareHiddenPressed_gui(GtkToggleButton *togglebutton, gpoin
 	return FALSE;
 }
 
-void Settings::onAppearanceToggledClicked_gui(GtkCellRendererToggle *cell, gchar *path, gpointer data)
-{
-	Settings *s = (Settings *)data;
-	GtkTreeIter iter;
-
-	if (gtk_tree_model_get_iter_from_string(GTK_TREE_MODEL(s->appearanceStore), &iter, path))
-	{
-		gboolean fixed = s->appearanceView.getValue<gboolean>(&iter,"Use");
-		gtk_list_store_set(s->appearanceStore, &iter, s->appearanceView.col("Use"), !fixed, -1);
-	}
-}
-
-void Settings::onTabToggledClicked_gui(GtkCellRendererToggle *cell, gchar *path, gpointer data)
-{
-	Settings *s = (Settings *)data;
-	GtkTreeIter iter;
-
-	if (gtk_tree_model_get_iter_from_string(GTK_TREE_MODEL(s->tabStore), &iter, path))
-	{
-		gboolean fixed = s->tabView.getValue<gboolean>(&iter, "Use");
-		gtk_list_store_set(s->tabStore, &iter, s->tabView.col("Use"), !fixed, -1);
-	}
-}
-
-void Settings::onWindowView1ToggledClicked_gui(GtkCellRendererToggle *cell, gchar *path, gpointer data)
-{
-	Settings *s = (Settings *)data;
-	GtkTreeIter iter;
-
-	if (gtk_tree_model_get_iter_from_string(GTK_TREE_MODEL(s->windowStore1), &iter, path))
-	{
-		gboolean fixed = s->windowView1.getValue<gboolean>(&iter, "Use");
-		gtk_list_store_set(s->windowStore1, &iter, s->windowView1.col("Use"), !fixed, -1);
-	}
-}
-
-void Settings::onWindowView2ToggledClicked_gui(GtkCellRendererToggle *cell, gchar *path, gpointer data)
-{
-	Settings *s = (Settings *)data;
-	GtkTreeIter iter;
-
-	if (gtk_tree_model_get_iter_from_string(GTK_TREE_MODEL(s->windowStore2), &iter, path))
-	{
-		gboolean fixed = s->windowView2.getValue<gboolean>(&iter, "Use");
-		gtk_list_store_set(s->windowStore2, &iter, s->windowView2.col("Use"), !fixed, -1);
-	}
-}
-
-void Settings::onWindowView3ToggledClicked_gui(GtkCellRendererToggle *cell, gchar *path, gpointer data)
-{
-	Settings *s = (Settings *)data;
-	GtkTreeIter iter;
-
-	if (gtk_tree_model_get_iter_from_string(GTK_TREE_MODEL(s->windowStore3), &iter, path))
-	{
-		gboolean fixed = s->windowView3.getValue<gboolean>(&iter, "Use");
-		gtk_list_store_set(s->windowStore3, &iter, s->windowView3.col("Use"), !fixed, -1);
-	}
-}
-
 void Settings::onLogBrowseClicked_gui(GtkWidget *widget, gpointer data)
 {
 	Settings *s = (Settings *)data;
@@ -1788,18 +1592,6 @@ void Settings::onLogUploadClicked_gui(GtkToggleButton *button, gpointer data)
 	bool toggled = gtk_toggle_button_get_active(button);
 	gtk_widget_set_sensitive(s->getWidget("logUploadsLabel"), toggled);
 	gtk_widget_set_sensitive(s->getWidget("logUploadsEntry"), toggled);
-}
-
-void Settings::onAdvancedToggledClicked_gui(GtkCellRendererToggle *cell, gchar *path, gpointer data)
-{
-	Settings *s = (Settings *)data;
-	GtkTreeIter iter;
-
-	if (gtk_tree_model_get_iter_from_string(GTK_TREE_MODEL(s->advancedStore), &iter, path))
-	{
-		gboolean fixed = s->advancedView.getValue<gboolean>(&iter, "Use");
-		gtk_list_store_set(s->advancedStore, &iter, s->advancedView.col("Use"), !fixed, -1);
-	}
 }
 
 void Settings::onUserCommandAdd_gui(GtkWidget *widget, gpointer data)
@@ -2112,18 +1904,6 @@ void Settings::onCertificatesPathBrowseClicked_gui(GtkWidget *widget, gpointer d
 			gtk_entry_set_text(GTK_ENTRY(s->getWidget("trustedCertificatesPathEntry")), Text::toUtf8(path).c_str());
 			g_free(path);
 		}
-	}
-}
-
-void Settings::onCertificatesToggledClicked_gui(GtkCellRendererToggle *cell, gchar *path, gpointer data)
-{
-	Settings *s = (Settings *)data;
-	GtkTreeIter iter;
-
-	if (gtk_tree_model_get_iter_from_string(GTK_TREE_MODEL(s->certificatesStore), &iter, path))
-	{
-		gboolean fixed = s->certificatesView.getValue<gboolean>(&iter, "Use");
-		gtk_list_store_set(s->certificatesStore, &iter, s->certificatesView.col("Use"), !fixed, -1);
 	}
 }
 

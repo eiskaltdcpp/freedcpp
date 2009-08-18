@@ -1,3 +1,6 @@
+r9: 0.0.1.5
+* Часть изменений из r312 (linuxdcpp).
+
 r8: 0.0.1.4
 * Добавлена поддержка звука (Esound).
 * Вкладка "Colors and Sounds" разделена на "Tabs", "Sounds" и "Colors".
