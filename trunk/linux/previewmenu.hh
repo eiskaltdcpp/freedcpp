@@ -22,8 +22,6 @@
 #ifndef PREVIEW_MENU_HH
 #define PREVIEW_MENU_HH
 
-#include <gtk/gtk.h>
-
 class PreviewMenu
 {
 	public:

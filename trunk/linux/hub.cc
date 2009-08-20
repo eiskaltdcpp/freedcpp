@@ -382,24 +382,23 @@ void Hub::addStatusMessage_gui(string message, Sound::TypeSound sound)
 {
 	if (!message.empty())
 	{
-		playSound_gui(sound);
+		if (sound != Sound::NONE)
+			Sound::get()->playSound(sound);
 
 		setStatus_gui("statusMain", message);
 
 		if (BOOLSETTING(STATUS_IN_CHAT))
 		{
 			string line = "*** " + message;
-			addMessage_gui(line, Sound::NONE);
+			addMessage_gui(line);
 		}
 	}
 }
 
-void Hub::addMessage_gui(string message, Sound::TypeSound sound)
+void Hub::addMessage_gui(string message)
 {
 	if (message.empty())
 		return;
-
-	playSound_gui(sound);
 
 	GtkTextIter iter;
 	string line = "";
@@ -542,12 +541,6 @@ void Hub::updateCursor_gui(GtkWidget *widget)
 		}
 		selectedTag = newTag;
 	}
-}
-
-void Hub::playSound_gui(Sound::TypeSound sound)
-{
-	if (sound != Sound::NONE)
-		Sound::get()->playSound(sound);
 }
 
 gboolean Hub::onFocusIn_gui(GtkWidget *widget, GdkEventFocus *event, gpointer data)
@@ -1621,8 +1614,8 @@ void Hub::on(ClientListener::Message, Client *, const OnlineUser &from, const st
 			LOG(LogManager::CHAT, params);
 		}
 
-		typedef Func2<Hub, string, Sound::TypeSound> F2;
-		F2 *func = new F2(this, &Hub::addMessage_gui, line, Sound::NONE);
+		typedef Func1<Hub, string> F1;
+		F1 *func = new F1(this, &Hub::addMessage_gui, line);
 		WulforManager::get()->dispatchGuiFunc(func);
 
 		// Set urgency hint if message contains user's nick
@@ -1664,8 +1657,8 @@ void Hub::on(ClientListener::StatusMessage, Client *, const string &message, int
 			LOG(LogManager::STATUS, params);
 		}
 
-		typedef Func2<Hub, string, Sound::TypeSound> F2;
-		F2 *func = new F2(this, &Hub::addMessage_gui, message, Sound::NONE);
+		typedef Func1<Hub, string> F1;
+		F1 *func = new F1(this, &Hub::addMessage_gui, message);
 		WulforManager::get()->dispatchGuiFunc(func);
 	}
 }

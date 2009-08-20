@@ -21,7 +21,8 @@
 
 #include "settingsmanager.hh"
 #include "WulforUtil.hh"
-#include "wulformanager.hh"
+#include <glib/gi18n.h>
+
 #include "previewmenu.hh"
 
 using namespace std;
@@ -88,8 +89,6 @@ bool PreviewMenu::buildMenu_gui(const string &target)
 	g_object_set_data_full(G_OBJECT(itemApp), "command", g_strdup("default"), g_free);
 	g_object_set_data_full(G_OBJECT(itemApp), "application", g_strdup(""), g_free);
 	g_object_set_data_full(G_OBJECT(itemApp), "target", g_strdup(target.c_str()), g_free);
-
-	gtk_widget_show_all(appsPreviewMenu);
 
 	return TRUE;
 }
