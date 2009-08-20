@@ -25,21 +25,16 @@
 class Sound
 {
 	public:
-		static Sound *pSound;
-
 		enum TypeSound
 		{
-			FIRST = 0,
 			/*-*/
-			DOWNLOAD_BEGINS = FIRST,
+			DOWNLOAD_BEGINS,
 			DOWNLOAD_FINISHED,
 			UPLOAD_FINISHED,
 			PRIVATE_MESSAGE,
 			HUB_CONNECT,
 			HUB_DISCONNECT,
 			/*-*/
-			LAST,
-
 			NONE
 		};
 
@@ -54,6 +49,8 @@ class Sound
 		void playSound(const std::string &target);
 
 	private:
+		static Sound *pSound;
+
 		void sound_init();
 		void sound_finalize();
 };

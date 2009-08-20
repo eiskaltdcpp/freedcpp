@@ -21,7 +21,6 @@
 
 #include <libgnome/gnome-sound.h>
 #include "settingsmanager.hh"
-#include "wulformanager.hh"
 
 #include "sound.hh"
 

@@ -54,13 +54,6 @@ PrivateMessage::PrivateMessage(const string &cid):
 	mark = gtk_text_buffer_create_mark(buffer, NULL, &iter, FALSE);
 	handCursor = gdk_cursor_new(GDK_HAND2);
 
-	/* FIXME: BOOLSETTING(PRIVATE_MESSGE_BEEP_OPEN) has been changed to
-	 * FIXME: STRINGSETTING(SOUND_PM_WINDOW)
-	 
-	if (BOOLSETTING(PRIVATE_MESSAGE_BEEP_OPEN))
-		gdk_beep();
-	*/
-
 	GtkAdjustment *adjustment = gtk_scrolled_window_get_vadjustment(GTK_SCROLLED_WINDOW(getWidget("scroll")));
 
 	// Connect the signals to their callback functions.
@@ -119,10 +112,6 @@ void PrivateMessage::addMessage_gui(string message)
 	if (BOOLSETTING(BOLD_PM))
 		setUrgent_gui();
 
-	/*if (BOOLSETTING(PRIVATE_MESSAGE_BEEP) && !isActive_gui())
-		gdk_beep();
-	*/
-
 	// Send an away message, but only the first time after setting away mode.
 	if (!Util::getAway())
 	{
@@ -135,17 +124,6 @@ void PrivateMessage::addMessage_gui(string message)
 		F1 *func = new F1(this, &PrivateMessage::sendMessage_client, Util::getAwayMessage());
 		WulforManager::get()->dispatchClientFunc(func);
 	}
-
-	/* FIXME: BOOLSETTING(PRIVATE_MESSAGE_BEEP) has been changed to
-	 * FIXME: STRINGSETTING(SOUND_PM) 
-	if (BOOLSETTING(PRIVATE_MESSAGE_BEEP))
-	{
-		MainWindow *mw = WulforManager::get()->getMainWindow();
-		GdkWindowState state = gdk_window_get_state(mw->getContainer()->window);
-	 	if ((state & GDK_WINDOW_STATE_ICONIFIED) || mw->currentPage_gui() != getContainer())
-			gdk_beep();
-	}
-	*/
 
 	if (WGETB("sound-pm"))
 	{
