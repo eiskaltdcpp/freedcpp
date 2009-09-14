@@ -81,9 +81,16 @@ Hub::Hub(const string &address, const string &encoding):
 	}
 	chatBuffer = gtk_text_buffer_new(NULL);
 	gtk_text_view_set_buffer(GTK_TEXT_VIEW(getWidget("chatText")), chatBuffer);
+
+	/* initial markers */
 	GtkTextIter iter;
 	gtk_text_buffer_get_end_iter(chatBuffer, &iter);
+
 	chatMark = gtk_text_buffer_create_mark(chatBuffer, NULL, &iter, FALSE);
+	start_mark = gtk_text_buffer_create_mark(chatBuffer, NULL, &iter, TRUE);
+	end_mark = gtk_text_buffer_create_mark(chatBuffer, NULL, &iter, TRUE);
+	tag_mark = gtk_text_buffer_create_mark(chatBuffer, NULL, &iter, TRUE);
+
 	handCursor = gdk_cursor_new(GDK_HAND2);
 
 	// Load the icons for the nick list
@@ -150,6 +157,24 @@ Hub::Hub(const string &address, const string &encoding):
 	}
 
 	history.push_back("");
+
+	/* initial tags map */
+	TagsMap[TAG_GENERAL] = createTag_gui("TAG_GENERAL", TAG_GENERAL);
+	TagsMap[TAG_MYOWN] = createTag_gui("TAG_MYOWN", TAG_MYOWN);
+	TagsMap[TAG_SYSTEM] = createTag_gui("TAG_SYSTEM", TAG_SYSTEM);
+	TagsMap[TAG_STATUS] = createTag_gui("TAG_STATUS", TAG_STATUS);
+	TagsMap[TAG_TIMESTAMP] = createTag_gui("TAG_TIMESTAMP", TAG_TIMESTAMP);
+	/*-*/
+	TagsMap[TAG_MYNICK] = createTag_gui("TAG_MYNICK", TAG_MYNICK);
+	TagsMap[TAG_NICK] = createTag_gui("TAG_NICK", TAG_NICK);
+	TagsMap[TAG_OPERATOR] = createTag_gui("TAG_OPERATOR", TAG_OPERATOR);
+	TagsMap[TAG_URL] = createTag_gui("TAG_URL", TAG_URL);
+
+	tagPrefix = "#";
+	myNick = "";
+
+	// set default select tag (fix error show cursor in neutral space).
+	selectedTag = TagsMap[TAG_GENERAL];
 }
 
 Hub::~Hub()
@@ -257,12 +282,13 @@ void Hub::updateUser_gui(ParamMap params)
 	{
 		totalShared += shared;
 		userMap[params["Nick"]] = cid;
+		myNick = params["MyNick"];
 
 		if (BOOLSETTING(SHOW_JOINS))
 		{
-			addStatusMessage_gui(params["Nick"] + _(" has joined"), Sound::NONE);
+			addStatusMessage_gui(params["Nick"] + _(" has joined"), Msg::SYSTEM, Sound::NONE);
 			string line = params["Nick"] + _(" has joined hub ") + client->getHubName();
-			WulforManager::get()->getMainWindow()->addPrivateStatusMessage_gui(cid, line);
+			WulforManager::get()->getMainWindow()->addPrivateStatusMessage_gui(Msg::SYSTEM, cid, line);
 		}
 		else if (BOOLSETTING(FAV_SHOW_JOINS))
 		{
@@ -314,7 +340,7 @@ void Hub::removeUser_gui(string cid)
 void Hub::removeTag_gui(const std::string &nick)
 {
 	GtkTextTagTable *textTagTable = gtk_text_buffer_get_tag_table(chatBuffer);
-	GtkTextTag *tag = gtk_text_tag_table_lookup(textTagTable, nick.c_str());
+	GtkTextTag *tag = gtk_text_tag_table_lookup(textTagTable, (tagPrefix + nick).c_str());
 	if (tag)
 		gtk_text_tag_table_remove(textTagTable, tag);
 }
@@ -378,7 +404,7 @@ void Hub::getPassword_gui()
 		client->disconnect(TRUE);
 }
 
-void Hub::addStatusMessage_gui(string message, Sound::TypeSound sound)
+void Hub::addStatusMessage_gui(string message, Msg::TypeMsg typemsg, Sound::TypeSound sound)
 {
 	if (!message.empty())
 	{
@@ -390,12 +416,12 @@ void Hub::addStatusMessage_gui(string message, Sound::TypeSound sound)
 		if (BOOLSETTING(STATUS_IN_CHAT))
 		{
 			string line = "*** " + message;
-			addMessage_gui(line);
+			addMessage_gui(line, typemsg);
 		}
 	}
 }
 
-void Hub::addMessage_gui(string message)
+void Hub::addMessage_gui(string message, Msg::TypeMsg typemsg)
 {
 	if (message.empty())
 		return;
@@ -415,6 +441,35 @@ void Hub::addMessage_gui(string message)
 	gtk_text_buffer_get_end_iter(chatBuffer, &iter);
 	gtk_text_buffer_insert(chatBuffer, &iter, line.c_str(), line.size());
 
+	switch (typemsg)
+	{
+		case Msg::MYOWN:
+			tagMsg = TAG_MYOWN;
+			tagNick = TAG_MYNICK;
+			break;
+
+		case Msg::SYSTEM:
+			tagMsg = TAG_SYSTEM;
+			tagNick = TAG_NICK;
+			break;
+
+		case Msg::STATUS:
+			tagMsg = TAG_STATUS;
+			tagNick = TAG_NICK;
+			break;
+
+		case Msg::OPERATOR:
+			tagMsg = TAG_GENERAL;
+			tagNick = TAG_OPERATOR;
+			break;
+
+		case Msg::GENERAL:
+
+		default:
+			tagMsg = TAG_GENERAL;
+			tagNick = TAG_NICK;
+	}
+
 	applyTags_gui(line);
 
 	gtk_text_buffer_get_end_iter(chatBuffer, &iter);
@@ -431,70 +486,175 @@ void Hub::addMessage_gui(string message)
 
 void Hub::applyTags_gui(const string &line)
 {
-	GtkTextIter iter;
-	GtkTextIter startIter;
-	GtkTextIter endIter;
-	bool firstNick = FALSE;
-	string::size_type start;
-	string::size_type end = 0;
+	GtkTextIter start_iter;
+	gtk_text_buffer_get_end_iter(chatBuffer, &start_iter);
 
-	gtk_text_buffer_get_end_iter(chatBuffer, &iter);
+	const gint begin = (line[0] == '\n')? 1 : 0;
 
-	// Tag nicknames and URIs
-	while ((start = line.find_first_not_of(" \n\r\t", end)) != string::npos)
+	// apply timestamp tag
+	if (BOOLSETTING(TIME_STAMPS))
 	{
-		end = line.find_first_of(" \n\r\t", start);
-		if (end == string::npos)
-			end = line.size();
+		gtk_text_iter_backward_chars(&start_iter,
+			g_utf8_strlen(line.c_str(), -1) - g_utf8_strlen(Util::getShortTimeString().c_str(), -1) - 2 - begin);
 
-		// Special case: catch nicks in the form <nick> at the beginning of the line.
-		if (!firstNick && start < end - 1 && line[start] == '<' && line[end - 1] == '>')
+		GtkTextIter ts_start_iter, ts_end_iter;
+		ts_end_iter = start_iter;
+
+		gtk_text_buffer_get_end_iter(chatBuffer, &ts_start_iter);
+		gtk_text_iter_backward_chars(&ts_start_iter, g_utf8_strlen(line.c_str(), -1) - begin);
+
+		gtk_text_buffer_apply_tag(chatBuffer, TagsMap[TAG_TIMESTAMP], &ts_start_iter, &ts_end_iter);
+	}
+	else
+		gtk_text_iter_backward_chars(&start_iter, g_utf8_strlen(line.c_str(), -1) - begin);
+
+	// apply tags: nick, link, hub-url, magnet
+	GtkTextIter tag_start_iter, tag_end_iter;
+
+	gtk_text_buffer_move_mark(chatBuffer, start_mark, &start_iter);
+	gtk_text_buffer_move_mark(chatBuffer, end_mark, &start_iter);
+
+	string tagName;
+	TypeTag tagStyle = TAG_GENERAL;
+
+	bool firstNick = FALSE;
+	bool start = FALSE;
+
+	for(;;)
+	{
+		do {
+			gunichar ch = gtk_text_iter_get_char(&start_iter);
+
+			if (!g_unichar_isspace(ch))
+				break;
+
+		} while (gtk_text_iter_forward_char(&start_iter));
+
+		if(!start)
 		{
-			++start;
-			--end;
-			firstNick = TRUE;
+			gtk_text_buffer_move_mark(chatBuffer, start_mark, &start_iter);
+			gtk_text_buffer_move_mark(chatBuffer, end_mark, &start_iter);
+
+			start = TRUE;
 		}
+
+		tag_start_iter = start_iter;
+
+		for(;gtk_text_iter_forward_char(&start_iter);)
+		{
+			gunichar ch = gtk_text_iter_get_char(&start_iter);
+
+			if (g_unichar_isspace(ch))
+				break;
+		}
+
+		tag_end_iter = start_iter;
 
 		GCallback callback = NULL;
 		bool isNick = FALSE;
-		string tagName = line.substr(start, end - start);
+		gchar *temp = gtk_text_iter_get_text(&tag_start_iter, &tag_end_iter);
 
-		if (findNick_gui(tagName, NULL))
+		if (!C_EMPTY(temp))
 		{
-			isNick = TRUE;
-			callback = G_CALLBACK(onNickTagEvent_gui);
+			tagName = temp;
+
+			// Special case: catch nicks in the form <nick> at the beginning of the line.
+			if (!firstNick && tagName[0] == '<' && tagName[tagName.size() - 1] == '>')
+			{
+				tagName = tagName.substr(1, tagName.size() - 2);
+				firstNick = TRUE;
+			}
+
+			if (findNick_gui(tagName, NULL))
+			{
+				isNick = TRUE;
+				callback = G_CALLBACK(onNickTagEvent_gui);
+
+				if (tagName == myNick)
+					tagStyle = TAG_MYNICK;
+				else
+					tagStyle = tagNick;
+
+				tagName = tagPrefix + tagName;
+			}
+			else
+			{
+				if (WulforUtil::isLink(tagName))
+					callback = G_CALLBACK(onLinkTagEvent_gui);
+				else if (WulforUtil::isHubURL(tagName))
+					callback = G_CALLBACK(onHubTagEvent_gui);
+				else if (WulforUtil::isMagnet(tagName))
+					callback = G_CALLBACK(onMagnetTagEvent_gui);
+
+				tagStyle = TAG_URL;
+			}
 		}
-		else
-		{
-			if (WulforUtil::isLink(tagName))
-				callback = G_CALLBACK(onLinkTagEvent_gui);
-			else if (WulforUtil::isHubURL(tagName))
-				callback = G_CALLBACK(onHubTagEvent_gui);
-			else if (WulforUtil::isMagnet(tagName))
-				callback = G_CALLBACK(onMagnetTagEvent_gui);
-		}
+
+		g_free(temp);
 
 		if (callback)
 		{
-			// check for the tag in our buffer
-			GtkTextTag *tag = gtk_text_tag_table_lookup(gtk_text_buffer_get_tag_table(chatBuffer), tagName.c_str());
+			gtk_text_buffer_move_mark(chatBuffer, tag_mark, &tag_end_iter);
+
+			// check for the tags in our buffer
+			GtkTextTag *tag = gtk_text_tag_table_lookup (gtk_text_buffer_get_tag_table(chatBuffer), tagName.c_str());
 
 			if (!tag)
 			{
 				if (isNick)
-					tag = gtk_text_buffer_create_tag(chatBuffer, tagName.c_str(), "style", PANGO_STYLE_ITALIC, NULL);
+					tag = gtk_text_buffer_create_tag(chatBuffer, tagName.c_str(), NULL);
 				else
-					tag = gtk_text_buffer_create_tag(chatBuffer, tagName.c_str(), "foreground", "blue", "underline", PANGO_UNDERLINE_SINGLE, NULL);
-
+					tag = gtk_text_buffer_create_tag(chatBuffer, tagName.c_str(), "underline", PANGO_UNDERLINE_SINGLE, NULL);
+				
 				g_signal_connect(tag, "event", callback, (gpointer)this);
 			}
 
-			startIter = endIter = iter;
-			gtk_text_iter_backward_chars(&startIter, g_utf8_strlen(line.c_str() + start, -1));
-			gtk_text_iter_backward_chars(&endIter, g_utf8_strlen(line.c_str() + end, -1));
-			gtk_text_buffer_apply_tag(chatBuffer, tag, &startIter, &endIter);
+			/* apply tags */
+			dcassert(tagStyle >= TAG_MYNICK && tagStyle < TAG_LAST);
+
+			gtk_text_buffer_apply_tag(chatBuffer, tag, &tag_start_iter, &tag_end_iter);
+			gtk_text_buffer_apply_tag(chatBuffer, TagsMap[tagStyle], &tag_start_iter, &tag_end_iter);
+
+			applyEmoticons_gui();
+
+			gtk_text_buffer_get_iter_at_mark(chatBuffer, &start_iter, tag_mark);
+
+			if (gtk_text_iter_is_end(&start_iter))
+				return;
+
+			start = FALSE;
+		}
+		else
+		{
+			if (gtk_text_iter_is_end(&start_iter))
+			{
+				if (!gtk_text_iter_equal(&tag_start_iter, &tag_end_iter))
+					gtk_text_buffer_move_mark(chatBuffer, end_mark, &tag_end_iter);
+
+				applyEmoticons_gui();
+
+				break;
+			}
+
+			gtk_text_buffer_move_mark(chatBuffer, end_mark, &tag_end_iter);
 		}
 	}
+}
+
+void Hub::applyEmoticons_gui()
+{
+	GtkTextIter start_iter, end_iter;
+
+	gtk_text_buffer_get_iter_at_mark(chatBuffer, &start_iter, start_mark);
+	gtk_text_buffer_get_iter_at_mark(chatBuffer, &end_iter, end_mark);
+
+	if(gtk_text_iter_equal(&start_iter, &end_iter))
+		return;
+
+	dcassert(tagMsg >= TAG_GENERAL && tagMsg < TAG_TIMESTAMP);
+	gtk_text_buffer_apply_tag(chatBuffer, TagsMap[tagMsg], &start_iter, &end_iter);
+
+	/* emoticons */
 }
 
 /*
@@ -518,6 +678,17 @@ void Hub::updateCursor_gui(GtkWidget *widget)
 	if (tagList != NULL) 
 	{
 		newTag = GTK_TEXT_TAG(tagList->data);
+
+		if (find(TagsMap + TAG_MYNICK, TagsMap + TAG_LAST, newTag) != TagsMap + TAG_LAST)
+		{
+			GSList *nextList = g_slist_next(tagList);
+
+			if (nextList != NULL)
+				newTag = GTK_TEXT_TAG(nextList->data);
+			else
+				newTag = NULL;
+		}
+
 		g_slist_free(tagList);
 	}
 
@@ -528,11 +699,14 @@ void Hub::updateCursor_gui(GtkWidget *widget)
 		{
 			// Cursor is entering a tag.
 			selectedTagStr = newTag->name;
-			if (selectedTag == NULL)
+
+			if (find(TagsMap, TagsMap + TAG_MYNICK, newTag) == TagsMap + TAG_MYNICK)
 			{
 				// Cursor was in neutral space.
 				gdk_window_set_cursor(gtk_text_view_get_window(GTK_TEXT_VIEW(widget), GTK_TEXT_WINDOW_TEXT), handCursor);
 			}
+			else
+				gdk_window_set_cursor(gtk_text_view_get_window(GTK_TEXT_VIEW(widget), GTK_TEXT_WINDOW_TEXT), NULL);
 		}
 		else 
 		{
@@ -541,6 +715,121 @@ void Hub::updateCursor_gui(GtkWidget *widget)
 		}
 		selectedTag = newTag;
 	}
+}
+
+void Hub::updateTags_gui()
+{
+	WulforSettingsManager *wsm = WulforSettingsManager::getInstance();
+	string fore, back;
+	int bold, italic;
+
+	for (int i = TAG_FIRST; i < TAG_LAST; i++)
+	{
+		getSettingTag_gui(wsm, (TypeTag)i, fore, back, bold, italic);
+
+		g_object_set(TagsMap[i],
+			"foreground", fore.c_str(),
+			"background", back.c_str(),
+			"weight", (PangoWeight)bold,
+			"style", (PangoStyle)italic,
+			NULL);
+	}
+
+	gtk_widget_queue_draw(getWidget("chatText"));
+}
+
+void Hub::getSettingTag_gui(WulforSettingsManager *wsm, TypeTag type, string &fore, string &back, int &bold, int &italic)
+{
+	switch (type)
+	{
+		case TAG_MYOWN:
+
+			fore = wsm->getString("text-myown-fore-color");
+			back = wsm->getString("text-myown-back-color");
+			bold = wsm->getInt("text-myown-bold");
+			italic = wsm->getInt("text-myown-italic");
+		break;
+
+		case TAG_SYSTEM:
+
+			fore = wsm->getString("text-system-fore-color");
+			back = wsm->getString("text-system-back-color");
+			bold = wsm->getInt("text-system-bold");
+			italic = wsm->getInt("text-system-italic");
+		break;
+
+		case TAG_STATUS:
+
+			fore = wsm->getString("text-status-fore-color");
+			back = wsm->getString("text-status-back-color");
+			bold = wsm->getInt("text-status-bold");
+			italic = wsm->getInt("text-status-italic");
+		break;
+
+		case TAG_TIMESTAMP:
+
+			fore = wsm->getString("text-timestamp-fore-color");
+			back = wsm->getString("text-timestamp-back-color");
+			bold = wsm->getInt("text-timestamp-bold");
+			italic = wsm->getInt("text-timestamp-italic");
+		break;
+
+		case TAG_MYNICK:
+
+			fore = wsm->getString("text-mynick-fore-color");
+			back = wsm->getString("text-mynick-back-color");
+			bold = wsm->getInt("text-mynick-bold");
+			italic = wsm->getInt("text-mynick-italic");
+		break;
+
+		case TAG_OPERATOR:
+
+			fore = wsm->getString("text-op-fore-color");
+			back = wsm->getString("text-op-back-color");
+			bold = wsm->getInt("text-op-bold");
+			italic = wsm->getInt("text-op-italic");
+		break;
+
+		case TAG_URL:
+
+			fore = wsm->getString("text-url-fore-color");
+			back = wsm->getString("text-url-back-color");
+			bold = wsm->getInt("text-url-bold");
+			italic = wsm->getInt("text-url-italic");
+		break;
+
+		case TAG_NICK:
+		case TAG_GENERAL:
+
+		default:
+			fore = wsm->getString("text-general-fore-color");
+			back = wsm->getString("text-general-back-color");
+			bold = wsm->getInt("text-general-bold");
+			italic = wsm->getInt("text-general-italic");
+	}
+}
+
+GtkTextTag* Hub::createTag_gui(const string &tagname, TypeTag type)
+{
+	WulforSettingsManager *wsm = WulforSettingsManager::getInstance();
+	GtkTextTag *tag = gtk_text_tag_table_lookup(gtk_text_buffer_get_tag_table(chatBuffer), tagname.c_str());
+	
+	if (!tag)
+	{
+		string fore, back;
+		int bold, italic;
+
+		getSettingTag_gui(wsm, type, fore, back, bold, italic);
+
+		tag = gtk_text_buffer_create_tag(chatBuffer, tagname.c_str(),
+			"foreground", fore.c_str(),
+			"background", back.c_str(),
+			"weight", (PangoWeight)bold,
+			"style", (PangoStyle)italic,
+			NULL);
+	}
+
+	return tag;
 }
 
 gboolean Hub::onFocusIn_gui(GtkWidget *widget, GdkEventFocus *event, gpointer data)
@@ -723,7 +1012,9 @@ gboolean Hub::onNickTagEvent_gui(GtkTextTag *tag, GObject *textView, GdkEvent *e
 	if (event->type == GDK_BUTTON_PRESS)
 	{
 		GtkTreeIter nickIter;
-		if (hub->findNick_gui(tag->name, &nickIter))
+		string tagName = tag->name;
+
+		if (hub->findNick_gui(tagName.substr(1), &nickIter))
 		{
 			// Select the user in the nick list view
 			GtkTreePath *path = gtk_tree_model_get_path(GTK_TREE_MODEL(hub->nickStore), &nickIter);
@@ -890,20 +1181,20 @@ void Hub::onSendMessage_gui(GtkEntry *entry, gpointer data)
 			{
 				Util::setAway(FALSE);
 				Util::setManualAway(FALSE);
-				hub->addStatusMessage_gui(_("Away mode off"), Sound::NONE);
+				hub->addStatusMessage_gui(_("Away mode off"), Msg::SYSTEM, Sound::NONE);
 			}
 			else
 			{
 				Util::setAway(TRUE);
 				Util::setManualAway(TRUE);
 				Util::setAwayMessage(param);
-				hub->addStatusMessage_gui(_("Away mode on: ") + Util::getAwayMessage(), Sound::NONE);
+				hub->addStatusMessage_gui(_("Away mode on: ") + Util::getAwayMessage(), Msg::SYSTEM, Sound::NONE);
 			}
 		}
 		else if (command == _("back"))
 		{
 			Util::setAway(FALSE);
-			hub->addStatusMessage_gui(_("Away mode off"), Sound::NONE);
+			hub->addStatusMessage_gui(_("Away mode off"), Msg::SYSTEM, Sound::NONE);
 		}
 		else if (command == _("clear"))
 		{
@@ -929,7 +1220,7 @@ void Hub::onSendMessage_gui(GtkEntry *entry, gpointer data)
 				WulforManager::get()->dispatchClientFunc(func2);
 			}
 			else
-				hub->addStatusMessage_gui(_("User not found"), Sound::NONE);
+				hub->addStatusMessage_gui(_("User not found"), Msg::SYSTEM, Sound::NONE);
 		}
 		else if (command == _("grant"))
 		{
@@ -939,12 +1230,12 @@ void Hub::onSendMessage_gui(GtkEntry *entry, gpointer data)
 				WulforManager::get()->dispatchClientFunc(func);
 			}
 			else
-				hub->addStatusMessage_gui(_("User not found"), Sound::NONE);
+				hub->addStatusMessage_gui(_("User not found"), Msg::SYSTEM, Sound::NONE);
 		}
 		else if (command == _("help"))
 		{
 			hub->addStatusMessage_gui(_("Available commands: /away <message>, /back, /clear, /close, /favorite, "\
-				 "/getlist <nick>, /grant <nick>, /help, /join <address>, /me <message>, /pm <nick>, /rebuild, /refresh, /userlist"), Sound::NONE);
+				 "/getlist <nick>, /grant <nick>, /help, /join <address>, /me <message>, /pm <nick>, /rebuild, /refresh, /userlist"), Msg::SYSTEM, Sound::NONE);
 		}
 		else if (command == _("join") && !param.empty())
 		{
@@ -968,9 +1259,9 @@ void Hub::onSendMessage_gui(GtkEntry *entry, gpointer data)
 		else if (command == _("pm"))
 		{
 			if (hub->userMap.find(param) != hub->userMap.end())
-				WulforManager::get()->getMainWindow()->addPrivateMessage_gui(hub->userMap[param]);
+				WulforManager::get()->getMainWindow()->addPrivateMessage_gui(Msg::UNKNOWN, hub->userMap[param]);
 			else
-				hub->addStatusMessage_gui(_("User not found"), Sound::NONE);
+				hub->addStatusMessage_gui(_("User not found"), Msg::SYSTEM, Sound::NONE);
 		}
 		else if (command == _("rebuild"))
 		{
@@ -994,7 +1285,7 @@ void Hub::onSendMessage_gui(GtkEntry *entry, gpointer data)
 		}
 		else
 		{
-			hub->addStatusMessage_gui(_("Unknown command '") + text + _("': type /help for a list of available commands"), Sound::NONE);
+			hub->addStatusMessage_gui(_("Unknown command '") + text + _("': type /help for a list of available commands"), Msg::SYSTEM, Sound::NONE);
 		}
 
 	}
@@ -1108,7 +1399,7 @@ void Hub::onMsgItemClicked_gui(GtkMenuItem *item, gpointer data)
 			if (gtk_tree_model_get_iter(GTK_TREE_MODEL(hub->nickStore), &iter, path))
 			{
 				cid = hub->nickView.getString(&iter, "CID");
-				WulforManager::get()->getMainWindow()->addPrivateMessage_gui(cid);
+				WulforManager::get()->getMainWindow()->addPrivateMessage_gui(Msg::UNKNOWN, cid);
 			}
 			gtk_tree_path_free(path);
 		}
@@ -1302,8 +1593,8 @@ void Hub::getFileList_client(string cid, bool match)
 
 	if (!message.empty())
 	{
-		typedef Func2<Hub, string, Sound::TypeSound> F2;
-		F2 *func = new F2(this, &Hub::addStatusMessage_gui, message, Sound::NONE);
+		typedef Func3<Hub, string, Msg::TypeMsg, Sound::TypeSound> F3;
+		F3 *func = new F3(this, &Hub::addStatusMessage_gui, message, Msg::SYSTEM, Sound::NONE);
 		WulforManager::get()->dispatchGuiFunc(func);
 	}
 }
@@ -1322,8 +1613,8 @@ void Hub::grantSlot_client(string cid)
 		}
 	}
 
-	typedef Func2<Hub, string, Sound::TypeSound> F2;
-	F2 *func = new F2(this, &Hub::addStatusMessage_gui, message, Sound::NONE);
+	typedef Func3<Hub, string, Msg::TypeMsg, Sound::TypeSound> F3;
+	F3 *func = new F3(this, &Hub::addStatusMessage_gui, message, Msg::STATUS, Sound::NONE);
 	WulforManager::get()->dispatchGuiFunc(func);
 }
 
@@ -1344,9 +1635,9 @@ void Hub::redirect_client(string address, bool follow)
 		if (ClientManager::getInstance()->isConnected(address))
 		{
 			string error = _("Unable to connect: already connected to the requested hub");
-			typedef Func2<Hub, string, Sound::TypeSound> F2;
-			F2 *f2 = new F2(this, &Hub::addStatusMessage_gui, error, Sound::NONE);
-			WulforManager::get()->dispatchGuiFunc(f2);
+			typedef Func3<Hub, string, Msg::TypeMsg, Sound::TypeSound> F3;
+			F3 *f3 = new F3(this, &Hub::addStatusMessage_gui, error, Msg::STATUS, Sound::NONE);
+			WulforManager::get()->dispatchGuiFunc(f3);
 			return;
 		}
 
@@ -1382,8 +1673,8 @@ void Hub::refreshFileList_client()
 
 void Hub::addAsFavorite_client()
 {
-	typedef Func2<Hub, string, Sound::TypeSound> F2;
-	F2 *func;
+	typedef Func3<Hub, string, Msg::TypeMsg, Sound::TypeSound> F3;
+	F3 *func;
 
 	FavoriteHubEntry *existingHub = FavoriteManager::getInstance()->getFavoriteHubEntry(client->getHubUrl());
 
@@ -1397,12 +1688,12 @@ void Hub::addAsFavorite_client()
 		aEntry.setNick(client->getMyNick());
 		aEntry.setEncoding(encoding);
 		FavoriteManager::getInstance()->addFavorite(aEntry);
-		func = new F2(this, &Hub::addStatusMessage_gui, _("Favorite hub added"), Sound::NONE);
+		func = new F3(this, &Hub::addStatusMessage_gui, _("Favorite hub added"), Msg::STATUS, Sound::NONE);
 		WulforManager::get()->dispatchGuiFunc(func);
 	}
 	else
 	{
-		func = new F2(this, &Hub::addStatusMessage_gui, _("Favorite hub already exists"), Sound::NONE);
+		func = new F3(this, &Hub::addStatusMessage_gui, _("Favorite hub already exists"), Msg::STATUS, Sound::NONE);
 		WulforManager::get()->dispatchGuiFunc(func);
 	}
 }
@@ -1423,15 +1714,15 @@ void Hub::checkFavoriteUserJoin_client(string cid)
 	if (user && FavoriteManager::getInstance()->isFavoriteUser(user))
 	{
 		string message = WulforUtil::getNicks(user) + _(" has joined");
-		typedef Func2<Hub, std::string, Sound::TypeSound> F2a;
-		F2a *func2a = new F2a(this, &Hub::addStatusMessage_gui, message, Sound::NONE);
-		WulforManager::get()->dispatchGuiFunc(func2a);
+		typedef Func3<Hub, std::string, Msg::TypeMsg, Sound::TypeSound> F3a;
+		F3a *func3a = new F3a(this, &Hub::addStatusMessage_gui, message, Msg::STATUS, Sound::NONE);
+		WulforManager::get()->dispatchGuiFunc(func3a);
 
 		string statusMessage = WulforUtil::getNicks(user) + _(" has joined hub ") + client->getHubName();
-		typedef Func2<MainWindow, string, string> F2b;
-		F2b *func2b = new F2b(WulforManager::get()->getMainWindow(),
-			&MainWindow::addPrivateStatusMessage_gui, cid, statusMessage);
-		WulforManager::get()->dispatchGuiFunc(func2b);
+		typedef Func3<MainWindow, Msg::TypeMsg, string, string> F3b;
+		F3b *func3b = new F3b(WulforManager::get()->getMainWindow(),
+			&MainWindow::addPrivateStatusMessage_gui, Msg::STATUS, cid, statusMessage);
+		WulforManager::get()->dispatchGuiFunc(func3b);
 	}
 }
 
@@ -1455,6 +1746,7 @@ void Hub::getParams_client(ParamMap &params, Identity &id)
 		params["Nick Order"] = "u" + id.getNick();
 	}
 
+	params["MyNick"] = client->getMyNick();
 	params["Nick"] = id.getNick();
 	params["Shared"] = Util::toString(id.getBytesShared());
 	params["Description"] = id.getDescription();
@@ -1466,15 +1758,15 @@ void Hub::getParams_client(ParamMap &params, Identity &id)
 
 void Hub::on(ClientListener::Connecting, Client *) throw()
 {
-	typedef Func2<Hub, string, Sound::TypeSound> F2;
-	F2 *f2 = new F2(this, &Hub::addStatusMessage_gui, _("Connecting to ") + client->getHubUrl() + "...", Sound::NONE);
-	WulforManager::get()->dispatchGuiFunc(f2);
+	typedef Func3<Hub, string, Msg::TypeMsg, Sound::TypeSound> F3;
+	F3 *f3 = new F3(this, &Hub::addStatusMessage_gui, _("Connecting to ") + client->getHubUrl() + "...", Msg::STATUS, Sound::NONE);
+	WulforManager::get()->dispatchGuiFunc(f3);
 }
 
 void Hub::on(ClientListener::Connected, Client *) throw()
 {
-	typedef Func2<Hub, string, Sound::TypeSound> F2;
-	F2 *func = new F2(this, &Hub::addStatusMessage_gui, _("Connected"), Sound::HUB_CONNECT);
+	typedef Func3<Hub, string, Msg::TypeMsg, Sound::TypeSound> F3;
+	F3 *func = new F3(this, &Hub::addStatusMessage_gui, _("Connected"), Msg::STATUS, Sound::HUB_CONNECT);
 	WulforManager::get()->dispatchGuiFunc(func);
 }
 
@@ -1520,15 +1812,15 @@ void Hub::on(ClientListener::UserRemoved, Client *, const OnlineUser &user) thro
 	if (BOOLSETTING(SHOW_JOINS) || (BOOLSETTING(FAV_SHOW_JOINS) &&
 		FavoriteManager::getInstance()->isFavoriteUser(user.getUser())))
 	{
-		typedef Func2<Hub, string, Sound::TypeSound> F2a;
-		F2a *func2a = new F2a(this, &Hub::addStatusMessage_gui, nick + _(" has quit"), Sound::NONE);
-		WulforManager::get()->dispatchGuiFunc(func2a);
+		typedef Func3<Hub, string, Msg::TypeMsg, Sound::TypeSound> F3a;
+		F3a *func3a = new F3a(this, &Hub::addStatusMessage_gui, nick + _(" has quit"), Msg::STATUS, Sound::NONE);
+		WulforManager::get()->dispatchGuiFunc(func3a);
 
 		string statusMessage = nick + _(" has quit hub ") + client->getHubName();
-		typedef Func2<MainWindow, string, string> F2b;
-		F2b *func2b = new F2b(WulforManager::get()->getMainWindow(),
-			&MainWindow::addPrivateStatusMessage_gui, cid, statusMessage);
-		WulforManager::get()->dispatchGuiFunc(func2b);
+		typedef Func3<MainWindow, Msg::TypeMsg, string, string> F3b;
+		F3b *func3b = new F3b(WulforManager::get()->getMainWindow(),
+			&MainWindow::addPrivateStatusMessage_gui, Msg::STATUS, cid, statusMessage);
+		WulforManager::get()->dispatchGuiFunc(func3b);
 	}
 
 	func = new F1(this, &Hub::removeUser_gui, cid);
@@ -1548,9 +1840,9 @@ void Hub::on(ClientListener::Failed, Client *, const string &reason) throw()
 	Func0<Hub> *f0 = new Func0<Hub>(this, &Hub::clearNickList_gui);
 	WulforManager::get()->dispatchGuiFunc(f0);
 
-	typedef Func2<Hub, string, Sound::TypeSound> F2;
-	F2 *f2 = new F2(this, &Hub::addStatusMessage_gui, _("Connect failed: ") + reason, Sound::HUB_DISCONNECT);
-	WulforManager::get()->dispatchGuiFunc(f2);
+	typedef Func3<Hub, string, Msg::TypeMsg, Sound::TypeSound> F3;
+	F3 *f3 = new F3(this, &Hub::addStatusMessage_gui, _("Connect failed: ") + reason, Msg::SYSTEM, Sound::HUB_DISCONNECT);
+	WulforManager::get()->dispatchGuiFunc(f3);
 }
 
 void Hub::on(ClientListener::GetPassword, Client *) throw()
@@ -1585,6 +1877,13 @@ void Hub::on(ClientListener::Message, Client *, const OnlineUser &from, const st
 {
 	if (!message.empty())
 	{
+		Msg::TypeMsg typemsg;
+
+		if (from.getIdentity().isHub()) typemsg = Msg::STATUS;
+		else if (from.getIdentity().isOp()) typemsg = Msg::OPERATOR;
+		else if (from.getUser() == client->getMyIdentity().getUser()) typemsg = Msg::MYOWN;
+		else typemsg = Msg::GENERAL;
+
 		string line;
 
 		if (thirdPerson)
@@ -1597,9 +1896,10 @@ void Hub::on(ClientListener::Message, Client *, const OnlineUser &from, const st
 			if ((message.find("Hub-Security") != string::npos && message.find("was kicked by") != string::npos) ||
 				(message.find("is kicking") != string::npos && message.find("because:") != string::npos))
 			{
-				typedef Func2<Hub, string, Sound::TypeSound> F2;
-				F2 *func = new F2(this, &Hub::addStatusMessage_gui, line, Sound::NONE);
+				typedef Func3<Hub, string, Msg::TypeMsg, Sound::TypeSound> F3;
+				F3 *func = new F3(this, &Hub::addStatusMessage_gui, line, Msg::STATUS, Sound::NONE);
 				WulforManager::get()->dispatchGuiFunc(func);
+
 				return;
 			}
 		}
@@ -1614,8 +1914,8 @@ void Hub::on(ClientListener::Message, Client *, const OnlineUser &from, const st
 			LOG(LogManager::CHAT, params);
 		}
 
-		typedef Func1<Hub, string> F1;
-		F1 *func = new F1(this, &Hub::addMessage_gui, line);
+		typedef Func2<Hub, string, Msg::TypeMsg> F2;
+		F2 *func = new F2(this, &Hub::addMessage_gui, line, typemsg);
 		WulforManager::get()->dispatchGuiFunc(func);
 
 		// Set urgency hint if message contains user's nick
@@ -1640,8 +1940,8 @@ void Hub::on(ClientListener::StatusMessage, Client *, const string &message, int
 			if ((message.find("Hub-Security") != string::npos && message.find("was kicked by") != string::npos) ||
 				(message.find("is kicking") != string::npos && message.find("because:") != string::npos))
 			{
-				typedef Func2<Hub, string, Sound::TypeSound> F2;
-				F2 *func = new F2(this, &Hub::addStatusMessage_gui, message, Sound::NONE);
+				typedef Func3<Hub, string, Msg::TypeMsg, Sound::TypeSound> F3;
+				F3 *func = new F3(this, &Hub::addStatusMessage_gui, message, Msg::STATUS, Sound::NONE);
 				WulforManager::get()->dispatchGuiFunc(func);
 				return;
 			}
@@ -1657,8 +1957,8 @@ void Hub::on(ClientListener::StatusMessage, Client *, const string &message, int
 			LOG(LogManager::STATUS, params);
 		}
 
-		typedef Func1<Hub, string> F1;
-		F1 *func = new F1(this, &Hub::addMessage_gui, message);
+		typedef Func2<Hub, string, Msg::TypeMsg> F2;
+		F2 *func = new F2(this, &Hub::addMessage_gui, message, Msg::STATUS);
 		WulforManager::get()->dispatchGuiFunc(func);
 	}
 }
@@ -1670,6 +1970,12 @@ void Hub::on(ClientListener::PrivateMessage, Client *, const OnlineUser &from,
 	const OnlineUser& user = (replyTo.getUser() == ClientManager::getInstance()->getMe()) ? to : replyTo;
 	string line;
 
+	Msg::TypeMsg typemsg;
+
+	if (from.getIdentity().isOp()) typemsg = Msg::OPERATOR;
+	else if (from.getUser() == client->getMyIdentity().getUser()) typemsg = Msg::MYOWN;
+	else typemsg = Msg::PRIVATE;
+
  	if (thirdPerson)
 		line = "* " + from.getIdentity().getNick() + " " + msg;
 	else
@@ -1678,37 +1984,37 @@ void Hub::on(ClientListener::PrivateMessage, Client *, const OnlineUser &from,
 	if (user.getIdentity().isHub() && BOOLSETTING(IGNORE_HUB_PMS))
 	{
 		error = _("Ignored private message from hub");
-		typedef Func2<Hub, string, Sound::TypeSound> F2;
-		F2 *func = new F2(this, &Hub::addStatusMessage_gui, error, Sound::NONE);
+		typedef Func3<Hub, string, Msg::TypeMsg, Sound::TypeSound> F3;
+		F3 *func = new F3(this, &Hub::addStatusMessage_gui, error, Msg::STATUS, Sound::NONE);
 		WulforManager::get()->dispatchGuiFunc(func);
 	}
 	else if (user.getIdentity().isBot() && BOOLSETTING(IGNORE_BOT_PMS))
 	{
 		error = _("Ignored private message from bot ") + user.getIdentity().getNick();
-		typedef Func2<Hub, string, Sound::TypeSound> F2;
-		F2 *func = new F2(this, &Hub::addStatusMessage_gui, error, Sound::NONE);
+		typedef Func3<Hub, string, Msg::TypeMsg, Sound::TypeSound> F3;
+		F3 *func = new F3(this, &Hub::addStatusMessage_gui, error, Msg::STATUS, Sound::NONE);
 		WulforManager::get()->dispatchGuiFunc(func);
 	}
 	else
 	{
-		typedef Func3<MainWindow, string, string, bool> F3;
-		F3 *func = new F3(WulforManager::get()->getMainWindow(), &MainWindow::addPrivateMessage_gui, 
-			user.getUser()->getCID().toBase32(), line, TRUE);
+		typedef Func4<MainWindow, Msg::TypeMsg, string, string, bool> F4;
+		F4 *func = new F4(WulforManager::get()->getMainWindow(), &MainWindow::addPrivateMessage_gui,
+			typemsg, user.getUser()->getCID().toBase32(), line, TRUE);
 		WulforManager::get()->dispatchGuiFunc(func);
 	}
 }
 
 void Hub::on(ClientListener::NickTaken, Client *) throw()
 {
-	typedef Func2<Hub, string, Sound::TypeSound> F2;
-	F2 *func = new F2(this, &Hub::addStatusMessage_gui, _("Nick already taken"), Sound::NONE);
+	typedef Func3<Hub, string, Msg::TypeMsg, Sound::TypeSound> F3;
+	F3 *func = new F3(this, &Hub::addStatusMessage_gui, _("Nick already taken"), Msg::STATUS, Sound::NONE);
 	WulforManager::get()->dispatchGuiFunc(func);
 }
 
 void Hub::on(ClientListener::SearchFlood, Client *, const string &msg) throw()
 {
-	typedef Func2<Hub, string, Sound::TypeSound> F2;
-	F2 *func = new F2(this, &Hub::addStatusMessage_gui, _("Search spam detected from ") + msg, Sound::NONE);
+	typedef Func3<Hub, string, Msg::TypeMsg, Sound::TypeSound> F3;
+	F3 *func = new F3(this, &Hub::addStatusMessage_gui, _("Search spam detected from ") + msg, Msg::STATUS, Sound::NONE);
 	WulforManager::get()->dispatchGuiFunc(func);
 }
 

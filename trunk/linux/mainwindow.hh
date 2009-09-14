@@ -34,6 +34,7 @@
 #include "entry.hh"
 #include "treeview.hh"
 #include "transfers.hh"
+#include "message.hh"
 
 class BookEntry;
 class Search;
@@ -67,8 +68,8 @@ class MainWindow:
 		void showFinishedDownloads_gui();
 		void showFinishedUploads_gui();
 		void showHub_gui(std::string address, std::string encoding = "");
-		void addPrivateMessage_gui(std::string cid, std::string message = "", bool useSetting = FALSE);
-		void addPrivateStatusMessage_gui(std::string cid, std::string message = "");
+		void addPrivateMessage_gui(Msg::TypeMsg typemsg, std::string cid, std::string message = "", bool useSetting = FALSE);
+		void addPrivateStatusMessage_gui(Msg::TypeMsg typemsg, std::string cid, std::string message = "");
 		void showPublicHubs_gui();
 		void showShareBrowser_gui(dcpp::UserPtr user, std::string file, std::string dir, bool useSetting);
 		Search *addSearch_gui();
@@ -145,6 +146,7 @@ class MainWindow:
 		int64_t lastUpdate, lastUp, lastDown;
 		int emptyStatusWidth;
 		bool minimized;
+		dcpp::StringList EntryList;
 };
 
 #else

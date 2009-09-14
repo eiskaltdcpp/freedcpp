@@ -1473,7 +1473,7 @@ void Search::onPrivateMessageClicked_gui(GtkMenuItem *item, gpointer data)
 				{
 					cid = s->resultView.getString(&iter, "CID");
 					if (!cid.empty())
-						WulforManager::get()->getMainWindow()->addPrivateMessage_gui(cid);
+						WulforManager::get()->getMainWindow()->addPrivateMessage_gui(Msg::UNKNOWN, cid);
 				}
 				while (parent && WulforUtil::getNextIter_gui(s->sortedFilterModel, &iter, TRUE, FALSE));
 			}

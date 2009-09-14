@@ -30,6 +30,8 @@
 #include "dialogentry.hh"
 #include "treeview.hh"
 
+class WulforSettingsManager;
+
 class Settings:
 	public DialogEntry
 {
@@ -40,8 +42,9 @@ class Settings:
 	private:
 		// GUI functions
 		void addOption_gui(GtkListStore *store, const std::string &name, dcpp::SettingsManager::IntSetting setting);
-		void addOption_gui(GtkListStore *store, const std::string &name, const std::string &key1, const std::string &key2);
-		void addOption_gui(GtkListStore *store, const std::string &name, const std::string &key1);
+		void addOption_gui(GtkListStore *store, WulforSettingsManager *wsm, const std::string &name,
+			const std::string &key1, const std::string &key2, const std::string &key3, const std::string &key4);
+		void addOption_gui(GtkListStore *store, WulforSettingsManager *wsm, const std::string &name, const std::string &key1);
 		void createOptionsView_gui(TreeView &treeView, GtkListStore *&store, const std::string &widgetName);
 		void saveOptionsView_gui(TreeView &treeView, dcpp::SettingsManager *sm);
 		void initPersonal_gui();
@@ -52,6 +55,8 @@ class Settings:
 		void initLog_gui();
 		void initAdvanced_gui();
 		void addShare_gui(std::string path, std::string name, std::string error);
+		void selectTextColor_gui(const int select);
+		void selectTextStyle_gui(const int select);
 		void loadUserCommands_gui();
 		void saveUserCommand(dcpp::UserCommand *uc);
 		void updateUserCommandTextSent_gui();
@@ -114,6 +119,11 @@ class Settings:
 		static void onSoundFileBrowseClicked_gui(GtkWidget *widget, gpointer data);
 		static void onSoundPlayButton_gui(GtkWidget *widget, gpointer data);
 		static void onSoundNoneButton_gui(GtkWidget *widget, gpointer data);
+		static void onTextColorForeClicked_gui(GtkWidget *widget, gpointer data);
+		static void onTextColorBackClicked_gui(GtkWidget *widget, gpointer data);
+		static void onTextColorBWClicked_gui(GtkWidget *widget, gpointer data);
+		static void onTextStyleClicked_gui(GtkWidget *widget, gpointer data);
+		static void onTextStyleDefaultClicked_gui(GtkWidget *widget, gpointer data);
 
 		// Client functions
 		void saveSettings_client();
@@ -127,11 +137,12 @@ class Settings:
 		GtkListStore *downloadToStore, *publicListStore, *queueStore,
 			*shareStore, *appearanceStore, *tabStore, *windowStore1,
 			*windowStore2, *windowStore3, *advancedStore, *certificatesStore, *userCommandStore,
-			*previewAppToStore, *soundStore;
+			*previewAppToStore, *soundStore, *textStyleStore;
 		TreeView downloadToView, publicListView, queueView, shareView,
 			appearanceView, tabView, windowView1, windowView2,
 			windowView3, advancedView, certificatesView, userCommandView,
-			previewAppView, soundView;
+			previewAppView, soundView, textStyleView;
+		GtkTextBuffer *textStyleBuffer;
 };
 
 #else

@@ -29,8 +29,10 @@
 #include "bookentry.hh"
 #include "treeview.hh"
 #include "sound.hh"
+#include "message.hh"
 
 class UserCommandMenu;
+class WulforSettingsManager;
 
 class Hub:
 	public BookEntry,
@@ -44,7 +46,26 @@ class Hub:
 		// Client functions
 		void reconnect_client();
 
+		// GUI functions
+		void updateTags_gui();
+
 	private:
+		typedef enum
+		{
+			TAG_FIRST = 0,
+			TAG_GENERAL = TAG_FIRST,
+			TAG_MYOWN,
+			TAG_SYSTEM,
+			TAG_STATUS,
+			TAG_TIMESTAMP,
+			/*-*/
+			TAG_MYNICK,
+			TAG_NICK,
+			TAG_OPERATOR,
+			TAG_URL,
+			TAG_LAST
+		} TypeTag;
+
 		typedef std::map<std::string, std::string> ParamMap;
 
 		// GUI functions
@@ -57,10 +78,13 @@ class Hub:
 		void clearNickList_gui();
 		void popupNickMenu_gui();
 		void getPassword_gui();
-		void addMessage_gui(std::string message);
+		void addMessage_gui(std::string message, Msg::TypeMsg typemsg);
 		void applyTags_gui(const std::string &line);
-		void addStatusMessage_gui(std::string message, Sound::TypeSound sound);
+		void addStatusMessage_gui(std::string message, Msg::TypeMsg typemsg, Sound::TypeSound sound);
+		void applyEmoticons_gui();
 		void updateCursor_gui(GtkWidget *widget);
+		void getSettingTag_gui(WulforSettingsManager *wsm, TypeTag type, std::string &fore, std::string &back, int &bold, int &italic);
+		GtkTextTag* createTag_gui(const std::string &tagname, TypeTag type);
 
 		// GUI callbacks
 		static gboolean onFocusIn_gui(GtkWidget *widget, GdkEventFocus *event, gpointer data);
@@ -124,13 +148,14 @@ class Hub:
 		std::tr1::unordered_map<std::string, std::string> userMap;
 		std::tr1::unordered_map<std::string, GdkPixbuf *> userIcons;
 		std::tr1::unordered_map<std::string, GtkTreeIter> userIters;
+		GtkTextTag *TagsMap[TAG_LAST];
 		std::string completionKey;
 		dcpp::Client *client;
 		TreeView nickView;
 		GtkListStore *nickStore;
 		GtkTreeSelection *nickSelection;
 		GtkTextBuffer *chatBuffer;
-		GtkTextMark *chatMark;
+		GtkTextMark *chatMark, *start_mark, *end_mark, *tag_mark;
 		gint oldType;
 		std::vector<std::string> history;
 		int historyIndex;
@@ -144,6 +169,9 @@ class Hub:
 		std::string address;
 		std::string encoding;
 		bool scrollToBottom;
+		std::string myNick;
+		std::string tagPrefix;
+		TypeTag tagMsg, tagNick;
 };
 
 #else
