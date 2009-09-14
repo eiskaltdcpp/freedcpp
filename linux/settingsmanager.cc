@@ -47,6 +47,26 @@ WulforSettingsManager::WulforSettingsManager():
 	defaultInt["toolbar-style"] = 5;
 	defaultInt["sound-pm-open"] = 0;
 	defaultInt["sound-pm"] = 1;
+	defaultInt["text-general-bold"] = TEXT_WEIGHT_NORMAL;
+	defaultInt["text-general-italic"] = TEXT_STYLE_NORMAL;
+	defaultInt["text-myown-bold"] = TEXT_WEIGHT_BOLD;
+	defaultInt["text-myown-italic"] = TEXT_STYLE_NORMAL;
+	defaultInt["text-private-bold"] = TEXT_WEIGHT_NORMAL;
+	defaultInt["text-private-italic"] = TEXT_STYLE_NORMAL;
+	defaultInt["text-system-bold"] = TEXT_WEIGHT_BOLD;
+	defaultInt["text-system-italic"] = TEXT_STYLE_NORMAL;
+	defaultInt["text-status-bold"] = TEXT_WEIGHT_BOLD;
+	defaultInt["text-status-italic"] = TEXT_STYLE_NORMAL;
+	defaultInt["text-timestamp-bold"] = TEXT_WEIGHT_BOLD;
+	defaultInt["text-timestamp-italic"] = TEXT_STYLE_NORMAL;
+	defaultInt["text-mynick-bold"] = TEXT_WEIGHT_BOLD;
+	defaultInt["text-mynick-italic"] = TEXT_STYLE_NORMAL;
+	defaultInt["text-fav-bold"] = TEXT_WEIGHT_BOLD;
+	defaultInt["text-fav-italic"] = TEXT_STYLE_NORMAL;
+	defaultInt["text-op-bold"] = TEXT_WEIGHT_BOLD;
+	defaultInt["text-op-italic"] = TEXT_STYLE_NORMAL;
+	defaultInt["text-url-bold"] = TEXT_WEIGHT_NORMAL;
+	defaultInt["text-url-italic"] = TEXT_STYLE_NORMAL;
 	defaultString["downloadqueue-order"] = "";
 	defaultString["downloadqueue-width"] = "";
 	defaultString["downloadqueue-visibility"] = "";
@@ -78,6 +98,26 @@ WulforSettingsManager::WulforSettingsManager():
 	defaultString["sound-private-message"] = "";
 	defaultString["sound-hub-connect"] = "";
 	defaultString["sound-hub-disconnect"] = "";
+	defaultString["text-general-back-color"] = "#FFFFFF";
+	defaultString["text-general-fore-color"] = "#4D4D4D";
+	defaultString["text-myown-back-color"] = "#FFFFFF";
+	defaultString["text-myown-fore-color"] = "#207505";
+	defaultString["text-private-back-color"] = "#FFFFFF";
+	defaultString["text-private-fore-color"] = "#2763CE";
+	defaultString["text-system-back-color"] = "#FFFFFF";
+	defaultString["text-system-fore-color"] = "#1A1A1A";
+	defaultString["text-status-back-color"] = "#FFFFFF";
+	defaultString["text-status-fore-color"] = "#7F7F7F";
+	defaultString["text-timestamp-back-color"] = "#FFFFFF";
+	defaultString["text-timestamp-fore-color"] = "#43629A";
+	defaultString["text-mynick-back-color"] = "#FFFFFF";
+	defaultString["text-mynick-fore-color"] = "#A52A2A";
+	defaultString["text-fav-back-color"] = "#FFFFFF";
+	defaultString["text-fav-fore-color"] = "#FFA500";
+	defaultString["text-op-back-color"] = "#FFFFFF";
+	defaultString["text-op-fore-color"] = "#0000FF";
+	defaultString["text-url-back-color"] = "#FFFFFF";
+	defaultString["text-url-fore-color"] = "#0000FF";
 
 	load();
 }
@@ -89,9 +129,12 @@ WulforSettingsManager::~WulforSettingsManager()
 	for_each(previewApps.begin(), previewApps.end(), DeleteFunction());
 }
 
-int WulforSettingsManager::getInt(const string &key)
+int WulforSettingsManager::getInt(const string &key, bool useDefault)
 {
 	dcassert(intMap.find(key) != intMap.end() || defaultInt.find(key) != defaultInt.end());
+
+	if (useDefault)
+		return defaultInt[key];
 
 	if (intMap.find(key) == intMap.end())
 		return defaultInt[key];
@@ -99,9 +142,12 @@ int WulforSettingsManager::getInt(const string &key)
 		return intMap[key];
 }
 
-string WulforSettingsManager::getString(const string &key)
+string WulforSettingsManager::getString(const string &key, bool useDefault)
 {
 	dcassert(stringMap.find(key) != stringMap.end() || defaultString.find(key) != defaultString.end());
+
+	if (useDefault)
+		return defaultString[key];
 
 	if (stringMap.find(key) == stringMap.end())
 		return defaultString[key];
@@ -109,9 +155,9 @@ string WulforSettingsManager::getString(const string &key)
 		return stringMap[key];
 }
 
-bool WulforSettingsManager::getBool(const string &key)
+bool WulforSettingsManager::getBool(const string &key, bool useDefault)
 {
-	return (getInt(key) != 0);
+	return (getInt(key, useDefault) != 0);
 }
 
 void WulforSettingsManager::set(const string &key, int value)

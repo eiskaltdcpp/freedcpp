@@ -245,6 +245,16 @@ void WulforUtil::openURItoApp(const std::string &cmd)
 	}
 }
 
+string WulforUtil::colorToString(const GdkColor *color)
+{
+	gchar strcolor[14];
+
+	g_snprintf(strcolor, sizeof(strcolor), "#%04X%04X%04X",
+		color->red, color->green, color->blue);
+
+	return strcolor;
+}
+
 string WulforUtil::makeMagnet(const string &name, const int64_t size, const string &tth)
 {
 	if (name.empty() || tth.empty())

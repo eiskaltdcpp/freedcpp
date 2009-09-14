@@ -485,7 +485,7 @@ void DownloadQueue::updateFileView_gui()
 void DownloadQueue::sendMessage_gui(string cid)
 {
 	if (!cid.empty())
-		WulforManager::get()->getMainWindow()->addPrivateMessage_gui(cid);
+		WulforManager::get()->getMainWindow()->addPrivateMessage_gui(Msg::UNKNOWN, cid);
 }
 
 gboolean DownloadQueue::onDirButtonPressed_gui(GtkWidget *widget, GdkEventButton *event, gpointer data)

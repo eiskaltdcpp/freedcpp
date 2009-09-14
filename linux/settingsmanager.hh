@@ -33,6 +33,12 @@
 #define WGETS(key) WulforSettingsManager::getInstance()->getString(key)
 #define WGETB(key) WulforSettingsManager::getInstance()->getBool(key)
 
+/* default font theme */
+#define TEXT_WEIGHT_NORMAL 400
+#define TEXT_WEIGHT_BOLD   700
+#define TEXT_STYLE_NORMAL  0
+#define TEXT_STYLE_ITALIC  2
+
 class PreviewApp
 {
 	public:
@@ -55,9 +61,9 @@ class WulforSettingsManager : public dcpp::Singleton<WulforSettingsManager>
 		WulforSettingsManager();
 		virtual ~WulforSettingsManager();
 
-		int getInt(const std::string &key);
-		bool getBool(const std::string &key);
-		std::string getString(const std::string &key);
+		int getInt(const std::string &key, bool useDefault = false);
+		bool getBool(const std::string &key, bool useDefault = false);
+		std::string getString(const std::string &key, bool useDefault = false);
 		void set(const std::string &key, int value);
 		void set(const std::string &key, bool value);
 		void set(const std::string &key, const std::string &value);

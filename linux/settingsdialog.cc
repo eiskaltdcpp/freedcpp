@@ -44,6 +44,9 @@ Settings::Settings(GtkWindow* parent):
 	gtk_dialog_set_alternative_button_order(GTK_DIALOG(getWidget("dirChooserDialog")), GTK_RESPONSE_OK, GTK_RESPONSE_CANCEL, -1);
 	gtk_dialog_set_alternative_button_order(GTK_DIALOG(getWidget("fileChooserDialog")), GTK_RESPONSE_OK, GTK_RESPONSE_CANCEL, -1);
 
+	textStyleBuffer = gtk_text_buffer_new(NULL);
+	gtk_text_view_set_buffer(GTK_TEXT_VIEW(getWidget("textViewPreviewStyles")), textStyleBuffer);
+
 	// Initialize the tabs in the GtkNotebook.
 	initPersonal_gui();
 	initConnection_gui();
@@ -65,11 +68,14 @@ Settings::~Settings()
 	gtk_widget_destroy(getWidget("dirChooserDialog"));
 	gtk_widget_destroy(getWidget("fileChooserDialog"));
 	gtk_widget_destroy(getWidget("commandDialog"));
+	gtk_widget_destroy(getWidget("fontSelectionDialog"));
+	gtk_widget_destroy(getWidget("colorSelectionDialog"));
 }
 
 void Settings::saveSettings_client()
 {
 	SettingsManager *sm = SettingsManager::getInstance();
+	WulforSettingsManager *wsm = WulforSettingsManager::getInstance();
 	string path;
 
 	{ // Personal
@@ -196,7 +202,22 @@ void Settings::saveSettings_client()
 			WSET("sound-pm-open", gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(getWidget("soundPMWindowCheckButton"))));
 		}
 
-		{/*Colors - not implemented*/}
+		{ // Colors & Fonts
+
+			GtkTreeIter iter;
+			GtkTreeModel *m = GTK_TREE_MODEL(textStyleStore);
+			gboolean valid = gtk_tree_model_get_iter_first(m, &iter);
+
+			while (valid)
+			{
+				wsm->set(textStyleView.getString(&iter, "keyForeColor"), textStyleView.getString(&iter, "ForeColor"));
+				wsm->set(textStyleView.getString(&iter, "keyBackColor"), textStyleView.getString(&iter, "BackColor"));
+				wsm->set(textStyleView.getString(&iter, "keyBolt"), textStyleView.getValue<int>(&iter, "Bolt"));
+				wsm->set(textStyleView.getString(&iter, "keyItalic"), textStyleView.getValue<int>(&iter, "Italic"));
+
+				valid = gtk_tree_model_iter_next(m, &iter);
+			}
+		}
 
 		{ // Window
 			// Auto-open on startup
@@ -266,31 +287,37 @@ void Settings::addOption_gui(GtkListStore *store, const string &name, SettingsMa
 
 /* Creates a generic sounds options GtkTreeView */
 
-void Settings::addOption_gui(GtkListStore *store, const string &name, const string &key1)
+void Settings::addOption_gui(GtkListStore *store, WulforSettingsManager *wsm, const string &name, const string &key1)
 {
 	GtkTreeIter iter;
 	gtk_list_store_append(store, &iter);
 	gtk_list_store_set(store, &iter,
 		0, name.c_str(),
-		1, WulforSettingsManager::getInstance()->getString(key1).c_str(),
+		1, wsm->getString(key1).c_str(),
 		2, key1.c_str(),
 		-1);
 }
 
 /* Creates a generic colors and fonts options GtkTreeView */
-/*
-void Settings::addOption_gui(GtkListStore *store, const string &name, const string &key1, const string &key2)
+
+void Settings::addOption_gui(GtkListStore *store, WulforSettingsManager *wsm, const string &name,
+	const string &key1, const string &key2, const string &key3, const string &key4)
 {
-	GtkTreeIter iter;
+ 	GtkTreeIter iter;
 	gtk_list_store_append(store, &iter);
 	gtk_list_store_set(store, &iter,
 		0, name.c_str(),
-		1, WulforSettingsManager::getInstance()->getString(key1).c_str(),
-		2, key1.c_str(),
-		3, key2.c_str(),
+		1, wsm->getString(key1).c_str(),
+		2, wsm->getString(key2).c_str(),
+		3, wsm->getInt(key3),
+		4, wsm->getInt(key4),
+		5, key1.c_str(),
+		6, key2.c_str(),
+		7, key3.c_str(),
+		8, key4.c_str(),
 		-1);
 }
-*/
+
 /* Creates a generic checkbox-based options GtkTreeView */
 
 void Settings::createOptionsView_gui(TreeView &treeView, GtkListStore *&store, const string &widgetName)
@@ -584,6 +611,8 @@ void Settings::initSharing_gui()
 
 void Settings::initAppearance_gui()
 {
+	WulforSettingsManager *wsm = WulforSettingsManager::getInstance();
+
 	{ // Appearance
 		createOptionsView_gui(appearanceView, appearanceStore, "appearanceOptionsTreeView");
 
@@ -631,12 +660,12 @@ void Settings::initAppearance_gui()
 		gtk_tree_view_set_model(soundView.get(), GTK_TREE_MODEL(soundStore));
 		g_object_unref(soundStore);
 
-		addOption_gui(soundStore, _("Download begins"), "sound-download-begins");
-		addOption_gui(soundStore, _("Download finished"), "sound-download-finished");
-		addOption_gui(soundStore, _("Upload finished"), "sound-upload-finished");
-		addOption_gui(soundStore, _("Private message"), "sound-private-message");
-		addOption_gui(soundStore, _("Hub connected"), "sound-hub-connect");
-		addOption_gui(soundStore, _("Hub disconnected"), "sound-hub-disconnect");
+		addOption_gui(soundStore, wsm, _("Download begins"), "sound-download-begins");
+		addOption_gui(soundStore, wsm, _("Download finished"), "sound-download-finished");
+		addOption_gui(soundStore, wsm, _("Upload finished"), "sound-upload-finished");
+		addOption_gui(soundStore, wsm, _("Private message"), "sound-private-message");
+		addOption_gui(soundStore, wsm, _("Hub connected"), "sound-hub-connect");
+		addOption_gui(soundStore, wsm, _("Hub disconnected"), "sound-hub-disconnect");
 
 		gtk_widget_set_sensitive(getWidget("soundPlayButton"), TRUE);
 		gtk_widget_set_sensitive(getWidget("soundNoneButton"), TRUE);
@@ -646,7 +675,126 @@ void Settings::initAppearance_gui()
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(getWidget("soundPMWindowCheckButton")), WGETB("sound-pm-open"));
 	}
 
-	{/*Colors - not implemented*/}
+	{ // Colors & Fonts
+		g_signal_connect(getWidget("textColorForeButton"), "clicked", G_CALLBACK(onTextColorForeClicked_gui), (gpointer)this);
+		g_signal_connect(getWidget("textColorBackButton"), "clicked", G_CALLBACK(onTextColorBackClicked_gui), (gpointer)this);
+		g_signal_connect(getWidget("textColorBWButton"), "clicked", G_CALLBACK(onTextColorBWClicked_gui), (gpointer)this);
+		g_signal_connect(getWidget("textStyleButton"), "clicked", G_CALLBACK(onTextStyleClicked_gui), (gpointer)this);
+		g_signal_connect(getWidget("textStylesDefaultButton"), "clicked", G_CALLBACK(onTextStyleDefaultClicked_gui), (gpointer)this);
+
+		textStyleView.setView(GTK_TREE_VIEW(getWidget("treeViewAvailableStyles")));
+		textStyleView.insertColumn("Style", G_TYPE_STRING, TreeView::STRING, -1);
+		textStyleView.insertHiddenColumn("ForeColor", G_TYPE_STRING);
+		textStyleView.insertHiddenColumn("BackColor", G_TYPE_STRING);
+		textStyleView.insertHiddenColumn("Bolt", G_TYPE_INT);
+		textStyleView.insertHiddenColumn("Italic", G_TYPE_INT);
+		textStyleView.insertHiddenColumn("keyForeColor", G_TYPE_STRING);
+		textStyleView.insertHiddenColumn("keyBackColor", G_TYPE_STRING);
+		textStyleView.insertHiddenColumn("keyBolt", G_TYPE_STRING);
+		textStyleView.insertHiddenColumn("keyItalic", G_TYPE_STRING);
+		textStyleView.finalize();
+
+		textStyleStore = gtk_list_store_newv(textStyleView.getColCount(), textStyleView.getGTypes());
+		gtk_tree_view_set_model(textStyleView.get(), GTK_TREE_MODEL(textStyleStore));
+		g_object_unref(textStyleStore);
+
+		// Available styles
+		addOption_gui(textStyleStore, wsm, _("General text"),
+			"text-general-fore-color", "text-general-back-color", "text-general-bold", "text-general-italic");
+
+		addOption_gui(textStyleStore, wsm, _("My nick"),
+			"text-mynick-fore-color", "text-mynick-back-color", "text-mynick-bold", "text-mynick-italic");
+
+		addOption_gui(textStyleStore, wsm, _("My own message"),
+			"text-myown-fore-color", "text-myown-back-color", "text-myown-bold", "text-myown-italic");
+
+		addOption_gui(textStyleStore, wsm, _("Private message"),
+			"text-private-fore-color", "text-private-back-color", "text-private-bold", "text-private-italic");
+
+		addOption_gui(textStyleStore, wsm, _("System message"),
+			"text-system-fore-color", "text-system-back-color", "text-system-bold", "text-system-italic");
+
+		addOption_gui(textStyleStore, wsm, _("Status message"),
+			"text-status-fore-color", "text-status-back-color", "text-status-bold", "text-status-italic");
+
+		addOption_gui(textStyleStore, wsm, _("Timestamp"),
+			"text-timestamp-fore-color", "text-timestamp-back-color", "text-timestamp-bold", "text-timestamp-italic");
+
+		addOption_gui(textStyleStore, wsm, _("URL"),
+			"text-url-fore-color", "text-url-back-color", "text-url-bold", "text-url-italic");
+
+		addOption_gui(textStyleStore, wsm, _("Favorite User"),
+			"text-fav-fore-color", "text-fav-back-color", "text-fav-bold", "text-fav-italic");
+
+		addOption_gui(textStyleStore, wsm, _("Operator"),
+			"text-op-fore-color", "text-op-back-color", "text-op-bold", "text-op-italic");
+
+		// Preview style
+		GtkTreeIter treeIter;
+		GtkTreeModel *m = GTK_TREE_MODEL(textStyleStore);
+		gboolean valid = gtk_tree_model_get_iter_first(m, &treeIter);
+
+		GtkTextIter textIter, textStartIter, textEndIter;
+		string line, style;
+
+		string timestamp = "[" + Util::getShortTimeString() + "] ";
+		const gint ts_strlen = g_utf8_strlen(timestamp.c_str(), -1);
+		string fore = wsm->getString("text-timestamp-fore-color");
+		string back = wsm->getString("text-timestamp-back-color");
+		int bold = wsm->getInt("text-timestamp-bold");
+		int italic = wsm->getInt("text-timestamp-italic");
+
+		GtkTextTag *tag = NULL;
+		GtkTextTag *tagTimeStamp = gtk_text_buffer_create_tag(textStyleBuffer, _("Timestamp"),
+			"background", back.c_str(),
+			"foreground", fore.c_str(),
+			"weight", (PangoWeight)bold,
+			"style", (PangoStyle)italic,
+			NULL);
+
+		gint row_count = 0;
+
+		while (valid)
+		{
+			style = textStyleView.getString(&treeIter, "Style");
+			fore = wsm->getString(textStyleView.getString(&treeIter, "keyForeColor"));
+			back = wsm->getString(textStyleView.getString(&treeIter, "keyBackColor"));
+			bold = wsm->getInt(textStyleView.getString(&treeIter, "keyBolt"));
+			italic = wsm->getInt(textStyleView.getString(&treeIter, "keyItalic"));
+			const gint st_strlen = g_utf8_strlen(style.c_str(), -1);
+
+			line = timestamp + style + "\n";
+
+			gtk_text_buffer_get_end_iter(textStyleBuffer, &textIter);
+			gtk_text_buffer_insert(textStyleBuffer, &textIter, line.c_str(), line.size());
+
+			textStartIter = textEndIter = textIter;
+
+			// apply text style
+			gtk_text_iter_backward_chars(&textStartIter, st_strlen + 1);
+
+			if (row_count != 6)
+				tag = gtk_text_buffer_create_tag(textStyleBuffer, style.c_str(),
+					"background", back.c_str(),
+					"foreground", fore.c_str(),
+					"weight", (PangoWeight)bold,
+					"style", (PangoStyle)italic,
+					NULL);
+			else
+				tag = tagTimeStamp;
+
+			gtk_text_buffer_apply_tag(textStyleBuffer, tag, &textStartIter, &textEndIter);
+
+			// apply timestamp style
+			gtk_text_iter_backward_chars(&textStartIter, ts_strlen);
+			gtk_text_iter_backward_chars(&textEndIter, st_strlen + 2);
+			gtk_text_buffer_apply_tag(textStyleBuffer, tagTimeStamp, &textStartIter, &textEndIter);
+
+			row_count++;
+
+			valid = gtk_tree_model_iter_next(m, &treeIter);
+		}
+	}
 
 	{ // Window
 		// Auto-open
@@ -853,6 +1001,36 @@ void Settings::onSoundNoneButton_gui(GtkWidget *widget, gpointer data)
 		gtk_list_store_set(s->soundStore, &iter, s->soundView.col(_("File")), "", -1);
 }
 
+void Settings::onTextColorForeClicked_gui(GtkWidget *widget, gpointer data)
+{
+	Settings *s = (Settings *)data;
+	s->selectTextColor_gui(0);
+}
+
+void Settings::onTextColorBackClicked_gui(GtkWidget *widget, gpointer data)
+{
+	Settings *s = (Settings *)data;
+	s->selectTextColor_gui(1);
+}
+
+void Settings::onTextColorBWClicked_gui(GtkWidget *widget, gpointer data)
+{
+	Settings *s = (Settings *)data;
+	s->selectTextColor_gui(2);
+}
+
+void Settings::onTextStyleClicked_gui(GtkWidget *widget, gpointer data)
+{
+	Settings *s = (Settings *)data;
+	s->selectTextStyle_gui(0);
+}
+
+void Settings::onTextStyleDefaultClicked_gui(GtkWidget *widget, gpointer data)
+{
+	Settings *s = (Settings *)data;
+	s->selectTextStyle_gui(1);
+}
+
 void Settings::onPreviewAdd_gui(GtkWidget *widget, gpointer data)
 {
 	Settings *s = (Settings*)data;
@@ -1002,6 +1180,179 @@ void Settings::onAddShare_gui(GtkWidget *widget, gpointer data)
 				F2 *func = new F2(s, &Settings::addShare_client, path, name);
 				WulforManager::get()->dispatchClientFunc(func);
 			}
+		}
+	}
+}
+
+void Settings::selectTextColor_gui(const int select)
+{
+	GtkTreeIter iter;
+
+	if (select == 2)
+	{
+		/* black and white style */
+		GtkTreeModel *m = GTK_TREE_MODEL(textStyleStore);
+		gboolean valid = gtk_tree_model_get_iter_first(m, &iter);
+
+		string style = "";
+		GtkTextTag *tag = NULL;
+		GtkTextTagTable *tag_table = gtk_text_buffer_get_tag_table(textStyleBuffer);
+
+		while (valid)
+		{
+			gtk_list_store_set(textStyleStore, &iter,
+				textStyleView.col("ForeColor"), "#000000",
+				textStyleView.col("BackColor"), "#FFFFFF", -1);
+
+			style = textStyleView.getString(&iter, "Style");
+			tag = gtk_text_tag_table_lookup(tag_table, style.c_str());
+
+			if (tag)
+				g_object_set(tag, "foreground", "#000000", "background", "#FFFFFF", NULL);
+
+			valid = gtk_tree_model_iter_next(m, &iter);
+		}
+
+		gtk_widget_queue_draw(getWidget("textViewPreviewStyles"));
+
+		return;
+	}
+
+	GtkTreeSelection *selection = gtk_tree_view_get_selection(textStyleView.get());
+
+	if (!gtk_tree_selection_get_selected(selection, NULL, &iter))
+	{
+		showErrorDialog(_("selected style failed"));
+		return;
+	}
+
+	GdkColor color;
+	string currentcolor = "";
+	GtkColorSelection *colorsel = GTK_COLOR_SELECTION(getWidget("colorsel-color_selection"));
+
+	if (select == 0)
+		currentcolor = textStyleView.getString(&iter, "ForeColor");
+	else
+		currentcolor = textStyleView.getString(&iter, "BackColor");
+
+	if (gdk_color_parse(currentcolor.c_str(), &color))
+		gtk_color_selection_set_current_color(colorsel, &color);
+
+	gint response = gtk_dialog_run(GTK_DIALOG(getWidget("colorSelectionDialog")));
+	gtk_widget_hide(getWidget("colorSelectionDialog"));
+
+	if (response == GTK_RESPONSE_OK)
+	{
+		gtk_color_selection_get_current_color(colorsel, &color);
+
+		string ground = "";
+		string strcolor = WulforUtil::colorToString(&color);
+		string style = textStyleView.getString(&iter, "Style");
+
+		if (select == 0)
+		{
+			ground = "foreground-gdk";
+			gtk_list_store_set(textStyleStore, &iter, textStyleView.col("ForeColor"), strcolor.c_str(), -1);
+		}
+		else
+		{
+			ground = "background-gdk";
+			gtk_list_store_set(textStyleStore, &iter, textStyleView.col("BackColor"), strcolor.c_str(), -1);
+		}
+
+		GtkTextTag *tag = gtk_text_tag_table_lookup(gtk_text_buffer_get_tag_table(textStyleBuffer), style.c_str());
+
+		if (tag)
+			g_object_set(tag, ground.c_str(), &color, NULL);
+
+		gtk_widget_queue_draw(getWidget("textViewPreviewStyles"));
+	}
+}
+
+void Settings::selectTextStyle_gui(const int select)
+{
+	GtkTreeIter iter;
+	int bolt, italic;
+	GtkTextTag *tag = NULL;
+	string style = "";
+
+	WulforSettingsManager *wsm = WulforSettingsManager::getInstance();
+
+	if (select == 1)
+	{
+		/* default style */
+		GtkTreeModel *m = GTK_TREE_MODEL(textStyleStore);
+		gboolean valid = gtk_tree_model_get_iter_first(m, &iter);
+		GtkTextTagTable *tag_table = gtk_text_buffer_get_tag_table(textStyleBuffer);
+		string fore, back;
+
+		while (valid)
+		{
+			style = textStyleView.getString(&iter, "Style");
+			fore = wsm->getString(textStyleView.getString(&iter, "keyForeColor"), true);
+			back = wsm->getString(textStyleView.getString(&iter, "keyBackColor"), true);
+			bolt = wsm->getInt(textStyleView.getString(&iter, "keyBolt"), true);
+			italic = wsm->getInt(textStyleView.getString(&iter, "keyItalic"), true);
+
+			gtk_list_store_set(textStyleStore, &iter,
+				textStyleView.col("ForeColor"), fore.c_str(),
+				textStyleView.col("BackColor"), back.c_str(),
+				textStyleView.col("Bolt"), bolt,
+				textStyleView.col("Italic"), italic,
+				-1);
+
+			tag = gtk_text_tag_table_lookup(tag_table, style.c_str());
+
+			if (tag)
+				g_object_set(tag,
+					"foreground", fore.c_str(),
+					"background", back.c_str(),
+					"weight", (PangoWeight)bolt,
+					"style", (PangoStyle)italic,
+					NULL);
+
+			valid = gtk_tree_model_iter_next(m, &iter);
+		}
+
+		gtk_widget_queue_draw(getWidget("textViewPreviewStyles"));
+
+		return;
+	}
+
+	GtkTreeSelection *selection = gtk_tree_view_get_selection(textStyleView.get());
+
+	if (!gtk_tree_selection_get_selected(selection, NULL, &iter))
+	{
+		showErrorDialog(_("selected style failed"));
+		return;
+	}
+
+	gint response = gtk_dialog_run(GTK_DIALOG(getWidget("fontSelectionDialog")));
+	gtk_widget_hide(getWidget("fontSelectionDialog"));
+
+	if (response == GTK_RESPONSE_OK)
+	{
+		GtkFontSelection *fontsel = GTK_FONT_SELECTION(getWidget("fontsel-font_selection"));
+		gchar *temp = gtk_font_selection_get_font_name(fontsel);
+
+		if (temp)
+		{
+			string font_name = temp;
+
+			font_name.find("Bold") != string::npos ? bolt = TEXT_WEIGHT_BOLD: bolt = TEXT_WEIGHT_NORMAL;
+			font_name.find("Italic") != string::npos ? italic = TEXT_STYLE_ITALIC: italic = TEXT_STYLE_NORMAL;
+
+			style = textStyleView.getString(&iter, "Style");
+			gtk_list_store_set(textStyleStore, &iter, textStyleView.col("Bolt"), bolt, textStyleView.col("Italic"), italic, -1);
+
+			tag = gtk_text_tag_table_lookup(gtk_text_buffer_get_tag_table(textStyleBuffer), style.c_str());
+
+			if (tag)
+				g_object_set(tag, "weight", (PangoWeight)bolt, "style", (PangoStyle)italic, NULL);
+
+			g_free(temp);
+
+			gtk_widget_queue_draw(getWidget("textViewPreviewStyles"));
 		}
 	}
 }

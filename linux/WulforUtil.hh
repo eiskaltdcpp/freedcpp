@@ -28,6 +28,8 @@
 #include <dcpp/CID.h>
 #include <dcpp/User.h>
 
+#define C_EMPTY(x) ((x) == NULL || (x)[0] == '\0')
+
 class WulforUtil
 {
 	public:
@@ -47,6 +49,7 @@ class WulforUtil
 		static std::vector<std::string>& getCharsets();
 		static void openURI(const std::string &uri);
 		static void openURItoApp(const std::string &cmd);
+		static std::string colorToString(const GdkColor *color); /* gdk < 2.12 */
 
  		// Magnet links
 		static std::string makeMagnet(const std::string &name, const int64_t size, const std::string &tth);

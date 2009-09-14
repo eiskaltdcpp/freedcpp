@@ -349,6 +349,16 @@ void MainWindow::raisePage_gui(GtkWidget *page)
 
 void MainWindow::removeBookEntry_gui(BookEntry *entry)
 {
+	string entryID = entry->getID();
+
+	string::size_type pos = entryID.find(':');
+	if (pos != string::npos) entryID.erase(0, pos + 1);
+
+	StringIter it = find(EntryList.begin(), EntryList.end(), entryID);
+
+	if (it != EntryList.end())
+		EntryList.erase(it);
+
 	GtkNotebook *book = GTK_NOTEBOOK(getWidget("book"));
 	GtkWidget *page = entry->getContainer();
 	GtkWidget* menuItem = entry->getTabMenuItem();
@@ -561,12 +571,14 @@ void MainWindow::showHub_gui(string address, string encoding)
 	{
 		entry = new Hub(address, encoding);
 		addBookEntry_gui(entry);
+
+		EntryList.push_back(address);
 	}
 
 	raisePage_gui(entry->getContainer());
 }
 
-void MainWindow::addPrivateMessage_gui(string cid, string message, bool useSetting)
+void MainWindow::addPrivateMessage_gui(Msg::TypeMsg typemsg, string cid, string message, bool useSetting)
 {
 	BookEntry *entry = findBookEntry(Entry::PRIVATE_MESSAGE, cid);
 	bool raise = TRUE;
@@ -579,21 +591,23 @@ void MainWindow::addPrivateMessage_gui(string cid, string message, bool useSetti
 	{
 		entry = new PrivateMessage(cid);
 		addBookEntry_gui(entry);
+
+		EntryList.push_back(cid);
 	}
 
 	if (!message.empty())
-		dynamic_cast<PrivateMessage*>(entry)->addMessage_gui(message);
+		dynamic_cast<PrivateMessage*>(entry)->addMessage_gui(message, typemsg);
 
 	if (raise)
 		raisePage_gui(entry->getContainer());
 }
 
-void MainWindow::addPrivateStatusMessage_gui(string cid, string message)
+void MainWindow::addPrivateStatusMessage_gui(Msg::TypeMsg typemsg, string cid, string message)
 {
 	BookEntry *entry = findBookEntry(Entry::PRIVATE_MESSAGE, cid);
 
 	if (entry != NULL)
-		dynamic_cast<PrivateMessage*>(entry)->addStatusMessage_gui(message);
+		dynamic_cast<PrivateMessage*>(entry)->addStatusMessage_gui(message, typemsg);
 }
 
 void MainWindow::showPublicHubs_gui()
@@ -962,6 +976,21 @@ void MainWindow::onPreferencesClicked_gui(GtkWidget *widget, gpointer data)
 
 		mw->setTabPosition_gui(WGETI("tab-position"));
 		mw->setToolbarStyle_gui(WGETI("toolbar-style"));
+
+		for (StringIterC it = mw->EntryList.begin(); it != mw->EntryList.end(); ++it)
+		{
+			BookEntry *entry = mw->findBookEntry(Entry::HUB, *it);
+
+			if (entry != NULL)
+				dynamic_cast<Hub*>(entry)->updateTags_gui();
+			else
+			{
+				entry = mw->findBookEntry(Entry::PRIVATE_MESSAGE, *it);
+
+				if (entry != NULL)
+					dynamic_cast<PrivateMessage*>(entry)->updateTags_gui();
+			}
+		}
 	}
 }
 

@@ -259,7 +259,7 @@ void Transfers::onPrivateMessageClicked_gui(GtkMenuItem *item, gpointer data)
 			{
 				cid = tr->transferView.getString(&iter, "CID");
 				if (!cid.empty())
-					WulforManager::get()->getMainWindow()->addPrivateMessage_gui(cid);
+					WulforManager::get()->getMainWindow()->addPrivateMessage_gui(Msg::UNKNOWN, cid);
 			}
 			while (parent && WulforUtil::getNextIter_gui(GTK_TREE_MODEL(tr->transferStore), &iter, TRUE, FALSE));
 		}

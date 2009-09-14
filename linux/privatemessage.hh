@@ -25,6 +25,9 @@
 #include <dcpp/stdinc.h>
 #include <dcpp/DCPlusPlus.h>
 #include "bookentry.hh"
+#include "message.hh"
+
+class WulforSettingsManager;
 
 class PrivateMessage:
 	public BookEntry
@@ -35,12 +38,33 @@ class PrivateMessage:
 		virtual void show();
 
 		// GUI functions
-		void addMessage_gui(std::string message);
-		void addStatusMessage_gui(std::string message);
+		void addMessage_gui(std::string message, Msg::TypeMsg typemsg);
+		void addStatusMessage_gui(std::string message, Msg::TypeMsg typemsg);
+		void updateTags_gui();
 
 	private:
+		typedef enum
+		{
+			TAG_FIRST = 0,
+			TAG_PRIVATE = TAG_FIRST,
+			TAG_MYOWN,
+			TAG_SYSTEM,
+			TAG_STATUS,
+			TAG_TIMESTAMP,
+			/*-*/
+			TAG_MYNICK,
+			TAG_NICK,
+			TAG_OPERATOR,
+			TAG_URL,
+			TAG_LAST
+		} TypeTag;
+
 		// GUI functions
-		void addLine_gui(const std::string &line);
+		void addLine_gui(Msg::TypeMsg typemsg, const std::string &line);
+		void applyTags_gui(const std::string &line);
+		void applyEmoticons_gui();
+		void getSettingTag_gui(WulforSettingsManager *wsm, TypeTag type, std::string &fore, std::string &back, int &bold, int &italic);
+		GtkTextTag* createTag_gui(const std::string &tagname, TypeTag type);
 		void updateCursor(GtkWidget *widget);
 
 		// GUI callbacks
@@ -66,8 +90,8 @@ class PrivateMessage:
 		void getFileList_client();
 		void grantSlot_client();
 
-		GtkTextBuffer *buffer;
-		GtkTextMark *mark;
+		GtkTextBuffer *messageBuffer;
+		GtkTextMark *mark, *start_mark, *end_mark, *tag_mark;
 		std::string cid;
 		bool isBot;
 		std::vector<std::string> history;
@@ -76,9 +100,11 @@ class PrivateMessage:
 		static const int maxLines = 500; ///@todo: make these preferences
 		static const int maxHistory = 20;
 		GdkCursor* handCursor;
-		std::string selectedURI;
+		std::string selectedTagStr;
 		GtkTextTag* selectedTag;
 		bool scrollToBottom;
+		GtkTextTag *TagsMap[TAG_LAST];
+		TypeTag tagMsg, tagNick;
 };
 
 #else
