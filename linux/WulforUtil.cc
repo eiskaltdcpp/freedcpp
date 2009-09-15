@@ -295,6 +295,20 @@ bool WulforUtil::splitMagnet(const string &magnet, string &name, int64_t &size, 
 	return TRUE;
 }
 
+bool WulforUtil::splitMagnet(const string &magnet, string &line)
+{
+	string name;
+	string tth;
+	int64_t size;
+
+	if (splitMagnet(magnet, name, size, tth))
+		line = name + " (" + Util::formatBytes(size) + ")";
+	else
+		return FALSE;
+
+	return TRUE;
+}
+
 bool WulforUtil::isMagnet(const string &text)
 {
 	return g_ascii_strncasecmp(text.c_str(), magnetSignature.c_str(), magnetSignature.length()) == 0;

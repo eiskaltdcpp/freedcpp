@@ -58,7 +58,7 @@ PrivateMessage::PrivateMessage(const string &cid):
 	mark = gtk_text_buffer_create_mark(messageBuffer, NULL, &iter, FALSE);
 	start_mark = gtk_text_buffer_create_mark(messageBuffer, NULL, &iter, TRUE);
 	end_mark = gtk_text_buffer_create_mark(messageBuffer, NULL, &iter, TRUE);
-	tag_mark = gtk_text_buffer_create_mark(messageBuffer, NULL, &iter, TRUE);
+	tag_mark = gtk_text_buffer_create_mark(messageBuffer, NULL, &iter, FALSE);
 
 	handCursor = gdk_cursor_new(GDK_HAND2);
 
@@ -371,8 +371,23 @@ void PrivateMessage::applyTags_gui(const string &line)
 			}
 
 			// apply tags
-			gtk_text_buffer_apply_tag(messageBuffer, tag, &tag_start_iter, &tag_end_iter);
-			gtk_text_buffer_apply_tag(messageBuffer, TagsMap[TAG_URL], &tag_start_iter, &tag_end_iter);
+			if (callback == G_CALLBACK(onMagnetTagEvent_gui))
+			{
+				string line;
+
+				if (WulforUtil::splitMagnet(tagName, line))
+				{
+					gtk_text_buffer_delete(messageBuffer, &tag_start_iter, &tag_end_iter);
+
+					gtk_text_buffer_insert_with_tags(messageBuffer, &tag_start_iter,
+						line.c_str(), line.size(), tag, TagsMap[TAG_URL], NULL);
+				}
+			}
+			else
+			{
+				gtk_text_buffer_apply_tag(messageBuffer, tag, &tag_start_iter, &tag_end_iter);
+				gtk_text_buffer_apply_tag(messageBuffer, TagsMap[TAG_URL], &tag_start_iter, &tag_end_iter);
+			}
 
 			applyEmoticons_gui();
 
