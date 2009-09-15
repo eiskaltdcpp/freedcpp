@@ -89,7 +89,7 @@ Hub::Hub(const string &address, const string &encoding):
 	chatMark = gtk_text_buffer_create_mark(chatBuffer, NULL, &iter, FALSE);
 	start_mark = gtk_text_buffer_create_mark(chatBuffer, NULL, &iter, TRUE);
 	end_mark = gtk_text_buffer_create_mark(chatBuffer, NULL, &iter, TRUE);
-	tag_mark = gtk_text_buffer_create_mark(chatBuffer, NULL, &iter, TRUE);
+	tag_mark = gtk_text_buffer_create_mark(chatBuffer, NULL, &iter, FALSE);
 
 	handCursor = gdk_cursor_new(GDK_HAND2);
 
@@ -610,10 +610,27 @@ void Hub::applyTags_gui(const string &line)
 			}
 
 			/* apply tags */
-			dcassert(tagStyle >= TAG_MYNICK && tagStyle < TAG_LAST);
+			if (callback == G_CALLBACK(onMagnetTagEvent_gui))
+			{
+				string line;
 
-			gtk_text_buffer_apply_tag(chatBuffer, tag, &tag_start_iter, &tag_end_iter);
-			gtk_text_buffer_apply_tag(chatBuffer, TagsMap[tagStyle], &tag_start_iter, &tag_end_iter);
+				if (WulforUtil::splitMagnet(tagName, line))
+				{
+					gtk_text_buffer_delete(chatBuffer, &tag_start_iter, &tag_end_iter);
+
+					dcassert(tagStyle == TAG_URL);
+
+					gtk_text_buffer_insert_with_tags(chatBuffer, &tag_start_iter,
+						line.c_str(), line.size(), tag, TagsMap[tagStyle], NULL);
+				}
+			}
+			else
+			{
+				dcassert(tagStyle >= TAG_MYNICK && tagStyle < TAG_LAST);
+
+				gtk_text_buffer_apply_tag(chatBuffer, tag, &tag_start_iter, &tag_end_iter);
+				gtk_text_buffer_apply_tag(chatBuffer, TagsMap[tagStyle], &tag_start_iter, &tag_end_iter);
+			}
 
 			applyEmoticons_gui();
 
