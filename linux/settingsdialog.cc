@@ -278,11 +278,32 @@ void Settings::saveSettings_client()
 	sm->save();
 }
 
+/* Adds a core option */
+
 void Settings::addOption_gui(GtkListStore *store, const string &name, SettingsManager::IntSetting setting)
 {
 	GtkTreeIter iter;
 	gtk_list_store_append(store, &iter);
-	gtk_list_store_set(store, &iter, 0, SettingsManager::getInstance()->get(setting), 1, name.c_str(), 2, setting, -1);
+	gtk_list_store_set(store, &iter,
+		0, SettingsManager::getInstance()->get(setting),
+		1, name.c_str(),
+		2, setting,
+		3, "",
+		-1);
+}
+
+/* Adds a custom UI specific option */
+
+void Settings::addOption_gui(GtkListStore *store, const std::string &name, const std::string &setting)
+{
+	GtkTreeIter iter;
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter,
+		0, WGETI(setting),
+		1, name.c_str(),
+		2, -2,
+		3, setting.c_str(),
+		-1);
 }
 
 /* Creates a generic sounds options GtkTreeView */
@@ -320,13 +341,14 @@ void Settings::addOption_gui(GtkListStore *store, WulforSettingsManager *wsm, co
 
 /* Creates a generic checkbox-based options GtkTreeView */
 
-void Settings::createOptionsView_gui(TreeView &treeView, GtkListStore *&store, const string &widgetName)
+void Settings::createOptionsView_gui(TreeView &treeView, GtkListStore *&store, const std::string &widgetName)
 {
 	// Create the view
 	treeView.setView(GTK_TREE_VIEW(getWidget(widgetName.c_str())));
 	treeView.insertColumn("Use", G_TYPE_BOOLEAN, TreeView::BOOL, -1);
 	treeView.insertColumn("Name", G_TYPE_STRING, TreeView::STRING, -1);
-	treeView.insertHiddenColumn("Setting", G_TYPE_INT);
+	treeView.insertHiddenColumn("Core Setting", G_TYPE_INT);
+	treeView.insertHiddenColumn("UI Setting", G_TYPE_STRING);
 	treeView.finalize();
 
 	// Create the store
@@ -342,6 +364,8 @@ void Settings::createOptionsView_gui(TreeView &treeView, GtkListStore *&store, c
 	g_list_free(list);
 }
 
+/* Saves the core or UI values stored in the options GtkTreeView */
+
 void Settings::saveOptionsView_gui(TreeView &treeView, SettingsManager *sm)
 {
 	GtkTreeIter iter;
@@ -351,9 +375,18 @@ void Settings::saveOptionsView_gui(TreeView &treeView, SettingsManager *sm)
 	while (valid)
 	{
 		gboolean toggled = treeView.getValue<gboolean>(&iter, "Use");
-		gint setting = treeView.getValue<gint>(&iter, "Setting");
+		gint coreSetting = treeView.getValue<gint>(&iter, "Core Setting");
 
-		sm->set((SettingsManager::IntSetting)setting, toggled);
+		// If core setting has been set to a valid value
+		if (coreSetting >= 0)
+		{
+			sm->set((SettingsManager::IntSetting)coreSetting, toggled);
+		}
+		else
+		{
+			string uiSetting = treeView.getString(&iter, "UI Setting");
+			WSET(uiSetting, toggled);
+		}
 		valid = gtk_tree_model_iter_next(m, &iter);
 	}
 }
@@ -623,6 +656,7 @@ void Settings::initAppearance_gui()
 		addOption_gui(appearanceStore, _("Show joins / parts in chat by default"), SettingsManager::SHOW_JOINS);
 		addOption_gui(appearanceStore, _("Only show joins / parts for favorite users"), SettingsManager::FAV_SHOW_JOINS);
 		addOption_gui(appearanceStore, _("Use OEM monospaced font for chat windows"), SettingsManager::USE_OEM_MONOFONT);
+		addOption_gui(appearanceStore, _("Use magnet split"), "use-magnet-split");
 		/// @todo: Uncomment when implemented
 		//addOption_gui(appearanceStore, _("Minimize to tray"), SettingsManager::MINIMIZE_TRAY);
 		//addOption_gui(appearanceStore, _("Use system icons"), SettingsManager::USE_SYSTEM_ICONS);

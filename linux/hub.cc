@@ -610,7 +610,7 @@ void Hub::applyTags_gui(const string &line)
 			}
 
 			/* apply tags */
-			if (callback == G_CALLBACK(onMagnetTagEvent_gui))
+			if (callback == G_CALLBACK(onMagnetTagEvent_gui) && WGETB("use-magnet-split"))
 			{
 				string line;
 

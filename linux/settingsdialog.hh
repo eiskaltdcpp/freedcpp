@@ -44,6 +44,7 @@ class Settings:
 		void addOption_gui(GtkListStore *store, const std::string &name, dcpp::SettingsManager::IntSetting setting);
 		void addOption_gui(GtkListStore *store, WulforSettingsManager *wsm, const std::string &name,
 			const std::string &key1, const std::string &key2, const std::string &key3, const std::string &key4);
+		void addOption_gui(GtkListStore *store, const std::string &name, const std::string &setting);
 		void addOption_gui(GtkListStore *store, WulforSettingsManager *wsm, const std::string &name, const std::string &key1);
 		void createOptionsView_gui(TreeView &treeView, GtkListStore *&store, const std::string &widgetName);
 		void saveOptionsView_gui(TreeView &treeView, dcpp::SettingsManager *sm);
