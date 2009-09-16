@@ -47,6 +47,7 @@ WulforSettingsManager::WulforSettingsManager():
 	defaultInt["toolbar-style"] = 5;
 	defaultInt["sound-pm-open"] = 0;
 	defaultInt["sound-pm"] = 1;
+	defaultInt["use-magnet-split"] = 1;
 	defaultInt["text-general-bold"] = TEXT_WEIGHT_NORMAL;
 	defaultInt["text-general-italic"] = TEXT_STYLE_NORMAL;
 	defaultInt["text-myown-bold"] = TEXT_WEIGHT_BOLD;
