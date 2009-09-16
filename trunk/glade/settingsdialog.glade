@@ -2881,7 +2881,7 @@ System default</property>
                           </widget>
                         </child>
                         <child>
-                          <widget class="GtkCheckButton" id="checkBoldmessage">
+                          <widget class="GtkCheckButton" id="checkBoldAuthors">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="label" translatable="yes">Bold Authors of message in chat</property>
