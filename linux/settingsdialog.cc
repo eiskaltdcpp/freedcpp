@@ -217,6 +217,8 @@ void Settings::saveSettings_client()
 
 				valid = gtk_tree_model_iter_next(m, &iter);
 			}
+
+			WSET("text-bold-autors", gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(getWidget("checkBoldAuthors"))));
 		}
 
 		{ // Window
@@ -828,6 +830,8 @@ void Settings::initAppearance_gui()
 
 			valid = gtk_tree_model_iter_next(m, &treeIter);
 		}
+
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(getWidget("checkBoldAuthors")), WGETB("text-bold-autors"));
 	}
 
 	{ // Window

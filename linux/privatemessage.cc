@@ -491,6 +491,17 @@ void PrivateMessage::getSettingTag_gui(WulforSettingsManager *wsm, TypeTag type,
 		break;
 
 		case TAG_NICK:
+
+			fore = wsm->getString("text-private-fore-color");
+			back = wsm->getString("text-private-back-color");
+			italic = wsm->getInt("text-private-italic");
+
+			if (wsm->getBool("text-bold-autors"))
+				bold = TEXT_WEIGHT_BOLD;
+			else
+				bold = TEXT_WEIGHT_NORMAL;
+		break;
+
 		case TAG_PRIVATE:
 
 		default:
