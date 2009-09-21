@@ -43,13 +43,17 @@ bool PreviewMenu::buildMenu_gui(const string &target)
 
 	if (ext == ".dctmp")
 	{
-		string::size_type i = file.find('.');
-		string::size_type j = file.find('.', i + 1);
-
-		j != string::npos ? ext = file.substr(i, j - i) : ext = "";
+		if (count(file.begin(), file.end(), '.') >= 3)
+		{
+			string::size_type i = file.rfind('.');
+			string::size_type j = file.rfind('.', i - 1);
+			ext = Util::getFileExt(file.substr(0, j));
+		}
+		else
+			ext = "";
 	}
 
-	if (ext.empty() || ext == ".")
+	if (ext.empty() || ext == "." || file == ext)
 		return FALSE;
 
 	ext.erase(0, 1);
