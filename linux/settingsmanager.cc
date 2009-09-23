@@ -33,93 +33,93 @@ using namespace dcpp;
 WulforSettingsManager::WulforSettingsManager():
 	configFile(Util::getConfigPath() + "FreeDC++.xml")
 {
-	defaultInt["main-window-maximized"] = 0;
-	defaultInt["main-window-size-x"] = 875;
-	defaultInt["main-window-size-y"] = 685;
-	defaultInt["main-window-pos-x"] = 100;
-	defaultInt["main-window-pos-y"] = 100;
-	defaultInt["transfer-pane-position"] = 482;
-	defaultInt["nick-pane-position"] = 500;
-	defaultInt["downloadqueue-pane-position"] = 200;
-	defaultInt["sharebrowser-pane-position"] = 200;
-	defaultInt["use-stock-icons"] = 0;
-	defaultInt["tab-position"] = 0;
-	defaultInt["toolbar-style"] = 5;
-	defaultInt["sound-pm-open"] = 0;
-	defaultInt["sound-pm"] = 1;
-	defaultInt["use-magnet-split"] = 1;
-	defaultInt["text-bold-autors"] = 1;
-	defaultInt["text-general-bold"] = TEXT_WEIGHT_NORMAL;
-	defaultInt["text-general-italic"] = TEXT_STYLE_NORMAL;
-	defaultInt["text-myown-bold"] = TEXT_WEIGHT_BOLD;
-	defaultInt["text-myown-italic"] = TEXT_STYLE_NORMAL;
-	defaultInt["text-private-bold"] = TEXT_WEIGHT_NORMAL;
-	defaultInt["text-private-italic"] = TEXT_STYLE_NORMAL;
-	defaultInt["text-system-bold"] = TEXT_WEIGHT_BOLD;
-	defaultInt["text-system-italic"] = TEXT_STYLE_NORMAL;
-	defaultInt["text-status-bold"] = TEXT_WEIGHT_BOLD;
-	defaultInt["text-status-italic"] = TEXT_STYLE_NORMAL;
-	defaultInt["text-timestamp-bold"] = TEXT_WEIGHT_BOLD;
-	defaultInt["text-timestamp-italic"] = TEXT_STYLE_NORMAL;
-	defaultInt["text-mynick-bold"] = TEXT_WEIGHT_BOLD;
-	defaultInt["text-mynick-italic"] = TEXT_STYLE_NORMAL;
-	defaultInt["text-fav-bold"] = TEXT_WEIGHT_BOLD;
-	defaultInt["text-fav-italic"] = TEXT_STYLE_NORMAL;
-	defaultInt["text-op-bold"] = TEXT_WEIGHT_BOLD;
-	defaultInt["text-op-italic"] = TEXT_STYLE_NORMAL;
-	defaultInt["text-url-bold"] = TEXT_WEIGHT_NORMAL;
-	defaultInt["text-url-italic"] = TEXT_STYLE_NORMAL;
-	defaultString["downloadqueue-order"] = "";
-	defaultString["downloadqueue-width"] = "";
-	defaultString["downloadqueue-visibility"] = "";
-	defaultString["favoritehubs-order"] = "";
-	defaultString["favoritehubs-width"] = "";
-	defaultString["favoritehubs-visibility"] = "";
-	defaultString["finished-order"] = "";
-	defaultString["finished-width"] = "";
-	defaultString["finished-visibility"] = "";
-	defaultString["hub-order"] = "";
-	defaultString["hub-width"] = "";
-	defaultString["hub-visibility"] = "";
-	defaultString["transfers-order"] = "";
-	defaultString["transfers-width"] = "";
-	defaultString["transfers-visibility"] = "";
-	defaultString["publichubs-order"] = "";
-	defaultString["publichubs-width"] = "";
-	defaultString["publichubs-visibility"] = "";
-	defaultString["search-order"] = "";
-	defaultString["search-width"] = "";
-	defaultString["search-visibility"] = "";
-	defaultString["sharebrowser-order"] = "";
-	defaultString["sharebrowser-width"] = "";
-	defaultString["sharebrowser-visibility"] = "";
-	defaultString["default-charset"] = WulforUtil::ENCODING_SYSTEM_DEFAULT;
-	defaultString["sound-download-begins"] = "";
-	defaultString["sound-download-finished"] = "";
-	defaultString["sound-upload-finished"] = "";
-	defaultString["sound-private-message"] = "";
-	defaultString["sound-hub-connect"] = "";
-	defaultString["sound-hub-disconnect"] = "";
-	defaultString["text-general-back-color"] = "#FFFFFF";
-	defaultString["text-general-fore-color"] = "#4D4D4D";
-	defaultString["text-myown-back-color"] = "#FFFFFF";
-	defaultString["text-myown-fore-color"] = "#207505";
-	defaultString["text-private-back-color"] = "#FFFFFF";
-	defaultString["text-private-fore-color"] = "#2763CE";
-	defaultString["text-system-back-color"] = "#FFFFFF";
-	defaultString["text-system-fore-color"] = "#1A1A1A";
-	defaultString["text-status-back-color"] = "#FFFFFF";
-	defaultString["text-status-fore-color"] = "#7F7F7F";
-	defaultString["text-timestamp-back-color"] = "#FFFFFF";
-	defaultString["text-timestamp-fore-color"] = "#43629A";
-	defaultString["text-mynick-back-color"] = "#FFFFFF";
-	defaultString["text-mynick-fore-color"] = "#A52A2A";
-	defaultString["text-fav-back-color"] = "#FFFFFF";
-	defaultString["text-fav-fore-color"] = "#FFA500";
-	defaultString["text-op-back-color"] = "#FFFFFF";
-	defaultString["text-op-fore-color"] = "#0000FF";
-	defaultString["text-url-back-color"] = "#FFFFFF";
-	defaultString["text-url-fore-color"] = "#0000FF";
+	defaultInt.insert(IntMap::value_type("main-window-maximized", 0));
+	defaultInt.insert(IntMap::value_type("main-window-size-x", 875));
+	defaultInt.insert(IntMap::value_type("main-window-size-y", 685));
+	defaultInt.insert(IntMap::value_type("main-window-pos-x", 100));
+	defaultInt.insert(IntMap::value_type("main-window-pos-y", 100));
+	defaultInt.insert(IntMap::value_type("transfer-pane-position", 482));
+	defaultInt.insert(IntMap::value_type("nick-pane-position", 500));
+	defaultInt.insert(IntMap::value_type("downloadqueue-pane-position", 200));
+	defaultInt.insert(IntMap::value_type("sharebrowser-pane-position", 200));
+	defaultInt.insert(IntMap::value_type("use-stock-icons", 0));
+	defaultInt.insert(IntMap::value_type("tab-position", 0));
+	defaultInt.insert(IntMap::value_type("toolbar-style", 5));
+	defaultInt.insert(IntMap::value_type("sound-pm-open", 0));
+	defaultInt.insert(IntMap::value_type("sound-pm", 1));
+	defaultInt.insert(IntMap::value_type("use-magnet-split", 1));
+	defaultInt.insert(IntMap::value_type("text-bold-autors", 1));
+	defaultInt.insert(IntMap::value_type("text-general-bold", TEXT_WEIGHT_NORMAL));
+	defaultInt.insert(IntMap::value_type("text-general-italic", TEXT_STYLE_NORMAL));
+	defaultInt.insert(IntMap::value_type("text-myown-bold", TEXT_WEIGHT_BOLD));
+	defaultInt.insert(IntMap::value_type("text-myown-italic", TEXT_STYLE_NORMAL));
+	defaultInt.insert(IntMap::value_type("text-private-bold", TEXT_WEIGHT_NORMAL));
+	defaultInt.insert(IntMap::value_type("text-private-italic", TEXT_STYLE_NORMAL));
+	defaultInt.insert(IntMap::value_type("text-system-bold", TEXT_WEIGHT_BOLD));
+	defaultInt.insert(IntMap::value_type("text-system-italic", TEXT_STYLE_NORMAL));
+	defaultInt.insert(IntMap::value_type("text-status-bold", TEXT_WEIGHT_BOLD));
+	defaultInt.insert(IntMap::value_type("text-status-italic", TEXT_STYLE_NORMAL));
+	defaultInt.insert(IntMap::value_type("text-timestamp-bold", TEXT_WEIGHT_BOLD));
+	defaultInt.insert(IntMap::value_type("text-timestamp-italic", TEXT_STYLE_NORMAL));
+	defaultInt.insert(IntMap::value_type("text-mynick-bold", TEXT_WEIGHT_BOLD));
+	defaultInt.insert(IntMap::value_type("text-mynick-italic", TEXT_STYLE_NORMAL));
+	defaultInt.insert(IntMap::value_type("text-fav-bold", TEXT_WEIGHT_BOLD));
+	defaultInt.insert(IntMap::value_type("text-fav-italic", TEXT_STYLE_NORMAL));
+	defaultInt.insert(IntMap::value_type("text-op-bold", TEXT_WEIGHT_BOLD));
+	defaultInt.insert(IntMap::value_type("text-op-italic", TEXT_STYLE_NORMAL));
+	defaultInt.insert(IntMap::value_type("text-url-bold", TEXT_WEIGHT_NORMAL));
+	defaultInt.insert(IntMap::value_type("text-url-italic", TEXT_STYLE_NORMAL));
+	defaultString.insert(StringMap::value_type("downloadqueue-order", ""));
+	defaultString.insert(StringMap::value_type("downloadqueue-width", ""));
+	defaultString.insert(StringMap::value_type("downloadqueue-visibility", ""));
+	defaultString.insert(StringMap::value_type("favoritehubs-order", ""));
+	defaultString.insert(StringMap::value_type("favoritehubs-width", ""));
+	defaultString.insert(StringMap::value_type("favoritehubs-visibility", ""));
+	defaultString.insert(StringMap::value_type("finished-order", ""));
+	defaultString.insert(StringMap::value_type("finished-width", ""));
+	defaultString.insert(StringMap::value_type("finished-visibility", ""));
+	defaultString.insert(StringMap::value_type("hub-order", ""));
+	defaultString.insert(StringMap::value_type("hub-width", ""));
+	defaultString.insert(StringMap::value_type("hub-visibility", ""));
+	defaultString.insert(StringMap::value_type("transfers-order", ""));
+	defaultString.insert(StringMap::value_type("transfers-width", ""));
+	defaultString.insert(StringMap::value_type("transfers-visibility", ""));
+	defaultString.insert(StringMap::value_type("publichubs-order", ""));
+	defaultString.insert(StringMap::value_type("publichubs-width", ""));
+	defaultString.insert(StringMap::value_type("publichubs-visibility", ""));
+	defaultString.insert(StringMap::value_type("search-order", ""));
+	defaultString.insert(StringMap::value_type("search-width", ""));
+	defaultString.insert(StringMap::value_type("search-visibility", ""));
+	defaultString.insert(StringMap::value_type("sharebrowser-order", ""));
+	defaultString.insert(StringMap::value_type("sharebrowser-width", ""));
+	defaultString.insert(StringMap::value_type("sharebrowser-visibility", ""));
+	defaultString.insert(StringMap::value_type("default-charset", WulforUtil::ENCODING_SYSTEM_DEFAULT));
+	defaultString.insert(StringMap::value_type("sound-download-begins", ""));
+	defaultString.insert(StringMap::value_type("sound-download-finished", ""));
+	defaultString.insert(StringMap::value_type("sound-upload-finished", ""));
+	defaultString.insert(StringMap::value_type("sound-private-message", ""));
+	defaultString.insert(StringMap::value_type("sound-hub-connect", ""));
+	defaultString.insert(StringMap::value_type("sound-hub-disconnect", ""));
+	defaultString.insert(StringMap::value_type("text-general-back-color", "#FFFFFF"));
+	defaultString.insert(StringMap::value_type("text-general-fore-color", "#4D4D4D"));
+	defaultString.insert(StringMap::value_type("text-myown-back-color", "#FFFFFF"));
+	defaultString.insert(StringMap::value_type("text-myown-fore-color", "#207505"));
+	defaultString.insert(StringMap::value_type("text-private-back-color", "#FFFFFF"));
+	defaultString.insert(StringMap::value_type("text-private-fore-color", "#2763CE"));
+	defaultString.insert(StringMap::value_type("text-system-back-color", "#FFFFFF"));
+	defaultString.insert(StringMap::value_type("text-system-fore-color", "#1A1A1A"));
+	defaultString.insert(StringMap::value_type("text-status-back-color", "#FFFFFF"));
+	defaultString.insert(StringMap::value_type("text-status-fore-color", "#7F7F7F"));
+	defaultString.insert(StringMap::value_type("text-timestamp-back-color", "#FFFFFF"));
+	defaultString.insert(StringMap::value_type("text-timestamp-fore-color", "#43629A"));
+	defaultString.insert(StringMap::value_type("text-mynick-back-color", "#FFFFFF"));
+	defaultString.insert(StringMap::value_type("text-mynick-fore-color", "#A52A2A"));
+	defaultString.insert(StringMap::value_type("text-fav-back-color", "#FFFFFF"));
+	defaultString.insert(StringMap::value_type("text-fav-fore-color", "#FFA500"));
+	defaultString.insert(StringMap::value_type("text-op-back-color", "#FFFFFF"));
+	defaultString.insert(StringMap::value_type("text-op-fore-color", "#0000FF"));
+	defaultString.insert(StringMap::value_type("text-url-back-color", "#FFFFFF"));
+	defaultString.insert(StringMap::value_type("text-url-fore-color", "#0000FF"));
 
 	load();
 }
@@ -192,19 +192,19 @@ void WulforSettingsManager::load()
 		{
 			xml.stepIn();
 
-			map<string, int>::iterator iit;
+			IntMap::iterator iit;
 			for (iit = defaultInt.begin(); iit != defaultInt.end(); ++iit)
 			{
 				if (xml.findChild(iit->first))
-					intMap[iit->first] = Util::toInt(xml.getChildData());
+					intMap.insert(IntMap::value_type(iit->first, Util::toInt(xml.getChildData())));
 				xml.resetCurrentChild();
 			}
 
-			map<string, string>::iterator sit;
+			StringMap::iterator sit;
 			for (sit = defaultString.begin(); sit != defaultString.end(); ++sit)
 			{
 				if (xml.findChild(sit->first))
-					stringMap[sit->first] = xml.getChildData();
+					stringMap.insert(StringMap::value_type(sit->first, xml.getChildData()));
 				xml.resetCurrentChild();
 			}
 
@@ -234,14 +234,14 @@ void WulforSettingsManager::save()
 	xml.addTag("Settings");
 	xml.stepIn();
 
-	map<std::string, int>::iterator iit;
+	IntMap::iterator iit;
 	for (iit = intMap.begin(); iit != intMap.end(); ++iit)
 	{
 		xml.addTag(iit->first, iit->second);
 		xml.addChildAttrib(string("type"), string("int"));
 	}
 
-	map<std::string, std::string>::iterator sit;
+	StringMap::iterator sit;
 	for (sit = stringMap.begin(); sit != stringMap.end(); ++sit)
 	{
 		xml.addTag(sit->first, sit->second);
