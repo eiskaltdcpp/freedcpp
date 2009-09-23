@@ -79,10 +79,13 @@ class WulforSettingsManager : public dcpp::Singleton<WulforSettingsManager>
 		const PreviewApp::List& getPreviewApps() const {return previewApps;}
 
 	private:
-		std::map<std::string, int> intMap;
-		std::map<std::string, std::string> stringMap;
-		std::map<std::string, int> defaultInt;
-		std::map<std::string, std::string> defaultString;
+		typedef std::map<std::string, int> IntMap;
+		typedef std::map<std::string, std::string> StringMap;
+
+		IntMap intMap;
+		StringMap stringMap;
+		IntMap defaultInt;
+		StringMap defaultString;
 		std::string configFile;
 
 		PreviewApp::List previewApps;
