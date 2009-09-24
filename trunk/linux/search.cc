@@ -796,7 +796,7 @@ void Search::regroup_gui()
 			continue;
 		}
 
-		unordered_map<std::string, GtkTreeIter>::iterator mapIter = iterMap.find(groupStr);
+		unordered_map<string, GtkTreeIter>::iterator mapIter = iterMap.find(groupStr);
 
 		// New non-parent, top-level item
 		if (mapIter == iterMap.end())
@@ -840,7 +840,7 @@ void Search::regroup_gui()
 /*
  * We can't rely on the string from the text box since it will be internationalized.
  */
-std::string Search::getGroupingColumn(GroupType groupBy)
+string Search::getGroupingColumn(GroupType groupBy)
 {
 	string column;
 

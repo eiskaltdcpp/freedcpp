@@ -187,7 +187,7 @@ void TreeView::speedDataFunc(GtkTreeViewColumn *col, GtkCellRenderer *renderer, 
 	gtk_tree_model_get(model, iter, static_cast<Column*>(column)->pos, &speed, -1);
 	if (speed >= 0)
 	{
-		std::string speed_str = dcpp::Util::formatBytes(speed);
+		string speed_str = dcpp::Util::formatBytes(speed);
 		speed_str.append("/s");
 
 		g_object_set(renderer, "text", speed_str.c_str(), NULL);
@@ -201,7 +201,7 @@ void TreeView::byteDataFunc(GtkTreeViewColumn *col, GtkCellRenderer *renderer, G
 	gtk_tree_model_get(model, iter, static_cast<Column*>(column)->pos, &size, -1);
 	if (size >= 0)
 	{
-		std::string size_str = dcpp::Util::formatBytes(size);
+		string size_str = dcpp::Util::formatBytes(size);
 		g_object_set(renderer, "text", size_str.c_str(), NULL);
 	}
 	else

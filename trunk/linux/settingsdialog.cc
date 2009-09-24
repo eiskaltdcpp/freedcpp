@@ -296,7 +296,7 @@ void Settings::addOption_gui(GtkListStore *store, const string &name, SettingsMa
 
 /* Adds a custom UI specific option */
 
-void Settings::addOption_gui(GtkListStore *store, const std::string &name, const std::string &setting)
+void Settings::addOption_gui(GtkListStore *store, const string &name, const string &setting)
 {
 	GtkTreeIter iter;
 	gtk_list_store_append(store, &iter);
@@ -343,7 +343,7 @@ void Settings::addOption_gui(GtkListStore *store, WulforSettingsManager *wsm, co
 
 /* Creates a generic checkbox-based options GtkTreeView */
 
-void Settings::createOptionsView_gui(TreeView &treeView, GtkListStore *&store, const std::string &widgetName)
+void Settings::createOptionsView_gui(TreeView &treeView, GtkListStore *&store, const string &widgetName)
 {
 	// Create the view
 	treeView.setView(GTK_TREE_VIEW(getWidget(widgetName.c_str())));
@@ -1537,7 +1537,7 @@ bool Settings::validateUserCommandInput(const string &oldName)
 	return TRUE;
 }
 
-void Settings::showErrorDialog(const std::string &error)
+void Settings::showErrorDialog(const string &error)
 {
 	GtkWidget *errorDialog = gtk_message_dialog_new(GTK_WINDOW(getWidget("dialog")),
 		GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_OK, "%s", error.c_str());
@@ -2328,7 +2328,7 @@ void Settings::addShare_client(string path, string name)
 	WulforManager::get()->dispatchGuiFunc(func);
 }
 
-void Settings::removeUserCommand_client(std::string name, std::string hub)
+void Settings::removeUserCommand_client(string name, string hub)
 {
 	if (!name.empty())
 	{
@@ -2337,7 +2337,7 @@ void Settings::removeUserCommand_client(std::string name, std::string hub)
 	}
 }
 
-void Settings::moveUserCommand_client(std::string name, std::string hub, int pos)
+void Settings::moveUserCommand_client(string name, string hub, int pos)
 {
 	if (!name.empty())
 	{

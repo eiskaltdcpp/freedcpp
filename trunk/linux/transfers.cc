@@ -519,7 +519,7 @@ void Transfers::addConnection_gui(StringMap params, bool download)
 		-1);
 }
 
-void Transfers::removeConnection_gui(const std::string cid, bool download)
+void Transfers::removeConnection_gui(const string cid, bool download)
 {
 	GtkTreeIter iter;
 	GtkTreeIter parent;
@@ -548,7 +548,7 @@ void Transfers::updateParent_gui(GtkTreeIter* iter)
 	int active = 0;
 	GtkTreeIter child;
 	string users;
-	std::set<string> hubs;
+	set<string> hubs;
 	bool valid;
 	int64_t speed = 0;
 	int64_t position = 0;
@@ -994,7 +994,7 @@ void Transfers::on(DownloadManagerListener::Complete, Download* dl) throw()
 	WulforManager::get()->dispatchGuiFunc(f2b);
 }
 
-void Transfers::on(DownloadManagerListener::Failed, Download* dl, const std::string& reason) throw()
+void Transfers::on(DownloadManagerListener::Failed, Download* dl, const string& reason) throw()
 {
 	StringMap params;
 	getParams_client(params, dl);
@@ -1039,12 +1039,12 @@ void Transfers::on(ConnectionManagerListener::Connected, ConnectionQueueItem* cq
 
 void Transfers::on(ConnectionManagerListener::Removed, ConnectionQueueItem* cqi) throw()
 {
-	typedef Func2<Transfers, const std::string, bool> F2;
+	typedef Func2<Transfers, const string, bool> F2;
 	F2* f2 = new F2(this, &Transfers::removeConnection_gui, cqi->getUser()->getCID().toBase32(), cqi->getDownload());
 	WulforManager::get()->dispatchGuiFunc(f2);
 }
 
-void Transfers::on(ConnectionManagerListener::Failed, ConnectionQueueItem* cqi, const std::string& reason) throw()
+void Transfers::on(ConnectionManagerListener::Failed, ConnectionQueueItem* cqi, const string& reason) throw()
 {
 	StringMap params;
 	getParams_client(params, cqi);
@@ -1075,7 +1075,7 @@ void Transfers::on(ConnectionManagerListener::StatusChanged, ConnectionQueueItem
 	WulforManager::get()->dispatchGuiFunc(f3);
 }
 
-void Transfers::on(QueueManagerListener::Finished, QueueItem* qi, const std::string& dir, int64_t size) throw()
+void Transfers::on(QueueManagerListener::Finished, QueueItem* qi, const string& dir, int64_t size) throw()
 {
 	string target = qi->getTarget();
 
@@ -1153,7 +1153,7 @@ void Transfers::on(UploadManagerListener::Complete, Upload* ul) throw()
 	WulforManager::get()->dispatchGuiFunc(f3);
 }
 
-void Transfers::on(UploadManagerListener::Failed, Upload* ul, const std::string& reason) throw()
+void Transfers::on(UploadManagerListener::Failed, Upload* ul, const string& reason) throw()
 {
 	StringMap params;
 	getParams_client(params, ul);

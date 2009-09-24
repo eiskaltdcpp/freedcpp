@@ -891,7 +891,7 @@ void PrivateMessage::onMagnetPropertiesClicked_gui(GtkMenuItem *item, gpointer d
 	WulforManager::get()->getMainWindow()->openMagnetDialog_gui(pm->selectedTagStr);
 }
 
-void PrivateMessage::sendMessage_client(std::string message)
+void PrivateMessage::sendMessage_client(string message)
 {
 	UserPtr user = ClientManager::getInstance()->findUser(CID(cid));
 	if (user && user->isOnline())

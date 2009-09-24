@@ -474,7 +474,7 @@ void MainWindow::setMainStatus_gui(string text, time_t t)
 	}
 }
 
-void MainWindow::setStatus_gui(string statusBar, std::string text)
+void MainWindow::setStatus_gui(string statusBar, string text)
 {
 	if (statusBar != "status1")
 	{
@@ -494,8 +494,8 @@ void MainWindow::setStatus_gui(string statusBar, std::string text)
 	gtk_statusbar_push(GTK_STATUSBAR(getWidget(statusBar)), 0, text.c_str());
 }
 
-void MainWindow::setStats_gui(std::string hub, std::string slot,
-	std::string dTot, std::string uTot, std::string dl, std::string ul)
+void MainWindow::setStats_gui(string hub, string slot,
+	string dTot, string uTot, string dl, string ul)
 {
 	setStatus_gui("status2", hub);
 	setStatus_gui("status3", slot);
