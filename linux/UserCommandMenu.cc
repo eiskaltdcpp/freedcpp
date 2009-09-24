@@ -53,8 +53,8 @@ void UserCommandMenu::addUser(const string &cid)
 	ucParams.push_back(u);
 }
 
-void UserCommandMenu::addFile(const std::string &cid, const std::string &name,
-	const int64_t &size, const std::string &tth)
+void UserCommandMenu::addFile(const string &cid, const string &name,
+	const int64_t &size, const string &tth)
 {
 	UCParam u;
 	u.cid = cid;
@@ -113,7 +113,7 @@ void UserCommandMenu::buildMenu_gui()
 	}
 }
 
-void UserCommandMenu::createSubMenu_gui(GtkWidget *&menu, std::string &command)
+void UserCommandMenu::createSubMenu_gui(GtkWidget *&menu, string &command)
 {
 	string::size_type i = 0;
 	GtkWidget *menuItem;

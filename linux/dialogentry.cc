@@ -24,7 +24,7 @@
 
 using namespace std;
 
-DialogEntry::DialogEntry(const EntryType type, const std::string &glade, GtkWindow* parent):
+DialogEntry::DialogEntry(const EntryType type, const string &glade, GtkWindow* parent):
 	Entry(type, glade),
 	parent(parent),
 	responseID(GTK_RESPONSE_NONE)

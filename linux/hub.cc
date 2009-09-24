@@ -224,7 +224,7 @@ void Hub::setStatus_gui(string statusBar, string text)
 
 bool Hub::findUser_gui(const string &cid, GtkTreeIter *iter)
 {
-	unordered_map<std::string, GtkTreeIter>::const_iterator it = userIters.find(cid);
+	unordered_map<string, GtkTreeIter>::const_iterator it = userIters.find(cid);
 
 	if (it != userIters.end())
 	{
@@ -239,7 +239,7 @@ bool Hub::findUser_gui(const string &cid, GtkTreeIter *iter)
 
 bool Hub::findNick_gui(const string &nick, GtkTreeIter *iter)
 {
-	unordered_map<std::string, std::string>::const_iterator it = userMap.find(nick);
+	unordered_map<string, string>::const_iterator it = userMap.find(nick);
 
 	if (it != userMap.end())
 		return findUser_gui(it->second, iter);
@@ -337,7 +337,7 @@ void Hub::removeUser_gui(string cid)
 /*
  * Remove nick tag from text view
  */
-void Hub::removeTag_gui(const std::string &nick)
+void Hub::removeTag_gui(const string &nick)
 {
 	GtkTextTagTable *textTagTable = gtk_text_buffer_get_tag_table(chatBuffer);
 	GtkTextTag *tag = gtk_text_tag_table_lookup(textTagTable, (tagPrefix + nick).c_str());
@@ -1646,7 +1646,7 @@ void Hub::grantSlot_client(string cid)
 	WulforManager::get()->dispatchGuiFunc(func);
 }
 
-void Hub::removeUserFromQueue_client(std::string cid)
+void Hub::removeUserFromQueue_client(string cid)
 {
 	if (!cid.empty())
 	{
@@ -1742,7 +1742,7 @@ void Hub::checkFavoriteUserJoin_client(string cid)
 	if (user && FavoriteManager::getInstance()->isFavoriteUser(user))
 	{
 		string message = WulforUtil::getNicks(user) + _(" has joined");
-		typedef Func3<Hub, std::string, Msg::TypeMsg, Sound::TypeSound> F3a;
+		typedef Func3<Hub, string, Msg::TypeMsg, Sound::TypeSound> F3a;
 		F3a *func3a = new F3a(this, &Hub::addStatusMessage_gui, message, Msg::STATUS, Sound::NONE);
 		WulforManager::get()->dispatchGuiFunc(func3a);
 

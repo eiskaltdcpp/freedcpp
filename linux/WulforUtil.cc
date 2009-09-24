@@ -38,8 +38,8 @@ using namespace dcpp;
 
 const string WulforUtil::ENCODING_SYSTEM_DEFAULT = _("System default");
 const string WulforUtil::ENCODING_GLOBAL_HUB_DEFAULT = _("Global hub default");
-std::vector<std::string> WulforUtil::charsets;
-const std::string WulforUtil::magnetSignature = "magnet:?xt=urn:tree:tiger:";
+vector<string> WulforUtil::charsets;
+const string WulforUtil::magnetSignature = "magnet:?xt=urn:tree:tiger:";
 
 vector<int> WulforUtil::splitString(const string &str, const string &delimiter)
 {
@@ -208,7 +208,7 @@ vector<string>& WulforUtil::getCharsets()
 	return charsets;
 }
 
-void WulforUtil::openURI(const std::string &uri)
+void WulforUtil::openURI(const string &uri)
 {
 	GError* error = NULL;
 	gchar *argv[3];
@@ -232,7 +232,7 @@ void WulforUtil::openURI(const std::string &uri)
 	}
 }
 
-void WulforUtil::openURItoApp(const std::string &cmd)
+void WulforUtil::openURItoApp(const string &cmd)
 {
 	GError* error = NULL;
 

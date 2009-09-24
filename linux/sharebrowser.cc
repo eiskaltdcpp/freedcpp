@@ -33,7 +33,7 @@
 using namespace std;
 using namespace dcpp;
 
-ShareBrowser::ShareBrowser(UserPtr user, const std::string &file, const std::string &initialDirectory):
+ShareBrowser::ShareBrowser(UserPtr user, const string &file, const string &initialDirectory):
 	BookEntry(Entry::SHARE_BROWSER, _("List: ") + WulforUtil::getNicks(user), "sharebrowser.glade", user->getCID().toBase32()),
 	user(user),
 	file(file),
@@ -339,7 +339,7 @@ void ShareBrowser::updateStatus_gui()
 	setStatus_gui("totalStatus", total);
 }
 
-void ShareBrowser::setStatus_gui(string statusBar, std::string msg)
+void ShareBrowser::setStatus_gui(string statusBar, string msg)
 {
 	gtk_statusbar_pop(GTK_STATUSBAR(getWidget(statusBar)), 0);
 	gtk_statusbar_push(GTK_STATUSBAR(getWidget(statusBar)), 0, msg.c_str());

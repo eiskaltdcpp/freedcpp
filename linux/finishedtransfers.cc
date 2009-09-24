@@ -606,7 +606,7 @@ void FinishedTransfers::initializeList_client()
 
 void FinishedTransfers::getFinishedParams_client(const FinishedFileItemPtr& item, const string& file, StringMap &params)
 {
-	std::string nicks;
+	string nicks;
 	params["Filename"] = Util::getFileName(file);
 	params["Time"] = Util::formatTime("%Y-%m-%d %H:%M:%S", item->getTime());	
 	params["Path"] = Util::getFilePath(file);
@@ -627,7 +627,7 @@ void FinishedTransfers::getFinishedParams_client(const FinishedFileItemPtr& item
 
 void FinishedTransfers::getFinishedParams_client(const FinishedUserItemPtr& item, const UserPtr& user, StringMap &params)
 {
-	std::string files;
+	string files;
 	params["Time"] = Util::formatTime("%Y-%m-%d %H:%M:%S", item->getTime());	
 	params["Nick"] = WulforUtil::getNicks(user->getCID());
 	params["Hub"] = Util::toString(ClientManager::getInstance()->getHubNames(user->getCID()));
@@ -642,7 +642,7 @@ void FinishedTransfers::getFinishedParams_client(const FinishedUserItemPtr& item
 	params["Elapsed Time"] = Util::toString(item->getMilliSeconds());
 }
 
-void FinishedTransfers::removeUser_client(std::string cid)
+void FinishedTransfers::removeUser_client(string cid)
 {
 	UserPtr user = ClientManager::getInstance()->findUser(CID(cid));
 
@@ -651,7 +651,7 @@ void FinishedTransfers::removeUser_client(std::string cid)
 	
 }
 
-void FinishedTransfers::removeFile_client(std::string target)
+void FinishedTransfers::removeFile_client(string target)
 {
 
 	if (!target.empty())
@@ -737,7 +737,7 @@ void FinishedTransfers::on(FinishedManagerListener::RemovedUser, bool upload, co
 {
 	if (isUpload == upload)
 	{
-		typedef Func1<FinishedTransfers, std::string> F1;
+		typedef Func1<FinishedTransfers, string> F1;
 		F1 *func = new F1(this, &FinishedTransfers::removeUser_gui, user->getCID().toBase32());
 		WulforManager::get()->dispatchGuiFunc(func);
 	}
