@@ -170,7 +170,7 @@ class Hub:
 		std::string encoding;
 		bool scrollToBottom;
 		std::string myNick;
-		std::string tagPrefix;
+		static const std::string tagPrefix;
 		TypeTag tagMsg, tagNick;
 };
 

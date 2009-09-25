@@ -36,12 +36,13 @@
 using namespace std;
 using namespace dcpp;
 
+const string Hub::tagPrefix = "#";
+
 Hub::Hub(const string &address, const string &encoding):
 	BookEntry(Entry::HUB, _("Hub: ") + address, "hub.glade", address),
 	client(NULL),
 	historyIndex(0),
 	totalShared(0),
-	selectedTag(NULL),
 	address(address),
 	encoding(encoding),
 	scrollToBottom(TRUE)
@@ -170,7 +171,6 @@ Hub::Hub(const string &address, const string &encoding):
 	TagsMap[TAG_OPERATOR] = createTag_gui("TAG_OPERATOR", TAG_OPERATOR);
 	TagsMap[TAG_URL] = createTag_gui("TAG_URL", TAG_URL);
 
-	tagPrefix = "#";
 	myNick = "";
 
 	// set default select tag (fix error show cursor in neutral space).
@@ -1042,7 +1042,7 @@ gboolean Hub::onNickTagEvent_gui(GtkTextTag *tag, GObject *textView, GdkEvent *e
 		GtkTreeIter nickIter;
 		string tagName = tag->name;
 
-		if (hub->findNick_gui(tagName.substr(1), &nickIter))
+		if (hub->findNick_gui(tagName.substr(tagPrefix.size()), &nickIter))
 		{
 			// Select the user in the nick list view
 			GtkTreePath *path = gtk_tree_model_get_path(GTK_TREE_MODEL(hub->nickStore), &nickIter);
@@ -1260,10 +1260,14 @@ void Hub::onSendMessage_gui(GtkEntry *entry, gpointer data)
 			else
 				hub->addStatusMessage_gui(_("User not found"), Msg::SYSTEM, Sound::NONE);
 		}
+		else if (command == _("freedcpp"))
+		{
+			hub->addMessage_gui(_("freedcpp 0.0.1.14/0.7091, project home: http://freedcpp.narod.ru http://code.google.com/p/freedcpp"), Msg::SYSTEM);
+		}
 		else if (command == _("help"))
 		{
 			hub->addStatusMessage_gui(_("Available commands: /away <message>, /back, /clear, /close, /favorite, "\
-				 "/getlist <nick>, /grant <nick>, /help, /join <address>, /me <message>, /pm <nick>, /rebuild, /refresh, /userlist"), Msg::SYSTEM, Sound::NONE);
+				 "/getlist <nick>, /grant <nick>, /help, /join <address>, /me <message>, /pm <nick>, /rebuild, /refresh, /userlist, /freedcpp"), Msg::SYSTEM, Sound::NONE);
 		}
 		else if (command == _("join") && !param.empty())
 		{

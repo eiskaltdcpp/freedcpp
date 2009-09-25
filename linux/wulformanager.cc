@@ -93,7 +93,7 @@ WulforManager::WulforManager()
 	mainWin = NULL;
 
 	// Determine path to data files
-	path = string(_DATADIR) + PATH_SEPARATOR_STR + "freedcpp";
+	path = string(_DATADIR) + G_DIR_SEPARATOR_S + g_get_prgname();
 	if (!g_file_test(path.c_str(), G_FILE_TEST_EXISTS))
 	{
 		cerr << path << " is inaccessible, falling back to current directory instead.\n";
