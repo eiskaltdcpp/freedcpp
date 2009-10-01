@@ -193,14 +193,10 @@ void PrivateMessage::addLine_gui(Msg::TypeMsg typemsg, const string &message)
 	GtkTextIter iter;
 	string line = "";
 
-	//Add a new line if this isn't the first line in buffer.
-	if (gtk_text_buffer_get_char_count(messageBuffer) > 0)
-		line = "\n";
-
 	if (BOOLSETTING(TIME_STAMPS))
 		line += "[" + Util::getShortTimeString() + "] ";
 
-	line += message;
+	line += message + "\n";
 
 	gtk_text_buffer_get_end_iter(messageBuffer, &iter);
 	gtk_text_buffer_insert(messageBuffer, &iter, line.c_str(), line.size());
@@ -244,7 +240,7 @@ void PrivateMessage::addLine_gui(Msg::TypeMsg typemsg, const string &message)
 	gtk_text_buffer_get_end_iter(messageBuffer, &iter);
 
 	// Limit size of chat text
-	if (gtk_text_buffer_get_line_count(messageBuffer) > maxLines)
+	if (gtk_text_buffer_get_line_count(messageBuffer) > maxLines + 1)
 	{
 		GtkTextIter next;
 		gtk_text_buffer_get_start_iter(messageBuffer, &iter);
@@ -258,26 +254,28 @@ void PrivateMessage::applyTags_gui(const string &line)
 	GtkTextIter start_iter;
 	gtk_text_buffer_get_end_iter(messageBuffer, &start_iter);
 
-	string::size_type begin = (line[0] == '\n')? 1 : 0;
+	string::size_type begin = 0;
 
 	// apply timestamp tag
 	if (BOOLSETTING(TIME_STAMPS))
 	{
 		string ts = Util::getShortTimeString();
-		gtk_text_iter_backward_chars(&start_iter, g_utf8_strlen(line.c_str(), -1) - g_utf8_strlen(ts.c_str(), -1) - 2 - begin);
+		gtk_text_iter_backward_chars(&start_iter, g_utf8_strlen(line.c_str(), -1) - g_utf8_strlen(ts.c_str(), -1) - 2);
 
 		GtkTextIter ts_start_iter, ts_end_iter;
 		ts_end_iter = start_iter;
 
 		gtk_text_buffer_get_end_iter(messageBuffer, &ts_start_iter);
-		gtk_text_iter_backward_chars(&ts_start_iter, g_utf8_strlen(line.c_str(), -1) - begin);
+		gtk_text_iter_backward_chars(&ts_start_iter, g_utf8_strlen(line.c_str(), -1));
 
 		gtk_text_buffer_apply_tag(messageBuffer, TagsMap[TAG_TIMESTAMP], &ts_start_iter, &ts_end_iter);
 
-		begin += ts.size() + 2 + 1;
+		begin = ts.size() + 2 + 1;
 	}
 	else
-		gtk_text_iter_backward_chars(&start_iter, g_utf8_strlen(line.c_str(), -1) - begin);
+		gtk_text_iter_backward_chars(&start_iter, g_utf8_strlen(line.c_str(), -1));
+
+	dcassert(begin < line.size());
 
 	// apply nick tag
 	if (line[begin] == '<')
