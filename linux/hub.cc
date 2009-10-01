@@ -429,14 +429,10 @@ void Hub::addMessage_gui(string message, Msg::TypeMsg typemsg)
 	GtkTextIter iter;
 	string line = "";
 
-	// Add a new line if this isn't the first line in buffer.
-	if (gtk_text_buffer_get_char_count(chatBuffer) > 0)
-		line = "\n";
-
 	if (BOOLSETTING(TIME_STAMPS))
 		line += "[" + Util::getShortTimeString() + "] ";
 
-	line += message;
+	line += message + "\n";
 
 	gtk_text_buffer_get_end_iter(chatBuffer, &iter);
 	gtk_text_buffer_insert(chatBuffer, &iter, line.c_str(), line.size());
@@ -475,7 +471,7 @@ void Hub::addMessage_gui(string message, Msg::TypeMsg typemsg)
 	gtk_text_buffer_get_end_iter(chatBuffer, &iter);
 
 	// Limit size of chat text
-	if (gtk_text_buffer_get_line_count(chatBuffer) > maxLines)
+	if (gtk_text_buffer_get_line_count(chatBuffer) > maxLines + 1)
 	{
 		GtkTextIter next;
 		gtk_text_buffer_get_start_iter(chatBuffer, &iter);
@@ -489,24 +485,22 @@ void Hub::applyTags_gui(const string &line)
 	GtkTextIter start_iter;
 	gtk_text_buffer_get_end_iter(chatBuffer, &start_iter);
 
-	const gint begin = (line[0] == '\n')? 1 : 0;
-
 	// apply timestamp tag
 	if (BOOLSETTING(TIME_STAMPS))
 	{
 		gtk_text_iter_backward_chars(&start_iter,
-			g_utf8_strlen(line.c_str(), -1) - g_utf8_strlen(Util::getShortTimeString().c_str(), -1) - 2 - begin);
+			g_utf8_strlen(line.c_str(), -1) - g_utf8_strlen(Util::getShortTimeString().c_str(), -1) - 2);
 
 		GtkTextIter ts_start_iter, ts_end_iter;
 		ts_end_iter = start_iter;
 
 		gtk_text_buffer_get_end_iter(chatBuffer, &ts_start_iter);
-		gtk_text_iter_backward_chars(&ts_start_iter, g_utf8_strlen(line.c_str(), -1) - begin);
+		gtk_text_iter_backward_chars(&ts_start_iter, g_utf8_strlen(line.c_str(), -1));
 
 		gtk_text_buffer_apply_tag(chatBuffer, TagsMap[TAG_TIMESTAMP], &ts_start_iter, &ts_end_iter);
 	}
 	else
-		gtk_text_iter_backward_chars(&start_iter, g_utf8_strlen(line.c_str(), -1) - begin);
+		gtk_text_iter_backward_chars(&start_iter, g_utf8_strlen(line.c_str(), -1));
 
 	// apply tags: nick, link, hub-url, magnet
 	GtkTextIter tag_start_iter, tag_end_iter;
@@ -1262,7 +1256,7 @@ void Hub::onSendMessage_gui(GtkEntry *entry, gpointer data)
 		}
 		else if (command == _("freedcpp"))
 		{
-			hub->addMessage_gui(_("freedcpp 0.0.1.14/0.7091, project home: http://freedcpp.narod.ru http://code.google.com/p/freedcpp"), Msg::SYSTEM);
+			hub->addStatusMessage_gui(_("freedcpp 0.0.1.15/0.7091, project home: http://freedcpp.narod.ru http://code.google.com/p/freedcpp"), Msg::SYSTEM, Sound::NONE);
 		}
 		else if (command == _("help"))
 		{
