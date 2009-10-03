@@ -646,6 +646,19 @@ Search *MainWindow::addSearch_gui()
 	return entry;
 }
 
+void MainWindow::addSearch_gui(string magnet)
+{
+	string name;
+	int64_t size;
+	string tth;
+
+	if (WulforUtil::splitMagnet(magnet, name, size, tth))
+	{
+		Search *s = addSearch_gui();
+		s->putValue_gui(tth, 0, SearchManager::SIZE_DONTCARE, SearchManager::TYPE_TTH);
+	}
+}
+
 void MainWindow::setTabPosition_gui(int position)
 {
 	GtkPositionType tabPosition;
@@ -1187,6 +1200,24 @@ void MainWindow::autoConnect_client()
 			func = new F2(this, &MainWindow::showHub_gui, hub->getServer(), hub->getEncoding());
 			WulforManager::get()->dispatchGuiFunc(func);
 		}
+	}
+
+	string link = WulforManager::get()->getURL();
+
+	if (link.empty()) return;
+
+	typedef Func1<MainWindow, string> F1;
+	F1 *func1;
+
+	if (WulforUtil::isHubURL(link))
+	{
+		func = new F2(this, &MainWindow::showHub_gui, link, "");
+		WulforManager::get()->dispatchGuiFunc(func);
+	}
+	else if (WulforUtil::isMagnet(link))
+	{
+		func1 = new F1(this, &MainWindow::addSearch_gui, link);
+		WulforManager::get()->dispatchGuiFunc(func1);
 	}
 }
 

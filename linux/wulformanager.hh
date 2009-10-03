@@ -33,13 +33,14 @@
 class WulforManager
 {
 	public:
-		static void start();
+		static void start(int argc, char **argv);
 		static void stop();
 		static WulforManager *get();
 
 		WulforManager();
 		~WulforManager();
 
+		std::string getURL();
 		std::string getPath();
 		MainWindow *getMainWindow();
 		void deleteMainWindow();
@@ -53,7 +54,12 @@ class WulforManager
 		gint openHashDialog_gui();
 		gint openSettingsDialog_gui();
 
+		void onReceived_gui(const std::string link);
+
 	private:
+		// argv[1] from main
+		static std::string argv1;
+
 		// MainWindow-related functions
 		void createMainWindow();
 

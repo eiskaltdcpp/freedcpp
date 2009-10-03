@@ -1256,7 +1256,7 @@ void Hub::onSendMessage_gui(GtkEntry *entry, gpointer data)
 		}
 		else if (command == _("freedcpp"))
 		{
-			hub->addStatusMessage_gui(_("freedcpp 0.0.1.15/0.7091, project home: http://freedcpp.narod.ru http://code.google.com/p/freedcpp"), Msg::SYSTEM, Sound::NONE);
+			hub->addStatusMessage_gui(_("freedcpp 0.0.1.16/0.7091, project home: http://freedcpp.narod.ru http://code.google.com/p/freedcpp"), Msg::SYSTEM, Sound::NONE);
 		}
 		else if (command == _("help"))
 		{
@@ -1513,15 +1513,8 @@ void Hub::onOpenHubClicked_gui(GtkMenuItem *item, gpointer data)
 void Hub::onSearchMagnetClicked_gui(GtkMenuItem *item, gpointer data)
 {
 	Hub *hub = (Hub *)data;
-	string name;
-	int64_t size;
-	string tth;
 
-	if (WulforUtil::splitMagnet(hub->selectedTagStr, name, size, tth))
-	{
-		Search *s = WulforManager::get()->getMainWindow()->addSearch_gui();
-		s->putValue_gui(tth, 0, SearchManager::SIZE_DONTCARE, SearchManager::TYPE_TTH);
-	}
+	WulforManager::get()->getMainWindow()->addSearch_gui(hub->selectedTagStr);
 }
 
 void Hub::onMagnetPropertiesClicked_gui(GtkMenuItem *item, gpointer data)
