@@ -73,6 +73,7 @@ class MainWindow:
 		void showPublicHubs_gui();
 		void showShareBrowser_gui(dcpp::UserPtr user, std::string file, std::string dir, bool useSetting);
 		Search *addSearch_gui();
+		void addSearch_gui(std::string magnet);
 		void setMainStatus_gui(std::string text, time_t t = time(NULL));
 
 		// Client functions

@@ -20,6 +20,7 @@
  */
 
 #include "wulformanager.hh"
+#include "WulforUtil.hh"
 
 #include <iostream>
 #include <glib/gi18n.h>
@@ -29,9 +30,15 @@
 using namespace std;
 
 WulforManager *WulforManager::manager = NULL;
+string WulforManager::argv1;
 
-void WulforManager::start()
+void WulforManager::start(int argc, char **argv)
 {
+	if (argc > 1)
+	{
+		argv1 = argv[1];
+	}
+
 	// Create WulforManager
 	dcassert(!manager);
 	manager = new WulforManager();
@@ -274,6 +281,11 @@ MainWindow *WulforManager::getMainWindow()
 	return mainWin;
 }
 
+string WulforManager::getURL()
+{
+	return argv1;
+}
+
 string WulforManager::getPath()
 {
 	return path;
@@ -345,6 +357,17 @@ DialogEntry* WulforManager::getDialogEntry_gui(const string &id)
 	g_static_rw_lock_reader_unlock(&entryMutex);
 
 	return ret;
+}
+
+void WulforManager::onReceived_gui(const string link)
+{
+	dcassert(mainWin);
+
+	if (WulforUtil::isHubURL(link))
+		mainWin->showHub_gui(link);
+
+	else if (WulforUtil::isMagnet(link))
+		mainWin->addSearch_gui(link);
 }
 
 gint WulforManager::openHashDialog_gui()

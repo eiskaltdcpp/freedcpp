@@ -3,6 +3,7 @@
 # todo: Replace this with env.Glob('*.cpp') when Scons 0.98 is widespread enough 
 # (glob.glob() doesn't work here due to the use of a variant dir).
 gui_files = [
+	'bacon-message-connection.c',
 	'bookentry.cc',
 	'dialogentry.cc',
 	'downloadqueue.cc',

@@ -871,15 +871,8 @@ void PrivateMessage::onOpenHubClicked_gui(GtkMenuItem *item, gpointer data)
 void PrivateMessage::onSearchMagnetClicked_gui(GtkMenuItem *item, gpointer data)
 {
 	PrivateMessage *pm = (PrivateMessage *)data;
-	string name;
-	int64_t size;
-	string tth;
 
-	if (WulforUtil::splitMagnet(pm->selectedTagStr, name, size, tth))
-	{
-		Search *s = WulforManager::get()->getMainWindow()->addSearch_gui();
-		s->putValue_gui(tth, 0, SearchManager::SIZE_DONTCARE, SearchManager::TYPE_TTH);
-	}
+	WulforManager::get()->getMainWindow()->addSearch_gui(pm->selectedTagStr);
 }
 
 void PrivateMessage::onMagnetPropertiesClicked_gui(GtkMenuItem *item, gpointer data)
