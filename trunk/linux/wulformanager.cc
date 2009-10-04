@@ -28,6 +28,7 @@
 #include "settingsdialog.hh"
 
 using namespace std;
+using namespace dcpp;
 
 WulforManager *WulforManager::manager = NULL;
 string WulforManager::argv1;
@@ -363,10 +364,10 @@ void WulforManager::onReceived_gui(const string link)
 {
 	dcassert(mainWin);
 
-	if (WulforUtil::isHubURL(link))
+	if (WulforUtil::isHubURL(link) && BOOLSETTING(URL_HANDLER))
 		mainWin->showHub_gui(link);
 
-	else if (WulforUtil::isMagnet(link))
+	else if (WulforUtil::isMagnet(link) && BOOLSETTING(MAGNET_REGISTER))
 		mainWin->addSearch_gui(link);
 }
 

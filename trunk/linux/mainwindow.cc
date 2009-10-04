@@ -1209,12 +1209,12 @@ void MainWindow::autoConnect_client()
 	typedef Func1<MainWindow, string> F1;
 	F1 *func1;
 
-	if (WulforUtil::isHubURL(link))
+	if (WulforUtil::isHubURL(link) && BOOLSETTING(URL_HANDLER))
 	{
 		func = new F2(this, &MainWindow::showHub_gui, link, "");
 		WulforManager::get()->dispatchGuiFunc(func);
 	}
-	else if (WulforUtil::isMagnet(link))
+	else if (WulforUtil::isMagnet(link) && BOOLSETTING(MAGNET_REGISTER))
 	{
 		func1 = new F1(this, &MainWindow::addSearch_gui, link);
 		WulforManager::get()->dispatchGuiFunc(func1);
