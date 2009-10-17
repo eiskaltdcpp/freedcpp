@@ -41,6 +41,7 @@
 #include "search.hh"
 #include "settingsmanager.hh"
 #include "sharebrowser.hh"
+#include "emoticons.hh"
 #include "UserCommandMenu.hh"
 #include "wulformanager.hh"
 #include "WulforUtil.hh"
@@ -194,6 +195,7 @@ MainWindow::MainWindow():
 	createStatusIcon_gui();
 
 	Sound::start();
+	Emoticons::start();
 }
 
 MainWindow::~MainWindow()
@@ -233,6 +235,7 @@ MainWindow::~MainWindow()
 	g_object_unref(statusIcon);
 
 	Sound::stop();
+	Emoticons::stop();
 }
 
 GtkWidget *MainWindow::getContainer()

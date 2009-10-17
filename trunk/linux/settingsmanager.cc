@@ -120,6 +120,7 @@ WulforSettingsManager::WulforSettingsManager():
 	defaultString.insert(StringMap::value_type("text-op-fore-color", "#0000FF"));
 	defaultString.insert(StringMap::value_type("text-url-back-color", "#FFFFFF"));
 	defaultString.insert(StringMap::value_type("text-url-fore-color", "#0000FF"));
+	defaultString.insert(StringMap::value_type("emoticons-pack", ""));
 
 	load();
 }

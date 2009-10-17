@@ -29,6 +29,8 @@
 #include "privatemessage.hh"
 #include "search.hh"
 #include "settingsmanager.hh"
+#include "emoticonsdialog.hh"
+#include "emoticons.hh"
 #include "UserCommandMenu.hh"
 #include "wulformanager.hh"
 #include "WulforUtil.hh"
@@ -91,6 +93,7 @@ Hub::Hub(const string &address, const string &encoding):
 	start_mark = gtk_text_buffer_create_mark(chatBuffer, NULL, &iter, TRUE);
 	end_mark = gtk_text_buffer_create_mark(chatBuffer, NULL, &iter, TRUE);
 	tag_mark = gtk_text_buffer_create_mark(chatBuffer, NULL, &iter, FALSE);
+	emot_mark = gtk_text_buffer_create_mark(chatBuffer, NULL, &iter, TRUE);
 
 	handCursor = gdk_cursor_new(GDK_HAND2);
 
@@ -159,6 +162,14 @@ Hub::Hub(const string &address, const string &encoding):
 
 	history.push_back("");
 
+	/* initial emoticons dialog */
+	emotdialog = new EmoticonsDialog(getWidget("chatEntry"), getWidget("emotButton"), getWidget("emotPacksMenu"));
+	icon = path + "smile.png";
+	gtk_button_set_image(GTK_BUTTON(getWidget("emotButton")), gtk_image_new_from_file(icon.c_str()));
+	g_signal_connect(G_OBJECT(getWidget("emotButton")), "button-release-event", G_CALLBACK(onEmotButtonRelease_gui), (gpointer)this);
+
+	useEmoticons = TRUE;
+
 	/* initial tags map */
 	TagsMap[TAG_GENERAL] = createTag_gui("TAG_GENERAL", TAG_GENERAL);
 	TagsMap[TAG_MYOWN] = createTag_gui("TAG_MYOWN", TAG_MYOWN);
@@ -200,6 +211,8 @@ Hub::~Hub()
 		gdk_cursor_unref(handCursor);
 		handCursor = NULL;
 	}
+
+	delete emotdialog;
 }
 
 void Hub::show()
@@ -466,6 +479,8 @@ void Hub::addMessage_gui(string message, Msg::TypeMsg typemsg)
 			tagNick = TAG_NICK;
 	}
 
+	totalEmoticons = 0;
+
 	applyTags_gui(line);
 
 	gtk_text_buffer_get_end_iter(chatBuffer, &iter);
@@ -662,10 +677,118 @@ void Hub::applyEmoticons_gui()
 	if(gtk_text_iter_equal(&start_iter, &end_iter))
 		return;
 
+	/* apply general tag */
 	dcassert(tagMsg >= TAG_GENERAL && tagMsg < TAG_TIMESTAMP);
 	gtk_text_buffer_apply_tag(chatBuffer, TagsMap[tagMsg], &start_iter, &end_iter);
 
 	/* emoticons */
+	if (!Emoticons::get()->useEmoticons_gui())
+	{
+		setStatus_gui("statusMain", _(" *** emoticons no loads"));
+		return;
+	}
+	else if (!useEmoticons)
+	{
+		setStatus_gui("statusMain", _(" *** emoticons mode off"));
+		return;
+	}
+	else if (totalEmoticons >= EMOTICONS_MAX)
+	{
+		setStatus_gui("statusMain", _(" *** emoticons over"));
+		return;
+	}
+
+	bool search;
+	gint searchEmoticons = 0;
+
+	GtkTextIter tmp_end_iter,
+		match_start,
+		match_end,
+		p_start,
+		p_end;
+
+	Emot::Iter it, p_it;
+	gint set_start, new_start;
+	Emot::List &list = Emoticons::get()->getPack_gui();
+
+	/* set start mark */
+	gtk_text_buffer_move_mark(chatBuffer, emot_mark, &start_iter);
+
+	for (;;)
+	{
+		/* get start and end iter positions at marks */
+		gtk_text_buffer_get_iter_at_mark(chatBuffer, &start_iter, emot_mark);
+		gtk_text_buffer_get_iter_at_mark(chatBuffer, &end_iter, end_mark);
+
+		search = FALSE;
+		set_start = gtk_text_iter_get_offset(&end_iter);
+
+		for (it = list.begin(); it != list.end(); ++it)
+		{
+			if (gtk_text_iter_forward_search(&start_iter,
+				(*it)->getName().c_str(),
+				GTK_TEXT_SEARCH_VISIBLE_ONLY,
+				&match_start,
+				&match_end,
+				&end_iter))
+			{
+				if (!search)
+				{
+					search = TRUE;
+					end_iter = match_start;
+
+					/* set new limit search */
+					gtk_text_buffer_get_iter_at_mark(chatBuffer, &tmp_end_iter, end_mark);
+					for (int i = 1; !gtk_text_iter_equal(&end_iter, &tmp_end_iter) && i <= Emot::SIZE_NAME;
+						gtk_text_iter_forward_chars(&end_iter, 1), i++);
+
+				}
+
+				new_start = gtk_text_iter_get_offset(&match_start);
+
+				if (new_start < set_start)
+				{
+					set_start = new_start;
+
+					p_start = match_start;
+					p_end = match_end;
+
+					p_it = it;
+
+					if (gtk_text_iter_equal(&start_iter, &match_start))
+						break;
+				}
+			}
+		}
+
+		if (search)
+		{
+			if (totalEmoticons >= EMOTICONS_MAX)
+			{
+				setStatus_gui("statusMain", _(" *** emoticons over"));
+				return;
+			}
+
+			/* delete text-emoticon and insert pixbuf-emoticon */
+			gtk_text_buffer_delete(chatBuffer, &p_start, &p_end);
+			gtk_text_buffer_insert_pixbuf(chatBuffer, &p_start, (*p_it)->getPixbuf());
+
+			searchEmoticons++;
+			totalEmoticons++;
+
+			/* set emoticon mark to start */
+			gtk_text_buffer_move_mark(chatBuffer, emot_mark, &p_start);
+
+			/* check full emoticons */
+			gtk_text_buffer_get_iter_at_mark(chatBuffer, &start_iter, start_mark);
+			gtk_text_buffer_get_iter_at_mark(chatBuffer, &end_iter, end_mark);
+			
+			if (gtk_text_iter_get_offset(&end_iter) - gtk_text_iter_get_offset(&start_iter) == searchEmoticons - 1)
+				return;
+		}
+		else
+			return;
+	}
 }
 
 /*
@@ -1138,6 +1261,26 @@ gboolean Hub::onChatVisibilityChanged_gui(GtkWidget *widget, GdkEventVisibility 
 	return FALSE;
 }
 
+gboolean Hub::onEmotButtonRelease_gui(GtkWidget *widget, GdkEventButton *event, gpointer data)
+{
+	Hub *hub = (Hub *)data;
+
+	switch (event->button)
+	{
+		case 1: //show emoticons dialog
+
+			hub->emotdialog->showEmotDialog_gui();
+		break;
+
+		case 3: //show emoticons packs menu
+
+			hub->emotdialog->showPacksMenu_gui();
+		break;
+	}
+
+	return FALSE;
+}
+
 void Hub::onChatScroll_gui(GtkAdjustment *adjustment, gpointer data)
 {
 	Hub *hub = (Hub *)data;
@@ -1254,14 +1397,27 @@ void Hub::onSendMessage_gui(GtkEntry *entry, gpointer data)
 			else
 				hub->addStatusMessage_gui(_("User not found"), Msg::SYSTEM, Sound::NONE);
 		}
+		else if (command == _("emoticons") || command == _("emot"))
+		{
+			if (hub->useEmoticons)
+			{
+				hub->useEmoticons = FALSE;
+				hub->setStatus_gui("statusMain", _(" *** emoticons mode off"));
+			}
+			else
+			{
+				hub->useEmoticons = TRUE;
+				hub->setStatus_gui("statusMain", _(" *** emoticons mode on"));
+			}
+		}
 		else if (command == _("freedcpp"))
 		{
-			hub->addStatusMessage_gui(_("freedcpp 0.0.1.17/0.7091, project home: http://freedcpp.narod.ru http://code.google.com/p/freedcpp"), Msg::SYSTEM, Sound::NONE);
+			hub->addStatusMessage_gui(_("freedcpp 0.0.1.18/0.7091, project home: http://freedcpp.narod.ru http://code.google.com/p/freedcpp"), Msg::SYSTEM, Sound::NONE);
 		}
 		else if (command == _("help"))
 		{
 			hub->addStatusMessage_gui(_("Available commands: /away <message>, /back, /clear, /close, /favorite, "\
-				 "/getlist <nick>, /grant <nick>, /help, /join <address>, /me <message>, /pm <nick>, /rebuild, /refresh, /userlist, /freedcpp"), Msg::SYSTEM, Sound::NONE);
+				 "/getlist <nick>, /grant <nick>, /help, /join <address>, /me <message>, /pm <nick>, /rebuild, /refresh, /userlist, /freedcpp, \"/emoticons, /emot\""), Msg::SYSTEM, Sound::NONE);
 		}
 		else if (command == _("join") && !param.empty())
 		{
