@@ -7,6 +7,8 @@ gui_files = [
 	'bookentry.cc',
 	'dialogentry.cc',
 	'downloadqueue.cc',
+	'emoticons.cc',
+	'emoticonsdialog.cc',
 	'entry.cc',
 	'favoritehubs.cc',
 	'finishedtransfers.cc',

@@ -33,6 +33,7 @@
 
 class UserCommandMenu;
 class WulforSettingsManager;
+class EmoticonsDialog;
 
 class Hub:
 	public BookEntry,
@@ -98,6 +99,7 @@ class Hub:
 		static gboolean onMagnetTagEvent_gui(GtkTextTag *tag, GObject *textView, GdkEvent *event, GtkTextIter *iter, gpointer data);
 		static gboolean onChatPointerMoved_gui(GtkWidget *widget, GdkEventMotion *event, gpointer data);
 		static gboolean onChatVisibilityChanged_gui(GtkWidget *widget, GdkEventVisibility *event, gpointer data);
+		static gboolean onEmotButtonRelease_gui(GtkWidget *widget, GdkEventButton *event, gpointer data);
 		static void onChatScroll_gui(GtkAdjustment *adjustment, gpointer data);
 		static void onChatResize_gui(GtkAdjustment *adjustment, gpointer data);
 		static void onSendMessage_gui(GtkEntry *entry, gpointer data);
@@ -155,7 +157,7 @@ class Hub:
 		GtkListStore *nickStore;
 		GtkTreeSelection *nickSelection;
 		GtkTextBuffer *chatBuffer;
-		GtkTextMark *chatMark, *start_mark, *end_mark, *tag_mark;
+		GtkTextMark *chatMark, *start_mark, *end_mark, *tag_mark, *emot_mark;
 		gint oldType;
 		std::vector<std::string> history;
 		int historyIndex;
@@ -172,6 +174,9 @@ class Hub:
 		std::string myNick;
 		static const std::string tagPrefix;
 		TypeTag tagMsg, tagNick;
+		bool useEmoticons;
+		gint totalEmoticons;
+		EmoticonsDialog *emotdialog;
 };
 
 #else
