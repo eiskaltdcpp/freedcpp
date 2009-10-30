@@ -231,11 +231,15 @@ void EmoticonsDialog::onChat(GtkWidget *widget /*button*/, gpointer data /*this*
 {
 	EmoticonsDialog *ed = (EmoticonsDialog *) data;
 
+	// set focus chat enry
+	if (!gtk_widget_is_focus(ed->Chat))
+		gtk_widget_grab_focus(ed->Chat);
+
 	/* insert text to chat entry */
 	gchar *text = (gchar *) g_object_get_data(G_OBJECT(widget), "text");
 	gint pos = gtk_editable_get_position(GTK_EDITABLE(ed->Chat));
 	gtk_editable_insert_text(GTK_EDITABLE(ed->Chat), text, -1, &pos);
-	gtk_editable_set_position(GTK_EDITABLE(ed->Chat), -1);
+	gtk_editable_set_position(GTK_EDITABLE(ed->Chat), pos);
 
 	gtk_widget_destroy(ed->dialog);
 	ed->dialog = NULL;
