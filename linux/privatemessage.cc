@@ -598,6 +598,9 @@ gboolean PrivateMessage::onFocusIn_gui(GtkWidget *widget, GdkEventFocus *event, 
 
 	gtk_widget_grab_focus(pm->getWidget("entry"));
 
+	// fix select text
+	gtk_editable_set_position(GTK_EDITABLE(pm->getWidget("entry")), -1);
+
 	return TRUE;
 }
 

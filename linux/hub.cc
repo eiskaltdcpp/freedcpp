@@ -983,6 +983,9 @@ gboolean Hub::onFocusIn_gui(GtkWidget *widget, GdkEventFocus *event, gpointer da
 
 	gtk_widget_grab_focus(hub->getWidget("chatEntry"));
 
+	// fix select text
+	gtk_editable_set_position(GTK_EDITABLE(hub->getWidget("chatEntry")), -1);
+
 	return TRUE;
 }
 
