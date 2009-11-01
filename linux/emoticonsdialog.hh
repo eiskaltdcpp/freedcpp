@@ -30,22 +30,34 @@ class EmoticonsDialog
 
 		// GUI functions
 		void showEmotDialog_gui();
-		void showPacksMenu_gui();
+		void showEmotMenu_gui();
 
 	private:
+		enum {FIRST, x16 = FIRST, x22, x24, x32, x36, x48, x64, DEFAULT, LAST};
+
 		GtkWidget *Chat;       // chat entry
 		GtkWidget *Button;     // chat emoticons button
 		GtkWidget *Menu;       // packs menu
 		GtkWidget *dialog;     // emoticons dialog
 		GtkTooltips *tooltips; // tooltips for all icon widgets
 
+		int icon_width;
+		int icon_height;
+		std::string currIconSize;
+		static const std::string sizeIcon[LAST];
+
 		void build();
 		void position();
 		void graber();
+		void addPacksMenu(GtkWidget *item);
+		void addIconSizeMenu(GtkWidget *item);
+		void setCurrIconSize(const std::string &size);
+		GdkPixbuf* scalePixbuf(GdkPixbuf *pixbuf, const int width, const int height);
 
 		//GUI callback functions
 		static void onChat(GtkWidget *widget /*button*/, gpointer data /*this*/);
-		static void onCheckItemMenu(GtkMenuItem *checkItem, gpointer data);
+		static void onCheckPacksMenu(GtkMenuItem *checkItem, gpointer data);
+		static void onCheckIconSizeMenu(GtkMenuItem *checkItem, gpointer data);
 		static gboolean event(GtkWidget *widget /*dialog*/, GdkEvent *event, gpointer data /*this*/);
 };
 

@@ -121,6 +121,7 @@ WulforSettingsManager::WulforSettingsManager():
 	defaultString.insert(StringMap::value_type("text-url-back-color", "#FFFFFF"));
 	defaultString.insert(StringMap::value_type("text-url-fore-color", "#0000FF"));
 	defaultString.insert(StringMap::value_type("emoticons-pack", ""));
+	defaultString.insert(StringMap::value_type("emoticons-icon-size", "24x24"));
 
 	load();
 }
