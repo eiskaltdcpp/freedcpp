@@ -29,7 +29,8 @@
 class Emot
 {
 	public:
-		enum {SIZE_NAME = 24, SIZE_LIST = 255};
+//		enum {SIZE_LIST = 255}; FIXME limit emotions
+		enum {SIZE_NAME = 24};
 		typedef std::vector<Emot *> List;
 		typedef List::const_iterator Iter;
 

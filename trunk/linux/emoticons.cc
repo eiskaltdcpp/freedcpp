@@ -153,9 +153,12 @@ bool Emoticons::load(const string &file)
 				{
 					emotName = xml.getChildAttrib("text");
 
-					if (emotName.empty() || g_utf8_strlen(emotName.c_str(), -1) > Emot::SIZE_NAME ||
-						filter.count(emotName) || pack.size() > Emot::SIZE_LIST)
-							continue;
+					if (emotName.empty() || g_utf8_strlen(emotName.c_str(), -1) > Emot::SIZE_NAME || filter.count(emotName))
+						continue;
+
+//					FIXME limit emotions
+//					if (pack.size() > Emot::SIZE_LIST)
+//						continue;
 
 					filter.insert(emotName);
 
