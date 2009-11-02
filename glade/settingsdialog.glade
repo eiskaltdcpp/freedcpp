@@ -2372,6 +2372,14 @@ System default</property>
                                   <widget class="GtkEntry" id="timestampEntry">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
+                                    <property name="tooltip" translatable="yes">%a abbreviated weekday name.
+%b abbreviated month name.
+%H hour as a decimal number using a 24-hour clock.
+%M minute as a decimal number (range 00 to 59).
+%S second as a decimal number (range 00 to 59).
+%% a literal '%' character.
+
+see man strftime for details.</property>
                                   </widget>
                                 </child>
                               </widget>
@@ -5077,7 +5085,7 @@ System default</property>
   </widget>
   <widget class="GtkColorSelectionDialog" id="colorSelectionDialog">
     <property name="border_width">5</property>
-    <property name="title" translatable="yes">Выбор цвета</property>
+    <property name="title" translatable="yes">Color select</property>
     <property name="window_position">GTK_WIN_POS_CENTER_ON_PARENT</property>
     <property name="type_hint">GDK_WINDOW_TYPE_HINT_DIALOG</property>
     <child internal-child="color_selection">
@@ -5125,7 +5133,7 @@ System default</property>
   </widget>
   <widget class="GtkFontSelectionDialog" id="fontSelectionDialog">
     <property name="border_width">5</property>
-    <property name="title" translatable="yes">Выбор шрифта</property>
+    <property name="title" translatable="yes">Font select</property>
     <property name="window_position">GTK_WIN_POS_CENTER_ON_PARENT</property>
     <property name="type_hint">GDK_WINDOW_TYPE_HINT_DIALOG</property>
     <child internal-child="font_selection">
