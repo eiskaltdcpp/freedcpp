@@ -707,7 +707,7 @@ void Hub::applyEmoticons_gui()
 		p_start,
 		p_end;
 
-	Emot::Iter it, p_it;
+	Emot::Iter p_it;
 	gint set_start, new_start;
 	Emot::List &list = Emoticons::get()->getPack_gui();
 
@@ -723,40 +723,48 @@ void Hub::applyEmoticons_gui()
 		search = FALSE;
 		set_start = gtk_text_iter_get_offset(&end_iter);
 
-		for (it = list.begin(); it != list.end(); ++it)
+		for (Emot::Iter it = list.begin(); it != list.end(); ++it)
 		{
-			if (gtk_text_iter_forward_search(&start_iter,
-				(*it)->getName().c_str(),
-				GTK_TEXT_SEARCH_VISIBLE_ONLY,
-				&match_start,
-				&match_end,
-				&end_iter))
+			GList *names = (*it)->getNames();
+
+			for (GList *p = names; p != NULL; p = p->next)
 			{
-				if (!search)
+				if (gtk_text_iter_forward_search(&start_iter,
+					(gchar *)p->data,
+					GTK_TEXT_SEARCH_VISIBLE_ONLY,
+					&match_start,
+					&match_end,
+					&end_iter))
 				{
-					search = TRUE;
-					end_iter = match_start;
+					if (!search)
+					{
+						search = TRUE;
+						end_iter = match_start;
 
-					/* set new limit search */
-					gtk_text_buffer_get_iter_at_mark(chatBuffer, &tmp_end_iter, end_mark);
-					for (int i = 1; !gtk_text_iter_equal(&end_iter, &tmp_end_iter) && i <= Emot::SIZE_NAME;
-						gtk_text_iter_forward_chars(&end_iter, 1), i++);
+						/* set new limit search */
+						gtk_text_buffer_get_iter_at_mark(chatBuffer, &tmp_end_iter, end_mark);
+						for (int i = 1; !gtk_text_iter_equal(&end_iter, &tmp_end_iter) && i <= Emot::SIZE_NAME;
+							gtk_text_iter_forward_chars(&end_iter, 1), i++);
 
-				}
+					}
 
-				new_start = gtk_text_iter_get_offset(&match_start);
+					new_start = gtk_text_iter_get_offset(&match_start);
 
-				if (new_start < set_start)
-				{
-					set_start = new_start;
+					if (new_start < set_start)
+					{
+						set_start = new_start;
 
-					p_start = match_start;
-					p_end = match_end;
+						p_start = match_start;
+						p_end = match_end;
 
-					p_it = it;
+						p_it = it;
 
-					if (gtk_text_iter_equal(&start_iter, &match_start))
-						break;
+						if (gtk_text_iter_equal(&start_iter, &match_start))
+						{
+							it = list.end() - 1;
+							break;
+						}
+					}
 				}
 			}
 		}
@@ -1415,7 +1423,7 @@ void Hub::onSendMessage_gui(GtkEntry *entry, gpointer data)
 		}
 		else if (command == _("freedcpp"))
 		{
-			hub->addStatusMessage_gui(_("freedcpp 0.0.1.21/0.7091, project home: http://freedcpp.narod.ru http://code.google.com/p/freedcpp"), Msg::SYSTEM, Sound::NONE);
+			hub->addStatusMessage_gui(_("freedcpp 0.0.1.22/0.7091, project home: http://freedcpp.narod.ru http://code.google.com/p/freedcpp"), Msg::SYSTEM, Sound::NONE);
 		}
 		else if (command == _("help"))
 		{

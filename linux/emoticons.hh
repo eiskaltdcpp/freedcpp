@@ -34,16 +34,16 @@ class Emot
 		typedef std::vector<Emot *> List;
 		typedef List::const_iterator Iter;
 
-		Emot(std::string name, std::string file, GdkPixbuf *pixbuf = NULL) :
-			name(name), file(file), pixbuf(pixbuf) {}
+		Emot(GList *names, std::string file, GdkPixbuf *pixbuf = NULL) :
+			names(names), file(file), pixbuf(pixbuf) {}
 		~Emot() {}
 
-		std::string getName() {return name;}
+		GList* getNames() {return names;}
 		std::string getFile() {return file;}
 		GdkPixbuf* getPixbuf() {return pixbuf;}
 
 	private:
-		std::string name;
+		GList *names;
 		std::string file;
 		GdkPixbuf *pixbuf;
 };

@@ -104,7 +104,11 @@ void Emoticons::clean()
 	{
 		for (Emot::Iter it = pack.begin(); it != pack.end(); ++it)
 		{
+			GList *list = (*it)->getNames();
+			g_list_foreach(list, (GFunc)g_free, NULL);
+			g_list_free(list);
 			g_object_unref(G_OBJECT((*it)->getPixbuf()));
+
 			delete *it;
 		}
 
@@ -138,13 +142,11 @@ bool Emoticons::load(const string &file)
 
 			while (xml.findChild("emoticon"))
 			{
-				bool ftest = FALSE;
+				GList *list = NULL;
 				emotFile = xml.getChildAttrib("file");
 				emotPath = path + emotFile;
 
-				if (g_file_test(emotPath.c_str(), G_FILE_TEST_EXISTS))
-					ftest = TRUE;
-				else
+				if (!g_file_test(emotPath.c_str(), G_FILE_TEST_EXISTS))
 					continue;
 
 				xml.stepIn();
@@ -160,16 +162,15 @@ bool Emoticons::load(const string &file)
 //					if (pack.size() > Emot::SIZE_LIST)
 //						continue;
 
+					list = g_list_append(list, g_strdup(emotName.c_str()));
 					filter.insert(emotName);
+				}
 
-					Emot *emot = new Emot(emotName, emotFile, gdk_pixbuf_new_from_file(emotPath.c_str(), NULL));
+				if (list != NULL)
+				{
+					Emot *emot = new Emot(list, emotFile, gdk_pixbuf_new_from_file(emotPath.c_str(), NULL));
 					pack.push_back(emot);
-
-					if (ftest)
-					{
-						ftest = FALSE;
-						countfile++;
-					}
+					countfile++;
 				}
 					xml.stepOut();
 			}
