@@ -249,21 +249,19 @@ void EmoticonsDialog::build()
 	gtk_widget_show(table);
 
 	int i = 1;
-	string name = "";
 
 	setCurrIconSize(WGETS("emoticons-icon-size"));
 	bool useDefault = currIconSize != sizeIcon[DEFAULT]? FALSE : TRUE;
 
 	for (Emot::Iter it = list.begin(); it != list.end(); ++it)
 	{
-		if (name == (*it)->getFile())
-			continue;
-
 		GtkWidget *image = NULL;
 		GdkPixbuf *pixbuf = (*it)->getPixbuf();
 
 		if (pixbuf != NULL)
 		{
+			gchar *name = (gchar *)(*it)->getNames()->data;
+
 			if (!useDefault)
 			{
 				GdkPixbuf *scale = scalePixbuf(pixbuf, icon_width, icon_height);
@@ -279,9 +277,9 @@ void EmoticonsDialog::build()
 			gtk_widget_show(icon);
 
 			gtk_table_attach_defaults(GTK_TABLE(table), icon, left_attach, right_attach, top_attach, bottom_attach);
-			gtk_tooltips_set_tip(tooltips, icon, (*it)->getName().c_str(), NULL);
+			gtk_tooltips_set_tip(tooltips, icon, name, NULL);
 
-			g_object_set_data_full(G_OBJECT(icon), "text", g_strdup((*it)->getName().c_str()), g_free);
+			g_object_set_data_full(G_OBJECT(icon), "text", g_strdup(name), g_free);
 			g_signal_connect(G_OBJECT(icon), "clicked", G_CALLBACK(onChat), (gpointer) this);
 
 			right_attach = ++left_attach + 1;
@@ -292,8 +290,6 @@ void EmoticonsDialog::build()
 				right_attach = left_attach + 1;
 				bottom_attach = ++top_attach + 1;
 			}
-
-			name = (*it)->getFile();
 
 			if (++i > sizetable)
 				break;
