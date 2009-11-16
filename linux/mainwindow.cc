@@ -196,6 +196,7 @@ MainWindow::MainWindow():
 
 	Sound::start();
 	Emoticons::start();
+	Notify::start();
 }
 
 MainWindow::~MainWindow()
@@ -236,6 +237,7 @@ MainWindow::~MainWindow()
 
 	Sound::stop();
 	Emoticons::stop();
+	Notify::stop();
 }
 
 GtkWidget *MainWindow::getContainer()
@@ -477,6 +479,11 @@ void MainWindow::setMainStatus_gui(string text, time_t t)
 	}
 }
 
+void MainWindow::showNotification_gui(string body, Notify::TypeNotify notify)
+{
+	Notify::get()->showNotify(_("<b>file:</b> "), body, notify);
+}
+
 void MainWindow::setStatus_gui(string statusBar, string text)
 {
 	if (statusBar != "status1")
@@ -599,7 +606,16 @@ void MainWindow::addPrivateMessage_gui(Msg::TypeMsg typemsg, string cid, string 
 	}
 
 	if (!message.empty())
+	{
 		dynamic_cast<PrivateMessage*>(entry)->addMessage_gui(message, typemsg);
+
+		if (!isActive_gui())
+		{
+			Notify::get()->showNotify("",
+				(message.size() > 25 && !WGETB("notify-message-reduce")) ? message.substr(0, 25) + "..." : message,
+				Notify::PRIVATE_MESSAGE);
+		}
+	}
 
 	if (raise)
 		raisePage_gui(entry->getContainer());
@@ -1315,6 +1331,12 @@ void MainWindow::on(QueueManagerListener::Finished, QueueItem *item, const strin
 		typedef Func4<MainWindow, UserPtr, string, string, bool> F4;
 		F4 *func = new F4(this, &MainWindow::showShareBrowser_gui, user, listName, dir, TRUE);
 		WulforManager::get()->dispatchGuiFunc(func);
+	}
+	else if (item->isSet(QueueItem::FLAG_NORMAL))
+	{
+		typedef Func2<MainWindow, string, Notify::TypeNotify> F2;
+		F2 *f2 = new F2(this, &MainWindow::showNotification_gui, item->getTargetFileName(), Notify::DOWNLOAD_FINISHED);
+		WulforManager::get()->dispatchGuiFunc(f2);
 	}
 }
 

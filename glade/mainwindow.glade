@@ -723,7 +723,7 @@ In addition, as a special exception, compiling, linking, and/or using OpenSSL wi
   troll
 
 Contributors:
-
+  Leliksan Floyd
 </property>
     <property name="artists"></property>
     <property name="wrap_license">True</property>

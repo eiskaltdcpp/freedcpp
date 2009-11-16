@@ -24,6 +24,7 @@
 
 #include "settingsmanager.hh"
 #include "wulformanager.hh"
+#include "WulforUtil.hh"
 #include "emoticonsdialog.hh"
 #include "emoticons.hh"
 
@@ -264,7 +265,7 @@ void EmoticonsDialog::build()
 
 			if (!useDefault)
 			{
-				GdkPixbuf *scale = scalePixbuf(pixbuf, icon_width, icon_height);
+				GdkPixbuf *scale = WulforUtil::scalePixbuf(pixbuf, icon_width, icon_height);
 				image = gtk_image_new_from_pixbuf(scale);
 				g_object_unref(scale);
 			}
@@ -297,28 +298,6 @@ void EmoticonsDialog::build()
 		else
 			continue;
 	}
-}
-
-GdkPixbuf* EmoticonsDialog::scalePixbuf(GdkPixbuf *pixbuf, const int width, const int height)
-{
-	GdkPixbuf *scalebuf = NULL;
-
-	int Width = gdk_pixbuf_get_width(pixbuf);
-	int Height = gdk_pixbuf_get_height(pixbuf);
-
-	double w, h, k;
-
-	w = (double)(width - 2) / Width;
-	h = (double)(height - 2) / Height;
-	k = MIN (w, h);
-
-	if (Width > width || Height > height)
-
-		scalebuf = gdk_pixbuf_scale_simple(pixbuf, (int)(Width * k), (int)(Height * k), GDK_INTERP_BILINEAR);
-	else
-		scalebuf = gdk_pixbuf_scale_simple(pixbuf, (int)(Width * k * 0.85), (int)(Height * k * 0.85), GDK_INTERP_BILINEAR);
-
-	return scalebuf;
 }
 
 void EmoticonsDialog::position()

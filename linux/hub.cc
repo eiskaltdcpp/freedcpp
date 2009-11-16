@@ -985,6 +985,12 @@ GtkTextTag* Hub::createTag_gui(const string &tagname, TypeTag type)
 	return tag;
 }
 
+void Hub::addStatusMessage_gui(std::string message, Msg::TypeMsg typemsg, Sound::TypeSound sound, Notify::TypeNotify notify)
+{
+	addStatusMessage_gui(message, typemsg, sound);
+	Notify::get()->showNotify("<b>" + client->getHubUrl() + ":</b> ", message, notify);
+}
+
 gboolean Hub::onFocusIn_gui(GtkWidget *widget, GdkEventFocus *event, gpointer data)
 {
 	Hub *hub = (Hub *)data;
@@ -1423,7 +1429,7 @@ void Hub::onSendMessage_gui(GtkEntry *entry, gpointer data)
 		}
 		else if (command == _("freedcpp"))
 		{
-			hub->addStatusMessage_gui(_("freedcpp 0.0.1.22/0.7091, project home: http://freedcpp.narod.ru http://code.google.com/p/freedcpp"), Msg::SYSTEM, Sound::NONE);
+			hub->addStatusMessage_gui(_("freedcpp 0.0.1.23/0.7091, project home: http://freedcpp.narod.ru http://code.google.com/p/freedcpp"), Msg::SYSTEM, Sound::NONE);
 		}
 		else if (command == _("help"))
 		{
@@ -1951,8 +1957,8 @@ void Hub::on(ClientListener::Connecting, Client *) throw()
 
 void Hub::on(ClientListener::Connected, Client *) throw()
 {
-	typedef Func3<Hub, string, Msg::TypeMsg, Sound::TypeSound> F3;
-	F3 *func = new F3(this, &Hub::addStatusMessage_gui, _("Connected"), Msg::STATUS, Sound::HUB_CONNECT);
+	typedef Func4<Hub, string, Msg::TypeMsg, Sound::TypeSound, Notify::TypeNotify> F4;
+	F4 *func = new F4(this, &Hub::addStatusMessage_gui, _("Connected"), Msg::STATUS, Sound::HUB_CONNECT, Notify::HUB_CONNECT);
 	WulforManager::get()->dispatchGuiFunc(func);
 }
 
@@ -2026,9 +2032,9 @@ void Hub::on(ClientListener::Failed, Client *, const string &reason) throw()
 	Func0<Hub> *f0 = new Func0<Hub>(this, &Hub::clearNickList_gui);
 	WulforManager::get()->dispatchGuiFunc(f0);
 
-	typedef Func3<Hub, string, Msg::TypeMsg, Sound::TypeSound> F3;
-	F3 *f3 = new F3(this, &Hub::addStatusMessage_gui, _("Connect failed: ") + reason, Msg::SYSTEM, Sound::HUB_DISCONNECT);
-	WulforManager::get()->dispatchGuiFunc(f3);
+	typedef Func4<Hub, string, Msg::TypeMsg, Sound::TypeSound, Notify::TypeNotify> F4;
+	F4 *f4 = new F4(this, &Hub::addStatusMessage_gui, _("Connect failed: ") + reason, Msg::SYSTEM, Sound::HUB_DISCONNECT, Notify::HUB_DISCONNECT);
+	WulforManager::get()->dispatchGuiFunc(f4);
 }
 
 void Hub::on(ClientListener::GetPassword, Client *) throw()
@@ -2166,7 +2172,7 @@ void Hub::on(ClientListener::PrivateMessage, Client *, const OnlineUser &from,
 		line = "* " + from.getIdentity().getNick() + " " + msg;
 	else
 		line  = "<" + from.getIdentity().getNick() + "> " + msg;
-	
+
 	if (user.getIdentity().isHub() && BOOLSETTING(IGNORE_HUB_PMS))
 	{
 		error = _("Ignored private message from hub");

@@ -21,10 +21,11 @@
 
 #include <libgnome/gnome-sound.h>
 #include "settingsmanager.hh"
-
+#include <dcpp/Text.h>
 #include "sound.hh"
 
 using namespace std;
+using namespace dcpp;
 
 Sound *Sound::pSound = NULL;
 
@@ -76,7 +77,7 @@ void Sound::playSound(TypeSound sound)
 
 void Sound::playSound(const string &target)
 {
-	gnome_sound_play(target.c_str());
+	gnome_sound_play(Text::fromUtf8(target).c_str());
 }
 
 void Sound::sound_finalize()

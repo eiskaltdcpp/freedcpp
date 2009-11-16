@@ -22,6 +22,7 @@
 #include "settingsmanager.hh"
 #include "wulformanager.hh"
 #include "WulforUtil.hh"
+#include <dcpp/Text.h>
 #include "emoticons.hh"
 
 using namespace std;
@@ -144,7 +145,7 @@ bool Emoticons::load(const string &file)
 			{
 				GList *list = NULL;
 				emotFile = xml.getChildAttrib("file");
-				emotPath = path + emotFile;
+				emotPath = Text::fromUtf8(path + emotFile);
 
 				if (!g_file_test(emotPath.c_str(), G_FILE_TEST_EXISTS))
 					continue;

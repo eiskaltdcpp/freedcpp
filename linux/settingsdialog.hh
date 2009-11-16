@@ -44,6 +44,9 @@ class Settings:
 		void addOption_gui(GtkListStore *store, const std::string &name, dcpp::SettingsManager::IntSetting setting);
 		void addOption_gui(GtkListStore *store, WulforSettingsManager *wsm, const std::string &name,
 			const std::string &key1, const std::string &key2, const std::string &key3, const std::string &key4);
+		void addOption_gui(GtkListStore *store, WulforSettingsManager *wsm,
+			const std::string &name, const std::string &key1, const std::string &key2,
+			const std::string &key3, const int key4);
 		void addOption_gui(GtkListStore *store, const std::string &name, const std::string &setting);
 		void addOption_gui(GtkListStore *store, WulforSettingsManager *wsm, const std::string &name, const std::string &key1);
 		void createOptionsView_gui(TreeView &treeView, GtkListStore *&store, const std::string &widgetName);
@@ -125,6 +128,13 @@ class Settings:
 		static void onTextColorBWClicked_gui(GtkWidget *widget, gpointer data);
 		static void onTextStyleClicked_gui(GtkWidget *widget, gpointer data);
 		static void onTextStyleDefaultClicked_gui(GtkWidget *widget, gpointer data);
+		static void onNotifyTestButton_gui(GtkWidget *widget, gpointer data);
+		static void onNotifyIconFileBrowseClicked_gui(GtkWidget *widget, gpointer data);
+		static void onNotifyKeyReleased_gui(GtkWidget *widget, GdkEventKey *event, gpointer data);
+		static void onNotifyButtonReleased_gui(GtkWidget *widget, GdkEventButton *event, gpointer data);
+		static void onNotifyOKClicked_gui(GtkWidget *widget, gpointer data);
+		static void onNotifyIconNoneButton_gui(GtkWidget *widget, gpointer data);
+		static void onNotifyDefaultButton_gui(GtkWidget *widget, gpointer data);
 
 		// Client functions
 		void saveSettings_client();
@@ -138,11 +148,11 @@ class Settings:
 		GtkListStore *downloadToStore, *publicListStore, *queueStore,
 			*shareStore, *appearanceStore, *tabStore, *windowStore1,
 			*windowStore2, *windowStore3, *advancedStore, *certificatesStore, *userCommandStore,
-			*previewAppToStore, *soundStore, *textStyleStore;
+			*previewAppToStore, *soundStore, *textStyleStore, *notifyStore;
 		TreeView downloadToView, publicListView, queueView, shareView,
 			appearanceView, tabView, windowView1, windowView2,
 			windowView3, advancedView, certificatesView, userCommandView,
-			previewAppView, soundView, textStyleView;
+			previewAppView, soundView, textStyleView, notifyView;
 		GtkTextBuffer *textStyleBuffer;
 };
 
