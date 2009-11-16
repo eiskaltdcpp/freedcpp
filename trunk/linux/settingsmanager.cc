@@ -69,6 +69,12 @@ WulforSettingsManager::WulforSettingsManager():
 	defaultInt.insert(IntMap::value_type("text-op-italic", TEXT_STYLE_NORMAL));
 	defaultInt.insert(IntMap::value_type("text-url-bold", TEXT_WEIGHT_NORMAL));
 	defaultInt.insert(IntMap::value_type("text-url-italic", TEXT_STYLE_NORMAL));
+	defaultInt.insert(IntMap::value_type("notify-download-finished-use", 0));
+	defaultInt.insert(IntMap::value_type("notify-private-message-use", 0));
+	defaultInt.insert(IntMap::value_type("notify-hub-disconnect-use", 0));
+	defaultInt.insert(IntMap::value_type("notify-hub-connect-use", 0));
+	defaultInt.insert(IntMap::value_type("notify-message-reduce", 1));
+	defaultInt.insert(IntMap::value_type("notify-icon-size", 3));
 	defaultString.insert(StringMap::value_type("downloadqueue-order", ""));
 	defaultString.insert(StringMap::value_type("downloadqueue-width", ""));
 	defaultString.insert(StringMap::value_type("downloadqueue-visibility", ""));
@@ -122,6 +128,14 @@ WulforSettingsManager::WulforSettingsManager():
 	defaultString.insert(StringMap::value_type("text-url-fore-color", "#0000FF"));
 	defaultString.insert(StringMap::value_type("emoticons-pack", ""));
 	defaultString.insert(StringMap::value_type("emoticons-icon-size", "24x24"));
+	defaultString.insert(StringMap::value_type("notify-download-finished-title", "Download finished"));
+	defaultString.insert(StringMap::value_type("notify-download-finished-icon", ""));
+	defaultString.insert(StringMap::value_type("notify-private-message-title", "Private message"));
+	defaultString.insert(StringMap::value_type("notify-private-message-icon", ""));
+	defaultString.insert(StringMap::value_type("notify-hub-disconnect-title", "Hub disconnect"));
+	defaultString.insert(StringMap::value_type("notify-hub-disconnect-icon", ""));
+	defaultString.insert(StringMap::value_type("notify-hub-connect-title", "Hub connect"));
+	defaultString.insert(StringMap::value_type("notify-hub-connect-icon", ""));
 
 	load();
 }

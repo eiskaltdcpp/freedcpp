@@ -50,6 +50,8 @@ class WulforUtil
 		static void openURI(const std::string &uri);
 		static void openURItoApp(const std::string &cmd);
 		static std::string colorToString(const GdkColor *color); /* gdk < 2.12 */
+		static GdkPixbuf* scalePixbuf(const GdkPixbuf *pixbuf,
+			const int width, const int height, GdkInterpType type = GDK_INTERP_BILINEAR);
 
  		// Magnet links
 		static std::string makeMagnet(const std::string &name, const int64_t size, const std::string &tth);

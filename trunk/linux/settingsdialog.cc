@@ -27,8 +27,11 @@
 #include <dcpp/ShareManager.h>
 #include "settingsmanager.hh"
 #include "sound.hh"
+#include "notify.hh"
 #include "wulformanager.hh"
 #include "WulforUtil.hh"
+
+#define ICON_SIZE 32
 
 using namespace std;
 using namespace dcpp;
@@ -221,6 +224,24 @@ void Settings::saveSettings_client()
 			WSET("text-bold-autors", gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(getWidget("checkBoldAuthors"))));
 		}
 
+		{ // Notify
+			GtkTreeIter iter;
+			GtkTreeModel *m = GTK_TREE_MODEL(notifyStore);
+			gboolean valid = gtk_tree_model_get_iter_first(m, &iter);
+
+			while (valid)
+			{
+				wsm->set(notifyView.getString(&iter, "keyUse"), notifyView.getValue<int>(&iter, _("Use")));
+				wsm->set(notifyView.getString(&iter, "keyTitle"), notifyView.getString(&iter, _("Title")));
+				wsm->set(notifyView.getString(&iter, "keyIcon"), notifyView.getString(&iter, _("Icon")));
+
+				valid = gtk_tree_model_iter_next(m, &iter);
+			}
+
+			WSET("notify-message-reduce", gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(getWidget("notifyMessageReduceCheck"))));
+			WSET("notify-icon-size", gtk_combo_box_get_active(GTK_COMBO_BOX(getWidget("notifyIconSizeComboBox"))));
+		}
+
 		{ // Window
 			// Auto-open on startup
 			saveOptionsView_gui(windowView1, sm);
@@ -308,7 +329,7 @@ void Settings::addOption_gui(GtkListStore *store, const string &name, const stri
 		-1);
 }
 
-/* Creates a generic sounds options GtkTreeView */
+/* Adds a sounds options */
 
 void Settings::addOption_gui(GtkListStore *store, WulforSettingsManager *wsm, const string &name, const string &key1)
 {
@@ -321,7 +342,42 @@ void Settings::addOption_gui(GtkListStore *store, WulforSettingsManager *wsm, co
 		-1);
 }
 
-/* Creates a generic colors and fonts options GtkTreeView */
+/* Adds a notify options */
+
+void Settings::addOption_gui(GtkListStore *store, WulforSettingsManager *wsm,
+	const string &name, const string &key1, const string &key2, const string &key3, const int key4)
+{
+	GdkPixbuf *icon = NULL;
+	string pathIcon = wsm->getString(key3);
+	GdkPixbuf *pixbuf = gdk_pixbuf_new_from_file(Text::fromUtf8(pathIcon).c_str(), NULL);
+
+	if (pixbuf != NULL)
+	{
+		icon = WulforUtil::scalePixbuf(pixbuf, ICON_SIZE, ICON_SIZE);
+		g_object_unref(pixbuf);
+	}
+	else
+		pathIcon = "";
+
+	GtkTreeIter iter;
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter,
+		0, wsm->getInt(key1),               //use
+		1, name.c_str(),                    //notify
+		2, _(wsm->getString(key2).c_str()), //title
+		3, pathIcon.c_str(),                //icon path
+		4, key1.c_str(),                    //key use
+		5, key2.c_str(),                    //key title
+		6, key3.c_str(),                    //key icon
+		7, icon,                            //icon
+		8, key4,                            //urgency
+		-1);
+
+	if (icon != NULL)
+		g_object_unref(icon);
+}
+
+/* Adds a colors and fonts options */
 
 void Settings::addOption_gui(GtkListStore *store, WulforSettingsManager *wsm, const string &name,
 	const string &key1, const string &key2, const string &key3, const string &key4)
@@ -834,6 +890,56 @@ void Settings::initAppearance_gui()
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(getWidget("checkBoldAuthors")), WGETB("text-bold-autors"));
 	}
 
+	{ // Notify
+		notifyView.setView(GTK_TREE_VIEW(getWidget("notifyTreeView")));
+		notifyView.insertColumn(_("Use"), G_TYPE_BOOLEAN, TreeView::BOOL, -1);
+		notifyView.insertColumn(_("Notify"), G_TYPE_STRING, TreeView::PIXBUF_STRING, -1, "icon");
+		notifyView.insertColumn(_("Title"), G_TYPE_STRING, TreeView::STRING, -1);
+		notifyView.insertColumn(_("Icon"), G_TYPE_STRING, TreeView::STRING, -1);
+		notifyView.insertHiddenColumn("keyUse", G_TYPE_STRING);
+		notifyView.insertHiddenColumn("keyTitle", G_TYPE_STRING);
+		notifyView.insertHiddenColumn("keyIcon", G_TYPE_STRING);
+		notifyView.insertHiddenColumn("icon", GDK_TYPE_PIXBUF);
+		notifyView.insertHiddenColumn("Urgency", G_TYPE_INT);
+		notifyView.finalize();
+
+		notifyStore = gtk_list_store_newv(notifyView.getColCount(), notifyView.getGTypes());
+		gtk_tree_view_set_model(notifyView.get(), GTK_TREE_MODEL(notifyStore));
+		g_object_unref(notifyStore);
+
+		GList *list = gtk_tree_view_column_get_cell_renderers(gtk_tree_view_get_column(notifyView.get(), notifyView.col(_("Use"))));
+		GObject *renderer = (GObject *)g_list_nth_data(list, 0);
+		g_signal_connect(renderer, "toggled", G_CALLBACK(onOptionsViewToggled_gui), (gpointer)notifyStore);
+		g_list_free(list);
+
+		addOption_gui(notifyStore, wsm, _("Download finished"),
+			"notify-download-finished-use", "notify-download-finished-title",
+			"notify-download-finished-icon", NOTIFY_URGENCY_NORMAL);
+
+		addOption_gui(notifyStore, wsm, _("Private message"),
+			"notify-private-message-use", "notify-private-message-title",
+			"notify-private-message-icon", NOTIFY_URGENCY_NORMAL);
+
+		addOption_gui(notifyStore, wsm, _("Hub connect"),
+			"notify-hub-connect-use", "notify-hub-connect-title",
+			"notify-hub-connect-icon", NOTIFY_URGENCY_NORMAL);
+
+		addOption_gui(notifyStore, wsm, _("Hub disconnect"),
+			"notify-hub-disconnect-use", "notify-hub-disconnect-title",
+			"notify-hub-disconnect-icon", NOTIFY_URGENCY_CRITICAL);
+
+		g_signal_connect(getWidget("notifyTestButton"), "clicked", G_CALLBACK(onNotifyTestButton_gui), (gpointer)this);
+		g_signal_connect(getWidget("notifyIconFileBrowseButton"), "clicked", G_CALLBACK(onNotifyIconFileBrowseClicked_gui), (gpointer)this);
+		g_signal_connect(getWidget("notifyOKButton"), "clicked", G_CALLBACK(onNotifyOKClicked_gui), (gpointer)this);
+		g_signal_connect(getWidget("notifyIconNoneButton"), "clicked", G_CALLBACK(onNotifyIconNoneButton_gui), (gpointer)this);
+		g_signal_connect(getWidget("notifyDefaultButton"), "clicked", G_CALLBACK(onNotifyDefaultButton_gui), (gpointer)this);
+		g_signal_connect(getWidget("notifyTreeView"), "key-release-event", G_CALLBACK(onNotifyKeyReleased_gui), (gpointer)this);
+		g_signal_connect(notifyView.get(), "button-release-event", G_CALLBACK(onNotifyButtonReleased_gui), (gpointer)this);
+
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(getWidget("notifyMessageReduceCheck")), WGETB("notify-message-reduce"));
+		gtk_combo_box_set_active(GTK_COMBO_BOX(getWidget("notifyIconSizeComboBox")), WGETI("notify-icon-size"));
+	}
+
 	{ // Window
 		// Auto-open
 		createOptionsView_gui(windowView1, windowStore1, "windowsAutoOpenTreeView");
@@ -986,6 +1092,169 @@ void Settings::initAdvanced_gui()
 	}
 }
 
+void Settings::onNotifyTestButton_gui(GtkWidget *widget, gpointer data)
+{
+	Settings *s = (Settings *)data;
+
+	GtkTreeIter iter;
+	GtkTreeSelection *selection = gtk_tree_view_get_selection(s->notifyView.get());
+
+	if (gtk_tree_selection_get_selected(selection, NULL, &iter))
+	{
+		WSET("notify-icon-size", gtk_combo_box_get_active(GTK_COMBO_BOX(s->getWidget("notifyIconSizeComboBox"))));
+		string title = s->notifyView.getString(&iter, _("Title"));
+		string icon = s->notifyView.getString(&iter, _("Icon"));
+		NotifyUrgency urgency = (NotifyUrgency)s->notifyView.getValue<int>(&iter, "Urgency");
+		Notify::get()->showNotify(title, "<span weight=\"bold\" size=\"larger\">" + string(_("*** T E S T ***")) + "</span>",
+			"", icon, urgency);
+	}
+}
+
+void Settings::onNotifyIconFileBrowseClicked_gui(GtkWidget *widget, gpointer data)
+{
+	Settings *s = (Settings *)data;
+
+	gint response = gtk_dialog_run(GTK_DIALOG(s->getWidget("fileChooserDialog")));
+	gtk_widget_hide(s->getWidget("fileChooserDialog"));
+
+	if (response == GTK_RESPONSE_OK)
+	{
+		gchar *path = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(s->getWidget("fileChooserDialog")));
+
+		if (path)
+		{
+			GtkTreeIter iter;
+			GtkTreeSelection *selection = gtk_tree_view_get_selection(s->notifyView.get());
+
+			if (gtk_tree_selection_get_selected(selection, NULL, &iter))
+			{
+				GdkPixbuf *pixbuf = gdk_pixbuf_new_from_file(path, NULL);
+
+				if (pixbuf != NULL)
+				{
+					string target = Text::toUtf8(path);
+					GdkPixbuf *icon = WulforUtil::scalePixbuf(pixbuf, ICON_SIZE, ICON_SIZE);
+					g_object_unref(pixbuf);
+
+					gtk_list_store_set(s->notifyStore, &iter, s->notifyView.col(_("Icon")), target.c_str(), -1);
+					gtk_list_store_set(s->notifyStore, &iter, s->notifyView.col("icon"), icon, -1);
+					g_object_unref(icon);
+				}
+			}
+			g_free(path);
+		}
+	}
+}
+
+void Settings::onNotifyKeyReleased_gui(GtkWidget *widget, GdkEventKey *event, gpointer data)
+{
+	Settings *s = (Settings *)data;
+
+	if (event->keyval == GDK_Up || event->keyval == GDK_Down)
+	{
+		GtkTreeIter iter;
+		GtkTreeSelection *selection = gtk_tree_view_get_selection(s->notifyView.get());
+
+		if (gtk_tree_selection_get_selected(selection, NULL, &iter))
+		{
+			gtk_entry_set_text(GTK_ENTRY(s->getWidget("notifyTitleEntry")), s->notifyView.getString(&iter, _("Title")).c_str());
+		}
+	}
+}
+
+void Settings::onNotifyButtonReleased_gui(GtkWidget *widget, GdkEventButton *event, gpointer data)
+{
+	Settings *s = (Settings *)data;
+
+	if (event->button == 3 || event->button == 1)
+	{
+		GtkTreeIter iter;
+		GtkTreeSelection *selection = gtk_tree_view_get_selection(s->notifyView.get());
+
+		if (gtk_tree_selection_get_selected(selection, NULL, &iter))
+		{
+			gtk_entry_set_text(GTK_ENTRY(s->getWidget("notifyTitleEntry")), s->notifyView.getString(&iter, _("Title")).c_str());
+		}
+	}
+}
+
+void Settings::onNotifyOKClicked_gui(GtkWidget *widget, gpointer data)
+{
+	Settings *s = (Settings *)data;
+
+	string title = gtk_entry_get_text(GTK_ENTRY(s->getWidget("notifyTitleEntry")));
+
+	if (title.empty())
+	{
+		s->showErrorDialog(_("...must not be empty"));
+		return;
+	}
+
+	GtkTreeIter iter;
+	GtkTreeSelection *selection = gtk_tree_view_get_selection(s->notifyView.get());
+
+	if (gtk_tree_selection_get_selected(selection, NULL, &iter))
+	{
+		string temp = s->notifyView.getString(&iter, _("Title"));
+
+		if (temp != title)
+		{
+			gtk_list_store_set(s->notifyStore, &iter, s->notifyView.col(_("Title")), title.c_str(), -1);
+		}
+	}
+}
+
+void Settings::onNotifyIconNoneButton_gui(GtkWidget *widget, gpointer data)
+{
+	Settings *s = (Settings *)data;
+
+	GtkTreeIter iter;
+	GtkTreeSelection *selection = gtk_tree_view_get_selection(s->notifyView.get());
+
+	if (gtk_tree_selection_get_selected(selection, NULL, &iter))
+
+		gtk_list_store_set(s->notifyStore, &iter, s->notifyView.col("icon"), NULL, s->notifyView.col(_("Icon")), "", -1);
+	else
+		s->showErrorDialog(_("...must not be empty"));
+}
+
+void Settings::onNotifyDefaultButton_gui(GtkWidget *widget, gpointer data)
+{
+	Settings *s = (Settings *)data;
+
+	GtkTreeIter iter;
+	GtkTreeSelection *selection = gtk_tree_view_get_selection(s->notifyView.get());
+
+	if (gtk_tree_selection_get_selected(selection, NULL, &iter))
+	{
+		GdkPixbuf *icon = NULL;
+		WulforSettingsManager *wsm = WulforSettingsManager::getInstance();
+		string title = wsm->getString(s->notifyView.getString(&iter, "keyTitle"), TRUE);
+		string path = wsm->getString(s->notifyView.getString(&iter, "keyIcon"), TRUE);
+
+		if (!path.empty())
+		{
+			GdkPixbuf *pixbuf = gdk_pixbuf_new_from_file(Text::fromUtf8(path).c_str(), NULL);
+
+			if (pixbuf != NULL)
+			{
+				icon = WulforUtil::scalePixbuf(pixbuf, ICON_SIZE, ICON_SIZE);
+				g_object_unref(pixbuf);
+
+				gtk_list_store_set(s->notifyStore, &iter, s->notifyView.col("icon"), icon, -1);
+				g_object_unref(icon);
+			}
+		}
+		else
+			gtk_list_store_set(s->notifyStore, &iter, s->notifyView.col("icon"), icon, -1);
+
+		gtk_list_store_set(s->notifyStore, &iter,
+			s->notifyView.col(_("Icon")), path.c_str(), s->notifyView.col(_("Title")), _(title.c_str()), -1);
+	}
+	else
+		s->showErrorDialog(_("...must not be empty"));
+}
+
 void Settings::onSoundFileBrowseClicked_gui(GtkWidget *widget, gpointer data)
 {
 	Settings *s = (Settings *)data;
@@ -1004,9 +1273,7 @@ void Settings::onSoundFileBrowseClicked_gui(GtkWidget *widget, gpointer data)
 
 			if (gtk_tree_selection_get_selected(selection, NULL, &iter))
 			{
-				string sample = s->soundView.getString(&iter, "Sample");
 				string target = Text::toUtf8(path);
-
 				gtk_list_store_set(s->soundStore, &iter, s->soundView.col(_("File")), target.c_str(), -1);
 			}
 			g_free(path);

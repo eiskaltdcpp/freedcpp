@@ -52,7 +52,6 @@ class EmoticonsDialog
 		void addPacksMenu(GtkWidget *item);
 		void addIconSizeMenu(GtkWidget *item);
 		void setCurrIconSize(const std::string &size);
-		GdkPixbuf* scalePixbuf(GdkPixbuf *pixbuf, const int width, const int height);
 
 		//GUI callback functions
 		static void onChat(GtkWidget *widget /*button*/, gpointer data /*this*/);

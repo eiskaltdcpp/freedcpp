@@ -29,6 +29,7 @@
 #include "bookentry.hh"
 #include "treeview.hh"
 #include "sound.hh"
+#include "notify.hh"
 #include "message.hh"
 
 class UserCommandMenu;
@@ -86,6 +87,7 @@ class Hub:
 		void updateCursor_gui(GtkWidget *widget);
 		void getSettingTag_gui(WulforSettingsManager *wsm, TypeTag type, std::string &fore, std::string &back, int &bold, int &italic);
 		GtkTextTag* createTag_gui(const std::string &tagname, TypeTag type);
+		void addStatusMessage_gui(std::string message, Msg::TypeMsg typemsg, Sound::TypeSound sound, Notify::TypeNotify notify);
 
 		// GUI callbacks
 		static gboolean onFocusIn_gui(GtkWidget *widget, GdkEventFocus *event, gpointer data);

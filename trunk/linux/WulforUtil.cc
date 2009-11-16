@@ -255,6 +255,32 @@ string WulforUtil::colorToString(const GdkColor *color)
 	return strcolor;
 }
 
+GdkPixbuf* WulforUtil::scalePixbuf(const GdkPixbuf *pixbuf, const int width, const int height, GdkInterpType type)
+{
+	g_return_val_if_fail(pixbuf != NULL, NULL);
+	g_return_val_if_fail(width > 0, NULL);
+	g_return_val_if_fail(height > 0, NULL);
+
+	GdkPixbuf *scale = NULL;
+
+	int Width = gdk_pixbuf_get_width(pixbuf);
+	int Height = gdk_pixbuf_get_height(pixbuf);
+
+	double w, h, k;
+
+	w = (double) width / Width;
+	h = (double) height / Height;
+	k = MIN (w, h);
+
+	if (Width > width || Height > height)
+
+		scale = gdk_pixbuf_scale_simple(pixbuf, (int)(Width * k), (int)(Height * k), type);
+	else
+		scale = gdk_pixbuf_scale_simple(pixbuf, (int)(Width * k * 0.85), (int)(Height * k * 0.85), type);
+	return
+		scale;
+}
+
 string WulforUtil::makeMagnet(const string &name, const int64_t size, const string &tth)
 {
 	if (name.empty() || tth.empty())
