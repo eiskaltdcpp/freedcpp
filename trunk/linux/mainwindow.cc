@@ -1335,7 +1335,7 @@ void MainWindow::on(QueueManagerListener::Finished, QueueItem *item, const strin
 	else if (item->isSet(QueueItem::FLAG_NORMAL))
 	{
 		typedef Func2<MainWindow, string, Notify::TypeNotify> F2;
-		F2 *f2 = new F2(this, &MainWindow::showNotification_gui, item->getTargetFileName(), Notify::DOWNLOAD_FINISHED);
+		F2 *f2 = new F2(this, &MainWindow::showNotification_gui, item->getTarget(), Notify::DOWNLOAD_FINISHED);
 		WulforManager::get()->dispatchGuiFunc(f2);
 	}
 }

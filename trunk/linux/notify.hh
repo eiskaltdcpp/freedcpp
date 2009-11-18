@@ -75,6 +75,11 @@ class Notify
 		int icon_height;
 		int currIconSize;
 		NotifyNotification *notification;
+		bool action;
+
+		//GUI callback functions
+		static void onOpenFile(NotifyNotification *notify, const char *action, gpointer data);
+		static void onOpenFolder(NotifyNotification *notify, const char *action, gpointer data);
 };
 
 #else
