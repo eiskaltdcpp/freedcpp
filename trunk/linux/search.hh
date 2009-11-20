@@ -68,7 +68,7 @@ class Search:
 		void popupMenu_gui();
 		void setStatus_gui(std::string statusBar, std::string text);
 		void search_gui();
-		void parseSearchResult(dcpp::SearchResult *result, dcpp::StringMap &resultMap, GdkPixbuf **icon, int *actualSlots);
+		void parseSearchResult(dcpp::SearchResult *result, dcpp::StringMap &resultMap, int *actualSlots);
 		void addResult_gui(dcpp::SearchResult *result, bool inShare);
 		void clearList_gui();
 		void updateParentRow_gui(GtkTreeIter *parent, GtkTreeIter *child = NULL);
@@ -132,9 +132,6 @@ class Search:
 		GtkWidget *searchEntry;
 		dcpp::TStringList searchlist;
 		static GtkTreeModel *searchEntriesModel;
-		GdkPixbuf *iconFile;
-		GdkPixbuf *iconDirectory;
-		GdkPixbuf *iconGroup;
 		int droppedResult;
 		int searchHits;
 		bool isHash;

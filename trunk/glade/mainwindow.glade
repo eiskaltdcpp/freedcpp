@@ -69,7 +69,7 @@
                         <property name="use_underline">True</property>
                         <accelerator key="N" modifiers="GDK_CONTROL_MASK" signal="activate"/>
                         <child internal-child="image">
-                          <widget class="GtkImage" id="image67">
+                          <widget class="GtkImage" id="quickConnectMenuImage">
                             <property name="visible">True</property>
                             <property name="stock">gtk-connect</property>
                             <property name="icon_size">1</property>
@@ -93,9 +93,15 @@
                     <child>
                       <widget class="GtkImageMenuItem" id="settingsMenuItem">
                         <property name="visible">True</property>
-                        <property name="label">gtk-preferences</property>
+                        <property name="label" translatable="yes">Preferences</property>
                         <property name="use_underline">True</property>
-                        <property name="use_stock">True</property>
+                        <child internal-child="image">
+                          <widget class="GtkImage" id="settingsMenuImage">
+                            <property name="visible">True</property>
+                            <property name="stock">freedcpp-preferences</property>
+                            <property name="icon_size">1</property>
+                          </widget>
+                        </child>
                       </widget>
                     </child>
                     <child>
@@ -137,9 +143,9 @@
                         <property name="use_underline">True</property>
                         <accelerator key="F" modifiers="GDK_CONTROL_MASK" signal="activate"/>
                         <child internal-child="image">
-                          <widget class="GtkImage" id="image273">
+                          <widget class="GtkImage" id="favoriteHubsMenuImage">
                             <property name="visible">True</property>
-                            <property name="stock">gtk-home</property>
+                            <property name="stock">freedcpp-favorite-hubs</property>
                             <property name="icon_size">1</property>
                           </widget>
                         </child>
@@ -160,9 +166,9 @@
                         <property name="use_underline">True</property>
                         <accelerator key="P" modifiers="GDK_CONTROL_MASK" signal="activate"/>
                         <child internal-child="image">
-                          <widget class="GtkImage" id="image70">
+                          <widget class="GtkImage" id="publicHubsMenuImage">
                             <property name="visible">True</property>
-                            <property name="stock">gtk-network</property>
+                            <property name="stock">freedcpp-public-hubs</property>
                             <property name="icon_size">1</property>
                           </widget>
                         </child>
@@ -174,9 +180,9 @@
                         <property name="label" translatable="yes">Indexing Progress</property>
                         <property name="use_underline">True</property>
                         <child internal-child="image">
-                          <widget class="GtkImage" id="image73">
+                          <widget class="GtkImage" id="indexingProgressMenuImage">
                             <property name="visible">True</property>
-                            <property name="stock">gtk-convert</property>
+                            <property name="stock">freedcpp-hash</property>
                             <property name="icon_size">1</property>
                           </widget>
                         </child>
@@ -189,9 +195,9 @@
                         <property name="use_underline">True</property>
                         <accelerator key="S" modifiers="GDK_CONTROL_MASK" signal="activate"/>
                         <child internal-child="image">
-                          <widget class="GtkImage" id="image72">
+                          <widget class="GtkImage" id="searchMenuImage">
                             <property name="visible">True</property>
-                            <property name="stock">gtk-find</property>
+                            <property name="stock">freedcpp-search</property>
                             <property name="icon_size">1</property>
                           </widget>
                         </child>
@@ -204,9 +210,9 @@
                         <property name="use_underline">True</property>
                         <accelerator key="D" modifiers="GDK_CONTROL_MASK" signal="activate"/>
                         <child internal-child="image">
-                          <widget class="GtkImage" id="image270">
+                          <widget class="GtkImage" id="downloadQueueMenuImage">
                             <property name="visible">True</property>
-                            <property name="stock">gtk-directory</property>
+                            <property name="stock">freedcpp-queue</property>
                             <property name="icon_size">1</property>
                           </widget>
                         </child>
@@ -218,9 +224,9 @@
                         <property name="label" translatable="yes">Finished Downloads</property>
                         <property name="use_underline">True</property>
                         <child internal-child="image">
-                          <widget class="GtkImage" id="image271">
+                          <widget class="GtkImage" id="finishedDownloadsMenuImage">
                             <property name="visible">True</property>
-                            <property name="stock">gtk-go-down</property>
+                            <property name="stock">freedcpp-finished-downloads</property>
                             <property name="icon_size">1</property>
                           </widget>
                         </child>
@@ -232,9 +238,9 @@
                         <property name="label" translatable="yes">Finished Uploads</property>
                         <property name="use_underline">True</property>
                         <child internal-child="image">
-                          <widget class="GtkImage" id="image272">
+                          <widget class="GtkImage" id="finishedUploadsMenuImage">
                             <property name="visible">True</property>
-                            <property name="stock">gtk-go-up</property>
+                            <property name="stock">freedcpp-finished-uploads</property>
                             <property name="icon_size">1</property>
                           </widget>
                         </child>
@@ -312,8 +318,9 @@
                 <property name="visible">True</property>
                 <property name="tooltip" translatable="yes">Quick connect to a hub</property>
                 <property name="is_important">True</property>
+                <property name="label" translatable="yes">Connect</property>
                 <property name="use_underline">True</property>
-                <property name="stock_id">gtk-connect</property>
+                <property name="stock_id">freedcpp-connect</property>
               </widget>
               <packing>
                 <property name="expand">False</property>
@@ -326,7 +333,7 @@
                 <property name="is_important">True</property>
                 <property name="label" translatable="yes">Favorite Hubs</property>
                 <property name="use_underline">True</property>
-                <property name="stock_id">gtk-home</property>
+                <property name="stock_id">freedcpp-favorite-hubs</property>
               </widget>
               <packing>
                 <property name="expand">False</property>
@@ -339,7 +346,7 @@
                 <property name="is_important">True</property>
                 <property name="label" translatable="yes">Public Hubs</property>
                 <property name="use_underline">True</property>
-                <property name="stock_id">gtk-network</property>
+                <property name="stock_id">freedcpp-public-hubs</property>
               </widget>
               <packing>
                 <property name="expand">False</property>
@@ -350,8 +357,9 @@
                 <property name="visible">True</property>
                 <property name="tooltip" translatable="yes">Edit the preferences</property>
                 <property name="is_important">True</property>
+                <property name="label" translatable="yes">Preferences</property>
                 <property name="use_underline">True</property>
-                <property name="stock_id">gtk-preferences</property>
+                <property name="stock_id">freedcpp-preferences</property>
               </widget>
               <packing>
                 <property name="expand">False</property>
@@ -364,7 +372,7 @@
                 <property name="is_important">True</property>
                 <property name="label" translatable="yes">Hash</property>
                 <property name="use_underline">True</property>
-                <property name="stock_id">gtk-convert</property>
+                <property name="stock_id">freedcpp-hash</property>
               </widget>
               <packing>
                 <property name="expand">False</property>
@@ -377,7 +385,7 @@
                 <property name="is_important">True</property>
                 <property name="label" translatable="yes">Search</property>
                 <property name="use_underline">True</property>
-                <property name="stock_id">gtk-find</property>
+                <property name="stock_id">freedcpp-search</property>
               </widget>
               <packing>
                 <property name="expand">False</property>
@@ -390,7 +398,7 @@
                 <property name="is_important">True</property>
                 <property name="label" translatable="yes">Queue</property>
                 <property name="use_underline">True</property>
-                <property name="stock_id">gtk-directory</property>
+                <property name="stock_id">freedcpp-queue</property>
               </widget>
               <packing>
                 <property name="expand">False</property>
@@ -403,7 +411,7 @@
                 <property name="is_important">True</property>
                 <property name="label" translatable="yes">Finished Downloads</property>
                 <property name="use_underline">True</property>
-                <property name="stock_id">gtk-go-down</property>
+                <property name="stock_id">freedcpp-finished-downloads</property>
               </widget>
               <packing>
                 <property name="expand">False</property>
@@ -416,7 +424,7 @@
                 <property name="is_important">True</property>
                 <property name="label" translatable="yes">Finished Uploads</property>
                 <property name="use_underline">True</property>
-                <property name="stock_id">gtk-go-up</property>
+                <property name="stock_id">freedcpp-finished-uploads</property>
               </widget>
               <packing>
                 <property name="expand">False</property>
@@ -427,8 +435,9 @@
                 <property name="visible">True</property>
                 <property name="tooltip" translatable="yes">Quit the program</property>
                 <property name="is_important">True</property>
+                <property name="label" translatable="yes">Quit</property>
                 <property name="use_underline">True</property>
-                <property name="stock_id">gtk-quit</property>
+                <property name="stock_id">freedcpp-quit</property>
               </widget>
               <packing>
                 <property name="expand">False</property>

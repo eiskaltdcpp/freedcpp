@@ -94,7 +94,6 @@ class ShareBrowser:
 		GtkListStore *fileStore;
 		GtkTreeStore *dirStore;
 		GtkTreeSelection *fileSelection, *dirSelection;
-		GdkPixbuf *iconFile, *iconDirectory;
 		UserCommandMenu *fileUserCommandMenu;
 		UserCommandMenu *dirUserCommandMenu;
 };

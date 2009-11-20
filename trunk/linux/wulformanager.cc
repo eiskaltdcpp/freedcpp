@@ -107,6 +107,11 @@ WulforManager::WulforManager()
 		cerr << path << " is inaccessible, falling back to current directory instead.\n";
 		path = ".";
 	}
+
+	// Set the custom icon search path so GTK+ can find our icons
+	const string iconPath = getPath() + G_DIR_SEPARATOR_S + "icons";
+	GtkIconTheme *iconTheme = gtk_icon_theme_get_default();
+	gtk_icon_theme_append_search_path(iconTheme, iconPath.c_str());
 }
 
 WulforManager::~WulforManager()

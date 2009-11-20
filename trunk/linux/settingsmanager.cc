@@ -21,7 +21,6 @@
 
 #include "settingsmanager.hh"
 
-#include <glib.h>
 #include <dcpp/File.h>
 #include <dcpp/SimpleXML.h>
 #include <dcpp/Util.h>
@@ -42,7 +41,7 @@ WulforSettingsManager::WulforSettingsManager():
 	defaultInt.insert(IntMap::value_type("nick-pane-position", 500));
 	defaultInt.insert(IntMap::value_type("downloadqueue-pane-position", 200));
 	defaultInt.insert(IntMap::value_type("sharebrowser-pane-position", 200));
-	defaultInt.insert(IntMap::value_type("use-stock-icons", 0));
+	defaultInt.insert(IntMap::value_type("use-system-icons", 0));
 	defaultInt.insert(IntMap::value_type("tab-position", 0));
 	defaultInt.insert(IntMap::value_type("toolbar-style", 5));
 	defaultInt.insert(IntMap::value_type("sound-pm-open", 0));

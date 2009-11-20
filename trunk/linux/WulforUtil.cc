@@ -27,6 +27,7 @@
 #include <iostream>
 #include <arpa/inet.h>
 #include <fcntl.h>
+#include "settingsmanager.hh"
 
 #ifdef HAVE_IFADDRS_H
 #include <ifaddrs.h>
@@ -40,6 +41,7 @@ const string WulforUtil::ENCODING_SYSTEM_DEFAULT = _("System default");
 const string WulforUtil::ENCODING_GLOBAL_HUB_DEFAULT = _("Global hub default");
 vector<string> WulforUtil::charsets;
 const string WulforUtil::magnetSignature = "magnet:?xt=urn:tree:tiger:";
+GtkIconFactory* WulforUtil::iconFactory = NULL;
 
 vector<int> WulforUtil::splitString(const string &str, const string &delimiter)
 {
@@ -468,3 +470,60 @@ void WulforUtil::copyValue_gui(GtkTreeStore *store, GtkTreeIter *fromIter, GtkTr
 	g_value_unset(&value);
 }
 
+/*
+ * Registers either the custom icons or the GTK+ icons as stock icons in
+ * GtkIconFactory according to the user's preference. If the icons have
+ * previously been loaded, they are removed and re-added.
+ */
+void WulforUtil::registerIcons()
+{
+	// Holds a mapping of custom icon names -> stock icon names.
+	// Not all icons have stock representations.
+	map<string, string> icons;
+	icons["freedcpp"] = "freedcpp";
+	icons["freedcpp-dc++"] = "freedcpp-dc++";
+	icons["freedcpp-dc++-fw"] = "freedcpp-dc++-fw";
+	icons["freedcpp-dc++-fw-op"] = "freedcpp-dc++-fw-op";
+	icons["freedcpp-dc++-op"] = "freedcpp-dc++-op";
+	icons["freedcpp-normal"] = "freedcpp-normal";
+	icons["freedcpp-normal-fw"] = "freedcpp-normal-fw";
+	icons["freedcpp-normal-fw-op"] = "freedcpp-normal-fw-op";
+	icons["freedcpp-normal-op"] = "freedcpp-normal-op";
+	icons["freedcpp-smile"] = "freedcpp-smile";
+	icons["freedcpp-download"] = GTK_STOCK_GO_DOWN;
+	icons["freedcpp-favorite-hubs"] = GTK_STOCK_HOME;
+	icons["freedcpp-finished-downloads"] = GTK_STOCK_GO_DOWN;
+	icons["freedcpp-finished-uploads"] = GTK_STOCK_GO_UP;
+	icons["freedcpp-hash"] = GTK_STOCK_CONVERT;
+	icons["freedcpp-preferences"] = GTK_STOCK_PREFERENCES;
+	icons["freedcpp-public-hubs"] = GTK_STOCK_NETWORK;
+	icons["freedcpp-queue"] = GTK_STOCK_DIRECTORY;
+	icons["freedcpp-search"] = GTK_STOCK_FIND;
+	icons["freedcpp-upload"] = GTK_STOCK_GO_UP;
+	icons["freedcpp-quit"] = GTK_STOCK_QUIT;
+	icons["freedcpp-connect"] = GTK_STOCK_CONNECT;
+
+	if (iconFactory)
+	{
+		gtk_icon_factory_remove_default(iconFactory);
+		iconFactory = NULL;
+	}
+
+	iconFactory = gtk_icon_factory_new();
+
+	for (map<string, string>::const_iterator i = icons.begin(); i != icons.end(); ++i)
+	{
+		string iconName = WGETI("use-system-icons") ? i->second : i->first;
+		GtkIconSource *iconSource = gtk_icon_source_new();
+		GtkIconSet *iconSet = gtk_icon_set_new();
+
+		gtk_icon_source_set_icon_name(iconSource, iconName.c_str());
+		gtk_icon_set_add_source(iconSet, iconSource);
+		gtk_icon_factory_add(iconFactory, i->first.c_str(), iconSet);
+		gtk_icon_source_free(iconSource);
+		gtk_icon_set_unref(iconSet);
+	}
+
+	gtk_icon_factory_add_default(iconFactory);
+	g_object_unref(iconFactory);
+}

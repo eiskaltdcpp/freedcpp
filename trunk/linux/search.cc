@@ -63,14 +63,6 @@ Search::Search():
 	gtk_combo_box_set_active(GTK_COMBO_BOX(getWidget("comboboxFile")), 0);
 	gtk_combo_box_set_active(GTK_COMBO_BOX(getWidget("comboboxGroupBy")), (int)NOGROUPING);
 
-	// Load icons
-	iconFile = gtk_icon_theme_load_icon(gtk_icon_theme_get_default(),
-		GTK_STOCK_FILE, 16, (GtkIconLookupFlags)0, NULL);
-	iconDirectory = gtk_icon_theme_load_icon(gtk_icon_theme_get_default(),
-		GTK_STOCK_DIRECTORY, 16, (GtkIconLookupFlags)0, NULL);
-	iconGroup = gtk_icon_theme_load_icon(gtk_icon_theme_get_default(),
-		GTK_STOCK_DND_MULTIPLE, 16, (GtkIconLookupFlags)0, NULL);
-
 	// Initialize hub list treeview
 	hubView.setView(GTK_TREE_VIEW(getWidget("treeviewHubs")));
 	hubView.insertColumn("Search", G_TYPE_BOOLEAN, TreeView::BOOL, -1);
@@ -87,7 +79,7 @@ Search::Search():
 
 	// Initialize search result treeview
 	resultView.setView(GTK_TREE_VIEW(getWidget("treeviewResult")), TRUE, "search");
-	resultView.insertColumn("Filename", G_TYPE_STRING, TreeView::PIXBUF_STRING, 250, "Icon");
+	resultView.insertColumn("Filename", G_TYPE_STRING, TreeView::ICON_STRING, 250, "Icon");
 	resultView.insertColumn("Nick", G_TYPE_STRING, TreeView::STRING, 100);
 	resultView.insertColumn("Type", G_TYPE_STRING, TreeView::STRING, 65);
 	resultView.insertColumn("Size", G_TYPE_STRING, TreeView::STRING, 80);
@@ -98,7 +90,7 @@ Search::Search():
 	resultView.insertColumn("Exact Size", G_TYPE_STRING, TreeView::STRING, 80);
 	resultView.insertColumn("IP", G_TYPE_STRING, TreeView::STRING, 100);
 	resultView.insertColumn("TTH", G_TYPE_STRING, TreeView::STRING, 125);
-	resultView.insertHiddenColumn("Icon", GDK_TYPE_PIXBUF);
+	resultView.insertHiddenColumn("Icon", G_TYPE_STRING);
 	resultView.insertHiddenColumn("Real Size", G_TYPE_INT64);
 	resultView.insertHiddenColumn("Slots Order", G_TYPE_INT);
 	resultView.insertHiddenColumn("File Order", G_TYPE_STRING);
@@ -166,13 +158,6 @@ Search::~Search()
 
 	clearList_gui();
 	gtk_widget_destroy(getWidget("dirChooserDialog"));
-
-	if (iconFile)
-		g_object_unref(iconFile);
-	if (iconDirectory)
-		g_object_unref(iconDirectory);
-	if (iconGroup)
-		g_object_unref(iconGroup);
 }
 
 void Search::show()
@@ -496,7 +481,7 @@ void Search::search_gui()
 	}
 }
 
-void Search::parseSearchResult(SearchResult *result, StringMap &resultMap, GdkPixbuf **icon, int *actualSlots)
+void Search::parseSearchResult(SearchResult *result, StringMap &resultMap, int *actualSlots)
 {
 	if (result->getType() == SearchResult::TYPE_FILE)
 	{
@@ -517,7 +502,7 @@ void Search::parseSearchResult(SearchResult *result, StringMap &resultMap, GdkPi
 			resultMap["Type"].erase(0, 1);
 		resultMap["Size"] = Util::formatBytes(result->getSize());
 		resultMap["Exact Size"] = Util::formatExactSize(result->getSize());
-		*icon = iconFile;
+		resultMap["Icon"] = GTK_STOCK_FILE;
 	}
 	else
 	{
@@ -525,7 +510,7 @@ void Search::parseSearchResult(SearchResult *result, StringMap &resultMap, GdkPi
 		resultMap["Path"] = WulforUtil::linuxSeparator(result->getFile());
 		resultMap["File Order"] = "d" + resultMap["Filename"];
 		resultMap["Type"] = _("Directory");
-		*icon = iconDirectory;
+		resultMap["Icon"] = GTK_STOCK_DIRECTORY;
 		if (result->getSize() > 0)
 		{
 			resultMap["Size"] = Util::formatBytes(result->getSize());
@@ -553,10 +538,9 @@ void Search::addResult_gui(SearchResult *result, bool isShared)
 		return;
 
 	StringMap resultMap;
-	GdkPixbuf *icon;
 	int actualSlots;
 
-	parseSearchResult(result, resultMap, &icon, &actualSlots);
+	parseSearchResult(result, resultMap, &actualSlots);
 
 	GroupType groupBy = (GroupType)gtk_combo_box_get_active(GTK_COMBO_BOX(getWidget("comboboxGroupBy")));
 	string groupColumn = getGroupingColumn(groupBy);
@@ -614,7 +598,7 @@ void Search::addResult_gui(SearchResult *result, bool isShared)
 		// Insert the new parent row
 		gtk_tree_store_insert_with_values(resultStore, &parent, NULL, -1,
 				resultView.col("SearchResult"), NULL,
-				resultView.col("Icon"), iconGroup,
+				resultView.col("Icon"), GTK_STOCK_DND_MULTIPLE,
 				resultView.col("Grouping String"), groupStr.c_str(),
 				-1);
 
@@ -637,7 +621,7 @@ void Search::addResult_gui(SearchResult *result, bool isShared)
 		resultView.col("Exact Size"), resultMap["Exact Size"].c_str(),
 		resultView.col("IP"), resultMap["IP"].c_str(),
 		resultView.col("TTH"), resultMap["TTH"].c_str(),
-		resultView.col("Icon"), icon,
+		resultView.col("Icon"), resultMap["Icon"].c_str(),
 		resultView.col("File Order"), resultMap["File Order"].c_str(),
 		resultView.col("Real Size"), result->getSize(),
 		resultView.col("Slots Order"), actualSlots,
@@ -815,7 +799,7 @@ void Search::regroup_gui()
 			{
 				gtk_tree_store_insert_with_values(resultStore, &parent, NULL, position,
 					resultView.col("SearchResult"), NULL,
-					resultView.col("Icon"), iconGroup,
+					resultView.col("Icon"), GTK_STOCK_DND_MULTIPLE,
 					resultView.col("Grouping String"), groupStr.c_str(),
 					-1);
 

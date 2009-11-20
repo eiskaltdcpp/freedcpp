@@ -67,6 +67,7 @@ class WulforUtil
 		static void copyValue_gui(GtkListStore* store, GtkTreeIter *fromIter, GtkTreeIter *toIter, int position);
 		static GtkTreeIter copyRow_gui(GtkTreeStore *store, GtkTreeIter *fromIter, GtkTreeIter *parent = NULL, int position = -1);
 		static void copyValue_gui(GtkTreeStore* store, GtkTreeIter *fromIter, GtkTreeIter *toIter, int position);
+		static void registerIcons();
 
 		static const std::string ENCODING_SYSTEM_DEFAULT;
 		static const std::string ENCODING_GLOBAL_HUB_DEFAULT;
@@ -74,6 +75,7 @@ class WulforUtil
 	private:
 		static std::vector<std::string> charsets;
 		static const std::string magnetSignature;
+		static GtkIconFactory *iconFactory;
 };
 
 #endif
