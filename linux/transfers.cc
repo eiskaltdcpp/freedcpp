@@ -42,21 +42,6 @@ using namespace dcpp;
 Transfers::Transfers() :
 	Entry(Entry::TRANSFERS, "transfers.glade")
 {
-	// Load up/download  icons
-	string file, path = WulforManager::get()->getPath() + "/pixmaps/";
-	if (!WGETI("use-stock-icons"))
-	{
-		file = path + "upload.png";
-		uploadPic = gdk_pixbuf_new_from_file(file.c_str(), NULL);
-		file = path + "download.png";
-		downloadPic = gdk_pixbuf_new_from_file(file.c_str(), NULL);
-	}
-	else
-	{
-		uploadPic = gtk_icon_theme_load_icon(gtk_icon_theme_get_default(), GTK_STOCK_GO_UP, 16, (GtkIconLookupFlags)0, NULL);
-		downloadPic = gtk_icon_theme_load_icon(gtk_icon_theme_get_default(), GTK_STOCK_GO_DOWN, 16, (GtkIconLookupFlags)0, NULL);
-	}
-
 	// Should this FINALLY be implemented?
 	gtk_widget_set_sensitive(getWidget("addToFavoritesItem"), FALSE);
 
@@ -69,7 +54,7 @@ Transfers::Transfers() :
 
 	// Initialize transfer treeview
 	transferView.setView(GTK_TREE_VIEW(getWidget("transfers")), TRUE, "transfers");
-	transferView.insertColumn("User", G_TYPE_STRING, TreeView::PIXBUF_STRING, 150, "Icon");
+	transferView.insertColumn("User", G_TYPE_STRING, TreeView::ICON_STRING, 150, "Icon");
 	transferView.insertColumn("Hub Name", G_TYPE_STRING, TreeView::STRING, 100);
 	transferView.insertColumn("Status", G_TYPE_STRING, TreeView::PROGRESS, 250, "Progress");
 	transferView.insertColumn("Time Left", G_TYPE_STRING, TreeView::STRING, 85);
@@ -78,7 +63,7 @@ Transfers::Transfers() :
 	transferView.insertColumn("Size", G_TYPE_INT64, TreeView::BYTE, 125);
 	transferView.insertColumn("Path", G_TYPE_STRING, TreeView::STRING, 200);
 	transferView.insertColumn("IP", G_TYPE_STRING, TreeView::STRING, 175);
-	transferView.insertHiddenColumn("Icon", GDK_TYPE_PIXBUF);
+	transferView.insertHiddenColumn("Icon", G_TYPE_STRING);
 	transferView.insertHiddenColumn("Progress", G_TYPE_INT);
 	transferView.insertHiddenColumn("Sort Order", G_TYPE_STRING);
 	transferView.insertHiddenColumn("CID", G_TYPE_STRING);
@@ -86,6 +71,7 @@ Transfers::Transfers() :
 	transferView.insertHiddenColumn("Failed", G_TYPE_BOOLEAN);
 	transferView.insertHiddenColumn("Target", G_TYPE_STRING);
 	transferView.insertHiddenColumn("tmpTarget", G_TYPE_STRING);
+	transferView.insertHiddenColumn("Download", G_TYPE_BOOLEAN);
 	transferView.finalize();
 
 	transferStore = gtk_tree_store_newv(transferView.getColCount(), transferView.getGTypes());
@@ -116,9 +102,6 @@ Transfers::~Transfers()
 	DownloadManager::getInstance()->removeListener(this);
 	UploadManager::getInstance()->removeListener(this);
 	ConnectionManager::getInstance()->removeListener(this);
-		
-	g_object_unref(G_OBJECT(uploadPic));
-	g_object_unref(G_OBJECT(downloadPic));
 
 	delete appsPreviewMenu;
 }	
@@ -417,10 +400,7 @@ void Transfers::onCloseConnectionClicked_gui(GtkMenuItem *menuItem, gpointer dat
 				if (!cid.empty())
 				{
 					gtk_tree_store_set(tr->transferStore, &iter, tr->transferView.col("Status"), _("Closing connection..."), -1);
-					if (tr->transferView.getValue<GdkPixbuf*>(&iter,"Icon") == tr->downloadPic)
-						download = TRUE;
-					else
-						download = FALSE;
+					download = tr->transferView.getValue<gboolean>(&iter, "Download");
 
 					func = new F2(tr, &Transfers::closeConnection_client, cid, download);
 					WulforManager::get()->dispatchClientFunc(func);
@@ -472,7 +452,7 @@ bool Transfers::findParent_gui(const string& target, GtkTreeIter* iter)
 
 	while (valid)
 	{
-		if (transferView.getValue<GdkPixbuf*>(iter, "Icon") == downloadPic &&
+		if (transferView.getValue<gboolean>(iter, "Download") &&
 				target == transferView.getString(iter, "Target") && 
 				transferView.getString(iter, "CID").empty())
 			return TRUE;
@@ -492,9 +472,9 @@ bool Transfers::findTransfer_gui(const string& cid, bool download, GtkTreeIter* 
 	{
 		if (cid == transferView.getString(iter, "CID") && !cid.empty())
 		{
-			if (download && transferView.getValue<GdkPixbuf*>(iter, "Icon") == downloadPic)
+			if (download && transferView.getValue<gboolean>(iter, "Download"))
 				return TRUE;
-			if (!download && transferView.getValue<GdkPixbuf*>(iter, "Icon") == uploadPic)
+			if (!download && !transferView.getValue<gboolean>(iter, "Download"))
 				return TRUE;
 		}
 		valid = WulforUtil::getNextIter_gui(m, iter, TRUE, TRUE);
@@ -515,7 +495,8 @@ void Transfers::addConnection_gui(StringMap params, bool download)
 		transferView.col("Hub Name"), params["Hub Name"].c_str(),
 		transferView.col("Status"), params["Status"].c_str(),
 		transferView.col("CID"), params["CID"].c_str(),
-		transferView.col("Icon"), download ? downloadPic : uploadPic,
+		transferView.col("Icon"), download ? "freedcpp-download" : "freedcpp-upload",
+		transferView.col("Download"), download,
 		-1);
 }
 
@@ -724,7 +705,8 @@ void Transfers::initTransfer_gui(StringMap params)
 				transferView.col("Filename"), filename.c_str(),
 				transferView.col("Path"), params["Path"].c_str(),
 				transferView.col("Size"), Util::toInt64(params["File Size"]),
-				transferView.col("Icon"), downloadPic,
+				transferView.col("Icon"), "freedcpp-download",
+				transferView.col("Download"), TRUE,
 				transferView.col("Target"), params["Target"].c_str(),
 				-1);
 

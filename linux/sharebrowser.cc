@@ -55,19 +55,15 @@ ShareBrowser::ShareBrowser(UserPtr user, const string &file, const string &initi
 	// Set the pane position
 	gtk_paned_set_position(GTK_PANED(getWidget("pane")), WGETI("sharebrowser-pane-position"));
 
-	// Load the icons
-	iconFile = gtk_icon_theme_load_icon(gtk_icon_theme_get_default(), GTK_STOCK_FILE, 16, (GtkIconLookupFlags)0, NULL);
-	iconDirectory = gtk_icon_theme_load_icon(gtk_icon_theme_get_default(), GTK_STOCK_DIRECTORY, 16, (GtkIconLookupFlags)0, NULL);
-
 	// Initialize the file TreeView
 	fileView.setView(GTK_TREE_VIEW(getWidget("fileView")), true, "sharebrowser");
-	fileView.insertColumn("Filename", G_TYPE_STRING, TreeView::PIXBUF_STRING, 400, "Icon");
+	fileView.insertColumn("Filename", G_TYPE_STRING, TreeView::ICON_STRING, 400, "Icon");
 	fileView.insertColumn("Size", G_TYPE_STRING, TreeView::STRINGR, 80);
 	fileView.insertColumn("Type", G_TYPE_STRING, TreeView::STRING, 50);
 	fileView.insertColumn("TTH", G_TYPE_STRING, TreeView::STRING, 150);
 	fileView.insertColumn("Exact Size", G_TYPE_STRING, TreeView::STRINGR, 105);
 	fileView.insertHiddenColumn("DL File", G_TYPE_POINTER);
-	fileView.insertHiddenColumn("Icon", GDK_TYPE_PIXBUF);
+	fileView.insertHiddenColumn("Icon", G_TYPE_STRING);
 	fileView.insertHiddenColumn("Size Order", G_TYPE_INT64);
 	fileView.insertHiddenColumn("File Order", G_TYPE_STRING);
 	fileView.finalize();
@@ -85,9 +81,9 @@ ShareBrowser::ShareBrowser(UserPtr user, const string &file, const string &initi
 
 	// Initialize the directory treeview
 	dirView.setView(GTK_TREE_VIEW(getWidget("dirView")));
-	dirView.insertColumn("Dir", G_TYPE_STRING, TreeView::PIXBUF_STRING, -1, "Icon");
+	dirView.insertColumn("Dir", G_TYPE_STRING, TreeView::ICON_STRING, -1, "Icon");
 	dirView.insertHiddenColumn("DL Dir", G_TYPE_POINTER);
-	dirView.insertHiddenColumn("Icon", GDK_TYPE_PIXBUF);
+	dirView.insertHiddenColumn("Icon", G_TYPE_STRING);
 	dirView.finalize();
 	dirStore = gtk_tree_store_newv(dirView.getColCount(), dirView.getGTypes());
 	gtk_tree_view_set_model(dirView.get(), GTK_TREE_MODEL(dirStore));
@@ -122,11 +118,6 @@ ShareBrowser::~ShareBrowser()
 	// Save the pane position
 	int panePosition = gtk_paned_get_position(GTK_PANED(getWidget("pane")));
 	WSET("sharebrowser-pane-position", panePosition);
-
-	if (iconFile)
-		g_object_unref(iconFile);
-	if (iconDirectory)
-		g_object_unref(iconDirectory);
 
 	gtk_widget_destroy(getWidget("findDialog"));
 	gtk_widget_destroy(getWidget("dirChooserDialog"));
@@ -222,7 +213,7 @@ void ShareBrowser::buildDirs_gui(DirectoryListing::Directory *dir, GtkTreeIter *
 
 	gtk_tree_store_set(dirStore, &newIter,
 		dirView.col("DL Dir"), (gpointer)dir,
-		dirView.col("Icon"), iconDirectory,
+		dirView.col("Icon"), GTK_STOCK_DIRECTORY,
 		-1);
 
 	for (file = dir->files.begin(); file != dir->files.end(); ++file)
@@ -267,7 +258,7 @@ void ShareBrowser::updateFiles_gui(DirectoryListing::Directory *dir)
 
 		size = (*it_dir)->getTotalSize(false);
 		gtk_list_store_set(fileStore, &iter,
-			fileView.col("Icon"), iconDirectory,
+			fileView.col("Icon"), GTK_STOCK_DIRECTORY,
 			fileView.col("Size"), Util::formatBytes(size).c_str(),
 			fileView.col("Exact Size"), Util::formatExactSize(size).c_str(),
 			fileView.col("Size Order"), size,
@@ -298,7 +289,7 @@ void ShareBrowser::updateFiles_gui(DirectoryListing::Directory *dir)
 
 		size = (*it_file)->getSize();
 		gtk_list_store_set(fileStore, &iter,
-			fileView.col("Icon"), iconFile,
+			fileView.col("Icon"), GTK_STOCK_FILE,
 			fileView.col("Size"), Util::formatBytes(size).c_str(),
 			fileView.col("Exact Size"), Util::formatExactSize(size).c_str(),
 			fileView.col("Size Order"), size,

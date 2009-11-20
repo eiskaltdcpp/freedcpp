@@ -54,13 +54,13 @@ Hub::Hub(const string &address, const string &encoding):
 
 	// Initialize nick treeview
 	nickView.setView(GTK_TREE_VIEW(getWidget("nickView")), true, "hub");
-	nickView.insertColumn("Nick", G_TYPE_STRING, TreeView::PIXBUF_STRING, 100, "Icon");
+	nickView.insertColumn("Nick", G_TYPE_STRING, TreeView::ICON_STRING, 100, "Icon");
 	nickView.insertColumn("Shared", G_TYPE_INT64, TreeView::BYTE, 75);
 	nickView.insertColumn("Description", G_TYPE_STRING, TreeView::STRING, 85);
 	nickView.insertColumn("Tag", G_TYPE_STRING, TreeView::STRING, 100);
 	nickView.insertColumn("Connection", G_TYPE_STRING, TreeView::STRING, 85);
 	nickView.insertColumn("eMail", G_TYPE_STRING, TreeView::STRING, 90);
-	nickView.insertHiddenColumn("Icon", GDK_TYPE_PIXBUF);
+	nickView.insertHiddenColumn("Icon", G_TYPE_STRING);
 	nickView.insertHiddenColumn("Nick Order", G_TYPE_STRING);
 	nickView.insertHiddenColumn("CID", G_TYPE_STRING);
 	nickView.finalize();
@@ -96,25 +96,6 @@ Hub::Hub(const string &address, const string &encoding):
 	emot_mark = gtk_text_buffer_create_mark(chatBuffer, NULL, &iter, TRUE);
 
 	handCursor = gdk_cursor_new(GDK_HAND2);
-
-	// Load the icons for the nick list
-	string path = WulforManager::get()->getPath() + "/pixmaps/";
-	string icon = path + "normal.png";
-	userIcons["normal"] = gdk_pixbuf_new_from_file(icon.c_str(), NULL);
-	icon = path + "normal-op.png";
-	userIcons["normal-op"] = gdk_pixbuf_new_from_file(icon.c_str(), NULL);
-	icon = path + "normal-fw.png";
-	userIcons["normal-fw"] = gdk_pixbuf_new_from_file(icon.c_str(), NULL);
-	icon = path + "normal-fw-op.png";
-	userIcons["normal-fw-op"] = gdk_pixbuf_new_from_file(icon.c_str(), NULL);
-	icon = path + "dc++.png";
-	userIcons["dc++"] = gdk_pixbuf_new_from_file(icon.c_str(), NULL);
-	icon = path + "dc++-op.png";
-	userIcons["dc++-op"] = gdk_pixbuf_new_from_file(icon.c_str(), NULL);
-	icon = path + "dc++-fw.png";
-	userIcons["dc++-fw"] = gdk_pixbuf_new_from_file(icon.c_str(), NULL);
-	icon = path + "dc++-fw-op.png";
-	userIcons["dc++-fw-op"] = gdk_pixbuf_new_from_file(icon.c_str(), NULL);
 
 	// Initialize the user command menu
 	userCommandMenu = new UserCommandMenu(getWidget("usercommandMenu"), ::UserCommand::CONTEXT_CHAT);
@@ -164,8 +145,7 @@ Hub::Hub(const string &address, const string &encoding):
 
 	/* initial emoticons dialog */
 	emotdialog = new EmoticonsDialog(getWidget("chatEntry"), getWidget("emotButton"), getWidget("emotPacksMenu"));
-	icon = path + "smile.png";
-	gtk_button_set_image(GTK_BUTTON(getWidget("emotButton")), gtk_image_new_from_file(icon.c_str()));
+	gtk_button_set_image(GTK_BUTTON(getWidget("emotButton")), gtk_image_new_from_stock("freedcpp-smile", GTK_ICON_SIZE_BUTTON));
 	g_signal_connect(G_OBJECT(getWidget("emotButton")), "button-release-event", G_CALLBACK(onEmotButtonRelease_gui), (gpointer)this);
 
 	useEmoticons = TRUE;
@@ -191,10 +171,6 @@ Hub::Hub(const string &address, const string &encoding):
 Hub::~Hub()
 {
 	disconnect_client();
-
-	unordered_map<string, GdkPixbuf *>::iterator it;
-	for (it = userIcons.begin(); it != userIcons.end(); ++it)
-		g_object_unref(G_OBJECT(it->second));
 
 	// Save the pane position
 	gint width;
@@ -265,6 +241,7 @@ void Hub::updateUser_gui(ParamMap params)
 	GtkTreeIter iter;
 	int64_t shared = Util::toInt64(params["Shared"]);
 	const string& cid = params["CID"];
+	const string icon = "freedcpp-" + params["Icon"];
 
 	if (findUser_gui(cid, &iter))
 	{
@@ -286,7 +263,7 @@ void Hub::updateUser_gui(ParamMap params)
 			nickView.col("Tag"), params["Tag"].c_str(),
  			nickView.col("Connection"), params["Connection"].c_str(),
 			nickView.col("eMail"), params["eMail"].c_str(),
- 			nickView.col("Icon"), userIcons[params["Icon"]],
+			nickView.col("Icon"), icon.c_str(),
 			nickView.col("Nick Order"), params["Nick Order"].c_str(),
 			nickView.col("CID"), cid.c_str(),
 			-1);
@@ -317,7 +294,7 @@ void Hub::updateUser_gui(ParamMap params)
 			nickView.col("Tag"), params["Tag"].c_str(),
  			nickView.col("Connection"), params["Connection"].c_str(),
 			nickView.col("eMail"), params["eMail"].c_str(),
- 			nickView.col("Icon"), userIcons[params["Icon"]],
+			nickView.col("Icon"), icon.c_str(),
 			nickView.col("Nick Order"), params["Nick Order"].c_str(),
 			nickView.col("CID"), cid.c_str(),
 			-1);
@@ -1429,7 +1406,7 @@ void Hub::onSendMessage_gui(GtkEntry *entry, gpointer data)
 		}
 		else if (command == _("freedcpp"))
 		{
-			hub->addStatusMessage_gui(_("freedcpp 0.0.1.24/0.7091, project home: http://freedcpp.narod.ru http://code.google.com/p/freedcpp"), Msg::SYSTEM, Sound::NONE);
+			hub->addStatusMessage_gui(_("freedcpp 0.0.1.25/0.7091, project home: http://freedcpp.narod.ru http://code.google.com/p/freedcpp"), Msg::SYSTEM, Sound::NONE);
 		}
 		else if (command == _("help"))
 		{

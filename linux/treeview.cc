@@ -256,6 +256,16 @@ void TreeView::addColumn_gui(Column& column)
 			gtk_tree_view_column_pack_start(col, renderer, true);
 			gtk_tree_view_column_add_attribute(col, renderer, "text", column.pos);
 			break;
+		case ICON_STRING:
+			renderer = gtk_cell_renderer_pixbuf_new();
+			col = gtk_tree_view_column_new();
+			gtk_tree_view_column_set_title(col, column.title.c_str());
+			gtk_tree_view_column_pack_start(col, renderer, false);
+			gtk_tree_view_column_add_attribute(col, renderer, "icon-name", TreeView::col(column.linkedCol));
+			renderer = gtk_cell_renderer_text_new();
+			gtk_tree_view_column_pack_start(col, renderer, true);
+			gtk_tree_view_column_add_attribute(col, renderer, "text", column.pos);
+			break;
 		case EDIT_STRING:
 			renderer = gtk_cell_renderer_text_new();
  			g_object_set(renderer, "editable", TRUE, NULL);

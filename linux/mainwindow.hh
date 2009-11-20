@@ -83,6 +83,7 @@ class MainWindow:
 
 	private:
 		// GUI functions
+		void loadIcons_gui();
 		void showTransfersPane_gui();
 		void autoOpen_gui();
 		void addTabMenuItem_gui(GtkWidget* menuItem, GtkWidget* page);

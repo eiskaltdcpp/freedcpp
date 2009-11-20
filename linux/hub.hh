@@ -150,7 +150,6 @@ class Hub:
 		virtual void on(dcpp::ClientListener::SearchFlood, dcpp::Client *, const std::string &message) throw();
 
 		std::tr1::unordered_map<std::string, std::string> userMap;
-		std::tr1::unordered_map<std::string, GdkPixbuf *> userIcons;
 		std::tr1::unordered_map<std::string, GtkTreeIter> userIters;
 		GtkTextTag *TagsMap[TAG_LAST];
 		std::string completionKey;

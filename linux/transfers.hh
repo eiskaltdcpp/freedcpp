@@ -117,7 +117,6 @@ class Transfers:
 		TreeView transferView;
 		GtkTreeStore *transferStore;
 		GtkTreeSelection *transferSelection;
-		GdkPixbuf *uploadPic, *downloadPic;
 		UserCommandMenu* userCommandMenu;
 		PreviewMenu *appsPreviewMenu;
 };

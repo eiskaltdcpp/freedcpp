@@ -267,7 +267,7 @@ if not 'install' in COMMAND_LINE_TARGETS:
 else:
 
 	glade_files = glob.glob('glade/*.glade')
-	pixmap_files = glob.glob('pixmaps/*.png')
+#	pixmap_files = glob.glob('pixmaps/*.png')
 	text_files = glob.glob('*.txt')
 
 	mo_files = []
@@ -293,7 +293,8 @@ else:
 	env.Alias('install', env.Install(dir = env['FAKE_ROOT'] + env['PREFIX'] + '/share/' + APP_NAME + '/glade', source = glade_files))
 
 	# install pixmap files
-	env.Alias('install', env.Install(dir = env['FAKE_ROOT'] + env['PREFIX'] + '/share/' + APP_NAME + '/pixmaps', source = pixmap_files))
+#	env.Alias('install', env.Install(dir = env['FAKE_ROOT'] + env['PREFIX'] + '/share/' + APP_NAME + '/pixmaps', source = pixmap_files))
+	env.Alias('install', env.Install(dir = env['FAKE_ROOT'] + env['PREFIX'] + '/share/' + APP_NAME, source = 'icons/'))
 
 	# install text files
 	env.Alias('install', env.Install(dir = env['FAKE_ROOT'] + env['PREFIX'] + '/share/doc/' + APP_NAME, source = text_files))

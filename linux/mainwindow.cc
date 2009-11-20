@@ -71,41 +71,12 @@ MainWindow::MainWindow():
 	gtk_window_set_transient_for(GTK_WINDOW(getWidget("ucLineDialog")), window);
 	gtk_window_set_transient_for(GTK_WINDOW(getWidget("magnetDialog")), window);
 
-	// Load icons. We need to do this in the code and not in the .glade file,
-	// otherwise we won't always find the images.
-	string file, path = WulforManager::get()->getPath() + "/pixmaps/";
-
-	// Set the toolbar and transfer view icons.
-	if (!WGETI("use-stock-icons"))
-	{
-		file = path + "connect.png";
-		gtk_tool_button_set_icon_widget(GTK_TOOL_BUTTON(getWidget("connect")), gtk_image_new_from_file(file.c_str()));
-		file = path + "publichubs.png";
-		gtk_tool_button_set_icon_widget(GTK_TOOL_BUTTON(getWidget("publicHubs")), gtk_image_new_from_file(file.c_str()));
-		file = path + "search.png";
-		gtk_tool_button_set_icon_widget(GTK_TOOL_BUTTON(getWidget("search")), gtk_image_new_from_file(file.c_str()));
-		file = path + "settings.png";
-		gtk_tool_button_set_icon_widget(GTK_TOOL_BUTTON(getWidget("settings")), gtk_image_new_from_file(file.c_str()));
-		file = path + "hash.png";
-		gtk_tool_button_set_icon_widget(GTK_TOOL_BUTTON(getWidget("hash")), gtk_image_new_from_file(file.c_str()));
-		file = path + "FinishedDL.png";
-		gtk_tool_button_set_icon_widget(GTK_TOOL_BUTTON(getWidget("finishedDownloads")), gtk_image_new_from_file(file.c_str()));
-		file = path + "FinishedUL.png";
-		gtk_tool_button_set_icon_widget(GTK_TOOL_BUTTON(getWidget("finishedUploads")), gtk_image_new_from_file(file.c_str()));
-		file = path + "queue.png";
-		gtk_tool_button_set_icon_widget(GTK_TOOL_BUTTON(getWidget("queue")), gtk_image_new_from_file(file.c_str()));
-		file = path + "favhubs.png";
-		gtk_tool_button_set_icon_widget(GTK_TOOL_BUTTON(getWidget("favHubs")), gtk_image_new_from_file(file.c_str()));
-		file = path + "quit.png";
-		gtk_tool_button_set_icon_widget(GTK_TOOL_BUTTON(getWidget("quit")), gtk_image_new_from_file(file.c_str()));
-
-	}
-
-	// Set the about menu icon
-	file = path + "linuxdcpp.png";
+	string file, path = WulforManager::get()->getPath() + "/icons/hicolor/96x96/apps/";
+	file = path + "logo.png";
 	GdkPixbuf *logo = gdk_pixbuf_new_from_file(file.c_str(), NULL);
 	gtk_about_dialog_set_logo(GTK_ABOUT_DIALOG(getWidget("aboutDialog")), logo);
 	g_object_unref(logo);
+
 	gtk_about_dialog_set_email_hook((GtkAboutDialogActivateLinkFunc)onAboutDialogActivateLink_gui, (gpointer)this, NULL);
 	gtk_about_dialog_set_url_hook((GtkAboutDialogActivateLinkFunc)onAboutDialogActivateLink_gui, (gpointer)this, NULL);
 	// This has to be set in code in order to activate the link
@@ -113,9 +84,7 @@ MainWindow::MainWindow():
 	gtk_window_set_transient_for(GTK_WINDOW(getWidget("aboutDialog")), window);
 
 	// Set all windows to the default icon
-	file = path + "linuxdcpp-icon.png";
-	gtk_window_set_icon_from_file(window, file.c_str(), NULL);
-	gtk_window_set_default_icon_from_file(file.c_str(), NULL);
+	gtk_window_set_default_icon_name(g_get_prgname());
 
 	// Disable un-implemented menu items.
 	gtk_widget_set_sensitive(getWidget("favoriteUsersMenuItem"), FALSE);
@@ -182,6 +151,7 @@ MainWindow::MainWindow():
 
 	setMainStatus_gui(_("Welcome to ") + string(g_get_application_name()));
 
+	loadIcons_gui();
 	showTransfersPane_gui();
 
 	// Putting this after all the resizing and moving makes the window appear
@@ -294,6 +264,26 @@ void MainWindow::showTransfersPane_gui()
 	gtk_paned_pack2(GTK_PANED(getWidget("pane")), transfers->getContainer(), TRUE, TRUE);
 	addChild(transfers);
 	transfers->show();
+}
+
+/*
+ * Load the custom icons or the stock icons as per the setting
+ */
+void MainWindow::loadIcons_gui()
+{
+	WulforUtil::registerIcons();
+
+	// Reset the stock IDs manually to force the icon to refresh
+	gtk_tool_button_set_stock_id(GTK_TOOL_BUTTON(getWidget("favHubs")), "freedcpp-favorite-hubs");
+	gtk_tool_button_set_stock_id(GTK_TOOL_BUTTON(getWidget("publicHubs")), "freedcpp-public-hubs");
+	gtk_tool_button_set_stock_id(GTK_TOOL_BUTTON(getWidget("settings")), "freedcpp-preferences");
+	gtk_tool_button_set_stock_id(GTK_TOOL_BUTTON(getWidget("hash")), "freedcpp-hash");
+	gtk_tool_button_set_stock_id(GTK_TOOL_BUTTON(getWidget("search")), "freedcpp-search");
+	gtk_tool_button_set_stock_id(GTK_TOOL_BUTTON(getWidget("queue")), "freedcpp-queue");
+	gtk_tool_button_set_stock_id(GTK_TOOL_BUTTON(getWidget("finishedDownloads")), "freedcpp-finished-downloads");
+	gtk_tool_button_set_stock_id(GTK_TOOL_BUTTON(getWidget("finishedUploads")), "freedcpp-finished-uploads");
+	gtk_tool_button_set_stock_id(GTK_TOOL_BUTTON(getWidget("quit")), "freedcpp-quit");
+	gtk_tool_button_set_stock_id(GTK_TOOL_BUTTON(getWidget("connect")), "freedcpp-connect");
 }
 
 void MainWindow::autoOpen_gui()
@@ -448,8 +438,7 @@ void MainWindow::removeTabMenuItem_gui(GtkWidget *menuItem)
  */
 void MainWindow::createStatusIcon_gui()
 {
-	string iconPath = WulforManager::get()->getPath() + "/pixmaps/linuxdcpp-icon.png";
-	statusIcon = gtk_status_icon_new_from_file(iconPath.c_str());
+	statusIcon = gtk_status_icon_new_from_icon_name(g_get_prgname());
 
 	g_signal_connect(getWidget("statusIconQuitItem"), "activate", G_CALLBACK(onQuitClicked_gui), (gpointer)this);
 	g_signal_connect(getWidget("statusIconToggleInterfaceItem"), "activate", G_CALLBACK(onToggleWindowVisibility_gui), (gpointer)this);
@@ -990,6 +979,7 @@ void MainWindow::onPreferencesClicked_gui(GtkWidget *widget, gpointer data)
 	unsigned short tcpPort = (unsigned short)SETTING(TCP_PORT);
 	unsigned short udpPort = (unsigned short)SETTING(UDP_PORT);
 	int lastConn = SETTING(INCOMING_CONNECTIONS);
+	bool stockIcons = WGETI("use-system-icons");
 
 	gint response = WulforManager::get()->openSettingsDialog_gui();
 
@@ -1008,6 +998,10 @@ void MainWindow::onPreferencesClicked_gui(GtkWidget *widget, gpointer data)
 
 		mw->setTabPosition_gui(WGETI("tab-position"));
 		mw->setToolbarStyle_gui(WGETI("toolbar-style"));
+
+		// Reload the icons only if the setting has changed
+		if (WGETI("use-system-icons") != stockIcons)
+			mw->loadIcons_gui();
 
 		for (StringIterC it = mw->EntryList.begin(); it != mw->EntryList.end(); ++it)
 		{

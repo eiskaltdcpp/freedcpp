@@ -38,6 +38,7 @@ class TreeView
 			BOOL,
 			PIXBUF,
 			PIXBUF_STRING,
+			ICON_STRING,
 			EDIT_STRING,
 			PROGRESS,
 			SPEED,
