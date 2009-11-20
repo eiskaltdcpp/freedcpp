@@ -754,6 +754,7 @@ Contributors:
   <widget class="GtkFileChooserDialog" id="flistDialog">
     <property name="title" translatable="yes">Select filelist to browse</property>
     <property name="destroy_with_parent">True</property>
+    <property name="local_only">False</property>
     <property name="type_hint">GDK_WINDOW_TYPE_HINT_DIALOG</property>
     <child internal-child="vbox">
       <widget class="GtkVBox" id="dialog-vbox5">

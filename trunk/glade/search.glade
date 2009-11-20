@@ -562,6 +562,7 @@ File type
     <property name="action">GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER</property>
     <property name="title" translatable="yes">Choose a directory</property>
     <property name="modal">True</property>
+    <property name="local_only">False</property>
     <property name="type_hint">GDK_WINDOW_TYPE_HINT_DIALOG</property>
     <child internal-child="vbox">
       <widget class="GtkVBox" id="dialog-vbox1">
