@@ -1,3 +1,6 @@
+r30: 0.0.1.26
+* Ревизия 313 (linuxdcpp, fixed adding remote files to share).
+
 r29: 0.0.1.25
 * Ревизия 312 чаcть 2 (linuxdcpp, SVG support and various icon improvements).
 * Ревизия 314 (linuxdcpp, fixed missing status icon in the notification area).
