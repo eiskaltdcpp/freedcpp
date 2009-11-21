@@ -45,6 +45,7 @@ class FavoriteHubs:
 		void removeEntry_gui(std::string address);
 		void showErrorDialog_gui(const std::string &description);
 		void popupMenu_gui();
+		bool showFavoriteHubDialog_gui(dcpp::StringMap &params);
 
 		// GUI callbacks
 		static gboolean onButtonPressed_gui(GtkWidget *widget, GdkEventButton *event, gpointer data);

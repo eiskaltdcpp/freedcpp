@@ -87,8 +87,8 @@
     </child>
   </widget>
   <widget class="GtkDialog" id="favoriteHubsDialog">
-    <property name="title" translatable="yes">Favorite Hubs Properties</property>
-    <property name="resizable">False</property>
+    <property name="title" translatable="yes">Favorite Hub Properties</property>
+    <property name="resizable">True</property>
     <property name="destroy_with_parent">True</property>
     <property name="type_hint">GDK_WINDOW_TYPE_HINT_DIALOG</property>
     <child internal-child="vbox">
@@ -107,7 +107,7 @@
                   <widget class="GtkTable" id="table1">
                     <property name="visible">True</property>
                     <property name="border_width">8</property>
-                    <property name="n_rows">4</property>
+                    <property name="n_rows">5</property>
                     <property name="n_columns">2</property>
                     <property name="column_spacing">2</property>
                     <child>
@@ -128,15 +128,14 @@
                         <property name="right_attach">2</property>
                         <property name="top_attach">3</property>
                         <property name="bottom_attach">4</property>
+                        <property name="y_options"></property>
                       </packing>
                     </child>
                     <child>
                       <widget class="GtkEntry" id="entryDescription">
-                        <property name="width_request">200</property>
                         <property name="visible">True</property>
                         <property name="activates_default">True</property>
                         <property name="can_focus">True</property>
-                        <property name="invisible_char">*</property>
                       </widget>
                       <packing>
                         <property name="left_attach">1</property>
@@ -148,11 +147,9 @@
                     </child>
                     <child>
                       <widget class="GtkEntry" id="entryAddress">
-                        <property name="width_request">200</property>
                         <property name="visible">True</property>
                         <property name="activates_default">True</property>
                         <property name="can_focus">True</property>
-                        <property name="invisible_char">*</property>
                       </widget>
                       <packing>
                         <property name="left_attach">1</property>
@@ -164,11 +161,9 @@
                     </child>
                     <child>
                       <widget class="GtkEntry" id="entryName">
-                        <property name="width_request">200</property>
                         <property name="visible">True</property>
                         <property name="activates_default">True</property>
                         <property name="can_focus">True</property>
-                        <property name="invisible_char">*</property>
                       </widget>
                       <packing>
                         <property name="left_attach">1</property>
@@ -177,7 +172,7 @@
                       </packing>
                     </child>
                     <child>
-                      <widget class="GtkLabel" id="label4">
+                      <widget class="GtkLabel" id="labelDescription">
                         <property name="visible">True</property>
                         <property name="xalign">1</property>
                         <property name="label" translatable="yes">Description</property>
@@ -190,7 +185,7 @@
                       </packing>
                     </child>
                     <child>
-                      <widget class="GtkLabel" id="label3">
+                      <widget class="GtkLabel" id="labelAddress">
                         <property name="visible">True</property>
                         <property name="xalign">1</property>
                         <property name="label" translatable="yes">Address</property>
@@ -203,7 +198,7 @@
                       </packing>
                     </child>
                     <child>
-                      <widget class="GtkLabel" id="label2">
+                      <widget class="GtkLabel" id="labelName">
                         <property name="visible">True</property>
                         <property name="xalign">1</property>
                         <property name="label" translatable="yes">Name</property>
@@ -216,11 +211,43 @@
                     <child>
                       <widget class="GtkLabel" id="labelEncoding">
                         <property name="visible">True</property>
+                        <property name="xalign">1</property>
                         <property name="label" translatable="yes">Encoding</property>
                       </widget>
                       <packing>
                         <property name="top_attach">3</property>
                         <property name="bottom_attach">4</property>
+                        <property name="x_options">GTK_FILL</property>
+                        <property name="y_options"></property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkLabel" id="labelAutoConnect">
+                        <property name="visible">True</property>
+                        <property name="xalign">1</property>
+                        <property name="label" translatable="yes">Auto Connect</property>
+                      </widget>
+                      <packing>
+                        <property name="top_attach">4</property>
+                        <property name="bottom_attach">5</property>
+                        <property name="x_options">GTK_FILL</property>
+                        <property name="y_options"></property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkCheckButton" id="checkButtonAutoConnect">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">False</property>
+                        <property name="xalign">0</property>
+                        <property name="draw_indicator">True</property>
+                      </widget>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="right_attach">2</property>
+                        <property name="top_attach">4</property>
+                        <property name="bottom_attach">5</property>
+                        <property name="y_options"></property>
                       </packing>
                     </child>
                   </widget>
@@ -253,7 +280,6 @@
                         <property name="visible">True</property>
                         <property name="activates_default">True</property>
                         <property name="can_focus">True</property>
-                        <property name="invisible_char">*</property>
                       </widget>
                       <packing>
                         <property name="left_attach">1</property>
@@ -284,7 +310,6 @@
                         <property name="visible">True</property>
                         <property name="activates_default">True</property>
                         <property name="can_focus">True</property>
-                        <property name="invisible_char">*</property>
                       </widget>
                       <packing>
                         <property name="left_attach">1</property>

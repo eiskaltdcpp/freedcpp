@@ -235,47 +235,26 @@ gboolean FavoriteHubs::onKeyReleased_gui(GtkWidget *widget, GdkEventKey *event, 
 void FavoriteHubs::onAddEntry_gui(GtkWidget *widget, gpointer data)
 {
 	FavoriteHubs *fh = (FavoriteHubs *)data;
+	const string emptyString = "";
 
-	gtk_entry_set_text(GTK_ENTRY(fh->getWidget("entryName")), "");
-	gtk_entry_set_text(GTK_ENTRY(fh->getWidget("entryAddress")), "");
-	gtk_entry_set_text(GTK_ENTRY(fh->getWidget("entryDescription")), "");
-	gtk_entry_set_text(GTK_ENTRY(fh->getWidget("entryNick")), "");
-	gtk_entry_set_text(GTK_ENTRY(fh->getWidget("entryPassword")), "");
-	gtk_entry_set_text(GTK_ENTRY(fh->getWidget("entryUDescription")), "");
-	gtk_entry_set_text(GTK_ENTRY(fh->getWidget("comboboxentryCharset")), WulforUtil::ENCODING_GLOBAL_HUB_DEFAULT.c_str());
+	StringMap params;
+	params["Name"] = emptyString;
+	params["Address"] = emptyString;
+	params["Description"] = emptyString;
+	params["Nick"] = emptyString;
+	params["Hidden Password"] = emptyString;
+	params["User Description"] = emptyString;
+	params["Encoding"] = WulforUtil::ENCODING_GLOBAL_HUB_DEFAULT;
+	params["Auto Connect"] = "0";
 
-	int response = gtk_dialog_run(GTK_DIALOG(fh->getWidget("favoriteHubsDialog")));
+	bool updatedEntry = fh->showFavoriteHubDialog_gui(params);
 
-	while (response == GTK_RESPONSE_OK)
+	if (updatedEntry)
 	{
-		StringMap params;
-
-		params["Name"] = gtk_entry_get_text(GTK_ENTRY(fh->getWidget("entryName")));
-		params["Address"] = gtk_entry_get_text(GTK_ENTRY(fh->getWidget("entryAddress")));
-		params["Description"] = gtk_entry_get_text(GTK_ENTRY(fh->getWidget("entryDescription")));
-		params["Nick"] = gtk_entry_get_text(GTK_ENTRY(fh->getWidget("entryNick")));
-		params["Hidden Password"] = gtk_entry_get_text(GTK_ENTRY(fh->getWidget("entryPassword")));
-		params["User Description"] = gtk_entry_get_text(GTK_ENTRY(fh->getWidget("entryUDescription")));
-
-		gchar *encoding = gtk_combo_box_get_active_text(GTK_COMBO_BOX(fh->getWidget("comboboxCharset")));
-		params["Encoding"] = string(encoding);
-		g_free(encoding);
-
-		if (params["Name"].empty() || params["Address"].empty())
-		{
-			fh->showErrorDialog_gui(_("The name and address fields are required"));
-			response = gtk_dialog_run(GTK_DIALOG(fh->getWidget("favoriteHubsDialog")));
-		}
-		else
-		{
-			typedef Func1<FavoriteHubs, StringMap> F1;
-			F1 *func = new F1(fh, &FavoriteHubs::addEntry_client, params);
-			WulforManager::get()->dispatchClientFunc(func);
-			response = GTK_RESPONSE_CANCEL;
-		}
+		typedef Func1<FavoriteHubs, StringMap> F1;
+		F1 *func = new F1(fh, &FavoriteHubs::addEntry_client, params);
+		WulforManager::get()->dispatchClientFunc(func);
 	}
-
-	gtk_widget_hide(fh->getWidget("favoriteHubsDialog"));
 }
 
 void FavoriteHubs::onEditEntry_gui(GtkWidget *widget, gpointer data)
@@ -294,49 +273,68 @@ void FavoriteHubs::onEditEntry_gui(GtkWidget *widget, gpointer data)
 	params["Hidden Password"] = fh->favoriteView.getString(&iter, "Hidden Password");
 	params["User Description"] = fh->favoriteView.getString(&iter, "User Description");
 	params["Encoding"] = fh->favoriteView.getString(&iter, "Encoding");
+	params["Auto Connect"] = fh->favoriteView.getValue<gboolean>(&iter, "Auto Connect") ? "1" : "0";
 
-	gtk_entry_set_text(GTK_ENTRY(fh->getWidget("entryName")), params["Name"].c_str());
-	gtk_entry_set_text(GTK_ENTRY(fh->getWidget("entryAddress")), params["Address"].c_str());
-	gtk_entry_set_text(GTK_ENTRY(fh->getWidget("entryDescription")), params["Description"].c_str());
-	gtk_entry_set_text(GTK_ENTRY(fh->getWidget("entryNick")), params["Nick"].c_str());
-	gtk_entry_set_text(GTK_ENTRY(fh->getWidget("entryPassword")), params["Hidden Password"].c_str());
-	gtk_entry_set_text(GTK_ENTRY(fh->getWidget("entryUDescription")), params["User Description"].c_str());
-	gtk_entry_set_text(GTK_ENTRY(fh->getWidget("comboboxentryCharset")), params["Encoding"].c_str());
+	bool entryUpdated = fh->showFavoriteHubDialog_gui(params);
 
-	int response = gtk_dialog_run(GTK_DIALOG(fh->getWidget("favoriteHubsDialog")));
+	if (entryUpdated)
+	{
+		string address = fh->favoriteView.getString(&iter, "Address");
+		fh->editEntry_gui(params, &iter);
+
+		typedef Func2<FavoriteHubs, string, StringMap> F2;
+		F2 *func = new F2(fh, &FavoriteHubs::editEntry_client, address, params);
+		WulforManager::get()->dispatchClientFunc(func);
+	}
+}
+
+bool FavoriteHubs::showFavoriteHubDialog_gui(StringMap &params)
+{
+	// Populate the dialog with initial values
+	gtk_entry_set_text(GTK_ENTRY(getWidget("entryName")), params["Name"].c_str());
+	gtk_entry_set_text(GTK_ENTRY(getWidget("entryAddress")), params["Address"].c_str());
+	gtk_entry_set_text(GTK_ENTRY(getWidget("entryDescription")), params["Description"].c_str());
+	gtk_entry_set_text(GTK_ENTRY(getWidget("entryNick")), params["Nick"].c_str());
+	gtk_entry_set_text(GTK_ENTRY(getWidget("entryPassword")), params["Hidden Password"].c_str());
+	gtk_entry_set_text(GTK_ENTRY(getWidget("entryUDescription")), params["User Description"].c_str());
+	gtk_entry_set_text(GTK_ENTRY(getWidget("comboboxentryCharset")), params["Encoding"].c_str());
+
+	// Set the auto connect checkbox
+	gboolean autoConnect = params["Auto Connect"] == "1" ? TRUE : FALSE;
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(getWidget("checkButtonAutoConnect")), autoConnect);
+
+	// Show the dialog
+	gint response = gtk_dialog_run(GTK_DIALOG(getWidget("favoriteHubsDialog")));
 
 	while (response == GTK_RESPONSE_OK)
 	{
 		params.clear();
-		params["Name"] = gtk_entry_get_text(GTK_ENTRY(fh->getWidget("entryName")));
-		params["Address"] = gtk_entry_get_text(GTK_ENTRY(fh->getWidget("entryAddress")));
-		params["Description"] = gtk_entry_get_text(GTK_ENTRY(fh->getWidget("entryDescription")));
-		params["Nick"] = gtk_entry_get_text(GTK_ENTRY(fh->getWidget("entryNick")));
-		params["Hidden Password"] = gtk_entry_get_text(GTK_ENTRY(fh->getWidget("entryPassword")));
-		params["User Description"] = gtk_entry_get_text(GTK_ENTRY(fh->getWidget("entryUDescription")));
+		params["Name"] = gtk_entry_get_text(GTK_ENTRY(getWidget("entryName")));
+		params["Address"] = gtk_entry_get_text(GTK_ENTRY(getWidget("entryAddress")));
+		params["Description"] = gtk_entry_get_text(GTK_ENTRY(getWidget("entryDescription")));
+		params["Nick"] = gtk_entry_get_text(GTK_ENTRY(getWidget("entryNick")));
+		params["Hidden Password"] = gtk_entry_get_text(GTK_ENTRY(getWidget("entryPassword")));
+		params["User Description"] = gtk_entry_get_text(GTK_ENTRY(getWidget("entryUDescription")));
+		params["Auto Connect"] = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(getWidget("checkButtonAutoConnect"))) ? "1" : "0";
 
-		gchar *encoding = gtk_combo_box_get_active_text(GTK_COMBO_BOX(fh->getWidget("comboboxCharset")));
+		gchar *encoding = gtk_combo_box_get_active_text(GTK_COMBO_BOX(getWidget("comboboxCharset")));
 		params["Encoding"] = string(encoding);
 		g_free(encoding);
 
 		if (params["Name"].empty() || params["Address"].empty())
 		{
-			fh->showErrorDialog_gui(_("The name and address fields are required"));
-			response = gtk_dialog_run(GTK_DIALOG(fh->getWidget("favoriteHubsDialog")));
+			showErrorDialog_gui(_("The name and address fields are required"));
+			response = gtk_dialog_run(GTK_DIALOG(getWidget("favoriteHubsDialog")));
 		}
 		else
 		{
-			string address = fh->favoriteView.getString(&iter, "Address");
-			fh->editEntry_gui(params, &iter);
-
-			typedef Func2<FavoriteHubs, string, StringMap> F2;
-			F2 *func = new F2(fh, &FavoriteHubs::editEntry_client, address, params);
-			WulforManager::get()->dispatchClientFunc(func);
-			response = GTK_RESPONSE_CANCEL;
+			gtk_widget_hide(getWidget("favoriteHubsDialog"));
+			return TRUE;
 		}
 	}
 
-	gtk_widget_hide(fh->getWidget("favoriteHubsDialog"));
+	gtk_widget_hide(getWidget("favoriteHubsDialog"));
+	return FALSE;
 }
 
 void FavoriteHubs::onRemoveEntry_gui(GtkWidget *widget, gpointer data)
@@ -438,7 +436,7 @@ void FavoriteHubs::getFavHubParams_client(const FavoriteHubEntry *entry, StringM
 void FavoriteHubs::addEntry_client(StringMap params)
 {
 	FavoriteHubEntry entry;
-	entry.setConnect(FALSE);
+	entry.setConnect(Util::toInt(params["Auto Connect"]));
 	entry.setName(params["Name"]);
 	entry.setServer(params["Address"]);
 	entry.setDescription(params["Description"]);
@@ -455,6 +453,7 @@ void FavoriteHubs::editEntry_client(string address, StringMap params)
 
 	if (entry)
 	{
+		entry->setConnect(Util::toInt(params["Auto Connect"]));
 		entry->setName(params["Name"]);
 		entry->setServer(params["Address"]);
 		entry->setDescription(params["Description"]);

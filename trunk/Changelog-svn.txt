@@ -1,3 +1,6 @@
+r31: 0.0.1.27
+* Ревизия 315 (linuxdcpp, added auto-connect checkbox to favorite hub properties).
+
 r30: 0.0.1.26
 * Ревизия 313 (linuxdcpp, fixed adding remote files to share).
 
