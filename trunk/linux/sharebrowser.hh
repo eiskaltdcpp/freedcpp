@@ -82,6 +82,7 @@ class ShareBrowser:
 		dcpp::UserPtr user;
 		std::string file;
 		std::string initialDirectory;
+		std::string nick;
 		dcpp::DirectoryListing listing;
 		int64_t shareSize;
 		int64_t currentSize;

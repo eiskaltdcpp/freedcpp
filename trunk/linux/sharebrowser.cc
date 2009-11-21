@@ -46,6 +46,16 @@ ShareBrowser::ShareBrowser(UserPtr user, const string &file, const string &initi
 	updateFileView(TRUE),
 	skipHits(0)
 {
+	// Use the nick from the file name in case the user is offline and core only returns CID
+	nick = WulforUtil::getNicks(user);
+	if (nick.find(user->getCID().toBase32(), 1) != string::npos)
+	{
+		string name = Util::getFileName(file);
+		string::size_type loc = name.find('.');
+		nick = name.substr(0, loc);
+		setLabel_gui(_("List: ") + nick);
+	}
+
 	// Configure the dialogs
 	File::ensureDirectory(SETTING(DOWNLOAD_DIRECTORY));
 	gtk_dialog_set_alternative_button_order(GTK_DIALOG(getWidget("findDialog")), GTK_RESPONSE_OK, GTK_RESPONSE_CANCEL, -1);
@@ -139,7 +149,7 @@ void ShareBrowser::buildList_gui()
 		listing.loadFile(file);
 
 		// Set name of root entry to user nick.
-		listing.getRoot()->setName(WulforUtil::getNicks(user));
+		listing.getRoot()->setName(nick);
 
 		// Add entries to dir tree view starting with the root entry.
 		buildDirs_gui(listing.getRoot(), NULL);

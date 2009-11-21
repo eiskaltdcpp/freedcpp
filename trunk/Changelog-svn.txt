@@ -1,3 +1,6 @@
+r32: 0.0.1.28
+* Ревизия 317 (linuxdcpp, show nick instead of CID when browsing offline shares).
+
 r31: 0.0.1.27
 * Ревизия 315 (linuxdcpp, added auto-connect checkbox to favorite hub properties).
 
