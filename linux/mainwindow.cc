@@ -1077,7 +1077,7 @@ void MainWindow::onOpenFileListClicked_gui(GtkWidget *widget, gpointer data)
 			if (user)
 				mw->showShareBrowser_gui(user, path, "", FALSE);
 			else
-				mw->setMainStatus_gui(_("Unable to open: Older file list format detected"));
+				mw->setMainStatus_gui(_("Unable to load file list: Invalid file list name"));
 		}
 	}
 }
