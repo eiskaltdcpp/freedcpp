@@ -577,7 +577,7 @@ void MainWindow::showHub_gui(string address, string encoding)
 	raisePage_gui(entry->getContainer());
 }
 
-void MainWindow::addPrivateMessage_gui(Msg::TypeMsg typemsg, string cid, string message, bool useSetting)
+void MainWindow::addPrivateMessage_gui(Msg::TypeMsg typemsg, string cid, string hubUrl, string message, bool useSetting)
 {
 	BookEntry *entry = findBookEntry(Entry::PRIVATE_MESSAGE, cid);
 	bool raise = TRUE;
@@ -588,7 +588,7 @@ void MainWindow::addPrivateMessage_gui(Msg::TypeMsg typemsg, string cid, string 
 
 	if (entry == NULL)
 	{
-		entry = new PrivateMessage(cid);
+		entry = new PrivateMessage(cid, hubUrl);
 		addBookEntry_gui(entry);
 
 		EntryList.push_back(cid);

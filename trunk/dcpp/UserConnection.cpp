@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2008 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2009 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -50,6 +50,10 @@ void UserConnection::on(BufferedSocketListener::Line, const string& aLine) throw
 		return;
 
 	if(aLine[0] == 'C' && !isSet(FLAG_NMDC)) {
+		if(!Text::validateUtf8(aLine)) {
+			// @todo Report to user?
+			return;
+		}
 		dispatch(aLine);
 		return;
 	} else if(aLine[0] == '$') {

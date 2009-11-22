@@ -193,8 +193,8 @@ private:
 		bool loadTree(File& dataFile, const TreeInfo& ti, const TTHValue& root, TigerTree& tt);
 		int64_t saveTree(File& dataFile, const TigerTree& tt) throw(FileException);
 
-		string getIndexFile() { return Util::getConfigPath() + "HashIndex.xml"; }
-		string getDataFile() { return Util::getConfigPath() + "HashData.dat"; }
+		string getIndexFile() { return Util::getPath(Util::PATH_USER_CONFIG) + "HashIndex.xml"; }
+		string getDataFile() { return Util::getPath(Util::PATH_USER_CONFIG) + "HashData.dat"; }
 	};
 
 	friend class HashLoader;
@@ -208,10 +208,12 @@ private:
 	static const int64_t SMALL_TREE = -1;
 
 	void hashDone(const string& aFileName, uint32_t aTimeStamp, const TigerTree& tth, int64_t speed);
+
 	void doRebuild() {
 		Lock l(cs);
 		store.rebuild();
 	}
+
 	virtual void on(TimerManagerListener::Minute, uint32_t) throw() {
 		Lock l(cs);
 		store.save();

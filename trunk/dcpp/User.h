@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2008 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2009 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@
 namespace dcpp {
 
 /** A user connected to one or more hubs. */
-class User : public FastAlloc<User>, public intrusive_ptr_base, public Flags
+class User : public FastAlloc<User>, public intrusive_ptr_base<User>, public Flags
 {
 public:
 	enum Bits {
@@ -66,7 +66,7 @@ public:
 
 	User(const CID& aCID) : cid(aCID) { }
 
-	virtual ~User() throw() { }
+	~User() throw() { }
 
 	const CID& getCID() const { return cid; }
 	operator const CID&() const { return cid; }

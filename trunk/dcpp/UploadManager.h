@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2008 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2009 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -53,7 +53,7 @@ public:
 	int getFreeExtraSlots() { return max(3 - getExtra(), 0); }
 
 	/** @param aUser Reserve an upload slot for this user and connect. */
-	void reserveSlot(const UserPtr& aUser);
+	void reserveSlot(const UserPtr& aUser, const string& hubHint);
 
 	typedef set<string> FileSet;
 	typedef unordered_map<UserPtr, FileSet, User::Hash> FilesMap;

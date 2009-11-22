@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2008 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2009 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -171,6 +171,10 @@ void AdcHub::handle(AdcCommand::INF, AdcCommand& c) throw() {
 
 	if(u->getIdentity().supports(ADCS_FEATURE)) {
 		u->getUser()->setFlag(User::TLS);
+	}
+
+	if(!u->getIdentity().get("US").empty()) {
+		u->getIdentity().setConnection(str(F_("%1%/s") % Util::formatBytes(u->getIdentity().get("US"))));
 	}
 
 	if(u->getUser() == getMyIdentity().getUser()) {
@@ -522,7 +526,7 @@ void AdcHub::handle(AdcCommand::GET, AdcCommand& c) throw() {
 		size_t n = ShareManager::getInstance()->getSharedFiles();
 
 		// Ideal size for m is n * k / ln(2), but we allow some slack
-		if(m > (5 * n * k / log(2.)) || m > (1 << h)) {
+		if(m > (5 * n * k / log(2.)) || m > static_cast<size_t>(1 << h)) {
 			send(AdcCommand(AdcCommand::SEV_FATAL, AdcCommand::ERROR_TRANSFER_GENERIC, "Unsupported m"));
 			return;
 		}
@@ -696,7 +700,7 @@ void AdcHub::info(bool /*alwaysSend*/) {
 	addParam(lastInfoMap, c, "HR", Util::toString(counts.registered));
 	addParam(lastInfoMap, c, "HO", Util::toString(counts.op));
 	addParam(lastInfoMap, c, "VE", "++ " VERSIONSTRING);
-	addParam(lastInfoMap, c, "US", Util::toString((long)(Util::toDouble(SETTING(UPLOAD_SPEED))*1024*1024)));
+	addParam(lastInfoMap, c, "US", Util::toString((long)(Util::toDouble(SETTING(UPLOAD_SPEED))*1024*1024/8)));
 	addParam(lastInfoMap, c, "AW", Util::getAway() ? "1" : Util::emptyString);
 
 	if(SETTING(MAX_DOWNLOAD_SPEED) > 0) {
@@ -779,6 +783,11 @@ void AdcHub::on(Connected c) throw() {
 
 void AdcHub::on(Line l, const string& aLine) throw() {
 	Client::on(l, aLine);
+
+	if(!Text::validateUtf8(aLine)) {
+		// @todo report to user?
+		return;
+	}
 
 	if(BOOLSETTING(ADC_DEBUG)) {
 		fire(ClientListener::StatusMessage(), this, "<ADC>" + aLine + "</ADC>");

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2008 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2009 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,6 +46,7 @@ void ADLSearchManager::Load()
 	// Load file as a string
 	try {
 		SimpleXML xml;
+		Util::migrate(getConfigFile());
 		xml.fromXML(File(getConfigFile(), File::READ, File::OPEN).read());
 
 		if(xml.findChild("ADLSearch")) {
@@ -210,7 +211,7 @@ void ADLSearchManager::MatchesFile(DestDirList& destDirVector, DirectoryListing:
 			if(is->isAutoQueue){
 				try {
 					QueueManager::getInstance()->add(SETTING(DOWNLOAD_DIRECTORY) + currentFile->getName(),
-						currentFile->getSize(), currentFile->getTTH(), getUser());
+						currentFile->getSize(), currentFile->getTTH(), getUser(), Util::emptyString);
 				} catch(const Exception&) { }
 			}
 

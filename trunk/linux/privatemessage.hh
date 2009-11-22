@@ -33,7 +33,7 @@ class PrivateMessage:
 	public BookEntry
 {
 	public:
-		PrivateMessage(const std::string &cid);
+		PrivateMessage(const std::string &cid, const std::string &hubUrl);
 		virtual ~PrivateMessage();
 		virtual void show();
 
@@ -93,6 +93,7 @@ class PrivateMessage:
 		GtkTextBuffer *messageBuffer;
 		GtkTextMark *mark, *start_mark, *end_mark, *tag_mark;
 		std::string cid;
+		std::string hubUrl;
 		bool isBot;
 		std::vector<std::string> history;
 		int historyIndex;

@@ -1103,7 +1103,7 @@ void DownloadQueue::addList_client(string target, string nick)
 			{
 				UserPtr user = ClientManager::getInstance()->findUser(CID(it->second));
 				if (user)
-					QueueManager::getInstance()->addList(user, QueueItem::FLAG_CLIENT_VIEW);
+					QueueManager::getInstance()->addList(user, "", QueueItem::FLAG_CLIENT_VIEW);
 			}
 		}
 	}
@@ -1140,7 +1140,7 @@ void DownloadQueue::reAddSource_client(string target, string nick)
 			{
 				UserPtr user = ClientManager::getInstance()->findUser(CID(it->second));
 				if (user)
-					QueueManager::getInstance()->readd(target, user);
+					QueueManager::getInstance()->readd(target, user, "");
 			}
 		}
 	}

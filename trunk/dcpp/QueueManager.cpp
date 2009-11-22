@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2008 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2009 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,6 +36,7 @@
 #include "UserConnection.h"
 #include "version.h"
 #include "SearchResult.h"
+#include "MerkleCheckOutputStream.h"
 
 #include <limits>
 
@@ -326,15 +327,170 @@ int QueueManager::FileMover::run() {
 				// Try to just rename it to the correct name at least
 				string newTarget = Util::getFilePath(next.first) + Util::getFileName(next.second);
 				File::renameFile(next.first, newTarget);
-				LogManager::getInstance()->message(str(F_("%1% renamed to %2%") % next.first % newTarget));
+				LogManager::getInstance()->message(str(F_("%1% renamed to %2%") % Util::addBrackets(next.first) % Util::addBrackets(newTarget)));
 			} catch(const FileException& e) {
-				LogManager::getInstance()->message(str(F_("Unable to rename %1%: %2%") % next.first % e.getError()));
+				LogManager::getInstance()->message(str(F_("Unable to rename %1%: %2%") % Util::addBrackets(next.first) % e.getError()));
 			}
 		}
 	}
 }
 
-QueueManager::QueueManager() : lastSave(0), queueFile(Util::getConfigPath() + "Queue.xml"), dirty(true), nextSearch(0) {
+void QueueManager::Rechecker::add(const string& file) {
+	Lock l(cs);
+	files.push_back(file);
+	if(!active) {
+		active = true;
+		start();
+	}
+}
+
+int QueueManager::Rechecker::run() {
+	while(true) {
+		string file;
+		{
+			Lock l(cs);
+			StringIter i = files.begin();
+			if(i == files.end()) {
+				active = false;
+				return 0;
+			}
+			file = *i;
+			files.erase(i);
+		}
+
+		QueueItem* q;
+		int64_t tempSize;
+		TTHValue tth;
+
+		{
+			Lock l(qm->cs);
+
+			q = qm->fileQueue.find(file);
+			if(!q || q->isSet(QueueItem::FLAG_USER_LIST))
+				continue;
+
+			qm->fire(QueueManagerListener::RecheckStarted(), q);
+			dcdebug("Rechecking %s\n", file.c_str());
+
+			tempSize = File::getSize(q->getTempTarget());
+
+			if(tempSize == -1) {
+				qm->fire(QueueManagerListener::RecheckNoFile(), q);
+				continue;
+			}
+
+			if(tempSize < 64*1024) {
+				qm->fire(QueueManagerListener::RecheckFileTooSmall(), q);
+				continue;
+			}
+
+			if(tempSize != q->getSize()) {
+				File(q->getTempTarget(), File::WRITE, File::OPEN).setSize(q->getSize());
+			}
+
+			if(q->isRunning()) {
+				qm->fire(QueueManagerListener::RecheckDownloadsRunning(), q);
+				continue;
+			}
+
+			tth = q->getTTH();
+		}
+
+		TigerTree tt;
+		bool gotTree = HashManager::getInstance()->getTree(tth, tt);
+
+		string tempTarget;
+
+		{
+			Lock l(qm->cs);
+
+			// get q again in case it has been (re)moved
+			q = qm->fileQueue.find(file);
+			if(!q)
+				continue;
+
+			if(!gotTree) {
+				qm->fire(QueueManagerListener::RecheckNoTree(), q);
+				continue;
+			}
+
+			//Clear segments
+			q->resetDownloaded();
+
+			tempTarget = q->getTempTarget();
+		}
+
+		//Merklecheck
+		int64_t startPos=0;
+		DummyOutputStream dummy;
+		int64_t blockSize = tt.getBlockSize();
+		bool hasBadBlocks = false;
+
+		vector<uint8_t> buf((size_t)min((int64_t)1024*1024, blockSize));
+
+		typedef pair<int64_t, int64_t> SizePair;
+		typedef vector<SizePair> Sizes;
+		Sizes sizes;
+
+		{
+			File inFile(tempTarget, File::READ, File::OPEN);
+
+			while(startPos < tempSize) {
+				try {
+					MerkleCheckOutputStream<TigerTree, false> check(tt, &dummy, startPos);
+
+					inFile.setPos(startPos);
+					int64_t bytesLeft = min((tempSize - startPos),blockSize); //Take care of the last incomplete block
+					int64_t segmentSize = bytesLeft;
+					while(bytesLeft > 0) {
+						size_t n = (size_t)min((int64_t)buf.size(), bytesLeft);
+						size_t nr = inFile.read(&buf[0], n);
+						check.write(&buf[0], nr);
+						bytesLeft -= nr;
+						if(bytesLeft > 0 && nr == 0) {
+							// Huh??
+							throw Exception();
+						}
+					}
+					check.flush();
+
+					sizes.push_back(make_pair(startPos, segmentSize));
+				} catch(const Exception&) {
+					hasBadBlocks = true;
+					dcdebug("Found bad block at " I64_FMT "\n", startPos);
+				}
+				startPos += blockSize;
+			}
+		}
+
+		Lock l(qm->cs);
+
+		// get q again in case it has been (re)moved
+		q = qm->fileQueue.find(file);
+		if(!q)
+			continue;
+
+		//If no bad blocks then the file probably got stuck in the temp folder for some reason
+		if(!hasBadBlocks) {
+			qm->moveStuckFile(q);
+			continue;
+		}
+
+		for(Sizes::const_iterator i = sizes.begin(); i != sizes.end(); ++i)
+			q->addSegment(Segment(i->first, i->second));
+
+		qm->rechecked(q);
+	}
+	return 0;
+}
+
+QueueManager::QueueManager() :
+lastSave(0),
+queueFile(Util::getPath(Util::PATH_USER_CONFIG) + "Queue.xml"),
+rechecker(this),
+dirty(true),
+nextSearch(0)
+{
 	TimerManager::getInstance()->addListener(this);
 	SearchManager::getInstance()->addListener(this);
 	ClientManager::getInstance()->addListener(this);
@@ -397,8 +553,8 @@ void QueueManager::on(TimerManagerListener::Minute, uint32_t aTick) throw() {
 	}
 }
 
-void QueueManager::addList(const UserPtr& aUser, int aFlags, const string& aInitialDir /* = Util::emptyString */) throw(QueueException, FileException) {
-	add(aInitialDir, -1, TTHValue(), aUser, QueueItem::FLAG_USER_LIST | aFlags);
+void QueueManager::addList(const UserPtr& aUser, const string& hubHint, int aFlags, const string& aInitialDir /* = Util::emptyString */) throw(QueueException, FileException) {
+	add(aInitialDir, -1, TTHValue(), aUser, hubHint, QueueItem::FLAG_USER_LIST | aFlags);
 }
 
 string QueueManager::getListPath(const UserPtr& user) {
@@ -407,7 +563,7 @@ string QueueManager::getListPath(const UserPtr& user) {
 	return checkTarget(Util::getListPath() + nick + user->getCID().toBase32(), -1);
 }
 
-void QueueManager::add(const string& aTarget, int64_t aSize, const TTHValue& root, const UserPtr& aUser,
+void QueueManager::add(const string& aTarget, int64_t aSize, const TTHValue& root, const UserPtr& aUser, const string& hubHint,
 	int aFlags /* = 0 */, bool addBad /* = true */) throw(QueueException, FileException)
 {
 	bool wantConnection = true;
@@ -471,10 +627,10 @@ void QueueManager::add(const string& aTarget, int64_t aSize, const TTHValue& roo
 	}
 
 	if(wantConnection && aUser->isOnline())
-		ConnectionManager::getInstance()->getDownloadConnection(aUser);
+		ConnectionManager::getInstance()->getDownloadConnection(aUser, hubHint);
 }
 
-void QueueManager::readd(const string& target, const UserPtr& aUser) throw(QueueException) {
+void QueueManager::readd(const string& target, const UserPtr& aUser, const string& hubHint) throw(QueueException) {
 	bool wantConnection = false;
 	{
 		Lock l(cs);
@@ -484,7 +640,7 @@ void QueueManager::readd(const string& target, const UserPtr& aUser) throw(Queue
 		}
 	}
 	if(wantConnection && aUser->isOnline())
-		ConnectionManager::getInstance()->getDownloadConnection(aUser);
+		ConnectionManager::getInstance()->getDownloadConnection(aUser, hubHint);
 }
 
 void QueueManager::setDirty() {
@@ -551,7 +707,7 @@ bool QueueManager::addSource(QueueItem* qi, const UserPtr& aUser, Flags::MaskTyp
 	return wantConnection;
 }
 
-void QueueManager::addDirectory(const string& aDir, const UserPtr& aUser, const string& aTarget, QueueItem::Priority p /* = QueueItem::DEFAULT */) throw() {
+void QueueManager::addDirectory(const string& aDir, const UserPtr& aUser, const string& hubHint, const string& aTarget, QueueItem::Priority p /* = QueueItem::DEFAULT */) throw() {
 	bool needList;
 	{
 		Lock l(cs);
@@ -571,7 +727,7 @@ void QueueManager::addDirectory(const string& aDir, const UserPtr& aUser, const 
 
 	if(needList) {
 		try {
-			addList(aUser, QueueItem::FLAG_DIRECTORY_DOWNLOAD);
+			addList(aUser, hubHint, QueueItem::FLAG_DIRECTORY_DOWNLOAD);
 		} catch(const Exception&) {
 			// Ignore, we don't really care...
 		}
@@ -606,7 +762,7 @@ void buildMap(const DirectoryListing::Directory* dir) throw() {
 }
 }
 
-int QueueManager::matchListing(const DirectoryListing& dl) throw() {
+int QueueManager::matchListing(const DirectoryListing& dl, const string& hubHint) throw() {
 	int matches = 0;
 	{
 		Lock l(cs);
@@ -629,7 +785,7 @@ int QueueManager::matchListing(const DirectoryListing& dl) throw() {
 		}
 	}
 	if(matches > 0)
-		ConnectionManager::getInstance()->getDownloadConnection(dl.getUser());
+		ConnectionManager::getInstance()->getDownloadConnection(dl.getUser(), hubHint);
 	return matches;
 }
 
@@ -862,6 +1018,24 @@ void QueueManager::moveFile(const string& source, const string& target) {
 	}
 }
 
+void QueueManager::moveStuckFile(QueueItem* qi) {
+	moveFile(qi->getTempTarget(), qi->getTarget());
+
+	fire(QueueManagerListener::Removed(), qi);
+
+	userQueue.remove(qi);
+	fileQueue.remove(qi);
+
+	fire(QueueManagerListener::RecheckAlreadyFinished(), qi);
+}
+
+void QueueManager::rechecked(QueueItem* qi) {
+	fire(QueueManagerListener::RecheckDone(), qi);
+	fire(QueueManagerListener::StatusUpdated(), qi);
+
+	setDirty();
+}
+
 void QueueManager::putDownload(Download* aDownload, bool finished) throw() {
 	UserList getConn;
  	string fname;
@@ -962,6 +1136,7 @@ void QueueManager::putDownload(Download* aDownload, bool finished) throw() {
 
 							if(downloaded > 0) {
 								q->addSegment(Segment(aDownload->getStartPos(), downloaded));
+								setDirty();
 							}
 						}
 					}
@@ -983,7 +1158,8 @@ void QueueManager::putDownload(Download* aDownload, bool finished) throw() {
 	}
 
 	for(UserList::iterator i = getConn.begin(); i != getConn.end(); ++i) {
-		ConnectionManager::getInstance()->getDownloadConnection(*i);
+		// TODO provide hubhint
+		ConnectionManager::getInstance()->getDownloadConnection(*i, Util::emptyString);
 	}
 
 	if(!fname.empty()) {
@@ -996,7 +1172,7 @@ void QueueManager::processList(const string& name, UserPtr& user, int flags) {
 	try {
 		dirList.loadFile(name);
 	} catch(const Exception&) {
-		LogManager::getInstance()->message(str(F_("Unable to open filelist: %1%") % name));
+		LogManager::getInstance()->message(str(F_("Unable to open filelist: %1%") % Util::addBrackets(name)));
 		return;
 	}
 
@@ -1018,10 +1194,15 @@ void QueueManager::processList(const string& name, UserPtr& user, int flags) {
 		}
 	}
 	if(flags & QueueItem::FLAG_MATCH_QUEUE) {
-		size_t files = matchListing(dirList);
+		// TODO add hubHint?
+		size_t files = matchListing(dirList, Util::emptyString);
 		LogManager::getInstance()->message(str(FN_("%1%: Matched %2% file", "%1%: Matched %2% files", files) %
 			Util::toString(ClientManager::getInstance()->getNicks(user->getCID())) % files));
 	}
+}
+
+void QueueManager::recheck(const string& aTarget) {
+	rechecker.add(aTarget);
 }
 
 void QueueManager::remove(const string& aTarget) throw() {
@@ -1183,7 +1364,8 @@ void QueueManager::setPriority(const string& aTarget, QueueItem::Priority p) thr
 	}
 
 	for(UserList::iterator i = ul.begin(); i != ul.end(); ++i) {
-		ConnectionManager::getInstance()->getDownloadConnection(*i);
+		// TODO provide hubhint
+		ConnectionManager::getInstance()->getDownloadConnection(*i, Util::emptyString);
 	}
 }
 
@@ -1269,6 +1451,7 @@ private:
 void QueueManager::loadQueue() throw() {
 	try {
 		QueueLoader l;
+		Util::migrate(getQueueFile());
 		SimpleXMLReader(&l).fromXML(File(getQueueFile(), File::READ, File::OPEN).read());
 		dirty = false;
 	} catch(const Exception&) {
@@ -1365,7 +1548,8 @@ void QueueLoader::startTag(const string& name, StringPairList& attribs, bool sim
 
 			try {
 				if(qm->addSource(cur, user, 0) && user->isOnline())
-					ConnectionManager::getInstance()->getDownloadConnection(user);
+					// TODO save/load hubhint
+					ConnectionManager::getInstance()->getDownloadConnection(user, Util::emptyString);
 			} catch(const Exception&) {
 				return;
 			}
@@ -1412,13 +1596,14 @@ void QueueManager::on(SearchManagerListener::SR, const SearchResultPtr& sr) thro
 
 	if(added && BOOLSETTING(AUTO_SEARCH_AUTO_MATCH)) {
 		try {
-			addList(sr->getUser(), QueueItem::FLAG_MATCH_QUEUE);
+			addList(sr->getUser(), sr->getHubURL(), QueueItem::FLAG_MATCH_QUEUE);
 		} catch(const Exception&) {
 			// ...
 		}
 	}
-	if(added && sr->getUser()->isOnline() && wantConnection)
-		ConnectionManager::getInstance()->getDownloadConnection(sr->getUser());
+	if(added && sr->getUser()->isOnline() && wantConnection) {
+		ConnectionManager::getInstance()->getDownloadConnection(sr->getUser(), sr->getHubURL());
+	}
 
 }
 
@@ -1438,8 +1623,10 @@ void QueueManager::on(ClientManagerListener::UserConnected, const UserPtr& aUser
 		}
 	}
 
-	if(hasDown)
-		ConnectionManager::getInstance()->getDownloadConnection(aUser);
+	if(hasDown) {
+		// TODO provide hubhint
+		ConnectionManager::getInstance()->getDownloadConnection(aUser, Util::emptyString);
+	}
 }
 
 void QueueManager::on(ClientManagerListener::UserDisconnected, const UserPtr& aUser) throw() {

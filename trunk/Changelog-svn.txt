@@ -1,3 +1,10 @@
+r33: 0.0.1.29
+* Обновил ядро DC++ на 0.75.
+* Ревизия 318 (linuxdcpp, upgraded the DC++ core to 0.75).
+* Ревизия 324 (linuxdcpp, fix private message regression).
+* Ревизия 322 (linuxdcpp, fix memory leak in filelist refresh with 0.75-core).
+* Ревизия 320 (linuxdcpp, update about dialog with new core version).
+
 r32: 0.0.1.28
 * Ревизия 317 (linuxdcpp, show nick instead of CID when browsing offline shares).
 

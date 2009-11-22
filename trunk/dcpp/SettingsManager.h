@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2008 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2009 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -94,7 +94,8 @@ public:
 		DONT_DL_ALREADY_QUEUED, MAX_COMMAND_LENGTH, ALLOW_UNTRUSTED_HUBS, ALLOW_UNTRUSTED_CLIENTS,
 		TLS_PORT, FAST_HASH, SORT_FAVUSERS_FIRST, SEGMENTED_DL, FOLLOW_LINKS,
 		SEND_BLOOM, OWNER_DRAWN_MENUS, CORAL, SEARCH_FILTER_SHARED, MAX_TAB_CHARS, FINISHED_DL_ONLY_FULL,
-		CONFIRM_EXIT, CONFIRM_HUB_REMOVAL, CONFIRM_USER_REMOVAL, CONFIRM_ITEM_REMOVAL, CONFIRM_ADLS_REMOVAL,
+		CONFIRM_EXIT, CONFIRM_HUB_CLOSING, CONFIRM_HUB_REMOVAL, CONFIRM_USER_REMOVAL, CONFIRM_ITEM_REMOVAL, CONFIRM_ADLS_REMOVAL,
+		SEARCH_MERGE,
 		INT_LAST };
 
 	enum Int64Setting { INT64_FIRST = INT_LAST + 1,
@@ -102,7 +103,7 @@ public:
 		INT64_LAST };
 
 	enum FloatSetting { FLOAT_FIRST = INT64_LAST +1,
-		TRANSFERS_PANED_POS = FLOAT_FIRST, QUEUE_PANED_POS,
+		TRANSFERS_PANED_POS = FLOAT_FIRST, QUEUE_PANED_POS, SEARCH_PANED_POS,
 		FLOAT_LAST, SETTINGS_LAST = FLOAT_LAST };
 
 	enum {	INCOMING_DIRECT, INCOMING_FIREWALL_UPNP, INCOMING_FIREWALL_NAT,
@@ -179,7 +180,7 @@ public:
 	}
 	void set(FloatSetting key, double value) {
 		// yes, we loose precision here, but we're gonna loose even more when saving to the XML file...
-		floatSettings[key - FLOAT_FIRST] = value;
+		floatSettings[key - FLOAT_FIRST] = static_cast<float>(value);
 		isSet[key] = true;
 	}
 
@@ -200,10 +201,11 @@ public:
 	bool isDefault(int aSet) { return !isSet[aSet]; }
 
 	void load() {
-		load(Util::getConfigPath() + "DCPlusPlus.xml");
+		Util::migrate(getConfigFile());
+		load(getConfigFile());
 	}
 	void save() {
-		save(Util::getConfigPath() + "DCPlusPlus.xml");
+		save(getConfigFile());
 	}
 
 	void load(const string& aFileName);
@@ -227,6 +229,8 @@ private:
 	float floatDefaults[FLOAT_LAST - FLOAT_FIRST];
 
 	bool isSet[SETTINGS_LAST];
+
+	string getConfigFile() { return Util::getPath(Util::PATH_USER_CONFIG) + "DCPlusPlus.xml"; }
 };
 
 // Shorthand accessor macros

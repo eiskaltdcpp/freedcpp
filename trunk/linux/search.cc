@@ -94,11 +94,11 @@ Search::Search():
 	resultView.insertHiddenColumn("Real Size", G_TYPE_INT64);
 	resultView.insertHiddenColumn("Slots Order", G_TYPE_INT);
 	resultView.insertHiddenColumn("File Order", G_TYPE_STRING);
-	resultView.insertHiddenColumn("SearchResult", G_TYPE_POINTER);
 	resultView.insertHiddenColumn("Hub URL", G_TYPE_STRING);
 	resultView.insertHiddenColumn("CID", G_TYPE_STRING);
 	resultView.insertHiddenColumn("Shared", G_TYPE_BOOLEAN);
 	resultView.insertHiddenColumn("Grouping String", G_TYPE_STRING);
+	resultView.insertHiddenColumn("Free Slots", G_TYPE_INT);
 	resultView.finalize();
 	resultStore = gtk_tree_store_newv(resultView.getColCount(), resultView.getGTypes());
 	searchFilterModel = gtk_tree_model_filter_new(GTK_TREE_MODEL(resultStore), NULL);
@@ -156,7 +156,6 @@ Search::~Search()
 	ClientManager::getInstance()->removeListener(this);
 	SearchManager::getInstance()->removeListener(this);
 
-	clearList_gui();
 	gtk_widget_destroy(getWidget("dirChooserDialog"));
 }
 
@@ -419,7 +418,7 @@ void Search::search_gui()
 			break;
 	}
 
-	clearList_gui();
+	gtk_tree_store_clear(resultStore);
 	int64_t llsize = static_cast<int64_t>(lsize);
 	searchlist = StringTokenizer<string>(text, ' ').getTokens();
 
@@ -481,67 +480,8 @@ void Search::search_gui()
 	}
 }
 
-void Search::parseSearchResult(SearchResult *result, StringMap &resultMap, int *actualSlots)
+void Search::addResult_gui(StringMap resultMap)
 {
-	if (result->getType() == SearchResult::TYPE_FILE)
-	{
-		string file = WulforUtil::linuxSeparator(result->getFile());
-		if (file.rfind('/') == tstring::npos)
-		{
-			resultMap["Filename"] = file;
-		}
-		else
-		{
-			resultMap["Filename"] = Util::getFileName(file);
-			resultMap["Path"] = Util::getFilePath(file);
-		}
-
-		resultMap["File Order"] = "f" + resultMap["Filename"];
-		resultMap["Type"] = Util::getFileExt(resultMap["Filename"]);
-		if (!resultMap["Type"].empty() && resultMap["Type"][0] == '.')
-			resultMap["Type"].erase(0, 1);
-		resultMap["Size"] = Util::formatBytes(result->getSize());
-		resultMap["Exact Size"] = Util::formatExactSize(result->getSize());
-		resultMap["Icon"] = GTK_STOCK_FILE;
-	}
-	else
-	{
-		resultMap["Filename"] = WulforUtil::linuxSeparator(result->getFileName());
-		resultMap["Path"] = WulforUtil::linuxSeparator(result->getFile());
-		resultMap["File Order"] = "d" + resultMap["Filename"];
-		resultMap["Type"] = _("Directory");
-		resultMap["Icon"] = GTK_STOCK_DIRECTORY;
-		if (result->getSize() > 0)
-		{
-			resultMap["Size"] = Util::formatBytes(result->getSize());
-			resultMap["Exact Size"] = Util::formatExactSize(result->getSize());
-		}
-	}
-
-	resultMap["Nick"] = WulforUtil::getNicks(result->getUser());
-	resultMap["CID"] = result->getUser()->getCID().toBase32();
-	resultMap["Slots"] = result->getSlotString();
-	resultMap["Connection"] = ClientManager::getInstance()->getConnection(result->getUser()->getCID());
-	resultMap["Hub"] = result->getHubName().empty() ? result->getHubURL().c_str() : result->getHubName().c_str();
-	resultMap["Hub URL"] = result->getHubURL();
-	resultMap["IP"] = result->getIP();
-	if (result->getType() == SearchResult::TYPE_FILE)
-		resultMap["TTH"] = result->getTTH().toBase32();
-
-	// assumption: total slots is never above 999
-	*actualSlots = -1000 * result->getFreeSlots() - result->getSlots();
-}
-
-void Search::addResult_gui(SearchResult *result, bool isShared)
-{
-	if (!result)
-		return;
-
-	StringMap resultMap;
-	int actualSlots;
-
-	parseSearchResult(result, resultMap, &actualSlots);
-
 	GroupType groupBy = (GroupType)gtk_combo_box_get_active(GTK_COMBO_BOX(getWidget("comboboxGroupBy")));
 	string groupColumn = getGroupingColumn(groupBy);
 	string groupStr = resultMap[groupColumn];
@@ -558,12 +498,10 @@ void Search::addResult_gui(SearchResult *result, bool isShared)
 	while (valid)
 	{
 		// Check if it's a duplicate
-		SearchResult *result2 = resultView.getValue<SearchResult *>(&iter, "SearchResult", m);
-
-		if (result2 != NULL && result->getUser()->getCID() == result2->getUser()->getCID() &&
-		    result->getFile() == result2->getFile())
+		if (resultMap["CID"] == resultView.getString(&iter, "CID", m) &&
+		    resultMap["Filename"] == resultView.getString(&iter, "Filename", m) &&
+		    resultMap["Path"] == resultView.getString(&iter, "Path", m))
 		{
-			result->dec();
 			return;
 		}
 
@@ -597,7 +535,6 @@ void Search::addResult_gui(SearchResult *result, bool isShared)
 	{
 		// Insert the new parent row
 		gtk_tree_store_insert_with_values(resultStore, &parent, NULL, -1,
-				resultView.col("SearchResult"), NULL,
 				resultView.col("Icon"), GTK_STOCK_DND_MULTIPLE,
 				resultView.col("Grouping String"), groupStr.c_str(),
 				-1);
@@ -623,13 +560,13 @@ void Search::addResult_gui(SearchResult *result, bool isShared)
 		resultView.col("TTH"), resultMap["TTH"].c_str(),
 		resultView.col("Icon"), resultMap["Icon"].c_str(),
 		resultView.col("File Order"), resultMap["File Order"].c_str(),
-		resultView.col("Real Size"), result->getSize(),
-		resultView.col("Slots Order"), actualSlots,
-		resultView.col("SearchResult"), (gpointer)result,
+		resultView.col("Real Size"), Util::toInt64(resultMap["Real Size"]),
+		resultView.col("Slots Order"), Util::toInt(resultMap["Slots Order"]),
 		resultView.col("Hub URL"), resultMap["Hub URL"].c_str(),
 		resultView.col("CID"), resultMap["CID"].c_str(),
-		resultView.col("Shared"), isShared,
+		resultView.col("Shared"), Util::toInt(resultMap["Shared"]),
 		resultView.col("Grouping String"), groupStr.c_str(),
+		resultView.col("Free Slots"), Util::toInt(resultMap["Free Slots"]),
 		-1);
 
 	if (foundParent)
@@ -640,31 +577,6 @@ void Search::addResult_gui(SearchResult *result, bool isShared)
 
 	if (BOOLSETTING(BOLD_SEARCH))
 		setBold_gui();
-}
-
-void Search::clearList_gui()
-{
-	GtkTreeIter iter;
-	SearchResult *result = NULL;
-	GtkTreeModel *m = GTK_TREE_MODEL(resultStore);
-	gboolean valid = gtk_tree_model_get_iter_first(m, &iter);
-	int cleared = 0;
-
-	while (valid)
-	{
-		result = resultView.getValue<gpointer, SearchResult *>(&iter, "SearchResult", m);
-
-		if (result)
-		{
-			result->dec();
-			result = NULL;
-			cleared++;
-		}
-		valid = WulforUtil::getNextIter_gui(m, &iter, TRUE);
-	}
-
-	dcdebug("Search::clearList_gui(), decReffed: %d results\n", cleared);
-	gtk_tree_store_clear(resultStore);
 }
 
 void Search::updateParentRow_gui(GtkTreeIter *parent, GtkTreeIter *child)
@@ -798,7 +710,6 @@ void Search::regroup_gui()
 			if (!gtk_tree_model_iter_has_child(GTK_TREE_MODEL(resultStore), &groupParent))
 			{
 				gtk_tree_store_insert_with_values(resultStore, &parent, NULL, position,
-					resultView.col("SearchResult"), NULL,
 					resultView.col("Icon"), GTK_STOCK_DND_MULTIPLE,
 					resultView.col("Grouping String"), groupStr.c_str(),
 					-1);
@@ -1055,12 +966,11 @@ void Search::onDownloadClicked_gui(GtkMenuItem *item, gpointer data)
 
 	if (gtk_tree_selection_count_selected_rows(s->selection) > 0)
 	{
-		SearchResult *result;
 		GtkTreeIter iter;
 		GtkTreePath *path;
 		GList *list = gtk_tree_selection_get_selected_rows(s->selection, NULL);
-		typedef Func2<Search, string, SearchResult *> F2;
-		F2 *func;
+		string target = SETTING(DOWNLOAD_DIRECTORY);
+		typedef Func6<Search, string, string, string, int64_t, string, string> F6;
 
 		for (GList *i = list; i; i = i->next)
 		{
@@ -1071,10 +981,15 @@ void Search::onDownloadClicked_gui(GtkMenuItem *item, gpointer data)
 
 				do
 				{
-					result = s->resultView.getValue<gpointer, SearchResult *>(&iter, "SearchResult");
-					if (result)
+					if (!gtk_tree_model_iter_has_child(s->sortedFilterModel, &iter))
 					{
-						func = new F2(s, &Search::download_client, SETTING(DOWNLOAD_DIRECTORY), result);
+						string cid = s->resultView.getString(&iter, "CID");
+						string filename = s->resultView.getString(&iter, "Path");
+						filename += s->resultView.getString(&iter, "Filename");
+						int64_t size = s->resultView.getValue<int64_t>(&iter, "Real Size");
+						string tth = s->resultView.getString(&iter, "TTH");
+						string hubUrl = s->resultView.getString(&iter, "Hub URL");
+						F6 *func = new F6(s, &Search::download_client, target, cid, filename, size, tth, hubUrl);
 						WulforManager::get()->dispatchClientFunc(func);
 					}
 				}
@@ -1093,12 +1008,10 @@ void Search::onDownloadFavoriteClicked_gui(GtkMenuItem *item, gpointer data)
 
 	if (!fav.empty() && gtk_tree_selection_count_selected_rows(s->selection) > 0)
 	{
-		SearchResult *result;
 		GtkTreeIter iter;
 		GtkTreePath *path;
 		GList *list = gtk_tree_selection_get_selected_rows(s->selection, NULL);
-		typedef Func2<Search, string, SearchResult *> F2;
-		F2 *func;
+		typedef Func6<Search, string, string, string, int64_t, string, string> F6;
 
 		for (GList *i = list; i; i = i->next)
 		{
@@ -1109,10 +1022,15 @@ void Search::onDownloadFavoriteClicked_gui(GtkMenuItem *item, gpointer data)
 
 				do
 				{
-					result = s->resultView.getValue<gpointer, SearchResult *>(&iter, "SearchResult");
-					if (result)
+					if (!gtk_tree_model_iter_has_child(s->sortedFilterModel, &iter))
 					{
-						func = new F2(s, &Search::download_client, fav, result);
+						string cid = s->resultView.getString(&iter, "CID");
+						string filename = s->resultView.getString(&iter, "Path");
+						filename += s->resultView.getString(&iter, "Filename");
+						int64_t size = s->resultView.getValue<int64_t>(&iter, "Real Size");
+						string tth = s->resultView.getString(&iter, "TTH");
+						string hubUrl = s->resultView.getString(&iter, "Hub URL");
+						F6 *func = new F6(s, &Search::download_client, fav, cid, filename, size, tth, hubUrl);
 						WulforManager::get()->dispatchClientFunc(func);
 					}
 				}
@@ -1144,12 +1062,10 @@ void Search::onDownloadToClicked_gui(GtkMenuItem *item, gpointer data)
 			if (target[target.length() - 1] != PATH_SEPARATOR)
 				target += PATH_SEPARATOR;
 
-			SearchResult *result;
 			GtkTreeIter iter;
 			GtkTreePath *path;
 			GList *list = gtk_tree_selection_get_selected_rows(s->selection, NULL);
-			typedef Func2<Search, string, SearchResult *> F2;
-			F2 *func;
+			typedef Func6<Search, string, string, string, int64_t, string, string> F6;
 
 			for (GList *i = list; i; i = i->next)
 			{
@@ -1160,10 +1076,15 @@ void Search::onDownloadToClicked_gui(GtkMenuItem *item, gpointer data)
 
 					do
 					{
-						result = s->resultView.getValue<gpointer, SearchResult *>(&iter, "SearchResult");
-						if (result)
+						if (!gtk_tree_model_iter_has_child(s->sortedFilterModel, &iter))
 						{
-							func = new F2(s, &Search::download_client, target, result);
+							string cid = s->resultView.getString(&iter, "CID");
+							string filename = s->resultView.getString(&iter, "Path");
+							filename += s->resultView.getString(&iter, "Filename");
+							int64_t size = s->resultView.getValue<int64_t>(&iter, "Real Size");
+							string tth = s->resultView.getString(&iter, "TTH");
+							string hubUrl = s->resultView.getString(&iter, "Hub URL");
+							F6 *func = new F6(s, &Search::download_client, target, cid, filename, size, tth, hubUrl);
 							WulforManager::get()->dispatchClientFunc(func);
 						}
 					}
@@ -1183,12 +1104,10 @@ void Search::onDownloadToMatchClicked_gui(GtkMenuItem *item, gpointer data)
 	if (gtk_tree_selection_count_selected_rows(s->selection) > 0)
 	{
 		string fileName = WulforUtil::getTextFromMenu(item);
-		SearchResult *result;
 		GtkTreeIter iter;
 		GtkTreePath *path;
 		GList *list = gtk_tree_selection_get_selected_rows(s->selection, NULL);
-		typedef Func2<Search, string, SearchResult *> F2;
-		F2 *func;
+		typedef Func5<Search, string, string, int64_t, string, string> F5;
 
 		for (GList *i = list; i; i = i->next)
 		{
@@ -1199,10 +1118,13 @@ void Search::onDownloadToMatchClicked_gui(GtkMenuItem *item, gpointer data)
 
 				do
 				{
-					result = s->resultView.getValue<gpointer, SearchResult *>(&iter, "SearchResult");
-					if (result)
+					if (!gtk_tree_model_iter_has_child(s->sortedFilterModel, &iter))
 					{
-						func = new F2(s, &Search::addSource_client, fileName, result);
+						string cid = s->resultView.getString(&iter, "CID");
+						int64_t size = s->resultView.getValue<int64_t>(&iter, "Real Size");
+						string tth = s->resultView.getString(&iter, "TTH");
+						string hubUrl = s->resultView.getString(&iter, "Hub URL");
+						F5 *func = new F5(s, &Search::addSource_client, fileName, cid, size, tth, hubUrl);
 						WulforManager::get()->dispatchClientFunc(func);
 					}
 				}
@@ -1220,12 +1142,11 @@ void Search::onDownloadDirClicked_gui(GtkMenuItem *item, gpointer data)
 
 	if (gtk_tree_selection_count_selected_rows(s->selection) > 0)
 	{
-		SearchResult *result;
 		GtkTreeIter iter;
 		GtkTreePath *path;
 		GList *list = gtk_tree_selection_get_selected_rows(s->selection, NULL);
-		typedef Func2<Search, string, SearchResult *> F2;
-		F2 *func;
+		string target = SETTING(DOWNLOAD_DIRECTORY);
+		typedef Func4<Search, string, string, string, string> F4;
 
 		for (GList *i = list; i; i = i->next)
 		{
@@ -1236,10 +1157,13 @@ void Search::onDownloadDirClicked_gui(GtkMenuItem *item, gpointer data)
 
 				do
 				{
-					result = s->resultView.getValue<gpointer, SearchResult *>(&iter, "SearchResult");
-					if (result)
+					if (!gtk_tree_model_iter_has_child(s->sortedFilterModel, &iter))
 					{
-						func = new F2(s, &Search::downloadDir_client, SETTING(DOWNLOAD_DIRECTORY), result);
+						string cid = s->resultView.getString(&iter, "CID");
+						string filename = s->resultView.getString(&iter, "Path");
+						filename += s->resultView.getString(&iter, "Filename");
+						string hubUrl = s->resultView.getString(&iter, "Hub URL");
+						F4 *func = new F4(s, &Search::downloadDir_client, target, cid, filename, hubUrl);
 						WulforManager::get()->dispatchClientFunc(func);
 					}
 				}
@@ -1258,12 +1182,10 @@ void Search::onDownloadFavoriteDirClicked_gui(GtkMenuItem *item, gpointer data)
 
 	if (!fav.empty() && gtk_tree_selection_count_selected_rows(s->selection) > 0)
 	{
-		SearchResult *result;
 		GtkTreeIter iter;
 		GtkTreePath *path;
 		GList *list = gtk_tree_selection_get_selected_rows(s->selection, NULL);
-		typedef Func2<Search, string, SearchResult *> F2;
-		F2 *func;
+		typedef Func4<Search, string, string, string, string> F4;
 
 		for (GList *i = list; i; i = i->next)
 		{
@@ -1274,10 +1196,13 @@ void Search::onDownloadFavoriteDirClicked_gui(GtkMenuItem *item, gpointer data)
 
 				do
 				{
-					result = s->resultView.getValue<gpointer, SearchResult *>(&iter, "SearchResult");
-					if (result)
+					if (!gtk_tree_model_iter_has_child(s->sortedFilterModel, &iter))
 					{
-						func = new F2(s, &Search::downloadDir_client, fav, result);
+						string cid = s->resultView.getString(&iter, "CID");
+						string filename = s->resultView.getString(&iter, "Path");
+						filename += s->resultView.getString(&iter, "Filename");
+						string hubUrl = s->resultView.getString(&iter, "Hub URL");
+						F4 *func = new F4(s, &Search::downloadDir_client, fav, cid, filename, hubUrl);
 						WulforManager::get()->dispatchClientFunc(func);
 					}
 				}
@@ -1309,12 +1234,10 @@ void Search::onDownloadDirToClicked_gui(GtkMenuItem *item, gpointer data)
 			if (target[target.length() - 1] != PATH_SEPARATOR)
 				target += PATH_SEPARATOR;
 
-			SearchResult *result;
 			GtkTreeIter iter;
 			GtkTreePath *path;
 			GList *list = gtk_tree_selection_get_selected_rows(s->selection, NULL);
-			typedef Func2<Search, string, SearchResult *> F2;
-			F2 *func;
+			typedef Func4<Search, string, string, string, string> F4;
 
 			for (GList *i = list; i; i = i->next)
 			{
@@ -1325,10 +1248,13 @@ void Search::onDownloadDirToClicked_gui(GtkMenuItem *item, gpointer data)
 
 					do
 					{
-						result = s->resultView.getValue<gpointer, SearchResult *>(&iter, "SearchResult");
-						if (result)
+						if (!gtk_tree_model_iter_has_child(s->sortedFilterModel, &iter))
 						{
-							func = new F2(s, &Search::downloadDir_client, target, result);
+							string cid = s->resultView.getString(&iter, "CID");
+							string filename = s->resultView.getString(&iter, "Path");
+							filename += s->resultView.getString(&iter, "Filename");
+							string hubUrl = s->resultView.getString(&iter, "Hub URL");
+							F4 *func = new F4(s, &Search::downloadDir_client, target, cid, filename, hubUrl);
 							WulforManager::get()->dispatchClientFunc(func);
 						}
 					}
@@ -1372,12 +1298,10 @@ void Search::onGetFileListClicked_gui(GtkMenuItem *item, gpointer data)
 
 	if (gtk_tree_selection_count_selected_rows(s->selection) > 0)
 	{
-		string cid, dir;
 		GtkTreeIter iter;
 		GtkTreePath *path;
 		GList *list = gtk_tree_selection_get_selected_rows(s->selection, NULL);
-		typedef Func3<Search, string, string, bool> F3;
-		F3 *func;
+		typedef Func4<Search, string, string, bool, string> F4;
 
 		for (GList *i = list; i; i = i->next)
 		{
@@ -1388,9 +1312,10 @@ void Search::onGetFileListClicked_gui(GtkMenuItem *item, gpointer data)
 
 				do
 				{
-					cid = s->resultView.getString(&iter, "CID");
-					dir = s->resultView.getString(&iter, "Path");
-					func = new F3(s, &Search::getFileList_client, cid, dir, FALSE);
+					string cid = s->resultView.getString(&iter, "CID");
+					string dir = s->resultView.getString(&iter, "Path");
+					string hubUrl = s->resultView.getString(&iter, "Hub URL");
+					F4 *func = new F4(s, &Search::getFileList_client, cid, dir, FALSE, hubUrl);
 					WulforManager::get()->dispatchClientFunc(func);
 				}
 				while (parent && WulforUtil::getNextIter_gui(s->sortedFilterModel, &iter, TRUE, FALSE));
@@ -1407,12 +1332,10 @@ void Search::onMatchQueueClicked_gui(GtkMenuItem *item, gpointer data)
 
 	if (gtk_tree_selection_count_selected_rows(s->selection) > 0)
 	{
-		string cid;
 		GtkTreeIter iter;
 		GtkTreePath *path;
 		GList *list = gtk_tree_selection_get_selected_rows(s->selection, NULL);
-		typedef Func3<Search, string, string, bool> F3;
-		F3 *func;
+		typedef Func4<Search, string, string, bool, string> F4;
 
 		for (GList *i = list; i; i = i->next)
 		{
@@ -1423,8 +1346,9 @@ void Search::onMatchQueueClicked_gui(GtkMenuItem *item, gpointer data)
 
 				do
 				{
-					cid = s->resultView.getString(&iter, "CID");
-					func = new F3(s, &Search::getFileList_client, cid, "", TRUE);
+					string cid = s->resultView.getString(&iter, "CID");
+					string hubUrl = s->resultView.getString(&iter, "Hub URL");
+					F4 *func = new F4(s, &Search::getFileList_client, cid, "", TRUE, hubUrl);
 					WulforManager::get()->dispatchClientFunc(func);
 				}
 				while (parent && WulforUtil::getNextIter_gui(s->sortedFilterModel, &iter, TRUE, FALSE));
@@ -1441,7 +1365,6 @@ void Search::onPrivateMessageClicked_gui(GtkMenuItem *item, gpointer data)
 
 	if (gtk_tree_selection_count_selected_rows(s->selection) > 0)
 	{
-		string cid;
 		GtkTreeIter iter;
 		GtkTreePath *path;
 		GList *list = gtk_tree_selection_get_selected_rows(s->selection, NULL);
@@ -1455,9 +1378,10 @@ void Search::onPrivateMessageClicked_gui(GtkMenuItem *item, gpointer data)
 
 				do
 				{
-					cid = s->resultView.getString(&iter, "CID");
+					string cid = s->resultView.getString(&iter, "CID");
+					string hubUrl = s->resultView.getString(&iter, "Hub URL");
 					if (!cid.empty())
-						WulforManager::get()->getMainWindow()->addPrivateMessage_gui(Msg::UNKNOWN, cid);
+						WulforManager::get()->getMainWindow()->addPrivateMessage_gui(Msg::UNKNOWN, cid, hubUrl);
 				}
 				while (parent && WulforUtil::getNextIter_gui(s->sortedFilterModel, &iter, TRUE, FALSE));
 			}
@@ -1507,12 +1431,10 @@ void Search::onGrantExtraSlotClicked_gui(GtkMenuItem *item, gpointer data)
 
 	if (gtk_tree_selection_count_selected_rows(s->selection) > 0)
 	{
-		string cid;
 		GtkTreeIter iter;
 		GtkTreePath *path;
 		GList *list = gtk_tree_selection_get_selected_rows(s->selection, NULL);
-		typedef Func1<Search, string> F1;
-		F1 *func;
+		typedef Func2<Search, string, string> F2;
 
 		for (GList *i = list; i; i = i->next)
 		{
@@ -1523,8 +1445,9 @@ void Search::onGrantExtraSlotClicked_gui(GtkMenuItem *item, gpointer data)
 
 				do
 				{
-					cid = s->resultView.getString(&iter, "CID");
-					func = new F1(s, &Search::grantSlot_client, cid);
+					string cid = s->resultView.getString(&iter, "CID");
+					string hubUrl = s->resultView.getString(&iter, "Hub URL");
+					F2 *func = new F2(s, &Search::grantSlot_client, cid, hubUrl);
 					WulforManager::get()->dispatchClientFunc(func);
 				}
 				while (parent && WulforUtil::getNextIter_gui(s->sortedFilterModel, &iter, TRUE, FALSE));
@@ -1575,8 +1498,8 @@ void Search::onRemoveClicked_gui(GtkMenuItem *item, gpointer data)
 
 	if (gtk_tree_selection_count_selected_rows(s->selection) > 0)
 	{
-		SearchResult *result;
-		GtkTreeIter iter, filterIter;
+		GtkTreeIter iter;
+		GtkTreeIter filterIter;
 		GtkTreePath *path;
 		GList *list = gtk_tree_selection_get_selected_rows(s->selection, NULL);
 
@@ -1585,20 +1508,8 @@ void Search::onRemoveClicked_gui(GtkMenuItem *item, gpointer data)
 			path = (GtkTreePath *)i->data;
 			if (gtk_tree_model_get_iter(s->sortedFilterModel, &iter, path))
 			{
-				bool parent = gtk_tree_model_iter_has_child(s->sortedFilterModel, &iter);
-				GtkTreeIter parentIter = iter;
-
-				// Decrease the SearchResult reference for every non-parent row
-				do
-				{
-					result = s->resultView.getValue<gpointer, SearchResult *>(&iter, "SearchResult");
-					if (result)
-						result->dec();
-				}
-				while (parent && WulforUtil::getNextIter_gui(s->sortedFilterModel, &iter, TRUE, FALSE));
-
 				// Remove the top-level node and it will remove any children nodes (if applicable)
-				gtk_tree_model_sort_convert_iter_to_child_iter(GTK_TREE_MODEL_SORT(s->sortedFilterModel), &filterIter, &parentIter);
+				gtk_tree_model_sort_convert_iter_to_child_iter(GTK_TREE_MODEL_SORT(s->sortedFilterModel), &filterIter, &iter);
 				gtk_tree_model_filter_convert_iter_to_child_iter(GTK_TREE_MODEL_FILTER(s->searchFilterModel), &iter, &filterIter);
 				gtk_tree_store_remove(s->resultStore, &iter);
 			}
@@ -1652,37 +1563,77 @@ void Search::onCopyMagnetClicked_gui(GtkMenuItem* item, gpointer data)
 	}
 }
 
-void Search::download_client(string target, SearchResult *result)
+void Search::parseSearchResult_client(SearchResultPtr result, StringMap &resultMap)
 {
-	try
+	if (result->getType() == SearchResult::TYPE_FILE)
 	{
-		if (result->getType() == SearchResult::TYPE_FILE)
+		string file = WulforUtil::linuxSeparator(result->getFile());
+		if (file.rfind('/') == tstring::npos)
 		{
-			string subdir = Util::getFileName(WulforUtil::linuxSeparator(result->getFile()));
-			QueueManager::getInstance()->add(target + subdir, result->getSize(), result->getTTH(), result->getUser());
+			resultMap["Filename"] = file;
 		}
 		else
 		{
-			QueueManager::getInstance()->addDirectory(result->getFile(), result->getUser(), target);
+			resultMap["Filename"] = Util::getFileName(file);
+			resultMap["Path"] = Util::getFilePath(file);
+		}
+
+		resultMap["File Order"] = "f" + resultMap["Filename"];
+		resultMap["Type"] = Util::getFileExt(resultMap["Filename"]);
+		if (!resultMap["Type"].empty() && resultMap["Type"][0] == '.')
+			resultMap["Type"].erase(0, 1);
+		resultMap["Size"] = Util::formatBytes(result->getSize());
+		resultMap["Exact Size"] = Util::formatExactSize(result->getSize());
+		resultMap["Icon"] = GTK_STOCK_FILE;
+		resultMap["Shared"] = Util::toString(ShareManager::getInstance()->isTTHShared(result->getTTH()));
+	}
+	else
+	{
+		resultMap["Filename"] = WulforUtil::linuxSeparator(result->getFileName());
+		resultMap["Path"] = WulforUtil::linuxSeparator(result->getFile());
+		resultMap["File Order"] = "d" + resultMap["Filename"];
+		resultMap["Type"] = _("Directory");
+		resultMap["Icon"] = GTK_STOCK_DIRECTORY;
+		resultMap["Shared"] = "0";
+		if (result->getSize() > 0)
+		{
+			resultMap["Size"] = Util::formatBytes(result->getSize());
+			resultMap["Exact Size"] = Util::formatExactSize(result->getSize());
 		}
 	}
-	catch (const Exception&)
-	{
-	}
+
+	resultMap["Nick"] = WulforUtil::getNicks(result->getUser());
+	resultMap["CID"] = result->getUser()->getCID().toBase32();
+	resultMap["Slots"] = result->getSlotString();
+	resultMap["Connection"] = ClientManager::getInstance()->getConnection(result->getUser()->getCID());
+	resultMap["Hub"] = result->getHubName().empty() ? result->getHubURL().c_str() : result->getHubName().c_str();
+	resultMap["Hub URL"] = result->getHubURL();
+	resultMap["IP"] = result->getIP();
+	resultMap["Real Size"] = Util::toString(result->getSize());
+	if (result->getType() == SearchResult::TYPE_FILE)
+		resultMap["TTH"] = result->getTTH().toBase32();
+
+	// assumption: total slots is never above 999
+	resultMap["Slots Order"] = Util::toString(-1000 * result->getFreeSlots() - result->getSlots());
+	resultMap["Free Slots"] = Util::toString(result->getFreeSlots());
 }
 
-void Search::downloadDir_client(string target, SearchResult *result)
+void Search::download_client(string target, string cid, string filename, int64_t size, string tth, string hubUrl)
 {
 	try
 	{
-		if (result->getType() == SearchResult::TYPE_FILE)
+		UserPtr user = ClientManager::getInstance()->findUser(CID(cid));
+
+		// Only files have a TTH
+		if (!tth.empty())
 		{
-			string path = WulforUtil::windowsSeparator(Util::getFilePath(WulforUtil::linuxSeparator(result->getFile())));
-			QueueManager::getInstance()->addDirectory(path, result->getUser(), target);
+			string subdir = Util::getFileName(filename);
+			QueueManager::getInstance()->add(target + subdir, size, TTHValue(tth), user, hubUrl);
 		}
 		else
 		{
-			QueueManager::getInstance()->addDirectory(result->getFile(), result->getUser(), target);
+			string dir = WulforUtil::windowsSeparator(filename);
+			QueueManager::getInstance()->addDirectory(dir, user, hubUrl, target);
 		}
 	}
 	catch (const Exception&)
@@ -1690,13 +1641,22 @@ void Search::downloadDir_client(string target, SearchResult *result)
 	}
 }
 
-void Search::addSource_client(string source, SearchResult *result)
+void Search::downloadDir_client(string target, string cid, string filename, string hubUrl)
 {
 	try
 	{
-		if (result->getType() == SearchResult::TYPE_FILE)
+		UserPtr user = ClientManager::getInstance()->findUser(CID(cid));
+
+		// If it's a file (directories are assumed to end in '/')
+		if (filename[filename.length() - 1] != PATH_SEPARATOR)
 		{
-			QueueManager::getInstance()->add(source, result->getSize(), result->getTTH(), result->getUser());
+			string dir = WulforUtil::windowsSeparator(Util::getFilePath(filename));
+			QueueManager::getInstance()->addDirectory(dir, user, hubUrl, target);
+		}
+		else
+		{
+			string dir = WulforUtil::windowsSeparator(filename);
+			QueueManager::getInstance()->addDirectory(dir, user, hubUrl, target);
 		}
 	}
 	catch (const Exception&)
@@ -1704,7 +1664,22 @@ void Search::addSource_client(string source, SearchResult *result)
 	}
 }
 
-void Search::getFileList_client(string cid, string dir, bool match)
+void Search::addSource_client(string source, string cid, int64_t size, string tth, string hubUrl)
+{
+	try
+	{
+		if (!tth.empty())
+		{
+			UserPtr user = ClientManager::getInstance()->findUser(CID(cid));
+			QueueManager::getInstance()->add(source, size, TTHValue(tth), user, hubUrl);
+		}
+	}
+	catch (const Exception&)
+	{
+	}
+}
+
+void Search::getFileList_client(string cid, string dir, bool match, string hubUrl)
 {
 	if (!cid.empty())
 	{
@@ -1719,7 +1694,7 @@ void Search::getFileList_client(string cid, string dir, bool match)
 				else
 					flags = QueueItem::FLAG_CLIENT_VIEW;
 
-				QueueManager::getInstance()->addList(user, flags, dir);
+				QueueManager::getInstance()->addList(user, hubUrl, flags, dir);
 			}
 		}
 		catch (const Exception&)
@@ -1728,13 +1703,13 @@ void Search::getFileList_client(string cid, string dir, bool match)
 	}
 }
 
-void Search::grantSlot_client(string cid)
+void Search::grantSlot_client(string cid, string hubUrl)
 {
 	if (!cid.empty())
 	{
 		UserPtr user = ClientManager::getInstance()->findUser(CID(cid));
 		if (user)
-			UploadManager::getInstance()->reserveSlot(user);
+			UploadManager::getInstance()->reserveSlot(user, hubUrl);
 	}
 }
 
@@ -1790,19 +1765,17 @@ void Search::on(ClientManagerListener::ClientDisconnected, Client *client) throw
 
 void Search::on(SearchManagerListener::SR, const SearchResultPtr& result) throw()
 {
-	bool isShared = FALSE;
 	if (searchlist.empty() || result == NULL)
 		return;
 
 	typedef Func2<Search, string, string> F2;
-	F2 *func;
 
 	if (isHash)
 	{
 		if (result->getType() != SearchResult::TYPE_FILE || TTHValue(searchlist[0]) != result->getTTH())
 		{
 			++droppedResult;
-			func = new F2(this, &Search::setStatus_gui, "statusbar3", Util::toString(droppedResult) + _(" filtered"));
+			F2 *func = new F2(this, &Search::setStatus_gui, "statusbar3", Util::toString(droppedResult) + _(" filtered"));
 			WulforManager::get()->dispatchGuiFunc(func);
 			return;
 		}
@@ -1815,21 +1788,19 @@ void Search::on(SearchManagerListener::SR, const SearchResultPtr& result) throw(
 			    (*i->begin() == '-' && i->size() != 1 && Util::findSubString(result->getFile(), i->substr(1)) != (string::size_type)-1))
 			{
 				++droppedResult;
-				func = new F2(this, &Search::setStatus_gui, "statusbar3", Util::toString(droppedResult) + _(" filtered"));
+				F2 *func = new F2(this, &Search::setStatus_gui, "statusbar3", Util::toString(droppedResult) + _(" filtered"));
 				WulforManager::get()->dispatchGuiFunc(func);
 				return;
 			}
 		}
 	}
 
-	if (result->getType() != SearchResult::TYPE_DIRECTORY)
-		isShared = ShareManager::getInstance()->isTTHShared(result->getTTH());
+	StringMap resultMap;
+	parseSearchResult_client(result, resultMap);
 
-	result->inc(); // I'm going to hell for this, yes?
-
-	typedef Func2<Search, SearchResult *, bool> F2_2;
-	F2_2 *func2 = new F2_2(this, &Search::addResult_gui, result.get(), isShared);
-	WulforManager::get()->dispatchGuiFunc(func2);
+	typedef Func1<Search, StringMap> F1;
+	F1 *func = new F1(this, &Search::addResult_gui, resultMap);
+	WulforManager::get()->dispatchGuiFunc(func);
 }
 
 // Filtering causes Gtk-CRITICAL assertion failure, when last item is removed
@@ -1843,14 +1814,11 @@ gboolean Search::searchFilterFunc_gui(GtkTreeModel *model, GtkTreeIter *iter, gp
 	if (!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(s->getWidget("checkbuttonFilter"))))
 		return TRUE;
 
-	// Filter based on selected hubs.
-	SearchResult *result = s->resultView.getValue<gpointer, SearchResult *>(iter, "SearchResult", model);
+	// Grouping shouldn't be enabled while filtering, but just in case...
+	if (gtk_tree_model_iter_has_child(model, iter))
+		return TRUE;
 
-	dcassert(result);	// Filtering isn't enabled with grouping, so we shouldn't have rows without resultptr
-	if (!result)		// in case this isn't a debug build, show the row instead of crashing
-		return TRUE;	// other actions on the row might still crash.
-
-	string hub = result->getHubURL();
+	string hub = s->resultView.getString(iter, "Hub URL", model);
 	GtkTreeIter hubIter;
 	bool valid = gtk_tree_model_get_iter_first(GTK_TREE_MODEL(s->hubStore), &hubIter);
 	while (valid)
@@ -1866,7 +1834,8 @@ gboolean Search::searchFilterFunc_gui(GtkTreeModel *model, GtkTreeIter *iter, gp
 	}
 
 	// Filter based on free slots.
-	if (s->onlyFree && result->getFreeSlots() < 1)
+	gint freeSlots = s->resultView.getValue<gint>(iter, "Free Slots", model);
+	if (s->onlyFree && freeSlots < 1)
 		return FALSE;
 
 	// Hide results already in share
@@ -1909,18 +1878,20 @@ gboolean Search::searchFilterFunc_gui(GtkTreeModel *model, GtkTreeIter *iter, gp
 				break;
 		}
 
+		int64_t size = s->resultView.getValue<int64_t>(iter, "Real Size", model);
+
 		switch (gtk_combo_box_get_active(GTK_COMBO_BOX(s->getWidget("comboboxSize"))))
 		{
 			case 0:
-				if (result->getSize() != filterSize)
+				if (size != filterSize)
 					return FALSE;
 				break;
 			case 1:
-				if (result->getSize() < filterSize)
+				if (size < filterSize)
 					return FALSE;
 				break;
 			case 2:
-				if (result->getSize() > filterSize)
+				if (size > filterSize)
 					return FALSE;
 		}
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2008 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2009 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -69,21 +69,21 @@ void ConnectionManager::listen() throw(SocketException){
  * for downloading.
  * @param aUser The user to connect to.
  */
-void ConnectionManager::getDownloadConnection(const UserPtr& aUser) {
+void ConnectionManager::getDownloadConnection(const UserPtr& aUser, const string& hubHint) {
 	dcassert((bool)aUser);
 	{
 		Lock l(cs);
 		ConnectionQueueItem::Iter i = find(downloads.begin(), downloads.end(), aUser);
 		if(i == downloads.end()) {
-			getCQI(aUser, true);
+			getCQI(aUser, true, hubHint);
 		} else {
 			DownloadManager::getInstance()->checkIdle(aUser);
 		}
 	}
 }
 
-ConnectionQueueItem* ConnectionManager::getCQI(const UserPtr& aUser, bool download) {
-	ConnectionQueueItem* cqi = new ConnectionQueueItem(aUser, download);
+ConnectionQueueItem* ConnectionManager::getCQI(const UserPtr& aUser, bool download, const string& hubHint) {
+	ConnectionQueueItem* cqi = new ConnectionQueueItem(aUser, download, hubHint);
 	if(download) {
 		dcassert(find(downloads.begin(), downloads.end(), aUser) == downloads.end());
 		downloads.push_back(cqi);
@@ -168,7 +168,7 @@ void ConnectionManager::on(TimerManagerListener::Second, uint32_t aTick) throw()
 					if(cqi->getState() == ConnectionQueueItem::WAITING) {
 						if(startDown) {
 							cqi->setState(ConnectionQueueItem::CONNECTING);
-							ClientManager::getInstance()->connect(cqi->getUser(), cqi->getToken());
+							ClientManager::getInstance()->connect(cqi->getUser(), cqi->getToken(), cqi->getHubHint());
 							fire(ConnectionManagerListener::StatusChanged(), cqi);
 							attemptDone = true;
 						} else {
@@ -322,6 +322,7 @@ void ConnectionManager::adcConnect(const OnlineUser& aUser, uint16_t aPort, cons
 	uc->setToken(aToken);
 	uc->setEncoding(Text::utf8);
 	uc->setState(UserConnection::STATE_CONNECT);
+	uc->setHubUrl(aUser.getClient().getHubUrl());
 	if(aUser.getIdentity().isOp()) {
 		uc->setFlag(UserConnection::FLAG_OP);
 	}
@@ -409,13 +410,14 @@ void ConnectionManager::on(UserConnectionListener::Connected, UserConnection* aS
 	dcassert(aSource->getState() == UserConnection::STATE_CONNECT);
 	if(aSource->isSet(UserConnection::FLAG_NMDC)) {
 		aSource->myNick(aSource->getToken());
-		aSource->lock(CryptoManager::getInstance()->getLock(), CryptoManager::getInstance()->getPk());
+		aSource->lock(CryptoManager::getInstance()->getLock(), CryptoManager::getInstance()->getPk() + "Ref=" + aSource->getHubUrl());
 	} else {
 		StringList defFeatures = adcFeatures;
 		if(BOOLSETTING(COMPRESS_TRANSFERS)) {
 			defFeatures.push_back("AD" + UserConnection::FEATURE_ZLIB_GET);
 		}
 		aSource->sup(defFeatures);
+		aSource->send(AdcCommand(AdcCommand::SEV_SUCCESS, AdcCommand::SUCCESS, Util::emptyString).addParam("RF", aSource->getHubUrl()));
 	}
 	aSource->setState(UserConnection::STATE_SUPNICK);
 }
@@ -581,7 +583,7 @@ void ConnectionManager::addUploadConnection(UserConnection* uc) {
 
 		ConnectionQueueItem::Iter i = find(uploads.begin(), uploads.end(), uc->getUser());
 		if(i == uploads.end()) {
-			ConnectionQueueItem* cqi = getCQI(uc->getUser(), false);
+			ConnectionQueueItem* cqi = getCQI(uc->getUser(), false, Util::emptyString);
 
 			cqi->setState(ConnectionQueueItem::ACTIVE);
 			uc->setFlag(UserConnection::FLAG_ASSOCIATED);

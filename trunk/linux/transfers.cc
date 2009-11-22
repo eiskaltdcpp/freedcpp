@@ -72,6 +72,7 @@ Transfers::Transfers() :
 	transferView.insertHiddenColumn("Target", G_TYPE_STRING);
 	transferView.insertHiddenColumn("tmpTarget", G_TYPE_STRING);
 	transferView.insertHiddenColumn("Download", G_TYPE_BOOLEAN);
+	transferView.insertHiddenColumn("Hub URL", G_TYPE_STRING);
 	transferView.finalize();
 
 	transferStore = gtk_tree_store_newv(transferView.getColCount(), transferView.getGTypes());
@@ -160,12 +161,10 @@ void Transfers::popupTransferMenu_gui()
 void Transfers::onGetFileListClicked_gui(GtkMenuItem *item, gpointer data)
 {
 	Transfers *tr = (Transfers *)data;
-	string cid;
 	GtkTreeIter iter;
 	GtkTreePath *path;
 	GList *list = gtk_tree_selection_get_selected_rows(tr->transferSelection, NULL);
-	typedef Func1<Transfers, string> F1;
-	F1 *func;
+	typedef Func2<Transfers, string, string> F2;
 
 	for (GList *i = list; i; i = i->next)
 	{
@@ -176,10 +175,11 @@ void Transfers::onGetFileListClicked_gui(GtkMenuItem *item, gpointer data)
 			
 			do 
 			{
-				cid = tr->transferView.getString(&iter, "CID");
+				string cid = tr->transferView.getString(&iter, "CID");
+				string hubUrl = tr->transferView.getString(&iter, "Hub URL");
 				if (!cid.empty())
 				{
-					func = new F1(tr, &Transfers::getFileList_client, cid);
+					F2 *func = new F2(tr, &Transfers::getFileList_client, cid, hubUrl);
 					WulforManager::get()->dispatchClientFunc(func);
 				}
 			} 
@@ -193,12 +193,10 @@ void Transfers::onGetFileListClicked_gui(GtkMenuItem *item, gpointer data)
 void Transfers::onMatchQueueClicked_gui(GtkMenuItem *item, gpointer data)
 {
 	Transfers *tr = (Transfers *)data;
-	string cid;
 	GtkTreeIter iter;
 	GtkTreePath *path;
 	GList *list = gtk_tree_selection_get_selected_rows(tr->transferSelection, NULL);
-	typedef Func1<Transfers, string > F1;
-	F1 *func;
+	typedef Func2<Transfers, string, string> F2;
 
 	for (GList *i = list; i; i = i->next)
 	{
@@ -209,10 +207,11 @@ void Transfers::onMatchQueueClicked_gui(GtkMenuItem *item, gpointer data)
 
 			do
 			{
-				cid = tr->transferView.getString(&iter, "CID");
+				string cid = tr->transferView.getString(&iter, "CID");
+				string hubUrl = tr->transferView.getString(&iter, "Hub URL");
 				if (!cid.empty())
 				{
-					func = new F1(tr, &Transfers::matchQueue_client, cid);
+					F2 *func = new F2(tr, &Transfers::matchQueue_client, cid, hubUrl);
 					WulforManager::get()->dispatchClientFunc(func);
 				}
 			}
@@ -287,12 +286,10 @@ void Transfers::onAddFavoriteUserClicked_gui(GtkMenuItem *item, gpointer data)
 void Transfers::onGrantExtraSlotClicked_gui(GtkMenuItem *item, gpointer data)
 {
 	Transfers *tr = (Transfers *)data;
-	string cid;
 	GtkTreeIter iter;
 	GtkTreePath *path;
 	GList *list = gtk_tree_selection_get_selected_rows(tr->transferSelection, NULL);
-	typedef Func1<Transfers, string > F1;
-	F1 *func;
+	typedef Func2<Transfers, string, string> F2;
 
 	for (GList *i = list; i; i = i->next)
 	{
@@ -303,10 +300,11 @@ void Transfers::onGrantExtraSlotClicked_gui(GtkMenuItem *item, gpointer data)
 
 			do
 			{
-				cid = tr->transferView.getString(&iter, "CID");
+				string cid = tr->transferView.getString(&iter, "CID");
+				string hubUrl = tr->transferView.getString(&iter, "Hub URL");
 				if (!cid.empty())
 				{
-					func = new F1(tr, &Transfers::grantExtraSlot_client, cid);
+					F2 *func = new F2(tr, &Transfers::grantExtraSlot_client, cid, hubUrl);
 					WulforManager::get()->dispatchClientFunc(func);
 				}
 			}
@@ -497,6 +495,7 @@ void Transfers::addConnection_gui(StringMap params, bool download)
 		transferView.col("CID"), params["CID"].c_str(),
 		transferView.col("Icon"), download ? "freedcpp-download" : "freedcpp-upload",
 		transferView.col("Download"), download,
+		transferView.col("Hub URL"), params["Hub URL"].c_str(),
 		-1);
 }
 
@@ -767,14 +766,14 @@ void Transfers::playSound_gui(Sound::TypeSound sound)
 		Sound::get()->playSound(sound);
 }
 
-void Transfers::getFileList_client(string cid)
+void Transfers::getFileList_client(string cid, string hubUrl)
 {
 	try
 	{
-		if (!cid.empty())
+		if (!cid.empty() && !hubUrl.empty())
 		{
 			UserPtr user = ClientManager::getInstance()->getUser(CID(cid));
-			QueueManager::getInstance()->addList(user, QueueItem::FLAG_CLIENT_VIEW);
+			QueueManager::getInstance()->addList(user, hubUrl, QueueItem::FLAG_CLIENT_VIEW);
 		}
 	}
 	catch (const Exception&)
@@ -782,14 +781,14 @@ void Transfers::getFileList_client(string cid)
 	}
 }
 
-void Transfers::matchQueue_client(string cid)
+void Transfers::matchQueue_client(string cid, string hubUrl)
 {
 	try
 	{
-		if (!cid.empty())
+		if (!cid.empty() && !hubUrl.empty())
 		{
 			UserPtr user = ClientManager::getInstance()->getUser(CID(cid));
-			QueueManager::getInstance()->addList(user, QueueItem::FLAG_MATCH_QUEUE);
+			QueueManager::getInstance()->addList(user, hubUrl, QueueItem::FLAG_MATCH_QUEUE);
 		}
 	}
 	catch (const Exception&)
@@ -806,12 +805,12 @@ void Transfers::addFavoriteUser_client(string cid)
 	}
 }
 
-void Transfers::grantExtraSlot_client(string cid)
+void Transfers::grantExtraSlot_client(string cid, string hubUrl)
 {
-	if (!cid.empty())
+	if (!cid.empty() && !hubUrl.empty())
 	{
 		UserPtr user = ClientManager::getInstance()->getUser(CID(cid));
-		UploadManager::getInstance()->reserveSlot(user);
+		UploadManager::getInstance()->reserveSlot(user, hubUrl);
 	}
 }
 
@@ -842,15 +841,15 @@ void Transfers::closeConnection_client(string cid, bool download)
 	}
 }
 
-
 void Transfers::getParams_client(StringMap& params, ConnectionQueueItem* cqi)
 {
 	const UserPtr& user = cqi->getUser();
 
 	params["CID"] = user->getCID().toBase32();
 	params["User"] = WulforUtil::getNicks(user);
-	params["Hub Name"] = WulforUtil::getHubNames(user);
+	params["Hub Name"] = WulforUtil::getHubNames(user); //TODO Get specific hub name
 	params["Failed"] = "0";
+	params["Hub URL"] = cqi->getHubHint();
 }
 
 void Transfers::getParams_client(StringMap& params, Transfer* tr)
@@ -866,7 +865,7 @@ void Transfers::getParams_client(StringMap& params, Transfer* tr)
 	else 
 		params["Filename"] = Util::getFileName(tr->getPath());
 	params["User"] = WulforUtil::getNicks(user);
-	params["Hub Name"] = WulforUtil::getHubNames(user);
+	params["Hub Name"] = WulforUtil::getHubNames(user); //TODO Get specific hub name
 	params["Path"] = Util::getFilePath(tr->getPath());
 	params["Size"] = Util::toString(tr->getSize());
 	params["Download Position"] = Util::toString(tr->getPos());
@@ -877,18 +876,7 @@ void Transfers::getParams_client(StringMap& params, Transfer* tr)
 	params["IP"] = tr->getUserConnection().getRemoteIp();
 	params["Time Left"] = Util::formatSeconds(tr->getSecondsLeft());
 	params["Target"] = tr->getPath();
-}
-
-void Transfers::getParams_client(StringMap& params, Download* dl)
-{
-	getParams_client(params, static_cast<Transfer*>(dl));
-	// Do we need any special parameters for dl? If not, this can be removed
-}
-
-void Transfers::getParams_client(StringMap& params, Upload* ul)
-{
-	getParams_client(params, static_cast<Transfer*>(ul));
-	// Do we need any special parameters for ul? If not, this can be removed
+	params["Hub URL"] = tr->getUserConnection().getHubUrl();
 }
 
 void Transfers::on(DownloadManagerListener::Requesting, Download* dl) throw()

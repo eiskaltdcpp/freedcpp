@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2008 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2009 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -81,13 +81,14 @@ const string SettingsManager::settingTags[] =
 	"DontDlAlreadyQueued", "MaxCommandLength", "AllowUntrustedHubs", "AllowUntrustedClients",
 	"TLSPort", "FastHash", "SortFavUsersFirst", "SegmentedDL", "FollowLinks",
 	"SendBloom", "OwnerDrawnMenus", "Coral", "SearchFilterShared", "MaxTabChars", "FinishedDLOnlyFull",
-	"ConfirmExit", "ConfirmHubRemoval", "ConfirmUserRemoval", "ConfirmItemRemoval", "ConfirmADLSRemoval",
+	"ConfirmExit", "ConfirmHubClosing", "ConfirmHubRemoval", "ConfirmUserRemoval", "ConfirmItemRemoval", "ConfirmADLSRemoval",
+	"SearchMerge",
 	"SENTRY",
 	// Int64
 	"TotalUpload", "TotalDownload",
 	"SENTRY",
 	// Floats
-	"TransfersPanedPos", "QueuePanedPos",
+	"TransfersPanedPos", "QueuePanedPos", "SearchPanedPos",
 	"SENTRY"
 };
 
@@ -126,8 +127,8 @@ SettingsManager::SettingsManager()
 		floatSettings[i] = 0;
 	}
 
-	setDefault(DOWNLOAD_DIRECTORY, Util::getConfigPath() + "Downloads" PATH_SEPARATOR_STR);
-	setDefault(TEMP_DOWNLOAD_DIRECTORY, Util::getConfigPath() + "Incomplete" PATH_SEPARATOR_STR);
+	setDefault(DOWNLOAD_DIRECTORY, Util::getPath(Util::PATH_DOWNLOADS));
+	setDefault(TEMP_DOWNLOAD_DIRECTORY, Util::getPath(Util::PATH_USER_LOCAL) + "Incomplete" PATH_SEPARATOR_STR);
 	setDefault(SLOTS, 1);
 	setDefault(TCP_PORT, 0);
 	setDefault(UDP_PORT, 0);
@@ -148,10 +149,10 @@ SettingsManager::SettingsManager()
 	setDefault(IGNORE_BOT_PMS, false);
 	setDefault(LIST_DUPES, true);
 	setDefault(BUFFER_SIZE, 64);
-	setDefault(HUBLIST_SERVERS, "http://hublist.hubtracker.com/hublist.xml.bz2;http://dchublist.com/hublist.xml.bz2;http://adchublist.com/hublist.xml.bz2;http://www.hublist.org/PublicHubList.xml.bz2;http://dclist.eu/hublist.xml.bz2;http://download.hublist.cz/hublist.xml.bz2;http://hublist.awenet.info/PublicHubList.xml.bz2");
+	setDefault(HUBLIST_SERVERS, "http://hublist.openhublist.org/hublist.xml.bz2;http://dchublist.com/hublist.xml.bz2;http://adchublist.com/hublist.xml.bz2;http://www.hublist.org/PublicHubList.xml.bz2;http://dclist.eu/hublist.xml.bz2;http://download.hublist.cz/hublist.xml.bz2;http://hublist.awenet.info/PublicHubList.xml.bz2");
 	setDefault(DOWNLOAD_SLOTS, 3);
 	setDefault(MAX_DOWNLOAD_SPEED, 0);
-	setDefault(LOG_DIRECTORY, Util::getConfigPath() + "Logs" PATH_SEPARATOR_STR);
+	setDefault(LOG_DIRECTORY, Util::getPath(Util::PATH_USER_LOCAL) + "Logs" PATH_SEPARATOR_STR);
 	setDefault(LOG_UPLOADS, false);
 	setDefault(LOG_DOWNLOADS, false);
 	setDefault(LOG_PRIVATE_CHAT, false);
@@ -252,9 +253,9 @@ SettingsManager::SettingsManager()
 	setDefault(SOCKET_OUT_BUFFER, 64*1024);
 	setDefault(OPEN_WAITING_USERS, false);
 	setDefault(OPEN_SYSTEM_LOG, true);
-	setDefault(TLS_TRUSTED_CERTIFICATES_PATH, Util::getConfigPath() + "Certificates" PATH_SEPARATOR_STR);
-	setDefault(TLS_PRIVATE_KEY_FILE, Util::getConfigPath() + "Certificates" PATH_SEPARATOR_STR "client.key");
-	setDefault(TLS_CERTIFICATE_FILE, Util::getConfigPath() + "Certificates" PATH_SEPARATOR_STR "client.crt");
+	setDefault(TLS_TRUSTED_CERTIFICATES_PATH, Util::getPath(Util::PATH_USER_CONFIG) + "Certificates" PATH_SEPARATOR_STR);
+	setDefault(TLS_PRIVATE_KEY_FILE, Util::getPath(Util::PATH_USER_CONFIG) + "Certificates" PATH_SEPARATOR_STR "client.key");
+	setDefault(TLS_CERTIFICATE_FILE, Util::getPath(Util::PATH_USER_CONFIG) + "Certificates" PATH_SEPARATOR_STR "client.crt");
 	setDefault(BOLD_FINISHED_DOWNLOADS, true);
 	setDefault(BOLD_FINISHED_UPLOADS, true);
 	setDefault(BOLD_QUEUE, true);
@@ -285,12 +286,15 @@ SettingsManager::SettingsManager()
 	setDefault(MAX_TAB_CHARS, 20);
 	setDefault(FINISHED_DL_ONLY_FULL, true);
 	setDefault(CONFIRM_EXIT, true);
+	setDefault(CONFIRM_HUB_CLOSING, true);
 	setDefault(CONFIRM_HUB_REMOVAL, true);
 	setDefault(CONFIRM_USER_REMOVAL, true);
 	setDefault(CONFIRM_ITEM_REMOVAL, true);
 	setDefault(CONFIRM_ADLS_REMOVAL, true);
+	setDefault(SEARCH_MERGE, true);
 	setDefault(TRANSFERS_PANED_POS, .7);
 	setDefault(QUEUE_PANED_POS, .3);
+	setDefault(SEARCH_PANED_POS, .2);
 
 #ifdef _WIN32
 	setDefault(MAIN_WINDOW_STATE, SW_SHOWNORMAL);

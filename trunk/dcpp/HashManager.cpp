@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2008 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2009 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -76,17 +76,10 @@ void HashManager::hashDone(const string& aFileName, uint32_t aTimeStamp, const T
 
 	fire(HashManagerListener::TTHDone(), aFileName, tth.getRoot());
 
-	string fn = aFileName;
-	if (count(fn.begin(), fn.end(), PATH_SEPARATOR) >= 2) {
-		string::size_type i = fn.rfind(PATH_SEPARATOR);
-		i = fn.rfind(PATH_SEPARATOR, i - 1);
-		fn.erase(0, i);
-		fn.insert(0, "...");
-	}
 	if (speed > 0) {
-		LogManager::getInstance()->message(str(F_("Finished hashing: %1% (%2%/s)") % fn % Util::formatBytes(speed)));
+		LogManager::getInstance()->message(str(F_("Finished hashing: %1% (%2%/s)") % Util::addBrackets(aFileName) % Util::formatBytes(speed)));
 	} else {
-		LogManager::getInstance()->message(str(F_("Finished hashing: %1%") % fn));
+		LogManager::getInstance()->message(str(F_("Finished hashing: %1%") % Util::addBrackets(aFileName)));
 	}
 }
 
@@ -357,6 +350,8 @@ private:
 
 void HashManager::HashStore::load() {
 	try {
+		Util::migrate(getIndexFile());
+
 		HashLoader l(*this);
 		SimpleXMLReader(&l).fromXML(File(getIndexFile(), File::READ, File::OPEN).read());
 	} catch (const Exception&) {
@@ -426,6 +421,9 @@ void HashLoader::endTag(const string& name, const string&) {
 
 HashManager::HashStore::HashStore() :
 	dirty(false) {
+
+	Util::migrate(getDataFile());
+
 	if (File::getSize(getDataFile()) <= static_cast<int64_t> (sizeof(int64_t))) {
 		try {
 			createDataFile( getDataFile());
@@ -606,7 +604,7 @@ static const int64_t BUF_SIZE = 0x1000000 - (0x1000000 % getpagesize());
 bool HashManager::Hasher::fastHash(const string& filename, uint8_t* , TigerTree& tth, int64_t size, CRC32Filter* xcrc32) {
 	int fd = open(Text::fromUtf8(filename).c_str(), O_RDONLY);
 	if(fd == -1)
-	return false;
+		return false;
 
 	int64_t size_left = size;
 	int64_t pos = 0;
@@ -615,7 +613,7 @@ bool HashManager::Hasher::fastHash(const string& filename, uint8_t* , TigerTree&
 
 	uint32_t lastRead = GET_TICK();
 	while(pos <= size) {
-		if(size_left> 0) {
+		if(size_left > 0) {
 			size_read = std::min(size_left, BUF_SIZE);
 			buf = mmap(0, size_read, PROT_READ, MAP_SHARED, fd, pos);
 			if(buf == MAP_FAILED) {
@@ -625,7 +623,7 @@ bool HashManager::Hasher::fastHash(const string& filename, uint8_t* , TigerTree&
 
 			madvise(buf, size_read, MADV_SEQUENTIAL | MADV_WILLNEED);
 
-			if(SETTING(MAX_HASH_SPEED)> 0) {
+			if(SETTING(MAX_HASH_SPEED) > 0) {
 				uint32_t now = GET_TICK();
 				uint32_t minTime = size_read * 1000LL / (SETTING(MAX_HASH_SPEED) * 1024LL * 1024LL);
 				if(lastRead + minTime> now) {
@@ -642,7 +640,8 @@ bool HashManager::Hasher::fastHash(const string& filename, uint8_t* , TigerTree&
 
 		tth.update(buf, size_read);
 		if(xcrc32)
-		(*xcrc32)(buf, size_read);
+			(*xcrc32)(buf, size_read);
+
 		{
 			Lock l(cs);
 			currentSize = max(static_cast<uint64_t>(currentSize - size_read), static_cast<uint64_t>(0));
@@ -672,7 +671,7 @@ int HashManager::Hasher::run() {
 	for(;;) {
 		s.wait();
 		if(stop)
-		break;
+			break;
 		if(rebuild) {
 			HashManager::getInstance()->doRebuild();
 			rebuild = false;
@@ -726,7 +725,7 @@ int HashManager::Hasher::run() {
 #ifdef _WIN32
 				if(!virtualBuf || !BOOLSETTING(FAST_HASH) || !fastHash(fname, buf, fastTTH, size, xcrc32)) {
 #else
-					if(!BOOLSETTING(FAST_HASH) || !fastHash(fname, 0, fastTTH, size, xcrc32)) {
+				if(!BOOLSETTING(FAST_HASH) || !fastHash(fname, 0, fastTTH, size, xcrc32)) {
 #endif
 						tth = &slowTTH;
 						crc32 = CRC32Filter();
@@ -746,7 +745,8 @@ int HashManager::Hasher::run() {
 							}
 							n = f.read(buf, bufSize);
 							tth->update(buf, n);
-							if(xcrc32) (*xcrc32)(buf, n);
+							if(xcrc32)
+								(*xcrc32)(buf, n);
 
 							{
 								Lock l(cs);
@@ -766,12 +766,12 @@ int HashManager::Hasher::run() {
 						speed = size * _LL(1000) / (end - start);
 					}
 					if(xcrc32 && xcrc32->getValue() != sfv.getCRC()) {
-						LogManager::getInstance()->message(str(F_("%1% not shared; calculated CRC32 does not match the one found in SFV file.") % fname));
+						LogManager::getInstance()->message(str(F_("%1% not shared; calculated CRC32 does not match the one found in SFV file.") % Util::addBrackets(fname)));
 					} else {
 						HashManager::getInstance()->hashDone(fname, timestamp, *tth, speed);
 					}
 				} catch(const FileException& e) {
-					LogManager::getInstance()->message(str(F_("Error hashing %1%: %2%") % fname % e.getError()));
+					LogManager::getInstance()->message(str(F_("Error hashing %1%: %2%") % Util::addBrackets(fname) % e.getError()));
 				}
 			}
 			{

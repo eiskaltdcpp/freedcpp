@@ -58,7 +58,7 @@ languages = ['ar', 'bg', 'bs', 'ca', 'cs', 'da', 'de', 'el', 'en_GB', 'es',
              'et', 'fi', 'fr', 'gl', 'he', 'hr', 'hu', 'id', 'is', 'it',
              'ja', 'km', 'ko', 'lt', 'lv', 'mk', 'ml', 'ms', 'nb', 'nl',
              'pl', 'pt_BR', 'pt', 'ro', 'ru', 'sk', 'sl', 'sq', 'sr', 'sv',
-             'tr', 'uk', 'zh_CN', 'zh_TW']
+             'tr', 'uk', 'zh_CN', 'zh_TW', 'en_CA']
 
 Import('env')
 

@@ -1406,7 +1406,7 @@ void Hub::onSendMessage_gui(GtkEntry *entry, gpointer data)
 		}
 		else if (command == _("freedcpp"))
 		{
-			hub->addStatusMessage_gui(_("freedcpp 0.0.1.28/0.7091, project home: http://freedcpp.narod.ru http://code.google.com/p/freedcpp"), Msg::SYSTEM, Sound::NONE);
+			hub->addStatusMessage_gui(_("freedcpp 0.0.1.29/0.75, project home: http://freedcpp.narod.ru http://code.google.com/p/freedcpp"), Msg::SYSTEM, Sound::NONE);
 		}
 		else if (command == _("help"))
 		{
@@ -1435,7 +1435,7 @@ void Hub::onSendMessage_gui(GtkEntry *entry, gpointer data)
 		else if (command == _("pm"))
 		{
 			if (hub->userMap.find(param) != hub->userMap.end())
-				WulforManager::get()->getMainWindow()->addPrivateMessage_gui(Msg::UNKNOWN, hub->userMap[param]);
+				WulforManager::get()->getMainWindow()->addPrivateMessage_gui(Msg::UNKNOWN, hub->userMap[param], hub->client->getHubUrl());
 			else
 				hub->addStatusMessage_gui(_("User not found"), Msg::SYSTEM, Sound::NONE);
 		}
@@ -1568,6 +1568,7 @@ void Hub::onMsgItemClicked_gui(GtkMenuItem *item, gpointer data)
 		GtkTreeIter iter;
 		GtkTreePath *path;
 		GList *list = gtk_tree_selection_get_selected_rows(hub->nickSelection, NULL);
+		const string &hubUrl = hub->client->getHubUrl();
 
 		for (GList *i = list; i; i = i->next)
 		{
@@ -1575,7 +1576,7 @@ void Hub::onMsgItemClicked_gui(GtkMenuItem *item, gpointer data)
 			if (gtk_tree_model_get_iter(GTK_TREE_MODEL(hub->nickStore), &iter, path))
 			{
 				cid = hub->nickView.getString(&iter, "CID");
-				WulforManager::get()->getMainWindow()->addPrivateMessage_gui(Msg::UNKNOWN, cid);
+				WulforManager::get()->getMainWindow()->addPrivateMessage_gui(Msg::UNKNOWN, cid, hubUrl);
 			}
 			gtk_tree_path_free(path);
 		}
@@ -1741,11 +1742,11 @@ void Hub::getFileList_client(string cid, bool match)
 				}
 				else if (match)
 				{
-					QueueManager::getInstance()->addList(user, QueueItem::FLAG_MATCH_QUEUE);
+					QueueManager::getInstance()->addList(user, client->getHubUrl(), QueueItem::FLAG_MATCH_QUEUE);
 				}
 				else
 				{
-					QueueManager::getInstance()->addList(user, QueueItem::FLAG_CLIENT_VIEW);
+					QueueManager::getInstance()->addList(user, client->getHubUrl(), QueueItem::FLAG_CLIENT_VIEW);
 				}
 			}
 			else
@@ -1777,7 +1778,7 @@ void Hub::grantSlot_client(string cid)
 		UserPtr user = ClientManager::getInstance()->findUser(CID(cid));
 		if (user)
 		{
-			UploadManager::getInstance()->reserveSlot(user);
+			UploadManager::getInstance()->reserveSlot(user, client->getHubUrl());
 			message = _("Slot granted to ") + WulforUtil::getNicks(user);
 		}
 	}
@@ -2166,9 +2167,9 @@ void Hub::on(ClientListener::PrivateMessage, Client *, const OnlineUser &from,
 	}
 	else
 	{
-		typedef Func4<MainWindow, Msg::TypeMsg, string, string, bool> F4;
-		F4 *func = new F4(WulforManager::get()->getMainWindow(), &MainWindow::addPrivateMessage_gui,
-			typemsg, user.getUser()->getCID().toBase32(), line, TRUE);
+		typedef Func5<MainWindow, Msg::TypeMsg, string, string, string, bool> F5;
+		F5 *func = new F5(WulforManager::get()->getMainWindow(), &MainWindow::addPrivateMessage_gui,
+			typemsg, user.getUser()->getCID().toBase32(), client->getHubUrl(), line, TRUE);
 		WulforManager::get()->dispatchGuiFunc(func);
 	}
 }

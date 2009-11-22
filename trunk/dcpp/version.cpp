@@ -16,38 +16,19 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef DCPLUSPLUS_DCPP_POINTER_H
-#define DCPLUSPLUS_DCPP_POINTER_H
+#include "stdinc.h"
+#include "DCPlusPlus.h"
 
-#include <boost/intrusive_ptr.hpp>
-#include "Thread.h"
+#include "version.h"
+
+#ifndef DCPP_REVISION
+#define DCPP_REVISION 0
+#endif
+
+#define xstrver(s) strver(s)
+#define strver(s) #s
 
 namespace dcpp {
+const string fullVersionString(APPNAME " v" VERSIONSTRING " (r" xstrver(DCPP_REVISION) ")");
+}
 
-template<typename T>
-class intrusive_ptr_base
-{
-public:
-	bool unique() throw() {
-		return (ref == 1);
-	}
-
-protected:
-	intrusive_ptr_base() throw() : ref(0) { }
-
-private:
-	friend void intrusive_ptr_add_ref(intrusive_ptr_base* p) { Thread::safeInc(p->ref); }
-	friend void intrusive_ptr_release(intrusive_ptr_base* p) { if(Thread::safeDec(p->ref) == 0) { delete static_cast<T*>(p); } }
-
-	volatile long ref;
-};
-
-
-struct DeleteFunction {
-	template<typename T>
-	void operator()(const T& p) const { delete p; }
-};
-
-} // namespace dcpp
-
-#endif // !defined(POINTER_H)

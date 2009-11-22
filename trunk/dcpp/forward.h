@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2008 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2009 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -52,10 +52,10 @@ class FavoriteUser;
 class File;
 
 class FinishedFileItem;
-typedef FinishedFileItem* FinishedFileItemPtr;
+typedef boost::intrusive_ptr<FinishedFileItem> FinishedFileItemPtr;
 
 class FinishedUserItem;
-typedef FinishedUserItem* FinishedUserItemPtr;
+typedef boost::intrusive_ptr<FinishedUserItem> FinishedUserItemPtr;
 
 class FinishedManager;
 

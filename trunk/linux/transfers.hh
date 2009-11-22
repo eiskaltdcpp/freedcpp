@@ -83,12 +83,10 @@ class Transfers:
 		// Client functions
 		void getParams_client(dcpp::StringMap& params, dcpp::ConnectionQueueItem* cqi);
 		void getParams_client(dcpp::StringMap& params, dcpp::Transfer* transfer);
-		void getParams_client(dcpp::StringMap& params, dcpp::Upload* ul);
-		void getParams_client(dcpp::StringMap& params, dcpp::Download* dl);
-		void getFileList_client(std::string cid);
-		void matchQueue_client(std::string cid);
+		void getFileList_client(std::string cid, std::string hubUrl);
+		void matchQueue_client(std::string cid, std::string hubUrl);
 		void addFavoriteUser_client(std::string cid);
-		void grantExtraSlot_client(std::string cid);
+		void grantExtraSlot_client(std::string cid, std::string hubUrl);
 		void removeUserFromQueue_client(std::string cid);
 		void forceAttempt_client(std::string cid);
 		void closeConnection_client(std::string cid, bool download);
