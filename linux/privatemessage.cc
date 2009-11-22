@@ -32,9 +32,10 @@
 using namespace std;
 using namespace dcpp;
 
-PrivateMessage::PrivateMessage(const string &cid):
+PrivateMessage::PrivateMessage(const string &cid, const string &hubUrl):
 	BookEntry(Entry::PRIVATE_MESSAGE, _("PM: ") + WulforUtil::getNicks(cid), "privatemessage.glade", cid),
 	cid(cid),
+	hubUrl(hubUrl),
 	historyIndex(0),
 	sentAwayMessage(FALSE),
 	scrollToBottom(TRUE)
@@ -891,7 +892,7 @@ void PrivateMessage::sendMessage_client(string message)
 	if (user && user->isOnline())
 	{
 		// FIXME: WTF does the 3rd param (bool thirdPerson) do? A: Used for /me stuff
-		ClientManager::getInstance()->privateMessage(user, message, false);
+		ClientManager::getInstance()->privateMessage(user, message, false, hubUrl);
 	}
 	else
 	{
@@ -922,7 +923,7 @@ void PrivateMessage::getFileList_client()
 	{
 		UserPtr user = ClientManager::getInstance()->findUser(CID(cid));
 		if (user)
-			QueueManager::getInstance()->addList(user, QueueItem::FLAG_CLIENT_VIEW);
+			QueueManager::getInstance()->addList(user, hubUrl, QueueItem::FLAG_CLIENT_VIEW);
 	}
 	catch (const Exception& e)
 	{
@@ -937,7 +938,7 @@ void PrivateMessage::grantSlot_client()
 	UserPtr user = ClientManager::getInstance()->findUser(CID(cid));
 	if (user)
 	{
-		UploadManager::getInstance()->reserveSlot(user);
+		UploadManager::getInstance()->reserveSlot(user, hubUrl);
 	}
 	else
 	{

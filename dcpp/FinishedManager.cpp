@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2008 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2009 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -65,10 +65,9 @@ void FinishedManager::remove(bool upload, const string& file) {
 		Lock l(cs);
 		MapByFile& map = upload ? ULByFile : DLByFile;
 		MapByFile::iterator it = map.find(file);
-		if(it != map.end()) {
-			delete it->second;
+		if(it != map.end())
 			map.erase(it);
-		} else
+		else
 			return;
 	}
 	fire(FinishedManagerListener::RemovedFile(), upload, file);
@@ -79,10 +78,9 @@ void FinishedManager::remove(bool upload, const UserPtr& user) {
 		Lock l(cs);
 		MapByUser& map = upload ? ULByUser : DLByUser;
 		MapByUser::iterator it = map.find(user);
-		if(it != map.end()) {
-			delete it->second;
+		if(it != map.end())
 			map.erase(it);
-		} else
+		else
 			return;
 	}
 	fire(FinishedManagerListener::RemovedUser(), upload, user);
@@ -98,20 +96,12 @@ void FinishedManager::removeAll(bool upload) {
 
 void FinishedManager::clearDLs() {
 	Lock l(cs);
-	for(MapByFile::iterator i = DLByFile.begin(); i != DLByFile.end(); ++i)
-		delete i->second;
-	for(MapByUser::iterator i = DLByUser.begin(); i != DLByUser.end(); ++i)
-		delete i->second;
 	DLByFile.clear();
 	DLByUser.clear();
 }
 
 void FinishedManager::clearULs() {
 	Lock l(cs);
-	for(MapByFile::iterator i = ULByFile.begin(); i != ULByFile.end(); ++i)
-		delete i->second;
-	for(MapByUser::iterator i = ULByUser.begin(); i != ULByUser.end(); ++i)
-		delete i->second;
 	ULByFile.clear();
 	ULByUser.clear();
 }

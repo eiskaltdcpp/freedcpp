@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2008 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2009 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -183,14 +183,13 @@ string ClientManager::findHubEncoding(const string& aUrl) const {
 
 UserPtr ClientManager::findLegacyUser(const string& aNick) const throw() {
 	Lock l(cs);
-
 	if (aNick.size() > 0)
-		for(OnlineMap::const_iterator i = onlineUsers.begin(); i != onlineUsers.end(); ++i)
-		{
-			const OnlineUser* ou = i->second;
-			if(ou->getUser()->isSet(User::NMDC) && Util::stricmp(ou->getIdentity().getNick(), aNick) == 0)
+
+	for(OnlineMap::const_iterator i = onlineUsers.begin(); i != onlineUsers.end(); ++i) {
+		const OnlineUser* ou = i->second;
+		if(ou->getUser()->isSet(User::NMDC) && Util::stricmp(ou->getIdentity().getNick(), aNick) == 0)
 			return ou->getUser();
-		}
+	}
 	return UserPtr();
 }
 
@@ -290,20 +289,38 @@ void ClientManager::putOffline(OnlineUser* ou, bool disconnect) throw() {
 	}
 }
 
-void ClientManager::connect(const UserPtr& p, const string& token) {
+void ClientManager::connect(const UserPtr& p, const string& token, const string& hintUrl) {
 	Lock l(cs);
-	OnlineIter i = onlineUsers.find(p->getCID());
-	if(i != onlineUsers.end()) {
-		OnlineUser* u = i->second;
+	OnlineUser* u = findOnlineUser(p->getCID(), hintUrl);
+
+	if(u) {
 		u->getClient().connect(*u, token);
 	}
 }
 
-void ClientManager::privateMessage(const UserPtr& p, const string& msg, bool thirdPerson) {
+OnlineUser* ClientManager::findOnlineUser(const CID& cid, const string& hintUrl) throw() {
+	OnlinePair p = onlineUsers.equal_range(cid);
+	if(p.first == p.second)
+		return 0;
+
+	if(!hintUrl.empty()) {
+		for(OnlineIter i = p.first; i != p.second; ++i) {
+			OnlineUser* u = i->second;
+			if(u->getClient().getHubUrl() == hintUrl) {
+				return u;
+			}
+		}
+	}
+
+	// TODO maybe disallow non-hint urls, or maybe for some hints (secure?)
+	return p.first->second;
+}
+
+void ClientManager::privateMessage(const UserPtr& p, const string& msg, bool thirdPerson, const string& hintUrl) {
 	Lock l(cs);
-	OnlineIter i = onlineUsers.find(p->getCID());
-	if(i != onlineUsers.end()) {
-		OnlineUser* u = i->second;
+	OnlineUser* u = findOnlineUser(p->getCID(), hintUrl);
+
+	if(u) {
 		u->getClient().privateMessage(*u, msg, thirdPerson);
 	}
 }
@@ -402,7 +419,18 @@ void ClientManager::userCommand(const UserPtr& p, const UserCommand& uc, StringM
 }
 
 void ClientManager::on(AdcSearch, Client*, const AdcCommand& adc, const CID& from) throw() {
-	SearchManager::getInstance()->respond(adc, from);
+	bool isUdpActive = false;
+	{
+		Lock l(cs);
+
+		OnlineIter i = onlineUsers.find(from);
+		if(i != onlineUsers.end()) {
+			OnlineUser& u = *i->second;
+			isUdpActive = u.getIdentity().isUdpActive();
+		}
+
+	}
+	SearchManager::getInstance()->respond(adc, from, isUdpActive);
 }
 
 void ClientManager::search(int aSizeMode, int64_t aSize, int aFileType, const string& aString, const string& aToken) {

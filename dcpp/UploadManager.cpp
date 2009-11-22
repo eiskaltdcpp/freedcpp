@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2008 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2009 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -146,7 +146,7 @@ bool UploadManager::prepareFile(UserConnection& aSource, const string& aType, co
 		aSource.fileNotAvail(e.getError());
 		return false;
 	} catch(const Exception& e) {
-		LogManager::getInstance()->message(str(F_("Unable to send file %1%: %2%") % sourceFile % e.getError()));
+		LogManager::getInstance()->message(str(F_("Unable to send file %1%: %2%") % Util::addBrackets(sourceFile) % e.getError()));
 		aSource.fileNotAvail();
 		return false;
 	}
@@ -242,13 +242,13 @@ void UploadManager::removeUpload(Upload* aUpload) {
 	delete aUpload;
 }
 
-void UploadManager::reserveSlot(const UserPtr& aUser) {
+void UploadManager::reserveSlot(const UserPtr& aUser, const string& hubHint) {
 	{
 		Lock l(cs);
 		reservedSlots.insert(aUser);
 	}
 	if(aUser->isOnline())
-		ClientManager::getInstance()->connect(aUser, Util::toString(Util::rand()));
+		ClientManager::getInstance()->connect(aUser, Util::toString(Util::rand()), hubHint);
 }
 
 void UploadManager::on(UserConnectionListener::Get, UserConnection* aSource, const string& aFile, int64_t aResume) throw() {

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2008 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2009 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -74,7 +74,7 @@ const string& QueueItem::getTempTarget() {
 			if(target.length() >= 3 && target[1] == ':' && target[2] == '\\')
 				sm["targetdrive"] = target.substr(0, 3);
 			else
-				sm["targetdrive"] = Util::getConfigPath().substr(0, 3);
+				sm["targetdrive"] = Util::getPath(Util::PATH_USER_LOCAL).substr(0, 3);
 			setTempTarget(Util::formatParams(SETTING(TEMP_DOWNLOAD_DIRECTORY), sm, false) + getTempName(getTargetFileName(), getTTH()));
 #else //_WIN32
 			setTempTarget(SETTING(TEMP_DOWNLOAD_DIRECTORY) + getTempName(getTargetFileName(), getTTH()));
@@ -84,31 +84,56 @@ const string& QueueItem::getTempTarget() {
 	return tempTarget;
 }
 
+namespace {
+
+inline int64_t roundDown(int64_t size, int64_t blockSize) {
+	return ((size + blockSize / 2) / blockSize) * blockSize;
+}
+inline int64_t roundUp(int64_t size, int64_t blockSize) {
+	return ((size + blockSize - 1) / blockSize) * blockSize;
+}
+
+}
 
 Segment QueueItem::getNextSegment(int64_t blockSize, int64_t wantedSize) const {
 	if(getSize() == -1 || blockSize == 0) {
 		return Segment(0, -1);
 	}
 
-	if(!BOOLSETTING(SEGMENTED_DL) && !downloads.empty()) {
-		return Segment(0, 0);
+	if(!BOOLSETTING(SEGMENTED_DL)) {
+		if(!downloads.empty()) {
+			return Segment(0, 0);
+		}
+
+		int64_t start = 0;
+		int64_t end = getSize();
+
+		if(!done.empty()) {
+			const Segment& first = *done.begin();
+
+			if(first.getStart() > 0) {
+				end = roundUp(first.getStart(), blockSize);
+			} else {
+				start = roundDown(first.getEnd(), blockSize);
+
+				if(done.size() > 1) {
+					const Segment& second = *(++done.begin());
+					end = roundUp(second.getStart(), blockSize);
+				}
+			}
+		}
+
+		return Segment(start, std::min(getSize(), end) - start);
 	}
 
-	int64_t remaining = getSize() - getDownloadedBytes();
+	double donePart = static_cast<double>(getDownloadedBytes()) / getSize();
 
-	int64_t targetSize;
-	if(BOOLSETTING(SEGMENTED_DL)) {
-		double done = static_cast<double>(getDownloadedBytes()) / getSize();
-
-		// We want smaller blocks at the end of the transfer, squaring gives a nice curve...
-		targetSize = wantedSize * std::max(0.25, (1. - (done * done)));
-	} else {
-		targetSize = remaining;
-	}
+	// We want smaller blocks at the end of the transfer, squaring gives a nice curve...
+	int64_t targetSize = wantedSize * std::max(0.25, (1. - (donePart * donePart)));
 
 	if(targetSize > blockSize) {
 		// Round off to nearest block size
-		targetSize = ((targetSize + (blockSize / 2)) / blockSize) * blockSize;
+		targetSize = roundDown(targetSize, blockSize);
 	} else {
 		targetSize = blockSize;
 	}

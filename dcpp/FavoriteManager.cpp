@@ -443,6 +443,7 @@ void FavoriteManager::load() {
 
 	try {
 		SimpleXML xml;
+		Util::migrate(getConfigFile());
 		xml.fromXML(File(getConfigFile(), File::READ, File::OPEN).read());
 
 		if(xml.findChild("Favorites")) {

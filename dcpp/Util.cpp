@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2008 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2009 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -60,10 +60,10 @@ string Util::awayMsg;
 time_t Util::awayTime;
 
 Util::CountryList Util::countries;
-string Util::configPath;
-string Util::systemPath;
-string Util::dataPath;
-string Util::localePath;
+
+string Util::paths[Util::PATH_LAST];
+
+bool Util::localMode = true;
 
 static void sgenrand(unsigned long seed);
 
@@ -71,63 +71,122 @@ extern "C" void bz_internal_error(int errcode) {
 	dcdebug("bzip2 internal error: %d\n", errcode);
 }
 
+#ifdef _WIN32
+
+typedef HRESULT (WINAPI* _SHGetKnownFolderPath)(GUID& rfid, DWORD dwFlags, HANDLE hToken, PWSTR *ppszPath);
+
+static string getDownloadsPath(const string& def) {
+	// Try Vista downloads path
+	static _SHGetKnownFolderPath getKnownFolderPath = 0;
+	static HINSTANCE shell32 = NULL;
+
+	if(!shell32) {
+	    shell32 = ::LoadLibrary(_T("Shell32.dll"));
+	    if(shell32)
+	    {
+	    	getKnownFolderPath = (_SHGetKnownFolderPath)::GetProcAddress(shell32, "SHGetKnownFolderPath");
+
+	    	if(getKnownFolderPath) {
+	    		 PWSTR path = NULL;
+	             // Defined in KnownFolders.h.
+	             static GUID downloads = {0x374de290, 0x123f, 0x4565, {0x91, 0x64, 0x39, 0xc4, 0x92, 0x5e, 0x46, 0x7b}};
+	    		 if(getKnownFolderPath(downloads, 0, NULL, &path) == S_OK) {
+	    			 string ret = Text::fromT(path) + "\\";
+	    			 ::CoTaskMemFree(path);
+	    			 return ret;
+	    		 }
+	    	}
+	    }
+	}
+
+	return def + "Downloads\\";
+}
+
+#endif
+
 void Util::initialize() {
 	Text::initialize();
 
 	sgenrand((unsigned long)time(NULL));
 
 #ifdef _WIN32
-	TCHAR buf[MAX_PATH+1];
+	TCHAR buf[MAX_PATH+1] = { 0 };
 	::GetModuleFileName(NULL, buf, MAX_PATH);
-	// System config path is DC++ executable path...
-	systemPath = Util::getFilePath(Text::fromT(buf));
-	configPath = systemPath;
-	dataPath = systemPath;
+
+	string exePath = Util::getFilePath(Text::fromT(buf));
+
+	// Global config path is DC++ executable path...
+	paths[PATH_GLOBAL_CONFIG] = exePath;
+
+	paths[PATH_USER_CONFIG] = paths[PATH_GLOBAL_CONFIG];
+
+	loadBootConfig();
+
+	if(!File::isAbsolute(paths[PATH_USER_CONFIG])) {
+		paths[PATH_USER_CONFIG] = paths[PATH_GLOBAL_CONFIG] + paths[PATH_USER_CONFIG];
+	}
+
+	paths[PATH_USER_CONFIG] = validateFileName(paths[PATH_USER_CONFIG]);
+
+	if(localMode) {
+		paths[PATH_USER_LOCAL] = paths[PATH_USER_CONFIG];
+	} else {
+		if(::SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, SHGFP_TYPE_CURRENT, buf) == S_OK) {
+			paths[PATH_USER_CONFIG] = Text::fromT(buf) + "\\DC++\\";
+		}
+
+		paths[PATH_USER_LOCAL] = ::SHGetFolderPath(NULL, CSIDL_LOCAL_APPDATA, NULL, SHGFP_TYPE_CURRENT, buf) == S_OK ? Text::fromT(buf) + "\\DC++\\" : paths[PATH_USER_CONFIG];
+	}
+
+	paths[PATH_RESOURCES] = exePath;
 
 	// libintl doesn't support wide path names so we use the short (8.3) format.
 	// https://sourceforge.net/forum/message.php?msg_id=4882703
-	tstring localePath_ = Text::toT(dataPath) + _T("locale\\");
+	tstring localePath_ = Text::toT(exePath) + _T("locale\\");
 	memset(buf, 0, sizeof(buf));
-	::GetShortPathName(localePath_.c_str(), buf, sizeof(TCHAR) * (localePath_.size() + 1));
-	localePath = Text::fromT(buf);
+	::GetShortPathName(localePath_.c_str(), buf, sizeof(buf)/sizeof(TCHAR));
+
+	paths[PATH_LOCALE] = Text::fromT(buf);
+	paths[PATH_DOWNLOADS] = getDownloadsPath(paths[PATH_USER_CONFIG]);
 
 #else
-	systemPath = "/etc/";
-	char* home = getenv("HOME");
-	configPath = home ? Text::toUtf8(home) + "/.dc++/" : "/tmp/";
-	dataPath = configPath; // dataPath in linux is usually prefix + /share/app_name, so we can't represent it here
-	localePath = dataPath; // TODO no good default here either, fix
-#endif
+	paths[PATH_GLOBAL_CONFIG] = "/etc/";
+	const char* home_ = getenv("HOME");
+	string home = home_ ? Text::toUtf8(home_) : "/tmp/";
 
-	// Load boot settings
-	try {
-		SimpleXML boot;
-		boot.fromXML(File(systemPath + "dcppboot.xml", File::READ, File::OPEN).read());
-		boot.stepIn();
+	paths[PATH_USER_CONFIG] = home + "/.dc++/";
 
-		if(boot.findChild("ConfigPath")) {
-			StringMap params;
-#ifdef _WIN32
-			TCHAR path[MAX_PATH];
+	loadBootConfig();
 
-			params["APPDATA"] = Text::fromT((::SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, SHGFP_TYPE_CURRENT, path), path));
-			params["PERSONAL"] = Text::fromT((::SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL, SHGFP_TYPE_CURRENT, path), path));
-			configPath = Util::formatParams(boot.getChildData(), params, false);
-#endif
-		}
-	} catch(const Exception& ) {
-		// Unable to load boot settings...
+	if(!File::isAbsolute(paths[PATH_USER_CONFIG])) {
+		paths[PATH_USER_CONFIG] = paths[PATH_GLOBAL_CONFIG] + paths[PATH_USER_CONFIG];
 	}
 
-	if(!File::isAbsolute(configPath)) {
-		configPath = systemPath + configPath;
+	paths[PATH_USER_CONFIG] = validateFileName(paths[PATH_USER_CONFIG]);
+
+	if(localMode) {
+		// @todo implement...
 	}
-	configPath = Util::validateFileName(configPath);
+
+	paths[PATH_USER_LOCAL] = paths[PATH_USER_CONFIG];
+
+	// @todo paths[PATH_RESOURCES] = <replace from sconscript?>;
+	// @todo paths[PATH_LOCALE] = <replace from sconscript?>;
+
+	paths[PATH_DOWNLOADS] = home + "Downloads/";
+#endif
+
+	paths[PATH_FILE_LISTS] = paths[PATH_USER_LOCAL] + "FileLists" PATH_SEPARATOR_STR;
+	paths[PATH_HUB_LISTS] = paths[PATH_USER_LOCAL] + "HubLists" PATH_SEPARATOR_STR;
+	paths[PATH_NOTEPAD] = paths[PATH_USER_CONFIG] + "Notepad.txt";
+
+	File::ensureDirectory(paths[PATH_USER_CONFIG]);
+	File::ensureDirectory(paths[PATH_USER_LOCAL]);
 
 	try {
 		// This product includes GeoIP data created by MaxMind, available from http://maxmind.com/
 		// Updates at http://www.maxmind.com/app/geoip_country
-		string file = Util::getDataPath() + "GeoIpCountryWhois.csv";
+		string file = getPath(PATH_RESOURCES) + "GeoIpCountryWhois.csv";
 		string data = File(file, File::READ, File::OPEN).read();
 
 		const char* start = data.c_str();
@@ -164,6 +223,51 @@ void Util::initialize() {
 			linestart = lineend + 1;
 		}
 	} catch(const FileException&) {
+	}
+}
+
+void Util::migrate(const string& file) {
+	if(localMode) {
+		return;
+	}
+
+	if(File::getSize(file) != -1) {
+		return;
+	}
+
+	string fname = getFileName(file);
+	string old = paths[PATH_GLOBAL_CONFIG] + fname;
+	if(File::getSize(old) == -1) {
+		return;
+	}
+
+	File::renameFile(old, file);
+}
+
+void Util::loadBootConfig() {
+	// Load boot settings
+	try {
+		SimpleXML boot;
+		boot.fromXML(File(getPath(PATH_GLOBAL_CONFIG) + "dcppboot.xml", File::READ, File::OPEN).read());
+		boot.stepIn();
+
+		if(boot.findChild("LocalMode")) {
+			localMode = boot.getChildData() != "0";
+		}
+
+		if(boot.findChild("ConfigPath")) {
+			StringMap params;
+#ifdef _WIN32
+			// @todo load environment variables instead? would make it more useful on *nix
+			TCHAR path[MAX_PATH];
+
+			params["APPDATA"] = Text::fromT((::SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, SHGFP_TYPE_CURRENT, path), path));
+			params["PERSONAL"] = Text::fromT((::SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL, SHGFP_TYPE_CURRENT, path), path));
+#endif
+			paths[PATH_USER_CONFIG] = Util::formatParams(boot.getChildData(), params, false);
+		}
+	} catch(const Exception& ) {
+		// Unable to load boot settings...
 	}
 }
 
@@ -265,6 +369,10 @@ string Util::cleanPathChars(string aNick) {
 		aNick[i] = '_';
 	}
 	return aNick;
+}
+
+string Util::addBrackets(const string& s) {
+	return '<' + s + '>';
 }
 
 string Util::getShortTimeString(time_t t) {
@@ -430,7 +538,8 @@ bool Util::resolveNmdc(string& ip) {
 	if(
 		ip == "70.85.55.252" || // hublist.org
 		ip == "207.44.220.108" || // dcpp.net
-		ip == "216.34.181.97" || // hubtracker.com
+		ip == "216.34.181.97" || // hubtracker.com -- this is old hosting
+		ip == "81.181.249.83" || //openhublist.org
 		ip == "64.19.158.42" || // dchublist.com
 		ip == "174.133.138.93" // adchublist.com
 		) {

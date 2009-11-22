@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2008 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2009 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -66,9 +66,8 @@ public:
 	void search(StringList& who, const string& aName, const string& aSize, TypeModes aTypeMode, SizeModes aSizeMode, const string& aToken) {
 		search(who, aName, Util::toInt64(aSize), aTypeMode, aSizeMode, aToken);
 	}
-	static string clean(const string& aSearchString);
 
-	void respond(const AdcCommand& cmd, const CID& cid);
+	void respond(const AdcCommand& cmd, const CID& cid,  bool isUdpActive);
 
 	uint16_t getPort()
 	{
@@ -101,6 +100,7 @@ private:
 
 	SearchManager();
 
+	static std::string normalizeWhitespace(const std::string& aString);
 	virtual int run();
 
 	virtual ~SearchManager() throw();

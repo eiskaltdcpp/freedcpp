@@ -288,7 +288,7 @@ private:
 		}
 	}
 
-	string getConfigFile() { return Util::getConfigPath() + "ADLSearch.xml"; }
+	string getConfigFile() { return Util::getPath(Util::PATH_USER_CONFIG) + "ADLSearch.xml"; }
 };
 
 } // namespace dcpp

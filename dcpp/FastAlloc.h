@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2008 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2009 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -57,6 +57,9 @@ struct FastAlloc : public FastAllocBase {
 			deallocate((uint8_t*)m);
 		}
 	}
+protected:
+	~FastAlloc() { }
+
 private:
 
 	static void* allocate() {

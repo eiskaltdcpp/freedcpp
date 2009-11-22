@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2008 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2009 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -185,6 +185,9 @@ void DownloadManager::checkDownloads(UserConnection* aConn) {
 		downloads.push_back(d);
 	}
 	fire(DownloadManagerListener::Requesting(), d);
+
+	dcdebug("Requesting " I64_FMT "/" I64_FMT "\n", d->getStartPos(), d->getSize());
+
 	aConn->send(d->getCommand(aConn->isSet(UserConnection::FLAG_SUPPORTS_ZLIB_GET)));
 }
 
@@ -376,7 +379,7 @@ bool DownloadManager::checkSfv(UserConnection* aSource, Download* d) {
 		if(!crcMatch) {
 			File::deleteFile(d->getDownloadTarget());
 			dcdebug("DownloadManager: CRC32 mismatch for %s\n", d->getPath().c_str());
-			LogManager::getInstance()->message(str(F_("CRC32 inconsistency (SFV-Check) (File: %1%)") % d->getPath()));
+			LogManager::getInstance()->message(_("CRC32 inconsistency (SFV-Check)") + ' ' + Util::addBrackets(d->getPath()));
 			removeDownload(d);
 			fire(DownloadManagerListener::Failed(), d, _("CRC32 inconsistency (SFV-Check)"));
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2008 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2009 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@ namespace dcpp {
 
 class SearchManager;
 
-class SearchResult : public FastAlloc<SearchResult>, public intrusive_ptr_base {
+class SearchResult : public FastAlloc<SearchResult>, public intrusive_ptr_base<SearchResult> {
 public:
 	enum Types {
 		TYPE_FILE,
@@ -64,7 +64,6 @@ private:
 	friend class SearchManager;
 
 	SearchResult();
-	virtual ~SearchResult() throw() { }
 
 	SearchResult(const SearchResult& rhs);
 

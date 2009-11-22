@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2008 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2009 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,12 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#define APPNAME "LinuxDC++"
-#define VERSIONSTRING "0.7091"
-#define VERSIONFLOAT 0.7091
+#define APPNAME "FreeDC++"
+#define VERSIONSTRING "0.75"
+#define VERSIONFLOAT 0.75
+
+namespace dcpp {
+extern const string fullVersionString;
+}
 
 /* Update the .rc file as well... */

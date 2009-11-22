@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2008 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2009 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@
 #include "File.h"
 #include "LogManager.h"
 #include "ClientManager.h"
+#include "version.h"
 
 #include <openssl/bn.h>
 
@@ -43,7 +44,7 @@ CryptoManager::CryptoManager()
 :
 	certsLoaded(false),
 	lock("EXTENDEDPROTOCOLABCABCABCABCABCABC"),
-	pk("DCPLUSPLUS" VERSIONSTRING "ABCABC")
+	pk("DCPLUSPLUS" VERSIONSTRING)
 {
 	SSL_library_init();
 
@@ -340,7 +341,7 @@ void CryptoManager::decodeBZ2(const uint8_t* is, size_t sz, string& os) throw (C
 	bz_stream bs = { 0 };
 
 	if(BZ2_bzDecompressInit(&bs, 0, 0) != BZ_OK)
-		throw(CryptoException(_("Error during decompression")));
+		throw CryptoException(_("Error during decompression"));
 
 	// We assume that the files aren't compressed more than 2:1...if they are it'll work anyway,
 	// but we'll have to do multiple passes...

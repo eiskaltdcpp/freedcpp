@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2008 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2009 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,16 +47,26 @@ SearchManager::~SearchManager() throw() {
 	}
 }
 
+string SearchManager::normalizeWhitespace(const string& aString){
+	string::size_type found = 0;
+	string normalized = aString;
+	while((found = normalized.find_first_of("\t\n\r", found)) != string::npos) {
+		normalized[found] = ' ';
+		found++;
+	}
+	return normalized;
+}
+
 void SearchManager::search(const string& aName, int64_t aSize, TypeModes aTypeMode /* = TYPE_ANY */, SizeModes aSizeMode /* = SIZE_ATLEAST */, const string& aToken /* = Util::emptyString */) {
 	if(okToSearch()) {
-		ClientManager::getInstance()->search(aSizeMode, aSize, aTypeMode, aName, aToken);
+		ClientManager::getInstance()->search(aSizeMode, aSize, aTypeMode, normalizeWhitespace(aName), aToken);
 		lastSearch = GET_TICK();
 	}
 }
 
 void SearchManager::search(StringList& who, const string& aName, int64_t aSize /* = 0 */, TypeModes aTypeMode /* = TYPE_ANY */, SizeModes aSizeMode /* = SIZE_ATLEAST */, const string& aToken /* = Util::emptyString */) {
 	if(okToSearch()) {
-		ClientManager::getInstance()->search(who, aSizeMode, aSize, aTypeMode, aName, aToken);
+		ClientManager::getInstance()->search(who, aSizeMode, aSize, aTypeMode, normalizeWhitespace(aName), aToken);
 		lastSearch = GET_TICK();
 	}
 }
@@ -300,7 +310,7 @@ void SearchManager::onRES(const AdcCommand& cmd, const UserPtr& from, const stri
 	}
 }
 
-void SearchManager::respond(const AdcCommand& adc, const CID& from) {
+void SearchManager::respond(const AdcCommand& adc, const CID& from,  bool isUdpActive) {
 	// Filter own searches
 	if(from == ClientManager::getInstance()->getMe()->getCID())
 		return;
@@ -310,7 +320,7 @@ void SearchManager::respond(const AdcCommand& adc, const CID& from) {
 		return;
 
 	SearchResultList results;
-	ShareManager::getInstance()->search(results, adc.getParameters(), 10);
+	ShareManager::getInstance()->search(results, adc.getParameters(), isUdpActive ? 10 : 5);
 
 	string token;
 
@@ -325,21 +335,6 @@ void SearchManager::respond(const AdcCommand& adc, const CID& from) {
 			cmd.addParam("TO", token);
 		ClientManager::getInstance()->send(cmd, from);
 	}
-}
-
-string SearchManager::clean(const string& aSearchString) {
-	static const char* badChars = "$|.[]()-_+";
-	string::size_type i = aSearchString.find_first_of(badChars);
-	if(i == string::npos)
-		return aSearchString;
-
-	string tmp = aSearchString;
-	// Remove all strange characters from the search string
-	do {
-		tmp[i] = ' ';
-	} while ( (i = tmp.find_first_of(badChars, i)) != string::npos);
-
-	return tmp;
 }
 
 } // namespace dcpp

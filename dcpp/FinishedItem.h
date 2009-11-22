@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2008 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2009 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,9 +24,9 @@
 
 namespace dcpp {
 
-class FinishedItemBase {
+class FinishedItemBase : boost::noncopyable {
 public:
-	FinishedItemBase(
+	explicit FinishedItemBase(
 		int64_t transferred_,
 		int64_t milliSeconds_,
 		time_t time_
@@ -45,9 +45,9 @@ public:
 	GETSET(time_t, time, Time);
 };
 
-class FinishedFileItem : public FinishedItemBase {
+class FinishedFileItem : public FinishedItemBase, public intrusive_ptr_base<FinishedFileItem> {
 public:
-	FinishedFileItem(
+	explicit FinishedFileItem(
 		int64_t transferred_,
 		int64_t milliSeconds_,
 		time_t time_,
@@ -72,9 +72,9 @@ public:
 	GETSET(bool, crc32Checked, Crc32Checked);
 };
 
-class FinishedUserItem : public FinishedItemBase {
+class FinishedUserItem : public FinishedItemBase, public intrusive_ptr_base<FinishedUserItem> {
 public:
-	FinishedUserItem(
+	explicit FinishedUserItem(
 		int64_t transferred_,
 		int64_t milliSeconds_,
 		time_t time_,

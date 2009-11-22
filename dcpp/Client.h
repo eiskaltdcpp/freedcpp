@@ -55,6 +55,10 @@ public:
 	virtual string escape(string const& str) const { return str; }
 
 	bool isConnected() const { return state != STATE_DISCONNECTED; }
+	bool isSecure() const;
+	bool isTrusted() const;
+	std::string getCipherName() const;
+
 	bool isOp() const { return getMyIdentity().isOp(); }
 
 	uint16_t getPort() const { return port; }

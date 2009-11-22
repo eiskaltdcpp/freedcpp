@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2008 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2009 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -73,16 +73,16 @@ class QueueManager : public Singleton<QueueManager>, public Speaker<QueueManager
 {
 public:
 	/** Add a file to the queue. */
-	void add(const string& aTarget, int64_t aSize, const TTHValue& root, const UserPtr& aUser,
+	void add(const string& aTarget, int64_t aSize, const TTHValue& root, const UserPtr& aUser, const string& hubHint,
 		int aFlags = 0, bool addBad = true) throw(QueueException, FileException);
 	/** Add a user's filelist to the queue. */
-	void addList(const UserPtr& aUser, int aFlags, const string& aInitialDir = Util::emptyString) throw(QueueException, FileException);
+	void addList(const UserPtr& aUser, const string& hubHint, int aFlags, const string& aInitialDir = Util::emptyString) throw(QueueException, FileException);
 	/** Readd a source that was removed */
-	void readd(const string& target, const UserPtr& aUser) throw(QueueException);
+	void readd(const string& target, const UserPtr& aUser, const string& hubHint) throw(QueueException);
 	/** Add a directory to the queue (downloads filelist and matches the directory). */
-	void addDirectory(const string& aDir, const UserPtr& aUser, const string& aTarget, QueueItem::Priority p = QueueItem::DEFAULT) throw();
+	void addDirectory(const string& aDir, const UserPtr& aUser, const string& hubHint, const string& aTarget, QueueItem::Priority p = QueueItem::DEFAULT) throw();
 
-	int matchListing(const DirectoryListing& dl) throw();
+	int matchListing(const DirectoryListing& dl, const string& hubHint) throw();
 
 	bool getTTH(const string& name, TTHValue& tth) throw();
 
@@ -95,6 +95,8 @@ public:
 	void remove(const string& aTarget) throw();
 	void removeSource(const string& aTarget, const UserPtr& aUser, int reason, bool removeConn = true) throw();
 	void removeSource(const UserPtr& aUser, int reason) throw();
+
+	void recheck(const string& aTarget);
 
 	void setPriority(const string& aTarget, QueueItem::Priority p) throw();
 
@@ -137,6 +139,27 @@ private:
 		FileList files;
 		CriticalSection cs;
 	} mover;
+
+	class Rechecker : public Thread {
+		struct DummyOutputStream : OutputStream {
+			virtual size_t write(const void*, size_t n) throw(Exception) { return n; }
+			virtual size_t flush() throw(Exception) { return 0; }
+		};
+
+	public:
+		explicit Rechecker(QueueManager* qm_) : qm(qm_), active(false) { }
+		virtual ~Rechecker() { join(); }
+
+		void add(const string& file);
+		virtual int run();
+
+	private:
+		QueueManager* qm;
+		bool active;
+
+		StringList files;
+		CriticalSection cs;
+	} rechecker;
 
 	/** All queue items by target */
 	class FileQueue {
@@ -223,6 +246,8 @@ private:
 
 	void load(const SimpleXML& aXml);
 	void moveFile(const string& source, const string& target);
+	void moveStuckFile(QueueItem* qi);
+	void rechecked(QueueItem* qi);
 
 	void setDirty();
 

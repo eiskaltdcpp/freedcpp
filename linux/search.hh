@@ -68,9 +68,7 @@ class Search:
 		void popupMenu_gui();
 		void setStatus_gui(std::string statusBar, std::string text);
 		void search_gui();
-		void parseSearchResult(dcpp::SearchResult *result, dcpp::StringMap &resultMap, int *actualSlots);
-		void addResult_gui(dcpp::SearchResult *result, bool inShare);
-		void clearList_gui();
+		void addResult_gui(dcpp::StringMap resultMap);
 		void updateParentRow_gui(GtkTreeIter *parent, GtkTreeIter *child = NULL);
 		void ungroup_gui();
 		void regroup_gui();
@@ -108,12 +106,13 @@ class Search:
 		static void onRemoveClicked_gui(GtkMenuItem *item, gpointer data);
 
 		// Client functions
-		void download_client(std::string target, dcpp::SearchResult *result);
-		void downloadDir_client(std::string target, dcpp::SearchResult *result);
-		void addSource_client(std::string source, dcpp::SearchResult *result);
-		void getFileList_client(std::string cid, std::string dir, bool match);
+		void parseSearchResult_client(dcpp::SearchResultPtr result, dcpp::StringMap &resultMap);
+		void download_client(std::string target, std::string cid, std::string filename, int64_t size, std::string tth, std::string hubUrl);
+		void downloadDir_client(std::string target, std::string cid, std::string filename, std::string hubUrl);
+		void addSource_client(std::string source, std::string cid, int64_t size, std::string tth, std::string hubUrl);
+		void getFileList_client(std::string cid, std::string dir, bool match, std::string hubUrl);
 		void addFavUser_client(std::string cid);
-		void grantSlot_client(std::string cid);
+		void grantSlot_client(std::string cid, std::string hubUrl);
 		void removeSource_client(std::string cid);
 
 		// Client callbacks
