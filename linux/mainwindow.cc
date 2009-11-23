@@ -441,7 +441,7 @@ void MainWindow::createStatusIcon_gui()
 	statusIcon = gtk_status_icon_new_from_icon_name(g_get_prgname());
 
 	g_signal_connect(getWidget("statusIconQuitItem"), "activate", G_CALLBACK(onQuitClicked_gui), (gpointer)this);
-	g_signal_connect(getWidget("statusIconToggleInterfaceItem"), "activate", G_CALLBACK(onToggleWindowVisibility_gui), (gpointer)this);
+	g_signal_connect(getWidget("statusIconShowInterfaceItem"), "toggled", G_CALLBACK(onShowInterfaceToggled_gui), (gpointer)this);
 	g_signal_connect(statusIcon, "activate", G_CALLBACK(onStatusIconActivated_gui), (gpointer)this);
 	g_signal_connect(statusIcon, "popup-menu", G_CALLBACK(onStatusIconPopupMenu_gui), (gpointer)this);
 
@@ -1162,7 +1162,12 @@ void MainWindow::onCloseBookEntry_gui(GtkWidget *widget, gpointer data)
 
 void MainWindow::onStatusIconActivated_gui(GtkStatusIcon *statusIcon, gpointer data)
 {
-	onToggleWindowVisibility_gui(NULL, data);
+	MainWindow *mw = (MainWindow *)data;
+	GtkCheckMenuItem *item = GTK_CHECK_MENU_ITEM(mw->getWidget("statusIconShowInterfaceItem"));
+
+	// Toggle the "Show Interface" check menu item. This will in turn invoke its callback.
+	gboolean active = gtk_check_menu_item_get_active(item);
+	gtk_check_menu_item_set_active(item, !active);
 }
 
 void MainWindow::onStatusIconPopupMenu_gui(GtkStatusIcon *statusIcon, guint button, guint time, gpointer data)
@@ -1172,7 +1177,7 @@ void MainWindow::onStatusIconPopupMenu_gui(GtkStatusIcon *statusIcon, guint butt
 	gtk_menu_popup(menu, NULL, NULL, gtk_status_icon_position_menu, statusIcon, button, time);
 }
 
-void MainWindow::onToggleWindowVisibility_gui(GtkMenuItem *item, gpointer data)
+void MainWindow::onShowInterfaceToggled_gui(GtkCheckMenuItem *item, gpointer data)
 {
 	MainWindow *mw = (MainWindow *)data;
 	GtkWindow *win = mw->window;

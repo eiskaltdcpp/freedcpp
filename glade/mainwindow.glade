@@ -23,7 +23,7 @@
                     <child>
                       <widget class="GtkImageMenuItem" id="openFileListMenuItem">
                         <property name="visible">True</property>
-                        <property name="label" translatable="yes">Open file list</property>
+                        <property name="label" translatable="yes">Open _file list...</property>
                         <property name="use_underline">True</property>
                         <accelerator key="L" modifiers="GDK_CONTROL_MASK" signal="activate"/>
                         <child internal-child="image">
@@ -38,14 +38,14 @@
                     <child>
                       <widget class="GtkMenuItem" id="openOwnListMenuItem">
                         <property name="visible">True</property>
-                        <property name="label" translatable="yes">Open own list</property>
+                        <property name="label" translatable="yes">Open _own list</property>
                         <property name="use_underline">True</property>
                       </widget>
                     </child>
                     <child>
                       <widget class="GtkImageMenuItem" id="refreshFileListMenuItem">
                         <property name="visible">True</property>
-                        <property name="label" translatable="yes">Refresh file list</property>
+                        <property name="label" translatable="yes">_Refresh file list</property>
                         <property name="use_underline">True</property>
                         <accelerator key="E" modifiers="GDK_CONTROL_MASK" signal="activate"/>
                         <child internal-child="image">
@@ -65,7 +65,7 @@
                     <child>
                       <widget class="GtkImageMenuItem" id="quickConnectMenuItem">
                         <property name="visible">True</property>
-                        <property name="label" translatable="yes">Quick connect</property>
+                        <property name="label" translatable="yes">_Quick connect</property>
                         <property name="use_underline">True</property>
                         <accelerator key="N" modifiers="GDK_CONTROL_MASK" signal="activate"/>
                         <child internal-child="image">
@@ -80,7 +80,7 @@
                     <child>
                       <widget class="GtkMenuItem" id="reconnectMenuItem">
                         <property name="visible">True</property>
-                        <property name="label" translatable="yes">Reconnect</property>
+                        <property name="label" translatable="yes">Re_connect</property>
                         <property name="use_underline">True</property>
                         <accelerator key="R" modifiers="GDK_CONTROL_MASK" signal="activate"/>
                       </widget>
@@ -93,7 +93,7 @@
                     <child>
                       <widget class="GtkImageMenuItem" id="settingsMenuItem">
                         <property name="visible">True</property>
-                        <property name="label" translatable="yes">Preferences</property>
+                        <property name="label" translatable="yes">_Preferences</property>
                         <property name="use_underline">True</property>
                         <child internal-child="image">
                           <widget class="GtkImage" id="settingsMenuImage">
@@ -887,10 +887,16 @@ Contributors:
   </widget>
   <widget class="GtkMenu" id="statusIconMenu">
     <child>
-      <widget class="GtkMenuItem" id="statusIconToggleInterfaceItem">
+      <widget class="GtkCheckMenuItem" id="statusIconShowInterfaceItem">
         <property name="visible">True</property>
-        <property name="label" translatable="yes">Show/hide interface</property>
+        <property name="label" translatable="yes">_Show Interface</property>
+        <property name="active">True</property>
         <property name="use_underline">True</property>
+      </widget>
+    </child>
+    <child>
+      <widget class="GtkSeparatorMenuItem" id="statusIconSeparatorItem">
+        <property name="visible">True</property>
       </widget>
     </child>
     <child>
