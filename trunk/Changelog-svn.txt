@@ -1,3 +1,8 @@
+r34: 0.0.1.30
+* Ревизия 316 (linuxdcpp, added 'Get Help Online' & 'Report a Problem' links to help menu).
+* Ревизия 319 (linuxdcpp, clicking notification icon fails to toggle interface).
+* Удалил пункты меню 'Get Help Online', 'Report a Problem'.
+
 r33: 0.0.1.29
 * Обновил ядро DC++ на 0.75.
 * Ревизия 318 (linuxdcpp, upgraded the DC++ core to 0.75).

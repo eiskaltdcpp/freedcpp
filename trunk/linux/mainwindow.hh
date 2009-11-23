@@ -131,7 +131,7 @@ class MainWindow:
 		static void onCloseBookEntry_gui(GtkWidget *widget, gpointer data);
 		static void onStatusIconActivated_gui(GtkStatusIcon *statusIcon, gpointer data);
 		static void onStatusIconPopupMenu_gui(GtkStatusIcon *statusIcon, guint button, guint time, gpointer data);
-		static void onToggleWindowVisibility_gui(GtkMenuItem *item, gpointer data);
+		static void onShowInterfaceToggled_gui(GtkCheckMenuItem *item, gpointer data);
 
 		// Client functions
 		void autoConnect_client();
