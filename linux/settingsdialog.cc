@@ -1805,7 +1805,7 @@ bool Settings::validateUserCommandInput(const string &oldName)
 	return TRUE;
 }
 
-void Settings::showErrorDialog(const string &error)
+void Settings::showErrorDialog(const string error)
 {
 	GtkWidget *errorDialog = gtk_message_dialog_new(GTK_WINDOW(getWidget("dialog")),
 		GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_OK, "%s", error.c_str());
@@ -2119,25 +2119,16 @@ gboolean Settings::onFavoriteButtonReleased_gui(GtkWidget *widget, GdkEventButto
 	return FALSE;
 }
 
-void Settings::addShare_gui(string path, string name, string error)
+void Settings::addShare_gui(string path, string name, int64_t size)
 {
-	if (error.empty())
-	{
-		GtkTreeIter iter;
-		int64_t size = ShareManager::getInstance()->getShareSize(path);
-
-		gtk_list_store_append(shareStore, &iter);
-		gtk_list_store_set(shareStore, &iter,
-			shareView.col("Virtual Name"), name.c_str(),
-			shareView.col("Directory"), path.c_str(),
-			shareView.col("Size"), Util::formatBytes(size).c_str(),
-			shareView.col("Real Size"), size,
-			-1);
-	}
-	else
-	{
-		showErrorDialog(error.c_str());
-	}
+	GtkTreeIter iter;
+	gtk_list_store_append(shareStore, &iter);
+	gtk_list_store_set(shareStore, &iter,
+		shareView.col("Virtual Name"), name.c_str(),
+		shareView.col("Directory"), path.c_str(),
+		shareView.col("Size"), Util::formatBytes(size).c_str(),
+		shareView.col("Real Size"), size,
+		-1);
 }
 
 void Settings::onRemoveShare_gui(GtkWidget *widget, gpointer data)
@@ -2580,19 +2571,22 @@ void Settings::shareHidden_client(bool show)
 
 void Settings::addShare_client(string path, string name)
 {
-	string error;
+	int64_t size = 0;
 
 	try
 	{
 		ShareManager::getInstance()->addDirectory(path, name);
+		size = ShareManager::getInstance()->getShareSize(path);
 	}
 	catch (const ShareException &e)
 	{
-		error = e.getError();
+		typedef Func1<Settings, const string> F1;
+		F1 *func = new F1(this, &Settings::showErrorDialog, e.getError());
+		WulforManager::get()->dispatchGuiFunc(func);
 	}
 
-	typedef Func3<Settings, string, string, string> F3;
-	F3 *func = new F3(this, &Settings::addShare_gui, path, name, error);
+	typedef Func3<Settings, string, string, int64_t> F3;
+	F3 *func = new F3(this, &Settings::addShare_gui, path, name, size);
 	WulforManager::get()->dispatchGuiFunc(func);
 }
 

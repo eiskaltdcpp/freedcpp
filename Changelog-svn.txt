@@ -1,3 +1,6 @@
+r35: 0.0.1.31
+* Ревизия 321 (linuxdcpp, minor settingsdialog cleanup).
+
 r34: 0.0.1.30
 * Ревизия 316 (linuxdcpp, added 'Get Help Online' & 'Report a Problem' links to help menu).
 * Ревизия 319 (linuxdcpp, clicking notification icon fails to toggle interface).
