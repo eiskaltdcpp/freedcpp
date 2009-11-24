@@ -58,14 +58,14 @@ class Settings:
 		void initAppearance_gui();
 		void initLog_gui();
 		void initAdvanced_gui();
-		void addShare_gui(std::string path, std::string name, std::string error);
+		void addShare_gui(std::string path, std::string name, int64_t size);
 		void selectTextColor_gui(const int select);
 		void selectTextStyle_gui(const int select);
 		void loadUserCommands_gui();
 		void saveUserCommand(dcpp::UserCommand *uc);
 		void updateUserCommandTextSent_gui();
 		bool validateUserCommandInput(const std::string &oldName = "");
-		void showErrorDialog(const std::string &error);
+		void showErrorDialog(const std::string error);
 
 		// GUI callbacks
 		static void onOptionsViewToggled_gui(GtkCellRendererToggle *cell, gchar *path, gpointer data);
