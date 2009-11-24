@@ -463,8 +463,7 @@ void MainWindow::setMainStatus_gui(string text, time_t t)
 	if (!text.empty())
 	{
 		text = "[" + Util::getShortTimeString(t) + "] " + text;
-
-		setStatus_gui("status1", text);
+		gtk_label_set_text(GTK_LABEL(getWidget("labelStatus")), text.c_str());
 	}
 }
 
@@ -473,35 +472,14 @@ void MainWindow::showNotification_gui(string body, Notify::TypeNotify notify)
 	Notify::get()->showNotify(_("<b>file:</b> "), body, notify);
 }
 
-void MainWindow::setStatus_gui(string statusBar, string text)
+void MainWindow::setStats_gui(string hubs, string downloadSpeed,
+	string downloaded, string uploadSpeed, string uploaded)
 {
-	if (statusBar != "status1")
-	{
-		PangoLayout *pango;
-		int width;
-		GtkRequisition req;
-
-		pango = gtk_widget_create_pango_layout(GTK_WIDGET(window), text.c_str());
-		pango_layout_get_pixel_size(pango, &width, NULL);
-		g_object_unref(G_OBJECT(pango));
-		gtk_widget_size_request(getWidget(statusBar), &req);
-		if (width > req.width - emptyStatusWidth)
-			gtk_widget_set_size_request(getWidget(statusBar), width + emptyStatusWidth, -1);
-	}
-
-	gtk_statusbar_pop(GTK_STATUSBAR(getWidget(statusBar)), 0);
-	gtk_statusbar_push(GTK_STATUSBAR(getWidget(statusBar)), 0, text.c_str());
-}
-
-void MainWindow::setStats_gui(string hub, string slot,
-	string dTot, string uTot, string dl, string ul)
-{
-	setStatus_gui("status2", hub);
-	setStatus_gui("status3", slot);
-	setStatus_gui("status4", dTot);
-	setStatus_gui("status5", uTot);
-	setStatus_gui("status6", ul);
-	setStatus_gui("status7", dl);
+	gtk_label_set_text(GTK_LABEL(getWidget("labelHubs")), hubs.c_str());
+	gtk_label_set_text(GTK_LABEL(getWidget("labelDownloadSpeed")), downloadSpeed.c_str());
+	gtk_label_set_text(GTK_LABEL(getWidget("labelDownloaded")), downloaded.c_str());
+	gtk_label_set_text(GTK_LABEL(getWidget("labelUploadSpeed")), uploadSpeed.c_str());
+	gtk_label_set_text(GTK_LABEL(getWidget("labelUploaded")), uploaded.c_str());
 }
 
 BookEntry* MainWindow::findBookEntry(const EntryType type, const string &id)
@@ -1345,37 +1323,36 @@ void MainWindow::on(TimerManagerListener::Second, uint32_t ticks) throw()
 	if (!BOOLSETTING(ALWAYS_TRAY) && minimized)
 		return;
 
-	string status1, status2, status3, status4, status5, status6;
 	int64_t diff = (int64_t)((lastUpdate == 0) ? ticks - 1000 : ticks - lastUpdate);
-	int64_t updiff = Socket::getTotalUp() - lastUp;
-	int64_t downdiff = Socket::getTotalDown() - lastDown;
+	int64_t downBytes = 0;
+	int64_t upBytes = 0;
 
-	status1 = _("H: ") + Client::getCounts();
-	status2 = _("S: ") + Util::toString(SETTING(SLOTS) -
-		UploadManager::getInstance()->getRunning()) + '/' +
-		Util::toString(SETTING(SLOTS));
-	status3 = _("D: ") + Util::formatBytes(Socket::getTotalDown());
-	status4 = _("U: ") + Util::formatBytes(Socket::getTotalUp());
 	if (diff > 0)
 	{
-		status5 = Util::formatBytes((int64_t)((downdiff*1000)/diff)) + "/s (" +
-			Util::toString(DownloadManager::getInstance()->getDownloadCount()) + ")";
-		status6 = Util::formatBytes((int64_t)((updiff*1000)/diff)) + "/s (" +
-			Util::toString(UploadManager::getInstance()->getUploadCount()) + ")";
+		int64_t downDiff = Socket::getTotalDown() - lastDown;
+		int64_t upDiff = Socket::getTotalUp() - lastUp;
+		downBytes = (downDiff * 1000) / diff;
+		upBytes = (upDiff * 1000) / diff;
 	}
+
+	string hubs = Client::getCounts();
+	string downloadSpeed = Util::formatBytes(downBytes) + "/s";
+	string downloaded = Util::formatBytes(Socket::getTotalDown());
+	string uploadSpeed = Util::formatBytes(upBytes) + "/s";
+	string uploaded = Util::formatBytes(Socket::getTotalUp());
 
 	lastUpdate = ticks;
 	lastUp = Socket::getTotalUp();
 	lastDown = Socket::getTotalDown();
 
-	typedef Func6<MainWindow, string, string, string, string, string, string> func_t;
-	func_t *func = new func_t(this, &MainWindow::setStats_gui, status1, status2, status3, status4, status5, status6);
+	typedef Func5<MainWindow, string, string, string, string, string> F5;
+	F5 *func = new F5(this, &MainWindow::setStats_gui, hubs, downloadSpeed, downloaded, uploadSpeed, uploaded);
 	WulforManager::get()->dispatchGuiFunc(func);
 
-	if (BOOLSETTING(ALWAYS_TRAY) && !status5.empty() && !status6.empty())
+	if (BOOLSETTING(ALWAYS_TRAY) && !downloadSpeed.empty() && !uploadSpeed.empty())
 	{
 		typedef Func2<MainWindow, string, string> F2;
-		F2 *f2 = new F2(this, &MainWindow::updateStatusIconTooltip_gui, status5, status6);
+		F2 *f2 = new F2(this, &MainWindow::updateStatusIconTooltip_gui, downloadSpeed, uploadSpeed);
 		WulforManager::get()->dispatchGuiFunc(f2);
 	}
 }
