@@ -1406,7 +1406,7 @@ void Hub::onSendMessage_gui(GtkEntry *entry, gpointer data)
 		}
 		else if (command == _("freedcpp"))
 		{
-			hub->addStatusMessage_gui(_("freedcpp 0.0.1.31/0.75, project home: http://freedcpp.narod.ru http://code.google.com/p/freedcpp"), Msg::SYSTEM, Sound::NONE);
+			hub->addStatusMessage_gui(_("freedcpp 0.0.1.32/0.75, project home: http://freedcpp.narod.ru http://code.google.com/p/freedcpp"), Msg::SYSTEM, Sound::NONE);
 		}
 		else if (command == _("help"))
 		{
@@ -1681,10 +1681,10 @@ void Hub::connectClient_client(string address, string encoding)
 
 	if (address.substr(0, 6) == "adc://" || address.substr(0, 7) == "adcs://")
 		encoding = "UTF-8";
-	else if (encoding.empty() || encoding == WulforUtil::ENCODING_GLOBAL_HUB_DEFAULT)
+	else if (encoding.empty() || encoding == "Global hub default") // latter for 1.0.3 backwards compatability
 		encoding = WGETS("default-charset");
 
-	if (encoding == WulforUtil::ENCODING_SYSTEM_DEFAULT)
+	if (encoding == WulforUtil::ENCODING_LOCALE)
 		encoding = Text::systemCharset;
 
 	// Only pick "UTF-8" part of "UTF-8 (Unicode)".

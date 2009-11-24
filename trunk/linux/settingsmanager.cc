@@ -98,7 +98,7 @@ WulforSettingsManager::WulforSettingsManager():
 	defaultString.insert(StringMap::value_type("sharebrowser-order", ""));
 	defaultString.insert(StringMap::value_type("sharebrowser-width", ""));
 	defaultString.insert(StringMap::value_type("sharebrowser-visibility", ""));
-	defaultString.insert(StringMap::value_type("default-charset", WulforUtil::ENCODING_SYSTEM_DEFAULT));
+	defaultString.insert(StringMap::value_type("default-charset", WulforUtil::ENCODING_LOCALE));
 	defaultString.insert(StringMap::value_type("sound-download-begins", ""));
 	defaultString.insert(StringMap::value_type("sound-download-finished", ""));
 	defaultString.insert(StringMap::value_type("sound-upload-finished", ""));

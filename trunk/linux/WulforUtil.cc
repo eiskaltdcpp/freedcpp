@@ -37,8 +37,7 @@
 using namespace std;
 using namespace dcpp;
 
-const string WulforUtil::ENCODING_SYSTEM_DEFAULT = _("System default");
-const string WulforUtil::ENCODING_GLOBAL_HUB_DEFAULT = _("Global hub default");
+const string WulforUtil::ENCODING_LOCALE = _("System default");
 vector<string> WulforUtil::charsets;
 const string WulforUtil::magnetSignature = "magnet:?xt=urn:tree:tiger:";
 GtkIconFactory* WulforUtil::iconFactory = NULL;
@@ -189,7 +188,7 @@ vector<string>& WulforUtil::getCharsets()
 {
 	if (charsets.size() == 0)
 	{
-		charsets.push_back(_("System default"));
+		charsets.push_back(ENCODING_LOCALE);
 		charsets.push_back(_("UTF-8 (Unicode)"));
 		charsets.push_back(_("CP1252 (Western Europe)"));
 		charsets.push_back(_("CP1250 (Central Europe)"));

@@ -69,8 +69,7 @@ class WulforUtil
 		static void copyValue_gui(GtkTreeStore* store, GtkTreeIter *fromIter, GtkTreeIter *toIter, int position);
 		static void registerIcons();
 
-		static const std::string ENCODING_SYSTEM_DEFAULT;
-		static const std::string ENCODING_GLOBAL_HUB_DEFAULT;
+		static const std::string ENCODING_LOCALE;
 		
 	private:
 		static std::vector<std::string> charsets;
