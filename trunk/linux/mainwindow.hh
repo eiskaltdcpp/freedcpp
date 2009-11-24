@@ -94,9 +94,8 @@ class MainWindow:
 		BookEntry *findBookEntry(const EntryType type, const std::string &id = "");
 		void createStatusIcon_gui();
 		void updateStatusIconTooltip_gui(std::string download, std::string upload);
-		void setStatus_gui(std::string statusBar, std::string text);
-		void setStats_gui(std::string hub, std::string slot,
-			std::string dTot, std::string uTot, std::string dl, std::string ul);
+		void setStats_gui(std::string hubs, std::string downloadSpeed,
+			std::string downloaded, std::string uploadSpeed, std::string uploaded);
 		void setTabPosition_gui(int position);
 		void setToolbarStyle_gui(int style);
 
