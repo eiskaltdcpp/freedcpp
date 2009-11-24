@@ -1,3 +1,6 @@
+r36: 0.0.1.32
+* Ревизия 323 (linuxdcpp, rewrote favorite hub properties dialog).
+
 r35: 0.0.1.31
 * Ревизия 321 (linuxdcpp, minor settingsdialog cleanup).
 

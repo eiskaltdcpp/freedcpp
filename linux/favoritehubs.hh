@@ -56,6 +56,7 @@ class FavoriteHubs:
 		static void onRemoveEntry_gui(GtkWidget *widget, gpointer data);
 		static void onConnect_gui(GtkButton *widget, gpointer data);
 		static void onToggledClicked_gui(GtkCellRendererToggle *cell, gchar *path, gpointer data);
+		static void onCheckButtonToggled_gui(GtkToggleButton *button, gpointer data);
 
 		// Client functions
 		void initializeList_client();

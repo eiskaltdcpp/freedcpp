@@ -32,9 +32,11 @@ FavoriteHubs::FavoriteHubs():
 {
 	// Configure the dialog
 	gtk_dialog_set_alternative_button_order(GTK_DIALOG(getWidget("favoriteHubsDialog")), GTK_RESPONSE_OK, GTK_RESPONSE_CANCEL, -1);
+	gtk_widget_set_sensitive(getWidget("comboboxCharset"), FALSE);
+	gtk_widget_set_sensitive(getWidget("entryNick"), FALSE);
+	gtk_widget_set_sensitive(getWidget("entryUserDescription"), FALSE);
 
 	// Fill the charset drop-down list in edit fav hub dialog.
-	gtk_combo_box_append_text(GTK_COMBO_BOX(getWidget("comboboxCharset")), WulforUtil::ENCODING_GLOBAL_HUB_DEFAULT.c_str());
 	vector<string> &charsets = WulforUtil::getCharsets();
 	for (vector<string>::const_iterator it = charsets.begin(); it != charsets.end(); ++it)
 		gtk_combo_box_append_text(GTK_COMBO_BOX(getWidget("comboboxCharset")), it->c_str());
@@ -44,9 +46,9 @@ FavoriteHubs::FavoriteHubs():
 	favoriteView.insertColumn("Auto Connect", G_TYPE_BOOLEAN, TreeView::BOOL, 100);
 	favoriteView.insertColumn("Name", G_TYPE_STRING, TreeView::STRING, 150);
 	favoriteView.insertColumn("Description", G_TYPE_STRING, TreeView::STRING, 250);
+	favoriteView.insertColumn("Address", G_TYPE_STRING, TreeView::STRING, 175);
 	favoriteView.insertColumn("Nick", G_TYPE_STRING, TreeView::STRING, 100);
 	favoriteView.insertColumn("Password", G_TYPE_STRING, TreeView::STRING, 100);
-	favoriteView.insertColumn("Address", G_TYPE_STRING, TreeView::STRING, 175);
 	favoriteView.insertColumn("User Description", G_TYPE_STRING, TreeView::STRING, 125);
 	favoriteView.insertColumn("Encoding", G_TYPE_STRING, TreeView::STRING, 125);
 	favoriteView.insertHiddenColumn("Hidden Password", G_TYPE_STRING);
@@ -78,6 +80,9 @@ FavoriteHubs::FavoriteHubs():
 	g_signal_connect(favoriteView.get(), "button-press-event", G_CALLBACK(onButtonPressed_gui), (gpointer)this);
 	g_signal_connect(favoriteView.get(), "button-release-event", G_CALLBACK(onButtonReleased_gui), (gpointer)this);
 	g_signal_connect(favoriteView.get(), "key-release-event", G_CALLBACK(onKeyReleased_gui), (gpointer)this);
+	g_signal_connect(getWidget("checkbuttonEncoding"), "toggled", G_CALLBACK(onCheckButtonToggled_gui), getWidget("comboboxCharset"));
+	g_signal_connect(getWidget("checkbuttonNick"), "toggled", G_CALLBACK(onCheckButtonToggled_gui), getWidget("entryNick"));
+	g_signal_connect(getWidget("checkbuttonUserDescription"), "toggled", G_CALLBACK(onCheckButtonToggled_gui), getWidget("entryUserDescription"));
 }
 
 FavoriteHubs::~FavoriteHubs()
@@ -101,18 +106,18 @@ void FavoriteHubs::addEntry_gui(StringMap params)
 
 void FavoriteHubs::editEntry_gui(StringMap &params, GtkTreeIter *iter)
 {
-	string encoding = params["Encoding"].empty() ? WulforUtil::ENCODING_GLOBAL_HUB_DEFAULT : params["Encoding"];
+	string password = params["Password"].empty() ? "" : string(8, '*');
 
 	gtk_list_store_set(favoriteStore, iter,
 		favoriteView.col("Auto Connect"), Util::toInt(params["Auto Connect"]),
 		favoriteView.col("Name"), params["Name"].c_str(),
 		favoriteView.col("Description"), params["Description"].c_str(),
 		favoriteView.col("Nick"), params["Nick"].c_str(),
-		favoriteView.col("Password"), params["Password"].c_str(),
-		favoriteView.col("Hidden Password"), params["Hidden Password"].c_str(),
+		favoriteView.col("Password"), password.c_str(),
+		favoriteView.col("Hidden Password"), params["Password"].c_str(),
 		favoriteView.col("Address"), params["Address"].c_str(),
 		favoriteView.col("User Description"), params["User Description"].c_str(),
-		favoriteView.col("Encoding"), encoding.c_str(),
+		favoriteView.col("Encoding"), params["Encoding"].c_str(),
 		-1);
 }
 
@@ -242,9 +247,9 @@ void FavoriteHubs::onAddEntry_gui(GtkWidget *widget, gpointer data)
 	params["Address"] = emptyString;
 	params["Description"] = emptyString;
 	params["Nick"] = emptyString;
-	params["Hidden Password"] = emptyString;
+	params["Password"] = emptyString;
 	params["User Description"] = emptyString;
-	params["Encoding"] = WulforUtil::ENCODING_GLOBAL_HUB_DEFAULT;
+	params["Encoding"] = emptyString;
 	params["Auto Connect"] = "0";
 
 	bool updatedEntry = fh->showFavoriteHubDialog_gui(params);
@@ -270,7 +275,7 @@ void FavoriteHubs::onEditEntry_gui(GtkWidget *widget, gpointer data)
 	params["Address"] = fh->favoriteView.getString(&iter, "Address");
 	params["Description"] = fh->favoriteView.getString(&iter, "Description");
 	params["Nick"] = fh->favoriteView.getString(&iter, "Nick");
-	params["Hidden Password"] = fh->favoriteView.getString(&iter, "Hidden Password");
+	params["Password"] = fh->favoriteView.getString(&iter, "Hidden Password");
 	params["User Description"] = fh->favoriteView.getString(&iter, "User Description");
 	params["Encoding"] = fh->favoriteView.getString(&iter, "Encoding");
 	params["Auto Connect"] = fh->favoriteView.getValue<gboolean>(&iter, "Auto Connect") ? "1" : "0";
@@ -295,13 +300,26 @@ bool FavoriteHubs::showFavoriteHubDialog_gui(StringMap &params)
 	gtk_entry_set_text(GTK_ENTRY(getWidget("entryAddress")), params["Address"].c_str());
 	gtk_entry_set_text(GTK_ENTRY(getWidget("entryDescription")), params["Description"].c_str());
 	gtk_entry_set_text(GTK_ENTRY(getWidget("entryNick")), params["Nick"].c_str());
-	gtk_entry_set_text(GTK_ENTRY(getWidget("entryPassword")), params["Hidden Password"].c_str());
-	gtk_entry_set_text(GTK_ENTRY(getWidget("entryUDescription")), params["User Description"].c_str());
+	gtk_entry_set_text(GTK_ENTRY(getWidget("entryPassword")), params["Password"].c_str());
+	gtk_entry_set_text(GTK_ENTRY(getWidget("entryUserDescription")), params["User Description"].c_str());
 	gtk_entry_set_text(GTK_ENTRY(getWidget("comboboxentryCharset")), params["Encoding"].c_str());
 
 	// Set the auto connect checkbox
 	gboolean autoConnect = params["Auto Connect"] == "1" ? TRUE : FALSE;
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(getWidget("checkButtonAutoConnect")), autoConnect);
+
+	// Set the override default encoding checkbox. Check for "Global hub default"
+	// for backwards compatability w/ 1.0.3. Should be removed at some point.
+	gboolean overrideEncoding = !(params["Encoding"].empty() || params["Encoding"] == "Global hub default");
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(getWidget("checkbuttonEncoding")), overrideEncoding);
+
+	// Set the override default nick checkbox
+	gboolean overrideNick = !(params["Nick"].empty() || params["Nick"] == SETTING(NICK));
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(getWidget("checkbuttonNick")), overrideNick);
+
+	// Set the override default user description checkbox
+	gboolean overrideUserDescription = !(params["User Description"].empty() || params["User Description"] == SETTING(DESCRIPTION));
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(getWidget("checkbuttonUserDescription")), overrideUserDescription);
 
 	// Show the dialog
 	gint response = gtk_dialog_run(GTK_DIALOG(getWidget("favoriteHubsDialog")));
@@ -312,14 +330,25 @@ bool FavoriteHubs::showFavoriteHubDialog_gui(StringMap &params)
 		params["Name"] = gtk_entry_get_text(GTK_ENTRY(getWidget("entryName")));
 		params["Address"] = gtk_entry_get_text(GTK_ENTRY(getWidget("entryAddress")));
 		params["Description"] = gtk_entry_get_text(GTK_ENTRY(getWidget("entryDescription")));
-		params["Nick"] = gtk_entry_get_text(GTK_ENTRY(getWidget("entryNick")));
-		params["Hidden Password"] = gtk_entry_get_text(GTK_ENTRY(getWidget("entryPassword")));
-		params["User Description"] = gtk_entry_get_text(GTK_ENTRY(getWidget("entryUDescription")));
+		params["Password"] = gtk_entry_get_text(GTK_ENTRY(getWidget("entryPassword")));
 		params["Auto Connect"] = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(getWidget("checkButtonAutoConnect"))) ? "1" : "0";
 
-		gchar *encoding = gtk_combo_box_get_active_text(GTK_COMBO_BOX(getWidget("comboboxCharset")));
-		params["Encoding"] = string(encoding);
-		g_free(encoding);
+		if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(getWidget("checkbuttonEncoding"))))
+		{
+			gchar *encoding = gtk_combo_box_get_active_text(GTK_COMBO_BOX(getWidget("comboboxCharset")));
+			params["Encoding"] = string(encoding);
+			g_free(encoding);
+		}
+
+		if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(getWidget("checkbuttonNick"))))
+		{
+			params["Nick"] = gtk_entry_get_text(GTK_ENTRY(getWidget("entryNick")));
+		}
+
+		if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(getWidget("checkbuttonUserDescription"))))
+		{
+			params["User Description"] = gtk_entry_get_text(GTK_ENTRY(getWidget("entryUserDescription")));
+		}
 
 		if (params["Name"].empty() || params["Address"].empty())
 		{
@@ -401,6 +430,19 @@ void FavoriteHubs::onToggledClicked_gui(GtkCellRendererToggle *cell, gchar *path
 	}
 }
 
+void FavoriteHubs::onCheckButtonToggled_gui(GtkToggleButton *button, gpointer data)
+{
+	GtkWidget *widget = (GtkWidget*)data;
+	bool override = gtk_toggle_button_get_active(button);
+
+	gtk_widget_set_sensitive(widget, override);
+
+	if (override)
+	{
+		gtk_widget_grab_focus(widget);
+	}
+}
+
 void FavoriteHubs::initializeList_client()
 {
 	StringMap params;
@@ -422,12 +464,8 @@ void FavoriteHubs::getFavHubParams_client(const FavoriteHubEntry *entry, StringM
 	params["Auto Connect"] = entry->getConnect() ? "1" : "0";
 	params["Name"] = entry->getName();
 	params["Description"] = entry->getDescription();
-	params["Nick"] = entry->getNick();
-	if (!entry->getPassword().empty())
-		params["Password"] = string(8, '*');
-	else
-		params["Password"] = "";
-	params["Hidden Password"] = entry->getPassword();
+	params["Nick"] = entry->getNick(FALSE); // Don't display default nick to avoid accidentally saving it
+	params["Password"] = entry->getPassword();
 	params["Address"] = entry->getServer();
 	params["User Description"] = entry->getUserDescription();
 	params["Encoding"] = entry->getEncoding();
@@ -441,7 +479,7 @@ void FavoriteHubs::addEntry_client(StringMap params)
 	entry.setServer(params["Address"]);
 	entry.setDescription(params["Description"]);
 	entry.setNick(params["Nick"]);
-	entry.setPassword(params["Hidden Password"]);
+	entry.setPassword(params["Password"]);
 	entry.setUserDescription(params["User Description"]);
 	entry.setEncoding(params["Encoding"]);
 	FavoriteManager::getInstance()->addFavorite(entry);
@@ -458,7 +496,7 @@ void FavoriteHubs::editEntry_client(string address, StringMap params)
 		entry->setServer(params["Address"]);
 		entry->setDescription(params["Description"]);
 		entry->setNick(params["Nick"]);
-		entry->setPassword(params["Hidden Password"]);
+		entry->setPassword(params["Password"]);
 		entry->setUserDescription(params["User Description"]);
 		entry->setEncoding(params["Encoding"]);
 		FavoriteManager::getInstance()->save();
@@ -500,3 +538,4 @@ void FavoriteHubs::on(FavoriteManagerListener::FavoriteRemoved, const FavoriteHu
 	F1 *func = new F1(this, &FavoriteHubs::removeEntry_gui, entry->getServer());
 	WulforManager::get()->dispatchGuiFunc(func);
 }
+
