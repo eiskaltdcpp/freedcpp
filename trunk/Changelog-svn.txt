@@ -1,3 +1,6 @@
+r40: 0.0.1.36
+* Ревизия 329 (linuxdcpp, remove the directory itself from the path in directory results).
+
 r39: 0.0.1.35
 * Ревизия 327 (linuxdcpp, enable rubber banding for treeviews).
 

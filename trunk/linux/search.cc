@@ -1589,8 +1589,9 @@ void Search::parseSearchResult_client(SearchResultPtr result, StringMap &resultM
 	}
 	else
 	{
+		string path = WulforUtil::linuxSeparator(result->getFile());
 		resultMap["Filename"] = WulforUtil::linuxSeparator(result->getFileName());
-		resultMap["Path"] = WulforUtil::linuxSeparator(result->getFile());
+		resultMap["Path"] = Util::getFilePath(path.substr(0, path.length() - 1)); // getFilePath just returns path unless we chop the last / off
 		resultMap["File Order"] = "d" + resultMap["Filename"];
 		resultMap["Type"] = _("Directory");
 		resultMap["Icon"] = GTK_STOCK_DIRECTORY;
