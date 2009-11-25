@@ -1,3 +1,6 @@
+r41: 0.0.1.37
+* Ревизия 330 (linuxdcpp, added an IP address column to the hub user list).
+
 r40: 0.0.1.36
 * Ревизия 329 (linuxdcpp, remove the directory itself from the path in directory results).
 
