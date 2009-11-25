@@ -1,3 +1,6 @@
+r42: 0.0.1.38
+* Ревизия 331 (linuxdcpp, temporary fix for crashing bug #442475).
+
 r41: 0.0.1.37
 * Ревизия 330 (linuxdcpp, added an IP address column to the hub user list).
 

@@ -1624,6 +1624,8 @@ void Search::download_client(string target, string cid, string filename, int64_t
 	try
 	{
 		UserPtr user = ClientManager::getInstance()->findUser(CID(cid));
+		if (user == NULL)
+			return;
 
 		// Only files have a TTH
 		if (!tth.empty())
@@ -1646,17 +1648,21 @@ void Search::downloadDir_client(string target, string cid, string filename, stri
 {
 	try
 	{
-		UserPtr user = ClientManager::getInstance()->findUser(CID(cid));
+		string dir;
 
 		// If it's a file (directories are assumed to end in '/')
 		if (filename[filename.length() - 1] != PATH_SEPARATOR)
 		{
-			string dir = WulforUtil::windowsSeparator(Util::getFilePath(filename));
-			QueueManager::getInstance()->addDirectory(dir, user, hubUrl, target);
+			dir = WulforUtil::windowsSeparator(Util::getFilePath(filename));
 		}
 		else
 		{
-			string dir = WulforUtil::windowsSeparator(filename);
+			dir = WulforUtil::windowsSeparator(filename);
+		}
+
+		UserPtr user = ClientManager::getInstance()->findUser(CID(cid));
+		if (user != NULL)
+		{
 			QueueManager::getInstance()->addDirectory(dir, user, hubUrl, target);
 		}
 	}
@@ -1669,9 +1675,9 @@ void Search::addSource_client(string source, string cid, int64_t size, string tt
 {
 	try
 	{
-		if (!tth.empty())
+		UserPtr user = ClientManager::getInstance()->findUser(CID(cid));
+		if (!tth.empty() && user != NULL)
 		{
-			UserPtr user = ClientManager::getInstance()->findUser(CID(cid));
 			QueueManager::getInstance()->add(source, size, TTHValue(tth), user, hubUrl);
 		}
 	}
