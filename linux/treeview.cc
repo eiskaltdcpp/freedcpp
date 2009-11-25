@@ -45,6 +45,7 @@ void TreeView::setView(GtkTreeView *view)
 {
 	this->view = view;
 	gtk_tree_view_set_headers_clickable(view, TRUE);
+	gtk_tree_view_set_rubber_banding(view, TRUE);
 }
 
 void TreeView::setView(GtkTreeView *view, bool padding, const string &name)
@@ -53,6 +54,7 @@ void TreeView::setView(GtkTreeView *view, bool padding, const string &name)
 	this->padding = padding;
 	this->name = name;
 	gtk_tree_view_set_headers_clickable(view, TRUE);
+	gtk_tree_view_set_rubber_banding(view, TRUE);
 }
 
 GtkTreeView *TreeView::get()
