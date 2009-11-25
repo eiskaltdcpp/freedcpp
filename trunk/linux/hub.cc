@@ -59,6 +59,7 @@ Hub::Hub(const string &address, const string &encoding):
 	nickView.insertColumn("Description", G_TYPE_STRING, TreeView::STRING, 85);
 	nickView.insertColumn("Tag", G_TYPE_STRING, TreeView::STRING, 100);
 	nickView.insertColumn("Connection", G_TYPE_STRING, TreeView::STRING, 85);
+	nickView.insertColumn("IP", G_TYPE_STRING, TreeView::STRING, 85);
 	nickView.insertColumn("eMail", G_TYPE_STRING, TreeView::STRING, 90);
 	nickView.insertHiddenColumn("Icon", G_TYPE_STRING);
 	nickView.insertHiddenColumn("Nick Order", G_TYPE_STRING);
@@ -262,6 +263,7 @@ void Hub::updateUser_gui(ParamMap params)
 			nickView.col("Description"), params["Description"].c_str(),
 			nickView.col("Tag"), params["Tag"].c_str(),
  			nickView.col("Connection"), params["Connection"].c_str(),
+			nickView.col("IP"), params["IP"].c_str(),
 			nickView.col("eMail"), params["eMail"].c_str(),
 			nickView.col("Icon"), icon.c_str(),
 			nickView.col("Nick Order"), params["Nick Order"].c_str(),
@@ -293,6 +295,7 @@ void Hub::updateUser_gui(ParamMap params)
 			nickView.col("Description"), params["Description"].c_str(),
 			nickView.col("Tag"), params["Tag"].c_str(),
  			nickView.col("Connection"), params["Connection"].c_str(),
+			nickView.col("IP"), params["IP"].c_str(),
 			nickView.col("eMail"), params["eMail"].c_str(),
 			nickView.col("Icon"), icon.c_str(),
 			nickView.col("Nick Order"), params["Nick Order"].c_str(),
@@ -1406,7 +1409,7 @@ void Hub::onSendMessage_gui(GtkEntry *entry, gpointer data)
 		}
 		else if (command == _("freedcpp"))
 		{
-			hub->addStatusMessage_gui(_("freedcpp 0.0.1.36/0.75, project home: http://freedcpp.narod.ru http://code.google.com/p/freedcpp"), Msg::SYSTEM, Sound::NONE);
+			hub->addStatusMessage_gui(_("freedcpp 0.0.1.37/0.75, project home: http://freedcpp.narod.ru http://code.google.com/p/freedcpp"), Msg::SYSTEM, Sound::NONE);
 		}
 		else if (command == _("help"))
 		{
@@ -1922,6 +1925,7 @@ void Hub::getParams_client(ParamMap &params, Identity &id)
 	params["Description"] = id.getDescription();
 	params["Tag"] = id.getTag();
 	params["Connection"] = id.getConnection();
+	params["IP"] = id.getIp();
 	params["eMail"] = id.getEmail();
 	params["CID"] = id.getUser()->getCID().toBase32();
 }
