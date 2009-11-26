@@ -71,11 +71,15 @@ MainWindow::MainWindow():
 	gtk_window_set_transient_for(GTK_WINDOW(getWidget("ucLineDialog")), window);
 	gtk_window_set_transient_for(GTK_WINDOW(getWidget("magnetDialog")), window);
 
-	string file, path = WulforManager::get()->getPath() + "/icons/hicolor/96x96/apps/";
-	file = path + "logo.png";
-	GdkPixbuf *logo = gdk_pixbuf_new_from_file(file.c_str(), NULL);
-	gtk_about_dialog_set_logo(GTK_ABOUT_DIALOG(getWidget("aboutDialog")), logo);
-	g_object_unref(logo);
+	// set logo 96x96 about dialog
+	GtkIconTheme *iconTheme = gtk_icon_theme_get_default();
+	GdkPixbuf *logo = gtk_icon_theme_load_icon(iconTheme, g_get_prgname(), 96, GTK_ICON_LOOKUP_FORCE_SVG, NULL);
+
+	if (logo != NULL)
+	{
+		gtk_about_dialog_set_logo(GTK_ABOUT_DIALOG(getWidget("aboutDialog")), logo);
+		g_object_unref(logo);
+	}
 
 	gtk_about_dialog_set_email_hook((GtkAboutDialogActivateLinkFunc)onAboutDialogActivateLink_gui, (gpointer)this, NULL);
 	gtk_about_dialog_set_url_hook((GtkAboutDialogActivateLinkFunc)onAboutDialogActivateLink_gui, (gpointer)this, NULL);
@@ -284,6 +288,9 @@ void MainWindow::loadIcons_gui()
 	gtk_tool_button_set_stock_id(GTK_TOOL_BUTTON(getWidget("finishedUploads")), "freedcpp-finished-uploads");
 	gtk_tool_button_set_stock_id(GTK_TOOL_BUTTON(getWidget("quit")), "freedcpp-quit");
 	gtk_tool_button_set_stock_id(GTK_TOOL_BUTTON(getWidget("connect")), "freedcpp-connect");
+	gtk_image_set_from_stock(GTK_IMAGE(getWidget("imageHubs")), "freedcpp-public-hubs", GTK_ICON_SIZE_SMALL_TOOLBAR);
+	gtk_image_set_from_stock(GTK_IMAGE(getWidget("imageDownloadSpeed")), "freedcpp-download", GTK_ICON_SIZE_SMALL_TOOLBAR);
+	gtk_image_set_from_stock(GTK_IMAGE(getWidget("imageUploadSpeed")), "freedcpp-upload", GTK_ICON_SIZE_SMALL_TOOLBAR);
 }
 
 void MainWindow::autoOpen_gui()
