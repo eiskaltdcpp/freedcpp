@@ -964,7 +964,6 @@ void MainWindow::onPreferencesClicked_gui(GtkWidget *widget, gpointer data)
 	unsigned short tcpPort = (unsigned short)SETTING(TCP_PORT);
 	unsigned short udpPort = (unsigned short)SETTING(UDP_PORT);
 	int lastConn = SETTING(INCOMING_CONNECTIONS);
-	bool stockIcons = WGETI("use-system-icons");
 
 	gint response = WulforManager::get()->openSettingsDialog_gui();
 
@@ -985,8 +984,7 @@ void MainWindow::onPreferencesClicked_gui(GtkWidget *widget, gpointer data)
 		mw->setToolbarStyle_gui(WGETI("toolbar-style"));
 
 		// Reload the icons only if the setting has changed
-		if (WGETI("use-system-icons") != stockIcons)
-			mw->loadIcons_gui();
+		mw->loadIcons_gui();
 
 		for (StringIterC it = mw->EntryList.begin(); it != mw->EntryList.end(); ++it)
 		{

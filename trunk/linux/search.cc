@@ -1584,7 +1584,7 @@ void Search::parseSearchResult_client(SearchResultPtr result, StringMap &resultM
 			resultMap["Type"].erase(0, 1);
 		resultMap["Size"] = Util::formatBytes(result->getSize());
 		resultMap["Exact Size"] = Util::formatExactSize(result->getSize());
-		resultMap["Icon"] = GTK_STOCK_FILE;
+		resultMap["Icon"] = "freedcpp-file";
 		resultMap["Shared"] = Util::toString(ShareManager::getInstance()->isTTHShared(result->getTTH()));
 	}
 	else
@@ -1594,7 +1594,7 @@ void Search::parseSearchResult_client(SearchResultPtr result, StringMap &resultM
 		resultMap["Path"] = Util::getFilePath(path.substr(0, path.length() - 1)); // getFilePath just returns path unless we chop the last / off
 		resultMap["File Order"] = "d" + resultMap["Filename"];
 		resultMap["Type"] = _("Directory");
-		resultMap["Icon"] = GTK_STOCK_DIRECTORY;
+		resultMap["Icon"] = "freedcpp-directory";
 		resultMap["Shared"] = "0";
 		if (result->getSize() > 0)
 		{

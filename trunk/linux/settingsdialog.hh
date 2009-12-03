@@ -49,6 +49,8 @@ class Settings:
 			const std::string &key3, const int key4);
 		void addOption_gui(GtkListStore *store, const std::string &name, const std::string &setting);
 		void addOption_gui(GtkListStore *store, WulforSettingsManager *wsm, const std::string &name, const std::string &key1);
+		void addOption_gui(GtkListStore *store, WulforSettingsManager *wsm, GtkIconTheme *iconTheme,
+			const std::string &name, const std::string &key1);
 		void createOptionsView_gui(TreeView &treeView, GtkListStore *&store, const std::string &widgetName);
 		void saveOptionsView_gui(TreeView &treeView, dcpp::SettingsManager *sm);
 		void initPersonal_gui();
@@ -135,6 +137,11 @@ class Settings:
 		static void onNotifyOKClicked_gui(GtkWidget *widget, gpointer data);
 		static void onNotifyIconNoneButton_gui(GtkWidget *widget, gpointer data);
 		static void onNotifyDefaultButton_gui(GtkWidget *widget, gpointer data);
+		static void onImportThemeButton_gui(GtkWidget *widget, gpointer data);
+		static void onExportThemeButton_gui(GtkWidget *widget, gpointer data);
+		static void onDefaultIconsThemeButton_gui(GtkWidget *widget, gpointer data);
+		static void onSystemIconsThemeButton_gui(GtkWidget *widget, gpointer data);
+		static void onDefaultThemeButton_gui(GtkWidget *widget, gpointer data);
 
 		// Client functions
 		void saveSettings_client();
@@ -148,12 +155,31 @@ class Settings:
 		GtkListStore *downloadToStore, *publicListStore, *queueStore,
 			*shareStore, *appearanceStore, *tabStore, *windowStore1,
 			*windowStore2, *windowStore3, *advancedStore, *certificatesStore, *userCommandStore,
-			*previewAppToStore, *soundStore, *textStyleStore, *notifyStore;
+			*previewAppToStore, *soundStore, *textStyleStore, *notifyStore, *themeIconsStore;
 		TreeView downloadToView, publicListView, queueView, shareView,
 			appearanceView, tabView, windowView1, windowView2,
 			windowView3, advancedView, certificatesView, userCommandView,
-			previewAppView, soundView, textStyleView, notifyView;
+			previewAppView, soundView, textStyleView, notifyView, themeIconsView;
 		GtkTextBuffer *textStyleBuffer;
+
+		typedef std::map<std::string, int> IntMap;
+		typedef std::map<std::string, std::string> StringMap;
+
+		IntMap defaultIntTheme;
+		IntMap intMapTheme;
+		StringMap stringMapTheme;
+		StringMap defaultStringTheme;
+
+		bool loadFileTheme(const std::string &file);
+		void saveFileTheme(const std::string &file);
+		void saveTheme();
+		void setTheme();
+		int getIntTheme(const std::string &key, bool useDefault = FALSE);
+		std::string getStringTheme(const std::string &key, bool useDefault = FALSE);
+		void set(const std::string &key, int value);
+		void set(const std::string &key, const std::string &value);
+		void applyIconsTheme(bool useDefault = FALSE);
+		void applyTextTheme(bool useDefault = FALSE);
 };
 
 #else

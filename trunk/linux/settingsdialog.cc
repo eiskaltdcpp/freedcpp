@@ -21,6 +21,8 @@
 
 #include "settingsdialog.hh"
 
+#include <dcpp/File.h>
+#include <dcpp/SimpleXML.h>
 #include <dcpp/CryptoManager.h>
 #include <dcpp/FavoriteManager.h>
 #include <dcpp/NmdcHub.h>
@@ -49,6 +51,71 @@ Settings::Settings(GtkWindow* parent):
 
 	textStyleBuffer = gtk_text_buffer_new(NULL);
 	gtk_text_view_set_buffer(GTK_TEXT_VIEW(getWidget("textViewPreviewStyles")), textStyleBuffer);
+	gtk_text_view_set_buffer(GTK_TEXT_VIEW(getWidget("textViewPreviewStylesTheme")), textStyleBuffer);
+
+	defaultStringTheme.insert(StringMap::value_type("icon-dc++", "freedcpp-dc++"));
+	defaultStringTheme.insert(StringMap::value_type("icon-dc++-fw", "freedcpp-dc++-fw"));
+	defaultStringTheme.insert(StringMap::value_type("icon-dc++-fw-op", "freedcpp-dc++-fw-op"));
+	defaultStringTheme.insert(StringMap::value_type("icon-dc++-op", "freedcpp-dc++-op"));
+	defaultStringTheme.insert(StringMap::value_type("icon-normal", "freedcpp-normal"));
+	defaultStringTheme.insert(StringMap::value_type("icon-normal-fw", "freedcpp-normal-fw"));
+	defaultStringTheme.insert(StringMap::value_type("icon-normal-fw-op", "freedcpp-normal-fw-op"));
+	defaultStringTheme.insert(StringMap::value_type("icon-normal-op", "freedcpp-normal-op"));
+	defaultStringTheme.insert(StringMap::value_type("icon-smile", "freedcpp-smile"));
+	defaultStringTheme.insert(StringMap::value_type("icon-download", "freedcpp-download"));
+	defaultStringTheme.insert(StringMap::value_type("icon-favorite-hubs", "freedcpp-favorite-hubs"));
+	defaultStringTheme.insert(StringMap::value_type("icon-finished-downloads", "freedcpp-finished-downloads"));
+	defaultStringTheme.insert(StringMap::value_type("icon-finished-uploads", "freedcpp-finished-uploads"));
+	defaultStringTheme.insert(StringMap::value_type("icon-hash", "freedcpp-hash"));
+	defaultStringTheme.insert(StringMap::value_type("icon-preferences", "freedcpp-preferences"));
+	defaultStringTheme.insert(StringMap::value_type("icon-public-hubs", "freedcpp-public-hubs"));
+	defaultStringTheme.insert(StringMap::value_type("icon-queue", "freedcpp-queue"));
+	defaultStringTheme.insert(StringMap::value_type("icon-search", "freedcpp-search"));
+	defaultStringTheme.insert(StringMap::value_type("icon-upload", "freedcpp-upload"));
+	defaultStringTheme.insert(StringMap::value_type("icon-quit", "freedcpp-quit"));
+	defaultStringTheme.insert(StringMap::value_type("icon-connect", "freedcpp-connect"));
+	defaultStringTheme.insert(StringMap::value_type("icon-file", GTK_STOCK_FILE));
+	defaultStringTheme.insert(StringMap::value_type("icon-directory", GTK_STOCK_DIRECTORY));
+	defaultStringTheme.insert(StringMap::value_type("text-general-back-color", "#FFFFFF"));
+	defaultStringTheme.insert(StringMap::value_type("text-general-fore-color", "#4D4D4D"));
+	defaultStringTheme.insert(StringMap::value_type("text-myown-back-color", "#FFFFFF"));
+	defaultStringTheme.insert(StringMap::value_type("text-myown-fore-color", "#207505"));
+	defaultStringTheme.insert(StringMap::value_type("text-private-back-color", "#FFFFFF"));
+	defaultStringTheme.insert(StringMap::value_type("text-private-fore-color", "#2763CE"));
+	defaultStringTheme.insert(StringMap::value_type("text-system-back-color", "#FFFFFF"));
+	defaultStringTheme.insert(StringMap::value_type("text-system-fore-color", "#1A1A1A"));
+	defaultStringTheme.insert(StringMap::value_type("text-status-back-color", "#FFFFFF"));
+	defaultStringTheme.insert(StringMap::value_type("text-status-fore-color", "#7F7F7F"));
+	defaultStringTheme.insert(StringMap::value_type("text-timestamp-back-color", "#FFFFFF"));
+	defaultStringTheme.insert(StringMap::value_type("text-timestamp-fore-color", "#43629A"));
+	defaultStringTheme.insert(StringMap::value_type("text-mynick-back-color", "#FFFFFF"));
+	defaultStringTheme.insert(StringMap::value_type("text-mynick-fore-color", "#A52A2A"));
+	defaultStringTheme.insert(StringMap::value_type("text-fav-back-color", "#FFFFFF"));
+	defaultStringTheme.insert(StringMap::value_type("text-fav-fore-color", "#FFA500"));
+	defaultStringTheme.insert(StringMap::value_type("text-op-back-color", "#FFFFFF"));
+	defaultStringTheme.insert(StringMap::value_type("text-op-fore-color", "#0000FF"));
+	defaultStringTheme.insert(StringMap::value_type("text-url-back-color", "#FFFFFF"));
+	defaultStringTheme.insert(StringMap::value_type("text-url-fore-color", "#0000FF"));
+	defaultIntTheme.insert(IntMap::value_type("text-general-bold", TEXT_WEIGHT_NORMAL));
+	defaultIntTheme.insert(IntMap::value_type("text-general-italic", TEXT_STYLE_NORMAL));
+	defaultIntTheme.insert(IntMap::value_type("text-myown-bold", TEXT_WEIGHT_BOLD));
+	defaultIntTheme.insert(IntMap::value_type("text-myown-italic", TEXT_STYLE_NORMAL));
+	defaultIntTheme.insert(IntMap::value_type("text-private-bold", TEXT_WEIGHT_NORMAL));
+	defaultIntTheme.insert(IntMap::value_type("text-private-italic", TEXT_STYLE_NORMAL));
+	defaultIntTheme.insert(IntMap::value_type("text-system-bold", TEXT_WEIGHT_BOLD));
+	defaultIntTheme.insert(IntMap::value_type("text-system-italic", TEXT_STYLE_NORMAL));
+	defaultIntTheme.insert(IntMap::value_type("text-status-bold", TEXT_WEIGHT_BOLD));
+	defaultIntTheme.insert(IntMap::value_type("text-status-italic", TEXT_STYLE_NORMAL));
+	defaultIntTheme.insert(IntMap::value_type("text-timestamp-bold", TEXT_WEIGHT_BOLD));
+	defaultIntTheme.insert(IntMap::value_type("text-timestamp-italic", TEXT_STYLE_NORMAL));
+	defaultIntTheme.insert(IntMap::value_type("text-mynick-bold", TEXT_WEIGHT_BOLD));
+	defaultIntTheme.insert(IntMap::value_type("text-mynick-italic", TEXT_STYLE_NORMAL));
+	defaultIntTheme.insert(IntMap::value_type("text-fav-bold", TEXT_WEIGHT_BOLD));
+	defaultIntTheme.insert(IntMap::value_type("text-fav-italic", TEXT_STYLE_NORMAL));
+	defaultIntTheme.insert(IntMap::value_type("text-op-bold", TEXT_WEIGHT_BOLD));
+	defaultIntTheme.insert(IntMap::value_type("text-op-italic", TEXT_STYLE_NORMAL));
+	defaultIntTheme.insert(IntMap::value_type("text-url-bold", TEXT_WEIGHT_NORMAL));
+	defaultIntTheme.insert(IntMap::value_type("text-url-italic", TEXT_STYLE_NORMAL));
 
 	// Initialize the tabs in the GtkNotebook.
 	initPersonal_gui();
@@ -242,6 +309,21 @@ void Settings::saveSettings_client()
 			WSET("notify-icon-size", gtk_combo_box_get_active(GTK_COMBO_BOX(getWidget("notifyIconSizeComboBox"))));
 		}
 
+		{ // Theme
+			GtkTreeIter iter;
+			GtkTreeModel *m = GTK_TREE_MODEL(themeIconsStore);
+			gboolean valid = gtk_tree_model_get_iter_first(m, &iter);
+
+			while (valid)
+			{
+				wsm->set(themeIconsView.getString(&iter, "keyIcon"), themeIconsView.getString(&iter, "iconName"));
+				valid = gtk_tree_model_iter_next(m, &iter);
+			}
+
+			string theme = gtk_label_get_text(GTK_LABEL(getWidget("currentThemeLabel")));
+			wsm->set("theme-name", theme);
+		}
+
 		{ // Window
 			// Auto-open on startup
 			saveOptionsView_gui(windowView1, sm);
@@ -375,6 +457,30 @@ void Settings::addOption_gui(GtkListStore *store, WulforSettingsManager *wsm,
 
 	if (icon != NULL)
 		g_object_unref(icon);
+}
+
+/* Adds a theme options */
+
+void Settings::addOption_gui(GtkListStore *store, WulforSettingsManager *wsm, GtkIconTheme *iconTheme,
+	const string &name, const string &key1)
+{
+	string iconName = wsm->getString(key1);
+	GdkPixbuf *icon = gtk_icon_theme_load_icon(iconTheme, iconName.c_str(),
+		ICON_SIZE, GTK_ICON_LOOKUP_FORCE_SVG, NULL);
+
+	GtkTreeIter iter;
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter,
+		0, name.c_str(),
+		1, icon,
+		2, iconName.c_str(),
+		3, key1.c_str(),
+		-1);
+
+	if (icon != NULL)
+		g_object_unref(icon);
+
+	set(key1, iconName);
 }
 
 /* Adds a colors and fonts options */
@@ -941,6 +1047,53 @@ void Settings::initAppearance_gui()
 		gtk_combo_box_set_active(GTK_COMBO_BOX(getWidget("notifyIconSizeComboBox")), WGETI("notify-icon-size"));
 	}
 
+	{ // Themes
+		themeIconsView.setView(GTK_TREE_VIEW(getWidget("treeViewIconsTheme")));
+		themeIconsView.insertColumn("Name", G_TYPE_STRING, TreeView::PIXBUF_STRING, -1, "icon");
+		themeIconsView.insertHiddenColumn("icon", GDK_TYPE_PIXBUF);
+		themeIconsView.insertHiddenColumn("iconName", G_TYPE_STRING);
+		themeIconsView.insertHiddenColumn("keyIcon", G_TYPE_STRING);
+		themeIconsView.finalize();
+
+		themeIconsStore = gtk_list_store_newv(themeIconsView.getColCount(), themeIconsView.getGTypes());
+		gtk_tree_view_set_model(themeIconsView.get(), GTK_TREE_MODEL(themeIconsStore));
+		g_object_unref(themeIconsStore);
+
+		GtkIconTheme *iconTheme = gtk_icon_theme_get_default();
+
+		addOption_gui(themeIconsStore, wsm, iconTheme, _("User"), "icon-dc++");
+		addOption_gui(themeIconsStore, wsm, iconTheme, _("User firewall"), "icon-dc++-fw");
+		addOption_gui(themeIconsStore, wsm, iconTheme, _("User operator firewall"), "icon-dc++-fw-op");
+		addOption_gui(themeIconsStore, wsm, iconTheme, _("User operator"), "icon-dc++-op");
+		addOption_gui(themeIconsStore, wsm, iconTheme, _("User normal"), "icon-normal");
+		addOption_gui(themeIconsStore, wsm, iconTheme, _("User normal firewall"), "icon-normal-fw");
+		addOption_gui(themeIconsStore, wsm, iconTheme, _("User operator firewall"), "icon-normal-fw-op");
+		addOption_gui(themeIconsStore, wsm, iconTheme, _("User operator"), "icon-normal-op");
+		addOption_gui(themeIconsStore, wsm, iconTheme, _("Button smile"), "icon-smile");
+		addOption_gui(themeIconsStore, wsm, iconTheme, _("Download"), "icon-download");
+		addOption_gui(themeIconsStore, wsm, iconTheme, _("Upload"), "icon-upload");
+		addOption_gui(themeIconsStore, wsm, iconTheme, _("Favorite Hubs"), "icon-favorite-hubs");
+		addOption_gui(themeIconsStore, wsm, iconTheme, _("Finished Downloads"), "icon-finished-downloads");
+		addOption_gui(themeIconsStore, wsm, iconTheme, _("Finished Uploads"), "icon-finished-uploads");
+		addOption_gui(themeIconsStore, wsm, iconTheme, _("Hash"), "icon-hash");
+		addOption_gui(themeIconsStore, wsm, iconTheme, _("Preferences"), "icon-preferences");
+		addOption_gui(themeIconsStore, wsm, iconTheme, _("Public Hubs"), "icon-public-hubs");
+		addOption_gui(themeIconsStore, wsm, iconTheme, _("Queue"), "icon-queue");
+		addOption_gui(themeIconsStore, wsm, iconTheme, _("Search"), "icon-search");
+		addOption_gui(themeIconsStore, wsm, iconTheme, _("Quit"), "icon-quit");
+		addOption_gui(themeIconsStore, wsm, iconTheme, _("Connect"), "icon-connect");
+		addOption_gui(themeIconsStore, wsm, iconTheme, _("File"), "icon-file");
+		addOption_gui(themeIconsStore, wsm, iconTheme, _("Directory"), "icon-directory");
+
+		g_signal_connect(getWidget("importThemeButton"), "clicked", G_CALLBACK(onImportThemeButton_gui), (gpointer)this);
+		g_signal_connect(getWidget("exportThemeButton"), "clicked", G_CALLBACK(onExportThemeButton_gui), (gpointer)this);
+		g_signal_connect(getWidget("defaultIconsThemeButton"), "clicked", G_CALLBACK(onDefaultIconsThemeButton_gui), (gpointer)this);
+		g_signal_connect(getWidget("systemIconsThemeButton"), "clicked", G_CALLBACK(onSystemIconsThemeButton_gui), (gpointer)this);
+		g_signal_connect(getWidget("defaultThemeButton"), "clicked", G_CALLBACK(onDefaultThemeButton_gui), (gpointer)this);
+
+		gtk_label_set_text(GTK_LABEL(getWidget("currentThemeLabel")), wsm->getString("theme-name").c_str());
+	}
+
 	{ // Window
 		// Auto-open
 		createOptionsView_gui(windowView1, windowStore1, "windowsAutoOpenTreeView");
@@ -1254,6 +1407,330 @@ void Settings::onNotifyDefaultButton_gui(GtkWidget *widget, gpointer data)
 	}
 	else
 		s->showErrorDialog(_("...must not be empty"));
+}
+
+void Settings::onImportThemeButton_gui(GtkWidget *widget, gpointer data)
+{
+	Settings *s = (Settings *)data;
+
+	gint response = gtk_dialog_run(GTK_DIALOG(s->getWidget("fileChooserDialog")));
+	gtk_widget_hide(s->getWidget("fileChooserDialog"));
+
+	if (response == GTK_RESPONSE_OK)
+	{
+		gchar *path = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(s->getWidget("fileChooserDialog")));
+
+		if (path)
+		{
+			string file = path;
+			g_free(path);
+
+			if (s->loadFileTheme(file))
+			{
+				s->applyIconsTheme();
+				s->applyTextTheme();
+
+				string fileName = Util::getFileName(Text::toUtf8(file));
+				string::size_type i = fileName.rfind('.');
+				string theme = fileName.substr(0, i);
+				gtk_label_set_text(GTK_LABEL(s->getWidget("currentThemeLabel")), theme.c_str());
+			}
+			else
+				s->showErrorDialog(_("...must be *.theme"));
+		}
+	}
+}
+
+void Settings::onExportThemeButton_gui(GtkWidget *widget, gpointer data)
+{
+	Settings *s = (Settings *)data;
+
+	gint response = gtk_dialog_run(GTK_DIALOG(s->getWidget("fileChooserDialog")));
+	gtk_widget_hide(s->getWidget("fileChooserDialog"));
+
+	if (response == GTK_RESPONSE_OK)
+	{
+		gchar *path = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(s->getWidget("fileChooserDialog")));
+
+		if (path)
+		{
+			string file = path;
+			g_free(path);
+
+			if (Util::getFileExt(file) != ".theme" || Util::getFileName(file) == ".theme")
+			{
+				s->showErrorDialog(_("...must be *.theme"));
+			}
+			else
+			{
+				s->setTheme();
+				s->saveFileTheme(file);
+			}
+		}
+	}
+}
+
+void Settings::onDefaultIconsThemeButton_gui(GtkWidget *widget, gpointer data)
+{
+	Settings *s = (Settings *)data;
+
+	gtk_label_set_text(GTK_LABEL(s->getWidget("currentThemeLabel")), _("default icons"));
+	s->applyIconsTheme(TRUE);
+}
+
+void Settings::onSystemIconsThemeButton_gui(GtkWidget *widget, gpointer data)
+{
+	Settings *s = (Settings *)data;
+
+	string theme = gtk_label_get_text(GTK_LABEL(s->getWidget("currentThemeLabel")));
+	theme += _(" + system icons");
+	gtk_label_set_text(GTK_LABEL(s->getWidget("currentThemeLabel")), theme.c_str());
+	s->set("icon-download", GTK_STOCK_GO_DOWN);
+	s->set("icon-favorite-hubs", GTK_STOCK_HOME);
+	s->set("icon-finished-downloads", GTK_STOCK_GO_DOWN);
+	s->set("icon-finished-uploads", GTK_STOCK_GO_UP);
+	s->set("icon-hash", GTK_STOCK_CONVERT);
+	s->set("icon-preferences", GTK_STOCK_PREFERENCES);
+	s->set("icon-public-hubs", GTK_STOCK_NETWORK);
+	s->set("icon-queue", GTK_STOCK_DIRECTORY);
+	s->set("icon-search", GTK_STOCK_FIND);
+	s->set("icon-upload", GTK_STOCK_GO_UP);
+	s->set("icon-quit", GTK_STOCK_QUIT);
+	s->set("icon-connect", GTK_STOCK_CONNECT);
+	s->set("icon-file", GTK_STOCK_FILE);
+	s->set("icon-directory", GTK_STOCK_DIRECTORY);
+	s->applyIconsTheme();
+}
+
+void Settings::onDefaultThemeButton_gui(GtkWidget *widget, gpointer data)
+{
+	Settings *s = (Settings *)data;
+
+	gtk_label_set_text(GTK_LABEL(s->getWidget("currentThemeLabel")), _("default icons and text styles"));
+	s->applyIconsTheme(TRUE);
+	s->applyTextTheme(TRUE);
+}
+
+void Settings::applyIconsTheme(bool useDefault)
+{
+	GtkTreeIter iter;
+	GtkTreeModel *m = GTK_TREE_MODEL(themeIconsStore);
+	gboolean valid = gtk_tree_model_get_iter_first(m, &iter);
+	GtkIconTheme *iconTheme = gtk_icon_theme_get_default();
+
+	while (valid)
+	{
+		string keyIcon = themeIconsView.getString(&iter, "keyIcon");
+		string iconName = getStringTheme(keyIcon, useDefault);
+		GdkPixbuf *icon = gtk_icon_theme_load_icon(iconTheme, iconName.c_str(),
+			ICON_SIZE, GTK_ICON_LOOKUP_FORCE_SVG, NULL);
+
+		gtk_list_store_set(themeIconsStore, &iter,
+			themeIconsView.col("icon"), icon,
+			themeIconsView.col("iconName"), iconName.c_str(),
+			-1);
+
+		if (icon != NULL)
+			g_object_unref(icon);
+
+		set(keyIcon, iconName);
+		valid = gtk_tree_model_iter_next(m, &iter);
+	}
+}
+
+void Settings::applyTextTheme(bool useDefault)
+{
+	GtkTreeIter iter;
+	GtkTreeModel *m = GTK_TREE_MODEL(textStyleStore);
+	gboolean valid = gtk_tree_model_get_iter_first(m, &iter);
+	GtkTextTagTable *tag_table = gtk_text_buffer_get_tag_table(textStyleBuffer);
+	string style, fore, back;
+	int bolt, italic;
+
+	while (valid)
+	{
+		style = textStyleView.getString(&iter, "Style");
+		fore = getStringTheme(textStyleView.getString(&iter, "keyForeColor"), useDefault);
+		back = getStringTheme(textStyleView.getString(&iter, "keyBackColor"), useDefault);
+		bolt = getIntTheme(textStyleView.getString(&iter, "keyBolt"), useDefault);
+		italic = getIntTheme(textStyleView.getString(&iter, "keyItalic"), useDefault);
+
+		gtk_list_store_set(textStyleStore, &iter,
+			textStyleView.col("ForeColor"), fore.c_str(),
+			textStyleView.col("BackColor"), back.c_str(),
+			textStyleView.col("Bolt"), bolt,
+			textStyleView.col("Italic"), italic,
+			-1);
+
+		GtkTextTag *tag = gtk_text_tag_table_lookup(tag_table, style.c_str());
+
+		if (tag)
+			g_object_set(tag,
+				"foreground", fore.c_str(),
+				"background", back.c_str(),
+				"weight", (PangoWeight)bolt,
+				"style", (PangoStyle)italic,
+				NULL);
+
+		valid = gtk_tree_model_iter_next(m, &iter);
+	}
+
+	gtk_widget_queue_draw(getWidget("textViewPreviewStylesTheme"));
+}
+
+bool Settings::loadFileTheme(const string &file)
+{
+	if (Util::getFileExt(file) != ".theme" || Util::getFileName(file) == ".theme")
+		return FALSE;
+
+	intMapTheme.clear();
+	stringMapTheme.clear();
+
+	try
+	{
+		SimpleXML xml;
+		xml.fromXML(File(file, File::READ, File::OPEN).read());
+		xml.resetCurrentChild();
+		xml.stepIn();
+
+		if (xml.findChild("Settings"))
+		{
+			xml.stepIn();
+
+			IntMap::iterator iit;
+			for (iit = defaultIntTheme.begin(); iit != defaultIntTheme.end(); ++iit)
+			{
+				if (xml.findChild(iit->first))
+					intMapTheme.insert(IntMap::value_type(iit->first, Util::toInt(xml.getChildData())));
+				xml.resetCurrentChild();
+			}
+
+			StringMap::iterator sit;
+			for (sit = defaultStringTheme.begin(); sit != defaultStringTheme.end(); ++sit)
+			{
+				if (xml.findChild(sit->first))
+				{
+					stringMapTheme.insert(StringMap::value_type(sit->first, xml.getChildData()));
+				}
+				xml.resetCurrentChild();
+			}
+
+			xml.stepOut();
+		}
+	}
+	catch (const Exception& e)
+	{
+		dcdebug("freedcpp: load theme %s...\n", e.getError().c_str());
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
+void Settings::setTheme()
+{
+	GtkTreeIter iter;
+	GtkTreeModel *m = GTK_TREE_MODEL(textStyleStore);
+	gboolean valid = gtk_tree_model_get_iter_first(m, &iter);
+
+	while (valid)
+	{
+		set(textStyleView.getString(&iter, "keyForeColor"), textStyleView.getString(&iter, "ForeColor"));
+		set(textStyleView.getString(&iter, "keyBackColor"), textStyleView.getString(&iter, "BackColor"));
+		set(textStyleView.getString(&iter, "keyBolt"), textStyleView.getValue<int>(&iter, "Bolt"));
+		set(textStyleView.getString(&iter, "keyItalic"), textStyleView.getValue<int>(&iter, "Italic"));
+
+		valid = gtk_tree_model_iter_next(m, &iter);
+	}
+
+	m = GTK_TREE_MODEL(themeIconsStore);
+	valid = gtk_tree_model_get_iter_first(m, &iter);
+
+	while (valid)
+	{
+		set(themeIconsView.getString(&iter, "keyIcon"), themeIconsView.getString(&iter, "iconName"));
+		valid = gtk_tree_model_iter_next(m, &iter);
+	}
+}
+
+void Settings::saveFileTheme(const string &file)
+{
+	SimpleXML xml;
+	xml.addTag("Theme");
+	xml.stepIn();
+	xml.addTag("Settings");
+	xml.stepIn();
+
+	IntMap::iterator iit;
+
+	for (iit = intMapTheme.begin(); iit != intMapTheme.end(); ++iit)
+	{
+		xml.addTag(iit->first, iit->second);
+		xml.addChildAttrib(string("type"), string("int"));
+	}
+
+	StringMap::iterator sit;
+
+	for (sit = stringMapTheme.begin(); sit != stringMapTheme.end(); ++sit)
+	{
+		xml.addTag(sit->first, sit->second);
+		xml.addChildAttrib(string("type"), string("string"));
+	}
+
+	xml.stepOut();
+
+	try
+	{
+		File out(file + ".tmp", File::WRITE, File::CREATE | File::TRUNCATE);
+		BufferedOutputStream<false> f(&out);
+		f.write(SimpleXML::utf8Header);
+		xml.toXML(&f);
+		f.flush();
+		out.close();
+		File::deleteFile(file);
+		File::renameFile(file + ".tmp", file);
+	}
+	catch (const FileException &)
+	{
+	}
+}
+
+int Settings::getIntTheme(const string &key, bool useDefault)
+{
+	dcassert(intMapTheme.find(key) != intMapTheme.end() || defaultIntTheme.find(key) != defaultIntTheme.end());
+
+	if (useDefault)
+		return defaultIntTheme[key];
+
+	if (intMapTheme.find(key) == intMapTheme.end())
+		return defaultIntTheme[key];
+	else
+		return intMapTheme[key];
+}
+
+string Settings::getStringTheme(const string &key, bool useDefault)
+{
+	dcassert(stringMapTheme.find(key) != stringMapTheme.end() || defaultStringTheme.find(key) != defaultStringTheme.end());
+
+	if (useDefault)
+		return defaultStringTheme[key];
+
+	if (stringMapTheme.find(key) == stringMapTheme.end())
+		return defaultStringTheme[key];
+	else
+		return stringMapTheme[key];
+}
+
+void Settings::set(const string &key, int value)
+{
+	dcassert(defaultIntTheme.find(key) != defaultIntTheme.end());
+	intMapTheme[key] = value;
+}
+
+void Settings::set(const string &key, const string &value)
+{
+	dcassert(defaultStringTheme.find(key) != defaultStringTheme.end());
+	stringMapTheme[key] = value;
 }
 
 void Settings::onSoundFileBrowseClicked_gui(GtkWidget *widget, gpointer data)
