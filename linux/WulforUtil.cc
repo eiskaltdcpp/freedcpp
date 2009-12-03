@@ -478,29 +478,32 @@ void WulforUtil::registerIcons()
 {
 	// Holds a mapping of custom icon names -> stock icon names.
 	// Not all icons have stock representations.
+	WulforSettingsManager *wsm = WulforSettingsManager::getInstance();
 	map<string, string> icons;
 	icons["freedcpp"] = "freedcpp";
-	icons["freedcpp-dc++"] = "freedcpp-dc++";
-	icons["freedcpp-dc++-fw"] = "freedcpp-dc++-fw";
-	icons["freedcpp-dc++-fw-op"] = "freedcpp-dc++-fw-op";
-	icons["freedcpp-dc++-op"] = "freedcpp-dc++-op";
-	icons["freedcpp-normal"] = "freedcpp-normal";
-	icons["freedcpp-normal-fw"] = "freedcpp-normal-fw";
-	icons["freedcpp-normal-fw-op"] = "freedcpp-normal-fw-op";
-	icons["freedcpp-normal-op"] = "freedcpp-normal-op";
-	icons["freedcpp-smile"] = "freedcpp-smile";
-	icons["freedcpp-download"] = GTK_STOCK_GO_DOWN;
-	icons["freedcpp-favorite-hubs"] = GTK_STOCK_HOME;
-	icons["freedcpp-finished-downloads"] = GTK_STOCK_GO_DOWN;
-	icons["freedcpp-finished-uploads"] = GTK_STOCK_GO_UP;
-	icons["freedcpp-hash"] = GTK_STOCK_CONVERT;
-	icons["freedcpp-preferences"] = GTK_STOCK_PREFERENCES;
-	icons["freedcpp-public-hubs"] = GTK_STOCK_NETWORK;
-	icons["freedcpp-queue"] = GTK_STOCK_DIRECTORY;
-	icons["freedcpp-search"] = GTK_STOCK_FIND;
-	icons["freedcpp-upload"] = GTK_STOCK_GO_UP;
-	icons["freedcpp-quit"] = GTK_STOCK_QUIT;
-	icons["freedcpp-connect"] = GTK_STOCK_CONNECT;
+	icons["freedcpp-dc++"] = wsm->getString("icon-dc++");
+	icons["freedcpp-dc++-fw"] = wsm->getString("icon-dc++-fw");
+	icons["freedcpp-dc++-fw-op"] = wsm->getString("icon-dc++-fw-op");
+	icons["freedcpp-dc++-op"] = wsm->getString("icon-dc++-op");
+	icons["freedcpp-normal"] = wsm->getString("icon-normal");
+	icons["freedcpp-normal-fw"] = wsm->getString("icon-normal-fw");
+	icons["freedcpp-normal-fw-op"] = wsm->getString("icon-normal-fw-op");
+	icons["freedcpp-normal-op"] = wsm->getString("icon-normal-op");
+	icons["freedcpp-smile"] = wsm->getString("icon-smile");
+	icons["freedcpp-download"] = wsm->getString("icon-download");
+	icons["freedcpp-favorite-hubs"] = wsm->getString("icon-favorite-hubs");
+	icons["freedcpp-finished-downloads"] = wsm->getString("icon-finished-downloads");
+	icons["freedcpp-finished-uploads"] = wsm->getString("icon-finished-uploads");
+	icons["freedcpp-hash"] = wsm->getString("icon-hash");
+	icons["freedcpp-preferences"] = wsm->getString("icon-preferences");
+	icons["freedcpp-public-hubs"] = wsm->getString("icon-public-hubs");
+	icons["freedcpp-queue"] = wsm->getString("icon-queue");
+	icons["freedcpp-search"] = wsm->getString("icon-search");
+	icons["freedcpp-upload"] = wsm->getString("icon-upload");
+	icons["freedcpp-quit"] = wsm->getString("icon-quit");
+	icons["freedcpp-connect"] = wsm->getString("icon-connect");
+	icons["freedcpp-file"] = wsm->getString("icon-file");
+	icons["freedcpp-directory"] = wsm->getString("icon-directory");
 
 	if (iconFactory)
 	{
@@ -512,11 +515,9 @@ void WulforUtil::registerIcons()
 
 	for (map<string, string>::const_iterator i = icons.begin(); i != icons.end(); ++i)
 	{
-		string iconName = WGETI("use-system-icons") ? i->second : i->first;
 		GtkIconSource *iconSource = gtk_icon_source_new();
 		GtkIconSet *iconSet = gtk_icon_set_new();
-
-		gtk_icon_source_set_icon_name(iconSource, iconName.c_str());
+		gtk_icon_source_set_icon_name(iconSource, i->second.c_str());
 		gtk_icon_set_add_source(iconSet, iconSource);
 		gtk_icon_factory_add(iconFactory, i->first.c_str(), iconSet);
 		gtk_icon_source_free(iconSource);

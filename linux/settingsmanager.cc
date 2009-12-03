@@ -135,6 +135,30 @@ WulforSettingsManager::WulforSettingsManager():
 	defaultString.insert(StringMap::value_type("notify-hub-disconnect-icon", ""));
 	defaultString.insert(StringMap::value_type("notify-hub-connect-title", "Hub connect"));
 	defaultString.insert(StringMap::value_type("notify-hub-connect-icon", ""));
+	defaultString.insert(StringMap::value_type("theme-name", "default"));
+	defaultString.insert(StringMap::value_type("icon-dc++", "freedcpp-dc++"));
+	defaultString.insert(StringMap::value_type("icon-dc++-fw", "freedcpp-dc++-fw"));
+	defaultString.insert(StringMap::value_type("icon-dc++-fw-op", "freedcpp-dc++-fw-op"));
+	defaultString.insert(StringMap::value_type("icon-dc++-op", "freedcpp-dc++-op"));
+	defaultString.insert(StringMap::value_type("icon-normal", "freedcpp-normal"));
+	defaultString.insert(StringMap::value_type("icon-normal-fw", "freedcpp-normal-fw"));
+	defaultString.insert(StringMap::value_type("icon-normal-fw-op", "freedcpp-normal-fw-op"));
+	defaultString.insert(StringMap::value_type("icon-normal-op", "freedcpp-normal-op"));
+	defaultString.insert(StringMap::value_type("icon-smile", "freedcpp-smile"));
+	defaultString.insert(StringMap::value_type("icon-download", "freedcpp-download"));
+	defaultString.insert(StringMap::value_type("icon-favorite-hubs", "freedcpp-favorite-hubs"));
+	defaultString.insert(StringMap::value_type("icon-finished-downloads", "freedcpp-finished-downloads"));
+	defaultString.insert(StringMap::value_type("icon-finished-uploads", "freedcpp-finished-uploads"));
+	defaultString.insert(StringMap::value_type("icon-hash", "freedcpp-hash"));
+	defaultString.insert(StringMap::value_type("icon-preferences", "freedcpp-preferences"));
+	defaultString.insert(StringMap::value_type("icon-public-hubs", "freedcpp-public-hubs"));
+	defaultString.insert(StringMap::value_type("icon-queue", "freedcpp-queue"));
+	defaultString.insert(StringMap::value_type("icon-search", "freedcpp-search"));
+	defaultString.insert(StringMap::value_type("icon-upload", "freedcpp-upload"));
+	defaultString.insert(StringMap::value_type("icon-quit", "freedcpp-quit"));
+	defaultString.insert(StringMap::value_type("icon-connect", "freedcpp-connect"));
+	defaultString.insert(StringMap::value_type("icon-file", GTK_STOCK_FILE));
+	defaultString.insert(StringMap::value_type("icon-directory", GTK_STOCK_DIRECTORY));
 
 	load();
 }

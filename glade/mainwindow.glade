@@ -29,7 +29,7 @@
                         <child internal-child="image">
                           <widget class="GtkImage" id="image66">
                             <property name="visible">True</property>
-                            <property name="stock">gtk-open</property>
+                            <property name="stock">freedcpp-directory</property>
                             <property name="icon_size">1</property>
                           </widget>
                         </child>
@@ -71,7 +71,7 @@
                         <child internal-child="image">
                           <widget class="GtkImage" id="quickConnectMenuImage">
                             <property name="visible">True</property>
-                            <property name="stock">gtk-connect</property>
+                            <property name="stock">freedcpp-connect</property>
                             <property name="icon_size">1</property>
                           </widget>
                         </child>
@@ -120,9 +120,15 @@
                     <child>
                       <widget class="GtkImageMenuItem" id="exitMenuItem">
                         <property name="visible">True</property>
-                        <property name="label">gtk-quit</property>
+                        <property name="label" translatable="yes">_Exit</property>
                         <property name="use_underline">True</property>
-                        <property name="use_stock">True</property>
+                        <child internal-child="image">
+                          <widget class="GtkImage" id="exitMenuImage">
+                            <property name="visible">True</property>
+                            <property name="stock">freedcpp-quit</property>
+                            <property name="icon_size">1</property>
+                          </widget>
+                        </child>
                       </widget>
                     </child>
                   </widget>
