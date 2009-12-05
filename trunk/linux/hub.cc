@@ -858,6 +858,8 @@ void Hub::updateTags_gui()
 	}
 
 	gtk_widget_queue_draw(getWidget("chatText"));
+	gtk_widget_queue_draw(getWidget("nickView"));
+	gtk_widget_queue_draw(getWidget("emotButton"));
 }
 
 void Hub::getSettingTag_gui(WulforSettingsManager *wsm, TypeTag type, string &fore, string &back, int &bold, int &italic)
@@ -1409,7 +1411,7 @@ void Hub::onSendMessage_gui(GtkEntry *entry, gpointer data)
 		}
 		else if (command == _("freedcpp"))
 		{
-			hub->addStatusMessage_gui(_("freedcpp 0.0.1.40/0.75, project home: http://freedcpp.narod.ru http://code.google.com/p/freedcpp"), Msg::SYSTEM, Sound::NONE);
+			hub->addStatusMessage_gui(_("freedcpp 0.0.1.41/0.75, project home: http://freedcpp.narod.ru http://code.google.com/p/freedcpp"), Msg::SYSTEM, Sound::NONE);
 		}
 		else if (command == _("help"))
 		{
