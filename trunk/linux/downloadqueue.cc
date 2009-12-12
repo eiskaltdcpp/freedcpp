@@ -44,9 +44,10 @@ DownloadQueue::DownloadQueue():
 
 	// Initialize directory treeview
 	dirView.setView(GTK_TREE_VIEW(getWidget("dirView")));
-	dirView.insertColumn("Dir", G_TYPE_STRING, TreeView::STRING, -1);
+	dirView.insertColumn("Dir", G_TYPE_STRING, TreeView::ICON_STRING, -1, "Icon");
 	dirView.insertHiddenColumn("Path", G_TYPE_STRING);
 	dirView.insertHiddenColumn("File Count", G_TYPE_INT);
+	dirView.insertHiddenColumn("Icon", G_TYPE_STRING);
 	dirView.finalize();
 	dirStore = gtk_tree_store_newv(dirView.getColCount(), dirView.getGTypes());
 	gtk_tree_view_set_model(dirView.get(), GTK_TREE_MODEL(dirStore));
@@ -57,7 +58,7 @@ DownloadQueue::DownloadQueue():
 
 	// Initialize file treeview
 	fileView.setView(GTK_TREE_VIEW(getWidget("fileView")), TRUE, "downloadqueue");
-	fileView.insertColumn("Filename", G_TYPE_STRING, TreeView::STRING, 200);
+	fileView.insertColumn("Filename", G_TYPE_STRING, TreeView::ICON_STRING, 200, "Icon");
 	fileView.insertColumn("Status", G_TYPE_STRING, TreeView::STRING, 100);
 	fileView.insertColumn("Size", G_TYPE_STRING, TreeView::STRING, 100);
 	fileView.insertColumn("Downloaded", G_TYPE_STRING, TreeView::STRING, 150);
@@ -71,6 +72,7 @@ DownloadQueue::DownloadQueue():
 	fileView.insertHiddenColumn("Size Sort", G_TYPE_INT64);
 	fileView.insertHiddenColumn("Downloaded Sort", G_TYPE_INT64);
 	fileView.insertHiddenColumn("Target", G_TYPE_STRING);
+	fileView.insertHiddenColumn("Icon", G_TYPE_STRING);
 	fileView.finalize();
 	fileStore = gtk_list_store_newv(fileView.getColCount(), fileView.getGTypes());
 	gtk_tree_view_set_model(fileView.get(), GTK_TREE_MODEL(fileStore));
@@ -278,6 +280,7 @@ void DownloadQueue::addFile_gui(StringMap params, bool updateDirs)
 			fileView.col("Added"), params["Added"].c_str(),
 			fileView.col("TTH"), params["TTH"].c_str(),
 			fileView.col("Target"), params["Target"].c_str(),
+			fileView.col("Icon"), "freedcpp-file",
 			-1);
 
 		if (BOOLSETTING(BOLD_QUEUE))
@@ -297,6 +300,7 @@ void DownloadQueue::addFile_gui(StringMap params, bool updateDirs)
 				dirView.col("Dir"), "/",
 				dirView.col("Path"), "/",
 				dirView.col("File Count"), 0,
+				dirView.col("Icon"), "freedcpp-directory",
 				-1);
 		}
 
@@ -340,6 +344,7 @@ void DownloadQueue::addDir_gui(const string &path, GtkTreeIter *parent)
 		dirView.col("Dir"), dir.c_str(),
 		dirView.col("Path"), fullpath.c_str(),
 		dirView.col("File Count"), 0,
+		dirView.col("Icon"), "freedcpp-directory",
 		-1);
 
 	GtkTreePath *treePath = gtk_tree_model_get_path(GTK_TREE_MODEL(dirStore), parent);
@@ -382,6 +387,7 @@ void DownloadQueue::updateFile_gui(StringMap params)
 					fileView.col("Added"), params["Added"].c_str(),
 					fileView.col("TTH"), params["TTH"].c_str(),
 					fileView.col("Target"), params["Target"].c_str(),
+					fileView.col("Icon"), "freedcpp-file",
 					-1);
 				return;
 			}
