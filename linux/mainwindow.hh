@@ -76,7 +76,7 @@ class MainWindow:
 		Search *addSearch_gui();
 		void addSearch_gui(std::string magnet);
 		void setMainStatus_gui(std::string text, time_t t = time(NULL));
-		void showNotification_gui(std::string body, Notify::TypeNotify notify);
+		void showNotification_gui(std::string head, std::string body, Notify::TypeNotify notify);
 
 		// Client functions
 		void openOwnList_client(bool useSetting);

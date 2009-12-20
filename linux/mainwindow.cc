@@ -474,9 +474,9 @@ void MainWindow::setMainStatus_gui(string text, time_t t)
 	}
 }
 
-void MainWindow::showNotification_gui(string body, Notify::TypeNotify notify)
+void MainWindow::showNotification_gui(string head, string body, Notify::TypeNotify notify)
 {
-	Notify::get()->showNotify(_("<b>file:</b> "), body, notify);
+	Notify::get()->showNotify(head, body, notify);
 }
 
 void MainWindow::setStats_gui(string hubs, string downloadSpeed,
@@ -1305,20 +1305,25 @@ void MainWindow::on(LogManagerListener::Message, time_t t, const string &message
 
 void MainWindow::on(QueueManagerListener::Finished, QueueItem *item, const string& dir, int64_t avSpeed) throw()
 {
+	typedef Func3<MainWindow, string, string, Notify::TypeNotify> F3;
+
 	if (item->isSet(QueueItem::FLAG_CLIENT_VIEW | QueueItem::FLAG_USER_LIST))
 	{
 		UserPtr user = item->getDownloads()[0]->getUser();
 		string listName = item->getListName();
 
+		F3 *f3 = new F3(this, &MainWindow::showNotification_gui, _("file list from "), WulforUtil::getNicks(user),
+			Notify::DOWNLOAD_FINISHED_USER_LIST);
+		WulforManager::get()->dispatchGuiFunc(f3);
+
 		typedef Func4<MainWindow, UserPtr, string, string, bool> F4;
 		F4 *func = new F4(this, &MainWindow::showShareBrowser_gui, user, listName, dir, TRUE);
 		WulforManager::get()->dispatchGuiFunc(func);
 	}
-	else if (item->isSet(QueueItem::FLAG_NORMAL))
+	else if (!item->isSet(QueueItem::FLAG_XML_BZLIST))
 	{
-		typedef Func2<MainWindow, string, Notify::TypeNotify> F2;
-		F2 *f2 = new F2(this, &MainWindow::showNotification_gui, item->getTarget(), Notify::DOWNLOAD_FINISHED);
-		WulforManager::get()->dispatchGuiFunc(f2);
+		F3 *f3 = new F3(this, &MainWindow::showNotification_gui, _("<b>file:</b> "), item->getTarget(), Notify::DOWNLOAD_FINISHED);
+		WulforManager::get()->dispatchGuiFunc(f3);
 	}
 }
 

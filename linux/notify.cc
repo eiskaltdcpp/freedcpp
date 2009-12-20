@@ -135,11 +135,11 @@ void Notify::showNotify(const string &head, const string &body, TypeNotify notif
 
 			if (wsm->getInt("notify-download-finished-use"))
 			{
-				notify_notification_add_action(notification, "f", _("Open file"),
-					(NotifyActionCallback) onOpenFile, g_strdup(body.c_str()), g_free);
+				notify_notification_add_action(notification, "1", _("Open file"),
+					(NotifyActionCallback) onActon, g_strdup(body.c_str()), g_free);
 
-				notify_notification_add_action(notification, "F", _("Open folder"),
-					(NotifyActionCallback) onOpenFolder, g_strdup(Util::getFilePath(body).c_str()), g_free);
+				notify_notification_add_action(notification, "2", _("Open folder"),
+					(NotifyActionCallback) onActon, g_strdup(Util::getFilePath(body).c_str()), g_free);
 
 				showNotify(wsm->getString("notify-download-finished-title"),
 					head, Util::getFileName(body), wsm->getString("notify-download-finished-icon"), NOTIFY_URGENCY_NORMAL);
@@ -147,6 +147,13 @@ void Notify::showNotify(const string &head, const string &body, TypeNotify notif
 				action = TRUE;
 			}
 
+			break;
+
+		case DOWNLOAD_FINISHED_USER_LIST:
+
+			if (wsm->getInt("notify-download-finished-ul-use"))
+			showNotify(wsm->getString("notify-download-finished-ul-title"),
+				head, body, wsm->getString("notify-download-finished-ul-icon"), NOTIFY_URGENCY_LOW);
 			break;
 
 		case PRIVATE_MESSAGE:
@@ -229,24 +236,8 @@ void Notify::showNotify(const string &title, const string &head, const string &b
 	notify_notification_show(notification, NULL);
 }
 
-void Notify::onOpenFile(NotifyNotification *notify, const char *action, gpointer data)
+void Notify::onActon(NotifyNotification *notify, const char *action, gpointer data)
 {
-	g_return_if_fail(!C_EMPTY(action));
-	g_return_if_fail(action[0] == 'f');
-
-	string target = (gchar*)data;
-
-	if (!target.empty())
-		WulforUtil::openURI(target);
-
-	notify_notification_close(notify, NULL);
-}
-
-void Notify::onOpenFolder(NotifyNotification *notify, const char *action, gpointer data)
-{
-	g_return_if_fail(!C_EMPTY(action));
-	g_return_if_fail(action[0] == 'F');
-
 	string target = (gchar*)data;
 
 	if (!target.empty())

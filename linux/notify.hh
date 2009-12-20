@@ -46,6 +46,7 @@ class Notify
 		enum TypeNotify
 		{
 			DOWNLOAD_FINISHED,
+			DOWNLOAD_FINISHED_USER_LIST,
 			PRIVATE_MESSAGE,
 			HUB_CONNECT,
 			HUB_DISCONNECT,
@@ -78,8 +79,7 @@ class Notify
 		bool action;
 
 		//GUI callback functions
-		static void onOpenFile(NotifyNotification *notify, const char *action, gpointer data);
-		static void onOpenFolder(NotifyNotification *notify, const char *action, gpointer data);
+		static void onActon(NotifyNotification *notify, const char *action, gpointer data);
 };
 
 #else

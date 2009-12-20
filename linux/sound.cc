@@ -62,6 +62,8 @@ void Sound::playSound(TypeSound sound)
 			playSound(WGETS("sound-download-begins")); break;
 		case DOWNLOAD_FINISHED:
 			playSound(WGETS("sound-download-finished")); break;
+		case DOWNLOAD_FINISHED_USER_LIST:
+			playSound(WGETS("sound-download-finished-ul")); break;
 		case UPLOAD_FINISHED:
 			playSound(WGETS("sound-upload-finished")); break;
 		case PRIVATE_MESSAGE:

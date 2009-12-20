@@ -1048,9 +1048,19 @@ void Transfers::on(ConnectionManagerListener::StatusChanged, ConnectionQueueItem
 void Transfers::on(QueueManagerListener::Finished, QueueItem* qi, const string& dir, int64_t size) throw()
 {
 	string target = qi->getTarget();
+	Sound::TypeSound sound = Sound::DOWNLOAD_FINISHED;
+
+	if (qi->isSet(QueueItem::FLAG_CLIENT_VIEW | QueueItem::FLAG_USER_LIST))
+	{
+		sound = Sound::DOWNLOAD_FINISHED_USER_LIST;
+	}
+	else if (qi->isSet(QueueItem::FLAG_XML_BZLIST))
+	{
+		sound = Sound::NONE;
+	}
 
 	typedef Func3<Transfers, const string, const string, Sound::TypeSound> F3;
-	F3* f3 = new F3(this, &Transfers::finishParent_gui, target, _("Download finished"), Sound::DOWNLOAD_FINISHED);
+	F3* f3 = new F3(this, &Transfers::finishParent_gui, target, _("Download finished"), sound);
 	WulforManager::get()->dispatchGuiFunc(f3);
 }
 
