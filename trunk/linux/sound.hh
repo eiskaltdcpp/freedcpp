@@ -27,14 +27,13 @@ class Sound
 	public:
 		enum TypeSound
 		{
-			/*-*/
 			DOWNLOAD_BEGINS,
 			DOWNLOAD_FINISHED,
+			DOWNLOAD_FINISHED_USER_LIST,
 			UPLOAD_FINISHED,
 			PRIVATE_MESSAGE,
 			HUB_CONNECT,
 			HUB_DISCONNECT,
-			/*-*/
 			NONE
 		};
 

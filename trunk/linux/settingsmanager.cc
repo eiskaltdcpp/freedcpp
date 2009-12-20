@@ -68,6 +68,7 @@ WulforSettingsManager::WulforSettingsManager():
 	defaultInt.insert(IntMap::value_type("text-url-bold", TEXT_WEIGHT_NORMAL));
 	defaultInt.insert(IntMap::value_type("text-url-italic", TEXT_STYLE_NORMAL));
 	defaultInt.insert(IntMap::value_type("notify-download-finished-use", 0));
+	defaultInt.insert(IntMap::value_type("notify-download-finished-ul-use", 0));
 	defaultInt.insert(IntMap::value_type("notify-private-message-use", 0));
 	defaultInt.insert(IntMap::value_type("notify-hub-disconnect-use", 0));
 	defaultInt.insert(IntMap::value_type("notify-hub-connect-use", 0));
@@ -100,6 +101,7 @@ WulforSettingsManager::WulforSettingsManager():
 	defaultString.insert(StringMap::value_type("default-charset", WulforUtil::ENCODING_LOCALE));
 	defaultString.insert(StringMap::value_type("sound-download-begins", ""));
 	defaultString.insert(StringMap::value_type("sound-download-finished", ""));
+	defaultString.insert(StringMap::value_type("sound-download-finished-ul", ""));
 	defaultString.insert(StringMap::value_type("sound-upload-finished", ""));
 	defaultString.insert(StringMap::value_type("sound-private-message", ""));
 	defaultString.insert(StringMap::value_type("sound-hub-connect", ""));
@@ -128,6 +130,8 @@ WulforSettingsManager::WulforSettingsManager():
 	defaultString.insert(StringMap::value_type("emoticons-icon-size", "24x24"));
 	defaultString.insert(StringMap::value_type("notify-download-finished-title", "Download finished"));
 	defaultString.insert(StringMap::value_type("notify-download-finished-icon", ""));
+	defaultString.insert(StringMap::value_type("notify-download-finished-ul-title", "Download finished file list"));
+	defaultString.insert(StringMap::value_type("notify-download-finished-ul-icon", ""));
 	defaultString.insert(StringMap::value_type("notify-private-message-title", "Private message"));
 	defaultString.insert(StringMap::value_type("notify-private-message-icon", ""));
 	defaultString.insert(StringMap::value_type("notify-hub-disconnect-title", "Hub disconnect"));

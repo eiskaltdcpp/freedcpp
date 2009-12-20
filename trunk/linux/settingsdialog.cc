@@ -860,6 +860,7 @@ void Settings::initAppearance_gui()
 
 		addOption_gui(soundStore, wsm, _("Download begins"), "sound-download-begins");
 		addOption_gui(soundStore, wsm, _("Download finished"), "sound-download-finished");
+		addOption_gui(soundStore, wsm, _("Download finished file list"), "sound-download-finished-ul");
 		addOption_gui(soundStore, wsm, _("Upload finished"), "sound-upload-finished");
 		addOption_gui(soundStore, wsm, _("Private message"), "sound-private-message");
 		addOption_gui(soundStore, wsm, _("Hub connected"), "sound-hub-connect");
@@ -1021,6 +1022,10 @@ void Settings::initAppearance_gui()
 		addOption_gui(notifyStore, wsm, _("Download finished"),
 			"notify-download-finished-use", "notify-download-finished-title",
 			"notify-download-finished-icon", NOTIFY_URGENCY_NORMAL);
+
+		addOption_gui(notifyStore, wsm, _("Download finished file list"),
+			"notify-download-finished-ul-use", "notify-download-finished-ul-title",
+			"notify-download-finished-ul-icon", NOTIFY_URGENCY_LOW);
 
 		addOption_gui(notifyStore, wsm, _("Private message"),
 			"notify-private-message-use", "notify-private-message-title",
