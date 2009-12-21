@@ -1,3 +1,6 @@
+r49: 0.0.1.45
+* Ревизия 334 (linuxdcpp, fix directory dl from filelist root with search result).
+
 r48: 0.0.1.44
 * Исправил иконку выхода в статус-меню.
 
