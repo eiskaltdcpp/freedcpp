@@ -1592,6 +1592,8 @@ void Search::parseSearchResult_client(SearchResultPtr result, StringMap &resultM
 		string path = WulforUtil::linuxSeparator(result->getFile());
 		resultMap["Filename"] = WulforUtil::linuxSeparator(result->getFileName());
 		resultMap["Path"] = Util::getFilePath(path.substr(0, path.length() - 1)); // getFilePath just returns path unless we chop the last / off
+		if (resultMap["Path"].find("/") == string::npos)
+			resultMap["Path"] = "";
 		resultMap["File Order"] = "d" + resultMap["Filename"];
 		resultMap["Type"] = _("Directory");
 		resultMap["Icon"] = "freedcpp-directory";
