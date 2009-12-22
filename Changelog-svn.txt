@@ -1,3 +1,6 @@
+r50: 0.0.1.46
+* Ревизия 338 (linuxdcpp, add path separator between HOME and Downloads for default download dir setting).
+
 r49: 0.0.1.45
 * Ревизия 334 (linuxdcpp, fix directory dl from filelist root with search result).
 
