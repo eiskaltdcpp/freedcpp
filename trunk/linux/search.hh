@@ -68,7 +68,7 @@ class Search:
 		void popupMenu_gui();
 		void setStatus_gui(std::string statusBar, std::string text);
 		void search_gui();
-		void addResult_gui(dcpp::StringMap resultMap);
+		void addResult_gui(const dcpp::SearchResultPtr result);
 		void updateParentRow_gui(GtkTreeIter *parent, GtkTreeIter *child = NULL);
 		void ungroup_gui();
 		void regroup_gui();
@@ -105,8 +105,10 @@ class Search:
 		static void onRemoveUserFromQueueClicked_gui(GtkMenuItem *item, gpointer data);
 		static void onRemoveClicked_gui(GtkMenuItem *item, gpointer data);
 
+		// GUI functions
+		void parseSearchResult_gui(dcpp::SearchResultPtr result, dcpp::StringMap &resultMap);
+
 		// Client functions
-		void parseSearchResult_client(dcpp::SearchResultPtr result, dcpp::StringMap &resultMap);
 		void download_client(std::string target, std::string cid, std::string filename, int64_t size, std::string tth, std::string hubUrl);
 		void downloadDir_client(std::string target, std::string cid, std::string filename, std::string hubUrl);
 		void addSource_client(std::string source, std::string cid, int64_t size, std::string tth, std::string hubUrl);
@@ -137,6 +139,7 @@ class Search:
 		bool onlyFree;
 		UserCommandMenu *userCommandMenu;
 		GroupType previousGrouping;
+		std::tr1::unordered_map<std::string, std::vector<dcpp::SearchResultPtr> > results;
 };
 
 #else
