@@ -344,8 +344,9 @@ GtkWidget *MainWindow::currentPage_gui()
 void MainWindow::raisePage_gui(GtkWidget *page)
 {
 	int num = gtk_notebook_page_num(GTK_NOTEBOOK(getWidget("book")), page);
+	int currentNum = gtk_notebook_get_current_page(GTK_NOTEBOOK(getWidget("book")));
 
-	if (num != -1)
+	if (num != -1 && num != currentNum)
 		gtk_notebook_set_current_page(GTK_NOTEBOOK(getWidget("book")), num);
 }
 
@@ -900,9 +901,16 @@ void MainWindow::onPageSwitched_gui(GtkNotebook *notebook, GtkNotebookPage *page
 
 	if (entry)
 	{
+		// Disable "activate" signal on the tab menu item since it can cause
+		// onPageSwitched_gui to be called multiple times
+		GtkWidget *item = entry->getTabMenuItem();
+		g_signal_handlers_block_by_func(item, (gpointer)onRaisePage_gui, child);
+
 		entry->setActive_gui();
 		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(entry->getTabMenuItem()), TRUE);
 		mw->setTitle(entry->getLabelText()); // Update window title with selected tab label
+
+		g_signal_handlers_unblock_by_func(item, (gpointer)onRaisePage_gui, (gpointer)child);
 	}
 
 	GList *list = (GList *)g_object_get_data(G_OBJECT(notebook), "page-rotation-list");
