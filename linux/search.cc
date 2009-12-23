@@ -419,6 +419,7 @@ void Search::search_gui()
 	}
 
 	gtk_tree_store_clear(resultStore);
+	results.clear();
 	int64_t llsize = static_cast<int64_t>(lsize);
 	searchlist = StringTokenizer<string>(text, ' ').getTokens();
 
@@ -480,12 +481,8 @@ void Search::search_gui()
 	}
 }
 
-void Search::addResult_gui(StringMap resultMap)
+void Search::addResult_gui(const SearchResultPtr result)
 {
-	GroupType groupBy = (GroupType)gtk_combo_box_get_active(GTK_COMBO_BOX(getWidget("comboboxGroupBy")));
-	string groupColumn = getGroupingColumn(groupBy);
-	string groupStr = resultMap[groupColumn];
-
 	// Check that it's not a duplicate and find parent for grouping
 	GtkTreeIter iter;
 	GtkTreeIter parent;
@@ -494,20 +491,26 @@ void Search::addResult_gui(StringMap resultMap)
 	bool foundParent = FALSE;
 	bool createParent = FALSE;
 
-	gboolean valid = gtk_tree_model_get_iter_first(m, &iter);
-	while (valid)
+	vector<SearchResultPtr> &existingResults = results[result->getUser()->getCID().toBase32()];
+	for (vector<SearchResultPtr>::iterator it = existingResults.begin(); it != existingResults.end(); it++)
 	{
 		// Check if it's a duplicate
-		if (resultMap["CID"] == resultView.getString(&iter, "CID", m) &&
-		    resultMap["Filename"] == resultView.getString(&iter, "Filename", m) &&
-		    resultMap["Path"] == resultView.getString(&iter, "Path", m))
-		{
+		if (result->getFile() == (*it)->getFile())
 			return;
-		}
+	}
+	existingResults.push_back(result);
 
-		// Find grouping parent
-		if (!foundParent && groupBy != NOGROUPING && !groupStr.empty() &&
-		    resultView.getString(&iter, "Grouping String", m) == groupStr)
+	dcpp::StringMap resultMap;
+	parseSearchResult_gui(result, resultMap);
+
+	// Find grouping parent
+	GroupType groupBy = (GroupType)gtk_combo_box_get_active(GTK_COMBO_BOX(getWidget("comboboxGroupBy")));
+	string groupColumn = getGroupingColumn(groupBy);
+	string groupStr = resultMap[groupColumn];
+	gboolean valid = gtk_tree_model_get_iter_first(m, &iter);
+	while (valid && groupBy != NOGROUPING && !foundParent && !groupStr.empty())
+	{
+		if (resultView.getString(&iter, "Grouping String", m) == groupStr)
 		{
 			// Parent row
 			if (gtk_tree_model_iter_has_child(m, &iter))
@@ -1492,6 +1495,8 @@ void Search::onRemoveUserFromQueueClicked_gui(GtkMenuItem *item, gpointer data)
 	}
 }
 
+// Removing a row from treeStore still leaves the SearchResultPtr to results map. This way if a duplicate
+// result comes in later it won't be readded, before the results map is cleared with a new search.
 void Search::onRemoveClicked_gui(GtkMenuItem *item, gpointer data)
 {
 	Search *s = (Search *)data;
@@ -1563,7 +1568,7 @@ void Search::onCopyMagnetClicked_gui(GtkMenuItem* item, gpointer data)
 	}
 }
 
-void Search::parseSearchResult_client(SearchResultPtr result, StringMap &resultMap)
+void Search::parseSearchResult_gui(SearchResultPtr result, StringMap &resultMap)
 {
 	if (result->getType() == SearchResult::TYPE_FILE)
 	{
@@ -1797,18 +1802,15 @@ void Search::on(SearchManagerListener::SR, const SearchResultPtr& result) throw(
 			    (*i->begin() == '-' && i->size() != 1 && Util::findSubString(result->getFile(), i->substr(1)) != (string::size_type)-1))
 			{
 				++droppedResult;
-				F2 *func = new F2(this, &Search::setStatus_gui, "statusbar3", Util::toString(droppedResult) + _(" filtered"));
+				F2 *func = new F2(this, &Search::setStatus_gui, "statusbar3", Util::toString(droppedResult) + _(" dropped"));
 				WulforManager::get()->dispatchGuiFunc(func);
 				return;
 			}
 		}
 	}
 
-	StringMap resultMap;
-	parseSearchResult_client(result, resultMap);
-
-	typedef Func1<Search, StringMap> F1;
-	F1 *func = new F1(this, &Search::addResult_gui, resultMap);
+	typedef Func1<Search, SearchResultPtr> F1;
+	F1 *func = new F1(this, &Search::addResult_gui, result);
 	WulforManager::get()->dispatchGuiFunc(func);
 }
 
