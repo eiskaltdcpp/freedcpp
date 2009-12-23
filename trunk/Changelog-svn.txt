@@ -1,3 +1,6 @@
+r52: 0.0.1.48
+* Ревизия 340 (linuxdcpp, fixed a rare crash when switching tabs).
+
 r51: 0.0.1.47
 * Ревизия 339 (linuxdcpp, added unordered_map<CID, vector<SearchResultPtr> > to search, fixes adding 'old' results to queue and improves addResult performance).
 
