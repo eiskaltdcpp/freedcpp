@@ -1,3 +1,6 @@
+r53: 0.0.1.49
+* Маркировка текста (для перевода).
+
 r52: 0.0.1.48
 * Ревизия 340 (linuxdcpp, fixed a rare crash when switching tabs).
 
