@@ -26,6 +26,8 @@
 #include <dcpp/Util.h>
 #include "WulforUtil.hh"
 
+#include <glib/gi18n.h>
+
 using namespace std;
 using namespace dcpp;
 
@@ -128,15 +130,15 @@ WulforSettingsManager::WulforSettingsManager():
 	defaultString.insert(StringMap::value_type("text-url-fore-color", "#0000FF"));
 	defaultString.insert(StringMap::value_type("emoticons-pack", ""));
 	defaultString.insert(StringMap::value_type("emoticons-icon-size", "24x24"));
-	defaultString.insert(StringMap::value_type("notify-download-finished-title", "Download finished"));
+	defaultString.insert(StringMap::value_type("notify-download-finished-title", _("Download finished")));
 	defaultString.insert(StringMap::value_type("notify-download-finished-icon", ""));
-	defaultString.insert(StringMap::value_type("notify-download-finished-ul-title", "Download finished file list"));
+	defaultString.insert(StringMap::value_type("notify-download-finished-ul-title", _("Download finished file list")));
 	defaultString.insert(StringMap::value_type("notify-download-finished-ul-icon", ""));
-	defaultString.insert(StringMap::value_type("notify-private-message-title", "Private message"));
+	defaultString.insert(StringMap::value_type("notify-private-message-title", _("Private message")));
 	defaultString.insert(StringMap::value_type("notify-private-message-icon", ""));
-	defaultString.insert(StringMap::value_type("notify-hub-disconnect-title", "Hub disconnect"));
+	defaultString.insert(StringMap::value_type("notify-hub-disconnect-title", _("Hub disconnect")));
 	defaultString.insert(StringMap::value_type("notify-hub-disconnect-icon", ""));
-	defaultString.insert(StringMap::value_type("notify-hub-connect-title", "Hub connect"));
+	defaultString.insert(StringMap::value_type("notify-hub-connect-title", _("Hub connect")));
 	defaultString.insert(StringMap::value_type("notify-hub-connect-icon", ""));
 	defaultString.insert(StringMap::value_type("theme-name", "default"));
 	defaultString.insert(StringMap::value_type("icon-dc++", "freedcpp-dc++"));

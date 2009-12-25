@@ -446,7 +446,7 @@ void Settings::addOption_gui(GtkListStore *store, WulforSettingsManager *wsm,
 	gtk_list_store_set(store, &iter,
 		0, wsm->getInt(key1),               //use
 		1, name.c_str(),                    //notify
-		2, _(wsm->getString(key2).c_str()), //title
+		2, wsm->getString(key2).c_str(),    //title
 		3, pathIcon.c_str(),                //icon path
 		4, key1.c_str(),                    //key use
 		5, key2.c_str(),                    //key title
