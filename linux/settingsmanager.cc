@@ -74,7 +74,7 @@ WulforSettingsManager::WulforSettingsManager():
 	defaultInt.insert(IntMap::value_type("notify-private-message-use", 0));
 	defaultInt.insert(IntMap::value_type("notify-hub-disconnect-use", 0));
 	defaultInt.insert(IntMap::value_type("notify-hub-connect-use", 0));
-	defaultInt.insert(IntMap::value_type("notify-message-reduce", 1));
+	defaultInt.insert(IntMap::value_type("notify-pm-length", 50));
 	defaultInt.insert(IntMap::value_type("notify-icon-size", 3));
 	defaultString.insert(StringMap::value_type("downloadqueue-order", ""));
 	defaultString.insert(StringMap::value_type("downloadqueue-width", ""));

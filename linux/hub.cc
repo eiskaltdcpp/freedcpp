@@ -1411,7 +1411,7 @@ void Hub::onSendMessage_gui(GtkEntry *entry, gpointer data)
 		}
 		else if (command == _("freedcpp"))
 		{
-			hub->addStatusMessage_gui(_("freedcpp 0.0.1.49/0.75, project home: http://freedcpp.narod.ru http://code.google.com/p/freedcpp"), Msg::SYSTEM, Sound::NONE);
+			hub->addStatusMessage_gui(_("freedcpp 0.0.1.50/0.75, project home: http://freedcpp.narod.ru http://code.google.com/p/freedcpp"), Msg::SYSTEM, Sound::NONE);
 		}
 		else if (command == _("help"))
 		{
