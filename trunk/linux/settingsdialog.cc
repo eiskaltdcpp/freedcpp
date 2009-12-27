@@ -305,7 +305,7 @@ void Settings::saveSettings_client()
 				valid = gtk_tree_model_iter_next(m, &iter);
 			}
 
-			WSET("notify-message-reduce", gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(getWidget("notifyMessageReduceCheck"))));
+			WSET("notify-pm-length", (int)gtk_spin_button_get_value(GTK_SPIN_BUTTON(getWidget("notifyPMLengthSpinButton"))));
 			WSET("notify-icon-size", gtk_combo_box_get_active(GTK_COMBO_BOX(getWidget("notifyIconSizeComboBox"))));
 		}
 
@@ -1047,7 +1047,7 @@ void Settings::initAppearance_gui()
 		g_signal_connect(getWidget("notifyTreeView"), "key-release-event", G_CALLBACK(onNotifyKeyReleased_gui), (gpointer)this);
 		g_signal_connect(notifyView.get(), "button-release-event", G_CALLBACK(onNotifyButtonReleased_gui), (gpointer)this);
 
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(getWidget("notifyMessageReduceCheck")), WGETB("notify-message-reduce"));
+		gtk_spin_button_set_value(GTK_SPIN_BUTTON(getWidget("notifyPMLengthSpinButton")), (gdouble)WGETI("notify-pm-length"));
 		gtk_combo_box_set_active(GTK_COMBO_BOX(getWidget("notifyIconSizeComboBox")), WGETI("notify-icon-size"));
 	}
 

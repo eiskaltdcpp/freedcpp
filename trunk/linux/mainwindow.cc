@@ -586,9 +586,28 @@ void MainWindow::addPrivateMessage_gui(Msg::TypeMsg typemsg, string cid, string 
 
 		if (!isActive_gui())
 		{
-			Notify::get()->showNotify("",
-				(message.size() > 25 && !WGETB("notify-message-reduce")) ? message.substr(0, 25) + "..." : message,
-				Notify::PRIVATE_MESSAGE);
+			const int length = WGETI("notify-pm-length");
+
+			if (length > 0 && g_utf8_strlen(message.c_str(), -1) > length)
+			{
+				const gchar *p = message.c_str();
+				int ii = 0;
+
+				while (*p)
+				{
+					p = g_utf8_next_char(p);
+
+					if (++ii >= length)
+						break;
+				}
+
+				string::size_type i = string(p).size();
+				string::size_type j = message.size();
+
+				Notify::get()->showNotify("", message.substr(0, j - i) + "...", Notify::PRIVATE_MESSAGE);
+			}
+			else
+				Notify::get()->showNotify("", message, Notify::PRIVATE_MESSAGE);
 		}
 	}
 

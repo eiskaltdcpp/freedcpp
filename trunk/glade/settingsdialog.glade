@@ -3073,39 +3073,6 @@ see man strftime for details.</property>
                                 </child>
                               </widget>
                             </child>
-                            <child>
-                              <widget class="GtkFrame" id="frame26">
-                                <property name="visible">True</property>
-                                <property name="label_xalign">0</property>
-                                <child>
-                                  <widget class="GtkComboBox" id="notifyIconSizeComboBox">
-                                    <property name="visible">True</property>
-                                    <property name="items">16x16
-22x22
-24x24
-32x32
-36x36
-48x48
-64x64
-default</property>
-                                  </widget>
-                                </child>
-                                <child>
-                                  <widget class="GtkLabel" id="label50">
-                                    <property name="visible">True</property>
-                                    <property name="label" translatable="yes">&lt;b&gt;Icon size&lt;/b&gt;</property>
-                                    <property name="use_markup">True</property>
-                                  </widget>
-                                  <packing>
-                                    <property name="type">label_item</property>
-                                  </packing>
-                                </child>
-                              </widget>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="position">1</property>
-                              </packing>
-                            </child>
                           </widget>
                           <packing>
                             <property name="expand">False</property>
@@ -3206,25 +3173,56 @@ default</property>
                     <child>
                       <widget class="GtkHBox" id="hbox25">
                         <property name="visible">True</property>
+                        <property name="spacing">4</property>
                         <child>
-                          <widget class="GtkCheckButton" id="notifyMessageReduceCheck">
+                          <widget class="GtkFrame" id="frame26">
                             <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="label" translatable="yes">not to reduce the message</property>
-                            <property name="use_underline">True</property>
-                            <property name="response_id">0</property>
-                            <property name="draw_indicator">True</property>
+                            <property name="label_xalign">0</property>
+                            <child>
+                              <widget class="GtkComboBox" id="notifyIconSizeComboBox">
+                                <property name="visible">True</property>
+                                <property name="items">16x16
+22x22
+24x24
+32x32
+36x36
+48x48
+64x64
+default</property>
+                              </widget>
+                            </child>
+                            <child>
+                              <widget class="GtkLabel" id="label50">
+                                <property name="visible">True</property>
+                                <property name="label" translatable="yes">&lt;b&gt;Icon size&lt;/b&gt;</property>
+                                <property name="use_markup">True</property>
+                              </widget>
+                              <packing>
+                                <property name="type">label_item</property>
+                              </packing>
+                            </child>
                           </widget>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">False</property>
-                          </packing>
                         </child>
                         <child>
-                          <widget class="GtkAlignment" id="alignment12">
+                          <widget class="GtkFrame" id="frame34">
                             <property name="visible">True</property>
+                            <property name="label_xalign">0</property>
                             <child>
-                              <placeholder/>
+                              <widget class="GtkSpinButton" id="notifyPMLengthSpinButton">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="adjustment">0 0 255 1 10 10</property>
+                              </widget>
+                            </child>
+                            <child>
+                              <widget class="GtkLabel" id="label60">
+                                <property name="visible">True</property>
+                                <property name="label" translatable="yes">&lt;b&gt;PM length (max)&lt;/b&gt;</property>
+                                <property name="use_markup">True</property>
+                              </widget>
+                              <packing>
+                                <property name="type">label_item</property>
+                              </packing>
                             </child>
                           </widget>
                           <packing>
