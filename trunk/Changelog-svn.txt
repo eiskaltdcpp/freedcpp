@@ -1,3 +1,6 @@
+r55: 0.0.1.51
+* Ревизия 344 (linuxdcpp, remote crash when user downloads from merged share).
+
 r54: 0.0.1.50
 * Добавил в настройки регулировку ограничения длины ЛС.
 
