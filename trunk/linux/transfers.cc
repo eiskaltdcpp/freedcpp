@@ -57,10 +57,10 @@ Transfers::Transfers() :
 	transferView.insertColumn("User", G_TYPE_STRING, TreeView::ICON_STRING, 150, "Icon");
 	transferView.insertColumn("Hub Name", G_TYPE_STRING, TreeView::STRING, 100);
 	transferView.insertColumn("Status", G_TYPE_STRING, TreeView::PROGRESS, 250, "Progress");
-	transferView.insertColumn("Time Left", G_TYPE_STRING, TreeView::STRING, 85);
+	transferView.insertColumn("Time Left", G_TYPE_INT64, TreeView::TIME_LEFT, 85);
 	transferView.insertColumn("Speed", G_TYPE_INT64, TreeView::SPEED, 125);
 	transferView.insertColumn("Filename", G_TYPE_STRING, TreeView::STRING, 200);
-	transferView.insertColumn("Size", G_TYPE_INT64, TreeView::BYTE, 125);
+	transferView.insertColumn("Size", G_TYPE_INT64, TreeView::SIZE, 125);
 	transferView.insertColumn("Path", G_TYPE_STRING, TreeView::STRING, 200);
 	transferView.insertColumn("IP", G_TYPE_STRING, TreeView::STRING, 175);
 	transferView.insertHiddenColumn("Icon", G_TYPE_STRING);
@@ -589,7 +589,7 @@ void Transfers::updateParent_gui(GtkTreeIter* iter)
 		transferView.col("User"), users.substr(0, users.length()-2).c_str(),
 		transferView.col("Hub Name"), tmpHubs.str().substr(0, tmpHubs.str().length()-2).c_str(),
 		transferView.col("Speed"), speed, 
-		transferView.col("Time Left"), Util::formatSeconds(timeLeft).c_str(),
+		transferView.col("Time Left"), timeLeft,
 		transferView.col("Status"), stream.str().c_str(), 
 		transferView.col("Progress"), static_cast<int>(progress),
 		transferView.col("Sort Order"), active ? (string("d").append(users)).c_str() : (string("w").append(users)).c_str(), 
@@ -619,7 +619,7 @@ void Transfers::updateTransfer_gui(StringMap params, bool download, Sound::TypeS
 
 	for (StringMap::const_iterator it = params.begin(); it != params.end(); ++it)
 	{
-		if (it->first == "Size" || it->first == "Speed" || it->first == "Download Position")
+		if (it->first == "Size" || it->first == "Speed" || it->first == "Download Position" || it->first == "Time Left")
 			gtk_tree_store_set(transferStore, &iter, transferView.col(it->first), Util::toInt64(it->second), -1);
 		else if (it->first == "Progress" || it->first == "Failed")
 			gtk_tree_store_set(transferStore, &iter, transferView.col(it->first), Util::toInt(it->second), -1);
@@ -874,7 +874,7 @@ void Transfers::getParams_client(StringMap& params, Transfer* tr)
 		percent = static_cast<double>(tr->getPos() * 100.0)/ tr->getSize();
 	params["Progress"] = Util::toString(static_cast<int>(percent));
 	params["IP"] = tr->getUserConnection().getRemoteIp();
-	params["Time Left"] = Util::formatSeconds(tr->getSecondsLeft());
+	params["Time Left"] = tr->getSecondsLeft() > 0 ? Util::toString(tr->getSecondsLeft()) : "-1";
 	params["Target"] = tr->getPath();
 	params["Hub URL"] = tr->getUserConnection().getHubUrl();
 }
@@ -972,7 +972,7 @@ void Transfers::on(DownloadManagerListener::Failed, Download* dl, const string& 
 	params["Sort Order"] = "w" + params["User"];
 	params["Failed"] = "1";
 	params["Speed"] = "-1";
-	params["Time Left"] = "";
+	params["Time Left"] = "-1";
 
 	int64_t pos = QueueManager::getInstance()->getPos(dl->getPath()) + dl->getPos();
 
@@ -1022,7 +1022,7 @@ void Transfers::on(ConnectionManagerListener::Failed, ConnectionQueueItem* cqi, 
 	params["Failed"] = "1";
 	params["Sort Order"] = "w" + params["User"];
 	params["Speed"] = "-1";
-	params["Time Left"] = "";
+	params["Time Left"] = "-1";
 
 	typedef Func3<Transfers, StringMap, bool, Sound::TypeSound> F3;
 	F3* f3 = new F3(this, &Transfers::updateTransfer_gui, params, cqi->getDownload(), Sound::NONE);
@@ -1141,7 +1141,7 @@ void Transfers::on(UploadManagerListener::Failed, Upload* ul, const string& reas
 	params["Sort Order"] = "w" + params["User"];
 	params["Failed"] = "1";
 	params["Speed"] = "-1";
-	params["Time Left"] = "";
+	params["Time Left"] = "-1";
 
 	typedef Func3<Transfers, StringMap, bool, Sound::TypeSound> F3;
 	F3* f3 = new F3(this, &Transfers::updateTransfer_gui, params, FALSE, Sound::NONE);

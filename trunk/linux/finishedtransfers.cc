@@ -53,7 +53,7 @@ FinishedTransfers::FinishedTransfers(const EntryType type, const string &title, 
 	fileView.insertColumn("Filename", G_TYPE_STRING, TreeView::STRING, 100);
 	fileView.insertColumn("Path", G_TYPE_STRING, TreeView::STRING, 200);
 	fileView.insertColumn("Nicks", G_TYPE_STRING, TreeView::STRING, 100);
-	fileView.insertColumn("Transferred", G_TYPE_INT64, TreeView::BYTE, 100);
+	fileView.insertColumn("Transferred", G_TYPE_INT64, TreeView::SIZE, 100);
 	fileView.insertColumn("Speed", G_TYPE_INT64, TreeView::SPEED, 100);
 	fileView.insertColumn("CRC Checked", G_TYPE_STRING, TreeView::STRING, 100);
 	fileView.insertHiddenColumn("Target", G_TYPE_STRING);
@@ -74,7 +74,7 @@ FinishedTransfers::FinishedTransfers(const EntryType type, const string &title, 
 	userView.insertColumn("Nick", G_TYPE_STRING, TreeView::STRING, 100);
 	userView.insertColumn("Hub", G_TYPE_STRING, TreeView::STRING, 200);
 	userView.insertColumn("Files", G_TYPE_STRING, TreeView::STRING, 100);
-	userView.insertColumn("Transferred", G_TYPE_INT64, TreeView::BYTE, 100);
+	userView.insertColumn("Transferred", G_TYPE_INT64, TreeView::SIZE, 100);
 	userView.insertColumn("Speed", G_TYPE_INT64, TreeView::SPEED, 100);
 	userView.insertHiddenColumn("CID", G_TYPE_STRING);
 	userView.insertHiddenColumn("Elapsed Time", G_TYPE_INT64);
