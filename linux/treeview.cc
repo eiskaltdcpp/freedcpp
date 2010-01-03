@@ -185,29 +185,44 @@ GType* TreeView::getGTypes()
 	
 void TreeView::speedDataFunc(GtkTreeViewColumn *col, GtkCellRenderer *renderer, GtkTreeModel *model, GtkTreeIter *iter, gpointer column)
 {
+	string speedString;
 	int64_t speed;
 	gtk_tree_model_get(model, iter, static_cast<Column*>(column)->pos, &speed, -1);
+
 	if (speed >= 0)
 	{
-		string speed_str = dcpp::Util::formatBytes(speed);
-		speed_str.append("/s");
-
-		g_object_set(renderer, "text", speed_str.c_str(), NULL);
+		speedString = dcpp::Util::formatBytes(speed) + "/s";
 	}
-	else g_object_set(renderer, "text", "", NULL);
+
+	g_object_set(renderer, "text", speedString.c_str(), NULL);
 }
 
-void TreeView::byteDataFunc(GtkTreeViewColumn *col, GtkCellRenderer *renderer, GtkTreeModel *model, GtkTreeIter *iter, gpointer column)
+void TreeView::sizeDataFunc(GtkTreeViewColumn *col, GtkCellRenderer *renderer, GtkTreeModel *model, GtkTreeIter *iter, gpointer column)
 {
+	string sizeString;
 	int64_t size;
 	gtk_tree_model_get(model, iter, static_cast<Column*>(column)->pos, &size, -1);
+
 	if (size >= 0)
 	{
-		string size_str = dcpp::Util::formatBytes(size);
-		g_object_set(renderer, "text", size_str.c_str(), NULL);
+		sizeString = dcpp::Util::formatBytes(size);
 	}
-	else
-		g_object_set(renderer, "text", "", NULL);
+
+	g_object_set(renderer, "text", sizeString.c_str(), NULL);
+}
+
+void TreeView::timeLeftDataFunc(GtkTreeViewColumn *col, GtkCellRenderer *renderer, GtkTreeModel *model, GtkTreeIter *iter, gpointer column)
+{
+	string timeLeftString;
+	int64_t seconds;
+	gtk_tree_model_get(model, iter, static_cast<Column*>(column)->pos, &seconds, -1);
+
+	if (seconds >= 0)
+	{
+		timeLeftString = dcpp::Util::formatSeconds(seconds);
+	}
+
+	g_object_set(renderer, "text", timeLeftString.c_str(), NULL);
 }
 
 void TreeView::addColumn_gui(Column& column)
@@ -222,17 +237,23 @@ void TreeView::addColumn_gui(Column& column)
 			col = gtk_tree_view_column_new_with_attributes(column.title.c_str(),
 				gtk_cell_renderer_text_new(), "text", column.pos, NULL);
 			break;
-		case BYTE:
+		case SIZE:
 			renderer = gtk_cell_renderer_text_new();
 			col = gtk_tree_view_column_new_with_attributes(column.title.c_str(),
 					renderer, "text", column.pos, NULL);
-			gtk_tree_view_column_set_cell_data_func(col, renderer, TreeView::byteDataFunc, &column, NULL);
+			gtk_tree_view_column_set_cell_data_func(col, renderer, TreeView::sizeDataFunc, &column, NULL);
 			break;
 		case SPEED:
 			renderer = gtk_cell_renderer_text_new();
 			col = gtk_tree_view_column_new_with_attributes(column.title.c_str(),
 					renderer, "text", column.pos, NULL);
 			gtk_tree_view_column_set_cell_data_func(col, renderer, TreeView::speedDataFunc, &column, NULL);
+			break;
+		case TIME_LEFT:
+			renderer = gtk_cell_renderer_text_new();
+			col = gtk_tree_view_column_new_with_attributes(column.title.c_str(),
+					renderer, "text", column.pos, NULL);
+			gtk_tree_view_column_set_cell_data_func(col, renderer, TreeView::timeLeftDataFunc, &column, NULL);
 			break;
 		case STRINGR:
 			renderer = gtk_cell_renderer_text_new();
@@ -294,7 +315,7 @@ void TreeView::addColumn_gui(Column& column)
 		gtk_tree_view_column_set_sizing(col, GTK_TREE_VIEW_COLUMN_FIXED);
 
 	//make columns sortable
-	if (column.type == STRING || column.type == INT || column.type == PROGRESS || column.type == BYTE || column.type == SPEED)
+	if (column.type != BOOL && column.type != PIXBUF && column.type != EDIT_STRING)
 	{
 		gtk_tree_view_column_set_sort_column_id(col, column.pos);
 		gtk_tree_view_column_set_sort_indicator(col, TRUE);

@@ -1,3 +1,6 @@
+r56: 0.0.1.52
+* Ревизия 345 (linuxdcpp, fixed sorting of 'Time Left' column in transfers view).
+
 r55: 0.0.1.51
 * Ревизия 344 (linuxdcpp, remote crash when user downloads from merged share).
 

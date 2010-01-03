@@ -40,8 +40,8 @@ PublicHubs::PublicHubs():
 	hubView.insertColumn("Users", G_TYPE_INT, TreeView::INT, 75);
 	hubView.insertColumn("Address", G_TYPE_STRING, TreeView::STRING, 110);
 	hubView.insertColumn("Country", G_TYPE_STRING, TreeView::STRING, 100);
-	hubView.insertColumn("Shared", G_TYPE_INT64, TreeView::BYTE, 70);
-	hubView.insertColumn("Min Share", G_TYPE_INT64, TreeView::BYTE, 80);
+	hubView.insertColumn("Shared", G_TYPE_INT64, TreeView::SIZE, 70);
+	hubView.insertColumn("Min Share", G_TYPE_INT64, TreeView::SIZE, 80);
 	hubView.insertColumn("Min Slots", G_TYPE_INT, TreeView::INT, 70);
 	hubView.insertColumn("Max Hubs", G_TYPE_INT, TreeView::INT, 80);
 	hubView.insertColumn("Max Users", G_TYPE_INT, TreeView::INT, 80);

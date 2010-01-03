@@ -42,7 +42,8 @@ class TreeView
 			EDIT_STRING,
 			PROGRESS,
 			SPEED,
-			BYTE
+			SIZE,
+			TIME_LEFT
 		} columnType;
 
 		TreeView();
@@ -60,19 +61,6 @@ class TreeView
 		int col(const std::string &title);
 		void saveSettings();
 		std::string getString(GtkTreeIter *i, const std::string &column, GtkTreeModel *m = NULL);
-		static void speedDataFunc(GtkTreeViewColumn*, GtkCellRenderer*, GtkTreeModel*, GtkTreeIter*, gpointer);
-		static void byteDataFunc(GtkTreeViewColumn*, GtkCellRenderer*, GtkTreeModel*, GtkTreeIter*, gpointer);
-
-		template<class T, class C>
-		C getValue(GtkTreeIter *i, const std::string &column, GtkTreeModel *m = NULL)
-		{
-			if (m == NULL)
-				m = gtk_tree_view_get_model(view);
-			T value;
-			assert(gtk_tree_model_get_column_type(m, col(column)) != G_TYPE_STRING);
-			gtk_tree_model_get(m, i, col(column), &value, -1);
-			return C(value);
-		}
 		template<class T>
 		T getValue(GtkTreeIter *i, const std::string &column, GtkTreeModel *m = NULL)
 		{
@@ -83,6 +71,11 @@ class TreeView
 			gtk_tree_model_get(m, i, col(column), &value, -1);
 			return value;
 		}
+		template<class T, class C>
+		C getValue(GtkTreeIter *i, const std::string &column, GtkTreeModel *m = NULL)
+		{
+			return static_cast<C>(getValue<T>(i, column, m));
+		}
 
 	private:
 		class Column
@@ -92,7 +85,7 @@ class TreeView
 				Column(const std::string &title, int id, GType gtype, TreeView::columnType type, int width, const std::string &linkedCol = "") :
 					title(title), id(id), gtype(gtype), type(type), width(width), pos(id), linkedCol(linkedCol), visible(true) {};
 				Column(const std::string &title, int id, GType gtype) :
-					title(title), id(id), gtype(gtype) {};
+					title(title), id(id), gtype(gtype), pos(id) {};
 				std::string title;
 				int id;
 				GType gtype;
@@ -111,6 +104,9 @@ class TreeView
 		void restoreSettings();
 		static gboolean popupMenu_gui(GtkWidget *widget, GdkEventButton *event, gpointer data);
 		static void toggleColumnVisibility(GtkMenuItem *item, gpointer data);
+		static void speedDataFunc(GtkTreeViewColumn*, GtkCellRenderer*, GtkTreeModel*, GtkTreeIter*, gpointer);
+		static void sizeDataFunc(GtkTreeViewColumn*, GtkCellRenderer*, GtkTreeModel*, GtkTreeIter*, gpointer);
+		static void timeLeftDataFunc(GtkTreeViewColumn*, GtkCellRenderer*, GtkTreeModel*, GtkTreeIter*, gpointer);
 
 		GtkTreeView *view;
 		std::string name; // Used to save settings

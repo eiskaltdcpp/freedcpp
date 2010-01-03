@@ -55,7 +55,7 @@ Hub::Hub(const string &address, const string &encoding):
 	// Initialize nick treeview
 	nickView.setView(GTK_TREE_VIEW(getWidget("nickView")), true, "hub");
 	nickView.insertColumn("Nick", G_TYPE_STRING, TreeView::ICON_STRING, 100, "Icon");
-	nickView.insertColumn("Shared", G_TYPE_INT64, TreeView::BYTE, 75);
+	nickView.insertColumn("Shared", G_TYPE_INT64, TreeView::SIZE, 75);
 	nickView.insertColumn("Description", G_TYPE_STRING, TreeView::STRING, 85);
 	nickView.insertColumn("Tag", G_TYPE_STRING, TreeView::STRING, 100);
 	nickView.insertColumn("Connection", G_TYPE_STRING, TreeView::STRING, 85);
@@ -1411,7 +1411,7 @@ void Hub::onSendMessage_gui(GtkEntry *entry, gpointer data)
 		}
 		else if (command == _("freedcpp"))
 		{
-			hub->addStatusMessage_gui(_("freedcpp 0.0.1.51/0.75, project home: http://freedcpp.narod.ru http://code.google.com/p/freedcpp"), Msg::SYSTEM, Sound::NONE);
+			hub->addStatusMessage_gui(_("freedcpp 0.0.1.52/0.75, project home: http://freedcpp.narod.ru http://code.google.com/p/freedcpp"), Msg::SYSTEM, Sound::NONE);
 		}
 		else if (command == _("help"))
 		{
