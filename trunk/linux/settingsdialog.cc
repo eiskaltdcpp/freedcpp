@@ -49,8 +49,8 @@ Settings::Settings(GtkWindow* parent):
 	gtk_dialog_set_alternative_button_order(GTK_DIALOG(getWidget("dirChooserDialog")), GTK_RESPONSE_OK, GTK_RESPONSE_CANCEL, -1);
 	gtk_dialog_set_alternative_button_order(GTK_DIALOG(getWidget("fileChooserDialog")), GTK_RESPONSE_OK, GTK_RESPONSE_CANCEL, -1);
 
-	textStyleBuffer = gtk_text_buffer_new(NULL);
-	gtk_text_view_set_buffer(GTK_TEXT_VIEW(getWidget("textViewPreviewStyles")), textStyleBuffer);
+	// the reference count on the buffer is not incremented and caller of this function won't own a new reference.
+	textStyleBuffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(getWidget("textViewPreviewStyles")));
 	gtk_text_view_set_buffer(GTK_TEXT_VIEW(getWidget("textViewPreviewStylesTheme")), textStyleBuffer);
 
 	defaultStringTheme.insert(StringMap::value_type("icon-dc++", "freedcpp-dc++"));
