@@ -49,8 +49,8 @@ PrivateMessage::PrivateMessage(const string &cid, const string &hubUrl):
 		pango_font_description_free(fontDesc);
 	}
 
-	messageBuffer = gtk_text_buffer_new(NULL);
-	gtk_text_view_set_buffer(GTK_TEXT_VIEW(getWidget("text")), messageBuffer);
+	// the reference count on the buffer is not incremented and caller of this function won't own a new reference.
+	messageBuffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(getWidget("text")));
 
 	/* initial markers */
 	GtkTextIter iter;

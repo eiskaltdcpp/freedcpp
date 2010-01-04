@@ -83,8 +83,9 @@ Hub::Hub(const string &address, const string &encoding):
 		gtk_widget_modify_font(getWidget("chatText"), fontDesc);
 		pango_font_description_free(fontDesc);
 	}
-	chatBuffer = gtk_text_buffer_new(NULL);
-	gtk_text_view_set_buffer(GTK_TEXT_VIEW(getWidget("chatText")), chatBuffer);
+
+	// the reference count on the buffer is not incremented and caller of this function won't own a new reference.
+	chatBuffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(getWidget("chatText")));
 
 	/* initial markers */
 	GtkTextIter iter;
@@ -1411,7 +1412,7 @@ void Hub::onSendMessage_gui(GtkEntry *entry, gpointer data)
 		}
 		else if (command == _("freedcpp"))
 		{
-			hub->addStatusMessage_gui(_("freedcpp 0.0.1.52/0.75, project home: http://freedcpp.narod.ru http://code.google.com/p/freedcpp"), Msg::SYSTEM, Sound::NONE);
+			hub->addStatusMessage_gui(_("freedcpp 0.0.1.53/0.75, project home: http://freedcpp.narod.ru http://code.google.com/p/freedcpp"), Msg::SYSTEM, Sound::NONE);
 		}
 		else if (command == _("help"))
 		{

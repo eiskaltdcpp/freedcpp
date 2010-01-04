@@ -1,3 +1,6 @@
+r57: 0.0.1.53
+* Исправлена ошибка, лишняя ссылка на текст-буфер.
+
 r56: 0.0.1.52
 * Ревизия 345 (linuxdcpp, fixed sorting of 'Time Left' column in transfers view).
 
