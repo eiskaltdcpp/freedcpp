@@ -307,6 +307,7 @@ void Settings::saveSettings_client()
 
 			WSET("notify-pm-length", (int)gtk_spin_button_get_value(GTK_SPIN_BUTTON(getWidget("notifyPMLengthSpinButton"))));
 			WSET("notify-icon-size", gtk_combo_box_get_active(GTK_COMBO_BOX(getWidget("notifyIconSizeComboBox"))));
+			WSET("notify-only-not-active", gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(getWidget("notifyAppActiveCheckButton"))));
 		}
 
 		{ // Theme
@@ -1049,6 +1050,7 @@ void Settings::initAppearance_gui()
 
 		gtk_spin_button_set_value(GTK_SPIN_BUTTON(getWidget("notifyPMLengthSpinButton")), (gdouble)WGETI("notify-pm-length"));
 		gtk_combo_box_set_active(GTK_COMBO_BOX(getWidget("notifyIconSizeComboBox")), WGETI("notify-icon-size"));
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(getWidget("notifyAppActiveCheckButton")), WGETI("notify-only-not-active"));
 	}
 
 	{ // Themes

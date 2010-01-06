@@ -584,7 +584,18 @@ void MainWindow::addPrivateMessage_gui(Msg::TypeMsg typemsg, string cid, string 
 	{
 		dynamic_cast<PrivateMessage*>(entry)->addMessage_gui(message, typemsg);
 
+		bool show = FALSE;
+
 		if (!isActive_gui())
+		{
+			show = TRUE;
+		}
+		else if (currentPage_gui() != entry->getContainer() && !WGETI("notify-only-not-active"))
+		{
+			show = TRUE;
+		}
+
+		if (show)
 		{
 			const int length = WGETI("notify-pm-length");
 
