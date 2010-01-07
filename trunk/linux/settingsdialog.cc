@@ -90,8 +90,9 @@ Settings::Settings(GtkWindow* parent):
 	defaultStringTheme.insert(StringMap::value_type("text-timestamp-fore-color", "#43629A"));
 	defaultStringTheme.insert(StringMap::value_type("text-mynick-back-color", "#FFFFFF"));
 	defaultStringTheme.insert(StringMap::value_type("text-mynick-fore-color", "#A52A2A"));
-	defaultStringTheme.insert(StringMap::value_type("text-fav-back-color", "#FFFFFF"));
-	defaultStringTheme.insert(StringMap::value_type("text-fav-fore-color", "#FFA500"));
+//	TODO: favorite user, uncomment when implemented
+// 	defaultStringTheme.insert(StringMap::value_type("text-fav-back-color", "#FFFFFF"));
+// 	defaultStringTheme.insert(StringMap::value_type("text-fav-fore-color", "#FFA500"));
 	defaultStringTheme.insert(StringMap::value_type("text-op-back-color", "#FFFFFF"));
 	defaultStringTheme.insert(StringMap::value_type("text-op-fore-color", "#0000FF"));
 	defaultStringTheme.insert(StringMap::value_type("text-url-back-color", "#FFFFFF"));
@@ -110,8 +111,9 @@ Settings::Settings(GtkWindow* parent):
 	defaultIntTheme.insert(IntMap::value_type("text-timestamp-italic", TEXT_STYLE_NORMAL));
 	defaultIntTheme.insert(IntMap::value_type("text-mynick-bold", TEXT_WEIGHT_BOLD));
 	defaultIntTheme.insert(IntMap::value_type("text-mynick-italic", TEXT_STYLE_NORMAL));
-	defaultIntTheme.insert(IntMap::value_type("text-fav-bold", TEXT_WEIGHT_BOLD));
-	defaultIntTheme.insert(IntMap::value_type("text-fav-italic", TEXT_STYLE_NORMAL));
+//	TODO: favorite user, uncomment when implemented
+// 	defaultIntTheme.insert(IntMap::value_type("text-fav-bold", TEXT_WEIGHT_BOLD));
+// 	defaultIntTheme.insert(IntMap::value_type("text-fav-italic", TEXT_STYLE_NORMAL));
 	defaultIntTheme.insert(IntMap::value_type("text-op-bold", TEXT_WEIGHT_BOLD));
 	defaultIntTheme.insert(IntMap::value_type("text-op-italic", TEXT_STYLE_NORMAL));
 	defaultIntTheme.insert(IntMap::value_type("text-url-bold", TEXT_WEIGHT_NORMAL));
@@ -258,13 +260,12 @@ void Settings::saveSettings_client()
 			GtkTreeIter iter;
 			GtkTreeModel *m = GTK_TREE_MODEL(soundStore);
 			gboolean valid = gtk_tree_model_get_iter_first(m, &iter);
-			string sample, target;
 
 			while (valid)
 			{
-				sample = soundView.getString(&iter, "Sample");
-				target = soundView.getString(&iter, _("File"));
-				WSET(sample, target);
+				wsm->set(soundView.getString(&iter, "keyUse"), soundView.getValue<int>(&iter, _("Use")));
+				wsm->set(soundView.getString(&iter, "keyFile"), soundView.getString(&iter, _("File")));
+
 				valid = gtk_tree_model_iter_next(m, &iter);
 			}
 
@@ -414,14 +415,16 @@ void Settings::addOption_gui(GtkListStore *store, const string &name, const stri
 
 /* Adds a sounds options */
 
-void Settings::addOption_gui(GtkListStore *store, WulforSettingsManager *wsm, const string &name, const string &key1)
+void Settings::addOption_gui(GtkListStore *store, WulforSettingsManager *wsm, const string &name, const string &key1, const string &key2)
 {
 	GtkTreeIter iter;
 	gtk_list_store_append(store, &iter);
 	gtk_list_store_set(store, &iter,
-		0, name.c_str(),
-		1, wsm->getString(key1).c_str(),
-		2, key1.c_str(),
+		0, wsm->getInt(key1),               //use
+		1, name.c_str(),                    //sounds
+		2, wsm->getString(key2).c_str(),    //file
+		3, key1.c_str(),                    //key use
+		4, key2.c_str(),                    //key file
 		-1);
 }
 
@@ -846,29 +849,35 @@ void Settings::initAppearance_gui()
 
 	{ // Sounds
 		g_signal_connect(getWidget("soundPlayButton"), "clicked", G_CALLBACK(onSoundPlayButton_gui), (gpointer)this);
-		g_signal_connect(getWidget("soundNoneButton"), "clicked", G_CALLBACK(onSoundNoneButton_gui), (gpointer)this);
 		g_signal_connect(getWidget("soundFileBrowseButton"), "clicked", G_CALLBACK(onSoundFileBrowseClicked_gui), (gpointer)this);
 
 		soundView.setView(GTK_TREE_VIEW(getWidget("soundsTreeView")));
+		soundView.insertColumn(_("Use"), G_TYPE_BOOLEAN, TreeView::BOOL, -1);
 		soundView.insertColumn(_("Sounds"), G_TYPE_STRING, TreeView::STRING, -1);
 		soundView.insertColumn(_("File"), G_TYPE_STRING, TreeView::STRING, -1);
-		soundView.insertHiddenColumn("Sample", G_TYPE_STRING);
+		soundView.insertHiddenColumn("keyUse", G_TYPE_STRING);
+		soundView.insertHiddenColumn("keyFile", G_TYPE_STRING);
 		soundView.finalize();
 
 		soundStore = gtk_list_store_newv(soundView.getColCount(), soundView.getGTypes());
 		gtk_tree_view_set_model(soundView.get(), GTK_TREE_MODEL(soundStore));
 		g_object_unref(soundStore);
 
-		addOption_gui(soundStore, wsm, _("Download begins"), "sound-download-begins");
-		addOption_gui(soundStore, wsm, _("Download finished"), "sound-download-finished");
-		addOption_gui(soundStore, wsm, _("Download finished file list"), "sound-download-finished-ul");
-		addOption_gui(soundStore, wsm, _("Upload finished"), "sound-upload-finished");
-		addOption_gui(soundStore, wsm, _("Private message"), "sound-private-message");
-		addOption_gui(soundStore, wsm, _("Hub connected"), "sound-hub-connect");
-		addOption_gui(soundStore, wsm, _("Hub disconnected"), "sound-hub-disconnect");
+		GList *list = gtk_tree_view_column_get_cell_renderers(gtk_tree_view_get_column(soundView.get(), soundView.col(_("Use"))));
+		GObject *renderer = (GObject *)g_list_nth_data(list, 0);
+		g_signal_connect(renderer, "toggled", G_CALLBACK(onOptionsViewToggled_gui), (gpointer)soundStore);
+		g_list_free(list);
+
+//		TODO: download begins, uncomment when implemented
+//		addOption_gui(soundStore, wsm, _("Download begins"), "sound-download-begins-use", "sound-download-begins");
+		addOption_gui(soundStore, wsm, _("Download finished"), "sound-download-finished-use", "sound-download-finished");
+		addOption_gui(soundStore, wsm, _("Download finished file list"), "sound-download-finished-ul-use", "sound-download-finished-ul");
+		addOption_gui(soundStore, wsm, _("Upload finished"), "sound-upload-finished-use", "sound-upload-finished");
+		addOption_gui(soundStore, wsm, _("Private message"), "sound-private-message-use", "sound-private-message");
+		addOption_gui(soundStore, wsm, _("Hub connected"), "sound-hub-connect-use", "sound-hub-connect");
+		addOption_gui(soundStore, wsm, _("Hub disconnected"), "sound-hub-disconnect-use", "sound-hub-disconnect");
 
 		gtk_widget_set_sensitive(getWidget("soundPlayButton"), TRUE);
-		gtk_widget_set_sensitive(getWidget("soundNoneButton"), TRUE);
 		gtk_widget_set_sensitive(getWidget("soundFileBrowseButton"), TRUE);
 
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(getWidget("soundPMReceivedCheckButton")), WGETB("sound-pm"));
@@ -923,8 +932,9 @@ void Settings::initAppearance_gui()
 		addOption_gui(textStyleStore, wsm, _("URL"),
 			"text-url-fore-color", "text-url-back-color", "text-url-bold", "text-url-italic");
 
-		addOption_gui(textStyleStore, wsm, _("Favorite User"),
-			"text-fav-fore-color", "text-fav-back-color", "text-fav-bold", "text-fav-italic");
+//		TODO: favorite user, uncomment when implemented
+// 		addOption_gui(textStyleStore, wsm, _("Favorite User"),
+// 			"text-fav-fore-color", "text-fav-back-color", "text-fav-bold", "text-fav-italic");
 
 		addOption_gui(textStyleStore, wsm, _("Operator"),
 			"text-op-fore-color", "text-op-back-color", "text-op-bold", "text-op-italic");
@@ -1777,17 +1787,6 @@ void Settings::onSoundPlayButton_gui(GtkWidget *widget, gpointer data)
 		string target = s->soundView.getString(&iter, _("File"));
 		Sound::get()->playSound(target);
 	}
-}
-
-void Settings::onSoundNoneButton_gui(GtkWidget *widget, gpointer data)
-{
-	Settings *s = (Settings *)data;
-
-	GtkTreeIter iter;
-	GtkTreeSelection *selection = gtk_tree_view_get_selection(s->soundView.get());
-
-	if (gtk_tree_selection_get_selected(selection, NULL, &iter))
-		gtk_list_store_set(s->soundStore, &iter, s->soundView.col(_("File")), "", -1);
 }
 
 void Settings::onTextColorForeClicked_gui(GtkWidget *widget, gpointer data)
