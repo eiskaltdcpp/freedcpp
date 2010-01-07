@@ -56,22 +56,52 @@ void Sound::sound_init()
 
 void Sound::playSound(TypeSound sound)
 {
+	WulforSettingsManager *wsm = WulforSettingsManager::getInstance();
+
 	switch (sound)
 	{
-		case DOWNLOAD_BEGINS:
-			playSound(WGETS("sound-download-begins")); break;
+//		TODO: download begins, uncomment when implemented
+//		case DOWNLOAD_BEGINS:
+// 
+//			if (wsm->getInt("sound-download-begins-use"))
+//				playSound(wsm->getString("sound-download-begins"));
+//		break;
+
 		case DOWNLOAD_FINISHED:
-			playSound(WGETS("sound-download-finished")); break;
+
+			if (wsm->getInt("sound-download-finished-use"))
+				playSound(wsm->getString("sound-download-finished"));
+		break;
+
 		case DOWNLOAD_FINISHED_USER_LIST:
-			playSound(WGETS("sound-download-finished-ul")); break;
+
+			if (wsm->getInt("sound-download-finished-ul-use"))
+				playSound(wsm->getString("sound-download-finished-ul"));
+		break;
+
 		case UPLOAD_FINISHED:
-			playSound(WGETS("sound-upload-finished")); break;
+
+			if (wsm->getInt("sound-upload-finished-use"))
+				playSound(wsm->getString("sound-upload-finished"));
+		break;
+
 		case PRIVATE_MESSAGE:
-			playSound(WGETS("sound-private-message")); break;
+
+			if (wsm->getInt("sound-private-message-use"))
+				playSound(wsm->getString("sound-private-message"));
+		break;
+
 		case HUB_CONNECT:
-			playSound(WGETS("sound-hub-connect")); break;
+
+			if (wsm->getInt("sound-hub-connect-use"))
+				playSound(wsm->getString("sound-hub-connect"));
+		break;
+
 		case HUB_DISCONNECT:
-			playSound(WGETS("sound-hub-disconnect")); break;
+
+			if (wsm->getInt("sound-hub-disconnect-use"))
+				playSound(wsm->getString("sound-hub-disconnect"));
+		break;
 
 		default: break;
 	}

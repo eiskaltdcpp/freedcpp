@@ -1,3 +1,7 @@
+r59: 0.0.1.55
+* Убрал кнопку 'None' (настройки/звуки).
+* todo: sound download begins, favorite user.
+
 r58: 0.0.1.54
 * Добавил вкладку ЛС (настройки/уведомления).
 * hbox24 (интервал 4), notifyTreeView (ширина границы 0), вместо viewport1 вставил alignment12.

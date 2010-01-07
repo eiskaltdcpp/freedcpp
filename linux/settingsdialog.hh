@@ -48,7 +48,8 @@ class Settings:
 			const std::string &name, const std::string &key1, const std::string &key2,
 			const std::string &key3, const int key4);
 		void addOption_gui(GtkListStore *store, const std::string &name, const std::string &setting);
-		void addOption_gui(GtkListStore *store, WulforSettingsManager *wsm, const std::string &name, const std::string &key1);
+		void addOption_gui(GtkListStore *store, WulforSettingsManager *wsm, const std::string &name,
+			const std::string &key1, const std::string &key2);
 		void addOption_gui(GtkListStore *store, WulforSettingsManager *wsm, GtkIconTheme *iconTheme,
 			const std::string &name, const std::string &key1);
 		void createOptionsView_gui(TreeView &treeView, GtkListStore *&store, const std::string &widgetName);
@@ -124,7 +125,6 @@ class Settings:
 		static void onPreviewButtonReleased_gui(GtkWidget *widget, GdkEventButton *event, gpointer data);
 		static void onSoundFileBrowseClicked_gui(GtkWidget *widget, gpointer data);
 		static void onSoundPlayButton_gui(GtkWidget *widget, gpointer data);
-		static void onSoundNoneButton_gui(GtkWidget *widget, gpointer data);
 		static void onTextColorForeClicked_gui(GtkWidget *widget, gpointer data);
 		static void onTextColorBackClicked_gui(GtkWidget *widget, gpointer data);
 		static void onTextColorBWClicked_gui(GtkWidget *widget, gpointer data);
