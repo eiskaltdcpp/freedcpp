@@ -62,7 +62,7 @@ class Notify
 
 		void showNotify(const std::string &head, const std::string &body, TypeNotify notify);
 		void showNotify(const std::string &title, const std::string &head, const std::string &body,
-			const std::string &icon, NotifyUrgency urgency);
+			const std::string &icon, const int iconSize, NotifyUrgency urgency);
 
 	private:
 		static Notify *notify;
