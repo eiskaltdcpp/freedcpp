@@ -1271,12 +1271,11 @@ void Settings::onNotifyTestButton_gui(GtkWidget *widget, gpointer data)
 
 	if (gtk_tree_selection_get_selected(selection, NULL, &iter))
 	{
-		WSET("notify-icon-size", gtk_combo_box_get_active(GTK_COMBO_BOX(s->getWidget("notifyIconSizeComboBox"))));
 		string title = s->notifyView.getString(&iter, _("Title"));
 		string icon = s->notifyView.getString(&iter, _("Icon"));
 		NotifyUrgency urgency = (NotifyUrgency)s->notifyView.getValue<int>(&iter, "Urgency");
 		Notify::get()->showNotify(title, "<span weight=\"bold\" size=\"larger\">" + string(_("*** T E S T ***")) + "</span>",
-			"", icon, urgency);
+			"", icon, gtk_combo_box_get_active(GTK_COMBO_BOX(s->getWidget("notifyIconSizeComboBox"))), urgency);
 	}
 }
 

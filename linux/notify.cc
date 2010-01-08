@@ -113,6 +113,10 @@ void Notify::setCurrIconSize(const int size)
 			icon_width = icon_height = 64; // 64x64
 			break;
 
+		case DEFAULT:
+			currIconSize = DEFAULT;
+			break;
+
 		default:
 			currIconSize = DEFAULT;
 			WSET("notify-icon-size", DEFAULT);
@@ -141,8 +145,8 @@ void Notify::showNotify(const string &head, const string &body, TypeNotify notif
 				notify_notification_add_action(notification, "2", _("Open folder"),
 					(NotifyActionCallback) onActon, g_strdup(Util::getFilePath(body).c_str()), g_free);
 
-				showNotify(wsm->getString("notify-download-finished-title"),
-					head, Util::getFileName(body), wsm->getString("notify-download-finished-icon"), NOTIFY_URGENCY_NORMAL);
+				showNotify(wsm->getString("notify-download-finished-title"), head, Util::getFileName(body),
+					wsm->getString("notify-download-finished-icon"), wsm->getInt("notify-icon-size"), NOTIFY_URGENCY_NORMAL);
 
 				action = TRUE;
 			}
@@ -152,43 +156,43 @@ void Notify::showNotify(const string &head, const string &body, TypeNotify notif
 		case DOWNLOAD_FINISHED_USER_LIST:
 
 			if (wsm->getInt("notify-download-finished-ul-use"))
-			showNotify(wsm->getString("notify-download-finished-ul-title"),
-				head, body, wsm->getString("notify-download-finished-ul-icon"), NOTIFY_URGENCY_LOW);
+			showNotify(wsm->getString("notify-download-finished-ul-title"), head, body,
+				wsm->getString("notify-download-finished-ul-icon"), wsm->getInt("notify-icon-size"), NOTIFY_URGENCY_LOW);
 			break;
 
 		case PRIVATE_MESSAGE:
 
 			if (wsm->getInt("notify-private-message-use"))
-			showNotify(wsm->getString("notify-private-message-title"), head,
-				body, wsm->getString("notify-private-message-icon"), NOTIFY_URGENCY_NORMAL);
+			showNotify(wsm->getString("notify-private-message-title"), head, body,
+				wsm->getString("notify-private-message-icon"), wsm->getInt("notify-icon-size"), NOTIFY_URGENCY_NORMAL);
 			break;
 
 		case HUB_CONNECT:
 
 			if (wsm->getInt("notify-hub-connect-use"))
-			showNotify(wsm->getString("notify-hub-connect-title"), head,
-				body, wsm->getString("notify-hub-connect-icon"), NOTIFY_URGENCY_NORMAL);
+			showNotify(wsm->getString("notify-hub-connect-title"), head, body,
+				wsm->getString("notify-hub-connect-icon"), wsm->getInt("notify-icon-size"), NOTIFY_URGENCY_NORMAL);
 			break;
 
 		case HUB_DISCONNECT:
 
 			if (wsm->getInt("notify-hub-disconnect-use"))
-			showNotify(wsm->getString("notify-hub-disconnect-title"), head,
-				body, wsm->getString("notify-hub-disconnect-icon"), NOTIFY_URGENCY_CRITICAL);
+			showNotify(wsm->getString("notify-hub-disconnect-title"), head, body,
+				wsm->getString("notify-hub-disconnect-icon"), wsm->getInt("notify-icon-size"), NOTIFY_URGENCY_CRITICAL);
 			break;
 
 		default: break;
 	}
 }
 
-void Notify::showNotify(const string &title, const string &head, const string &body, const string &icon, NotifyUrgency urgency)
+void Notify::showNotify(const string &title, const string &head, const string &body, const string &icon, const int iconSize, NotifyUrgency urgency)
 {
 	if (title.empty())
 		return;
 
 	gchar *esc_title = g_markup_escape_text(title.c_str(), -1);
 	gchar *esc_body = g_markup_escape_text(body.c_str(), -1);
-	string message = head + string(esc_body);
+	string message = head + esc_body;
 
 	notify_notification_close(notification, NULL);
 	notify_notification_clear_hints(notification);
@@ -200,12 +204,10 @@ void Notify::showNotify(const string &title, const string &head, const string &b
 
 	if (!icon.empty())
 	{
-		setCurrIconSize(WGETI("notify-icon-size"));
-		bool useDefault = currIconSize != DEFAULT ? FALSE : TRUE;
-
+		setCurrIconSize(iconSize);
 		GdkPixbuf *pixbuf = NULL;
 
-		if (!useDefault)
+		if (currIconSize != DEFAULT)
 		{
 			GdkPixbuf *temp = gdk_pixbuf_new_from_file(Text::fromUtf8(icon).c_str(), NULL);
 
