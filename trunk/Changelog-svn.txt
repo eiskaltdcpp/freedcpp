@@ -1,3 +1,6 @@
+r62: 0.0.1.58
+* Ник(и) в чат (Issue 7: public message on click nick).
+
 r61: 0.0.1.57
 * Ревизия 346 (linuxdcpp, added missing SIGBUS handler, crash when hashing files).
 
