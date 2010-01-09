@@ -88,6 +88,7 @@ class Hub:
 		void getSettingTag_gui(WulforSettingsManager *wsm, TypeTag type, std::string &fore, std::string &back, int &bold, int &italic);
 		GtkTextTag* createTag_gui(const std::string &tagname, TypeTag type);
 		void addStatusMessage_gui(std::string message, Msg::TypeMsg typemsg, Sound::TypeSound sound, Notify::TypeNotify notify);
+		void nickToChat_gui(const std::string &nick);
 
 		// GUI callbacks
 		static gboolean onFocusIn_gui(GtkWidget *widget, GdkEventFocus *event, gpointer data);
@@ -105,6 +106,7 @@ class Hub:
 		static void onChatScroll_gui(GtkAdjustment *adjustment, gpointer data);
 		static void onChatResize_gui(GtkAdjustment *adjustment, gpointer data);
 		static void onSendMessage_gui(GtkEntry *entry, gpointer data);
+		static void onNickToChat_gui(GtkMenuItem *item, gpointer data);
 		static void onCopyNickItemClicked_gui(GtkMenuItem *item, gpointer data);
 		static void onBrowseItemClicked_gui(GtkMenuItem *item, gpointer data);
 		static void onMatchItemClicked_gui(GtkMenuItem *item, gpointer data);

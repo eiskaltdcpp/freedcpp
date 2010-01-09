@@ -116,6 +116,7 @@ Hub::Hub(const string &address, const string &encoding):
 	g_signal_connect(getWidget("chatText"), "visibility-notify-event", G_CALLBACK(onChatVisibilityChanged_gui), (gpointer)this);
 	g_signal_connect(adjustment, "value_changed", G_CALLBACK(onChatScroll_gui), (gpointer)this);
 	g_signal_connect(adjustment, "changed", G_CALLBACK(onChatResize_gui), (gpointer)this);
+	g_signal_connect(getWidget("nickToChatItem"), "activate", G_CALLBACK(onNickToChat_gui), (gpointer)this);
 	g_signal_connect(getWidget("copyNickItem"), "activate", G_CALLBACK(onCopyNickItemClicked_gui), (gpointer)this);
 	g_signal_connect(getWidget("browseItem"), "activate", G_CALLBACK(onBrowseItemClicked_gui), (gpointer)this);
 	g_signal_connect(getWidget("matchItem"), "activate", G_CALLBACK(onMatchItemClicked_gui), (gpointer)this);
@@ -413,6 +414,16 @@ void Hub::addStatusMessage_gui(string message, Msg::TypeMsg typemsg, Sound::Type
 			addMessage_gui(line, typemsg);
 		}
 	}
+}
+
+void Hub::nickToChat_gui(const string &nick)
+{
+	if (!gtk_widget_is_focus(getWidget("chatEntry")))
+		gtk_widget_grab_focus(getWidget("chatEntry"));
+
+	gint pos = gtk_editable_get_position(GTK_EDITABLE(getWidget("chatEntry")));
+	gtk_editable_insert_text(GTK_EDITABLE(getWidget("chatEntry")), (nick + (!pos? ": " : " ")).c_str(), -1, &pos);
+	gtk_editable_set_position(GTK_EDITABLE(getWidget("chatEntry")), pos);
 }
 
 void Hub::addMessage_gui(string message, Msg::TypeMsg typemsg)
@@ -1154,7 +1165,14 @@ gboolean Hub::onNickTagEvent_gui(GtkTextTag *tag, GObject *textView, GdkEvent *e
 {
 	Hub *hub = (Hub *)data;
 
-	if (event->type == GDK_BUTTON_PRESS)
+	if (event->type == GDK_2BUTTON_PRESS)
+	{
+		string tagName = tag->name;
+		hub->nickToChat_gui(tagName.substr(tagPrefix.size()));
+
+		return TRUE;
+	}
+	else if (event->type == GDK_BUTTON_PRESS)
 	{
 		GtkTreeIter nickIter;
 		string tagName = tag->name;
@@ -1173,6 +1191,7 @@ gboolean Hub::onNickTagEvent_gui(GtkTextTag *tag, GObject *textView, GdkEvent *e
 
 		return TRUE;
 	}
+
 	return FALSE;
 }
 
@@ -1412,7 +1431,7 @@ void Hub::onSendMessage_gui(GtkEntry *entry, gpointer data)
 		}
 		else if (command == _("freedcpp"))
 		{
-			hub->addStatusMessage_gui(_("freedcpp 0.0.1.57/0.75, project home: http://freedcpp.narod.ru http://code.google.com/p/freedcpp"), Msg::SYSTEM, Sound::NONE);
+			hub->addStatusMessage_gui(_("freedcpp 0.0.1.58/0.75, project home: http://freedcpp.narod.ru http://code.google.com/p/freedcpp"), Msg::SYSTEM, Sound::NONE);
 		}
 		else if (command == _("help"))
 		{
@@ -1475,6 +1494,37 @@ void Hub::onSendMessage_gui(GtkEntry *entry, gpointer data)
 	{
 		func2 = new F2(hub, &Hub::sendMessage_client, text, false);
 		WulforManager::get()->dispatchClientFunc(func2);
+	}
+}
+
+void Hub::onNickToChat_gui(GtkMenuItem *item, gpointer data)
+{
+	Hub *hub = (Hub *)data;
+
+	if (gtk_tree_selection_count_selected_rows(hub->nickSelection) > 0)
+	{
+		string nicks;
+		GtkTreeIter iter;
+		GtkTreePath *path;
+		GList *list = gtk_tree_selection_get_selected_rows(hub->nickSelection, NULL);
+
+		for (GList *i = list; i; i = i->next)
+		{
+			path = (GtkTreePath *)i->data;
+
+			if (gtk_tree_model_get_iter(GTK_TREE_MODEL(hub->nickStore), &iter, path))
+				nicks += hub->nickView.getString(&iter, "Nick") + ", ";
+
+			gtk_tree_path_free(path);
+		}
+
+		g_list_free(list);
+
+		if (!nicks.empty())
+		{
+			nicks.erase(nicks.size() - 2);
+			hub->nickToChat_gui(nicks);
+		}
 	}
 }
 

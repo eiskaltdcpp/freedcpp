@@ -219,6 +219,13 @@
       </widget>
     </child>
     <child>
+      <widget class="GtkMenuItem" id="nickToChatItem">
+        <property name="visible">True</property>
+        <property name="label" translatable="yes">_Send public message</property>
+        <property name="use_underline">True</property>
+      </widget>
+    </child>
+    <child>
       <widget class="GtkMenuItem" id="browseItem">
         <property name="visible">True</property>
         <property name="label" translatable="yes">_Browse file list</property>
