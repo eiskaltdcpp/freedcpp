@@ -147,7 +147,6 @@ class MainWindow:
 		Transfers* transfers;
 		GtkStatusIcon *statusIcon;
 		int64_t lastUpdate, lastUp, lastDown;
-		int emptyStatusWidth;
 		bool minimized;
 		dcpp::StringList EntryList;
 };
