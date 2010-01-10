@@ -146,13 +146,6 @@ MainWindow::MainWindow():
 	if (WGETI("main-window-maximized"))
 		gtk_window_maximize(window);
 
-	GtkWidget *dummy;
-	GtkRequisition req;
-	dummy = gtk_statusbar_new();
-	gtk_widget_size_request(dummy, &req);
-	gtk_widget_destroy(dummy);
-	emptyStatusWidth = req.width;
-
 	setMainStatus_gui(_("Welcome to ") + string(g_get_application_name()));
 
 	loadIcons_gui();
