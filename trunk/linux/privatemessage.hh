@@ -28,6 +28,7 @@
 #include "message.hh"
 
 class WulforSettingsManager;
+class EmoticonsDialog;
 
 class PrivateMessage:
 	public BookEntry
@@ -60,6 +61,7 @@ class PrivateMessage:
 		} TypeTag;
 
 		// GUI functions
+		void setStatus_gui(std::string text);
 		void addLine_gui(Msg::TypeMsg typemsg, const std::string &line);
 		void applyTags_gui(const std::string &line);
 		void applyEmoticons_gui();
@@ -75,6 +77,7 @@ class PrivateMessage:
 		static gboolean onMagnetTagEvent_gui(GtkTextTag *tag, GObject *textView, GdkEvent *event, GtkTextIter *iter, gpointer data);
 		static gboolean onChatPointerMoved_gui(GtkWidget *widget, GdkEventMotion *event, gpointer data);
 		static gboolean onChatVisibilityChanged_gui(GtkWidget* widget, GdkEventVisibility* event, gpointer data);
+		static gboolean onEmotButtonRelease_gui(GtkWidget *widget, GdkEventButton *event, gpointer data);
 		static void onChatScroll_gui(GtkAdjustment *adjustment, gpointer data);
 		static void onChatResize_gui(GtkAdjustment *adjustment, gpointer data);
 		static void onSendMessage_gui(GtkEntry *entry, gpointer data);
@@ -91,7 +94,7 @@ class PrivateMessage:
 		void grantSlot_client();
 
 		GtkTextBuffer *messageBuffer;
-		GtkTextMark *mark, *start_mark, *end_mark, *tag_mark;
+		GtkTextMark *mark, *start_mark, *end_mark, *tag_mark, *emot_mark;
 		std::string cid;
 		std::string hubUrl;
 		bool isBot;
@@ -106,6 +109,9 @@ class PrivateMessage:
 		bool scrollToBottom;
 		GtkTextTag *TagsMap[TAG_LAST];
 		TypeTag tagMsg, tagNick;
+		bool useEmoticons;
+		gint totalEmoticons;
+		EmoticonsDialog *emotdialog;
 };
 
 #else

@@ -24,6 +24,8 @@
 #include <dcpp/ClientManager.h>
 #include <dcpp/FavoriteManager.h>
 #include "settingsmanager.hh"
+#include "emoticonsdialog.hh"
+#include "emoticons.hh"
 #include "wulformanager.hh"
 #include "WulforUtil.hh"
 #include "search.hh"
@@ -60,6 +62,7 @@ PrivateMessage::PrivateMessage(const string &cid, const string &hubUrl):
 	start_mark = gtk_text_buffer_create_mark(messageBuffer, NULL, &iter, TRUE);
 	end_mark = gtk_text_buffer_create_mark(messageBuffer, NULL, &iter, TRUE);
 	tag_mark = gtk_text_buffer_create_mark(messageBuffer, NULL, &iter, FALSE);
+	emot_mark = gtk_text_buffer_create_mark(messageBuffer, NULL, &iter, TRUE);
 
 	handCursor = gdk_cursor_new(GDK_HAND2);
 
@@ -88,6 +91,13 @@ PrivateMessage::PrivateMessage(const string &cid, const string &hubUrl):
 
 	setLabel_gui(_("PM: ") + WulforUtil::getNicks(cid) + " [" + WulforUtil::getHubNames(cid) + "]");
 
+	/* initial emoticons dialog */
+	emotdialog = new EmoticonsDialog(getWidget("entry"), getWidget("emotButton"), getWidget("emotMenu"));
+	gtk_button_set_image(GTK_BUTTON(getWidget("emotButton")), gtk_image_new_from_stock("freedcpp-smile", GTK_ICON_SIZE_BUTTON));
+	g_signal_connect(G_OBJECT(getWidget("emotButton")), "button-release-event", G_CALLBACK(onEmotButtonRelease_gui), (gpointer)this);
+
+	useEmoticons = TRUE;
+
 	/* initial tags map */
 	TagsMap[TAG_PRIVATE] = createTag_gui("TAG_PRIVATE", TAG_PRIVATE);
 	TagsMap[TAG_MYOWN] = createTag_gui("TAG_MYOWN", TAG_MYOWN);
@@ -111,6 +121,8 @@ PrivateMessage::~PrivateMessage()
 		gdk_cursor_unref(handCursor);
 		handCursor = NULL;
 	}
+
+	delete emotdialog;
 }
 
 void PrivateMessage::show()
@@ -162,6 +174,7 @@ void PrivateMessage::addMessage_gui(string message, Msg::TypeMsg typemsg)
 
 void PrivateMessage::addStatusMessage_gui(string message, Msg::TypeMsg typemsg)
 {
+	setStatus_gui(message);
 	addLine_gui(typemsg, "*** " + message);
 }
 
@@ -184,6 +197,16 @@ void PrivateMessage::updateTags_gui()
 	}
 
 	gtk_widget_queue_draw(getWidget("text"));
+}
+
+void PrivateMessage::setStatus_gui(string text)
+{
+	if (!text.empty())
+	{
+		text = "[" + Util::getShortTimeString() + "] " + text;
+		gtk_statusbar_pop(GTK_STATUSBAR(getWidget("status")), 0);
+		gtk_statusbar_push(GTK_STATUSBAR(getWidget("status")), 0, text.c_str());
+	}
 }
 
 void PrivateMessage::addLine_gui(Msg::TypeMsg typemsg, const string &message)
@@ -235,6 +258,8 @@ void PrivateMessage::addLine_gui(Msg::TypeMsg typemsg, const string &message)
 			tagMsg = TAG_PRIVATE;
 			tagNick = TAG_NICK;
 	}
+
+	totalEmoticons = 0;
 
 	applyTags_gui(line);
 
@@ -427,6 +452,121 @@ void PrivateMessage::applyEmoticons_gui()
 	gtk_text_buffer_apply_tag(messageBuffer, TagsMap[tagMsg], &start_iter, &end_iter);
 
 	/* emoticons */
+	if (!Emoticons::get()->useEmoticons_gui())
+	{
+		setStatus_gui(_(" *** emoticons no loads"));
+		return;
+	}
+	else if (!useEmoticons)
+	{
+		setStatus_gui(_(" *** emoticons mode off"));
+		return;
+	}
+	else if (totalEmoticons >= EMOTICONS_MAX)
+	{
+		setStatus_gui(_(" *** emoticons over"));
+		return;
+	}
+
+	bool search;
+	gint searchEmoticons = 0;
+
+	GtkTextIter tmp_end_iter,
+		match_start,
+		match_end,
+		p_start,
+		p_end;
+
+	Emot::Iter p_it;
+	gint set_start, new_start;
+	Emot::List &list = Emoticons::get()->getPack_gui();
+
+	/* set start mark */
+	gtk_text_buffer_move_mark(messageBuffer, emot_mark, &start_iter);
+
+	for (;;)
+	{
+		/* get start and end iter positions at marks */
+		gtk_text_buffer_get_iter_at_mark(messageBuffer, &start_iter, emot_mark);
+		gtk_text_buffer_get_iter_at_mark(messageBuffer, &end_iter, end_mark);
+
+		search = FALSE;
+		set_start = gtk_text_iter_get_offset(&end_iter);
+
+		for (Emot::Iter it = list.begin(); it != list.end(); ++it)
+		{
+			GList *names = (*it)->getNames();
+
+			for (GList *p = names; p != NULL; p = p->next)
+			{
+				if (gtk_text_iter_forward_search(&start_iter,
+					(gchar *)p->data,
+					GTK_TEXT_SEARCH_VISIBLE_ONLY,
+					&match_start,
+					&match_end,
+					&end_iter))
+				{
+					if (!search)
+					{
+						search = TRUE;
+						end_iter = match_start;
+
+						/* set new limit search */
+						gtk_text_buffer_get_iter_at_mark(messageBuffer, &tmp_end_iter, end_mark);
+						for (int i = 1; !gtk_text_iter_equal(&end_iter, &tmp_end_iter) && i <= Emot::SIZE_NAME;
+							gtk_text_iter_forward_chars(&end_iter, 1), i++);
+
+					}
+
+					new_start = gtk_text_iter_get_offset(&match_start);
+
+					if (new_start < set_start)
+					{
+						set_start = new_start;
+
+						p_start = match_start;
+						p_end = match_end;
+
+						p_it = it;
+
+						if (gtk_text_iter_equal(&start_iter, &match_start))
+						{
+							it = list.end() - 1;
+							break;
+						}
+					}
+				}
+			}
+		}
+
+		if (search)
+		{
+			if (totalEmoticons >= EMOTICONS_MAX)
+			{
+				setStatus_gui(_(" *** emoticons no loads"));
+				return;
+			}
+
+			/* delete text-emoticon and insert pixbuf-emoticon */
+			gtk_text_buffer_delete(messageBuffer, &p_start, &p_end);
+			gtk_text_buffer_insert_pixbuf(messageBuffer, &p_start, (*p_it)->getPixbuf());
+
+			searchEmoticons++;
+			totalEmoticons++;
+
+			/* set emoticon mark to start */
+			gtk_text_buffer_move_mark(messageBuffer, emot_mark, &p_start);
+
+			/* check full emoticons */
+			gtk_text_buffer_get_iter_at_mark(messageBuffer, &start_iter, start_mark);
+			gtk_text_buffer_get_iter_at_mark(messageBuffer, &end_iter, end_mark);
+			
+			if (gtk_text_iter_get_offset(&end_iter) - gtk_text_iter_get_offset(&start_iter) == searchEmoticons - 1)
+				return;
+		}
+		else
+			return;
+	}
 }
 
 void PrivateMessage::getSettingTag_gui(WulforSettingsManager *wsm, TypeTag type, string &fore, string &back, int &bold, int &italic)
@@ -689,9 +829,22 @@ void PrivateMessage::onSendMessage_gui(GtkEntry *entry, gpointer data)
 			F0 *func = new F0(pm, &PrivateMessage::grantSlot_client);
 			WulforManager::get()->dispatchClientFunc(func);
 		}
+		else if (command == _("emoticons") || command == _("emot"))
+		{
+			if (pm->useEmoticons)
+			{
+				pm->useEmoticons = FALSE;
+				pm->setStatus_gui(_(" *** emoticons mode off"));
+			}
+			else
+			{
+				pm->useEmoticons = TRUE;
+				pm->setStatus_gui(_(" *** emoticons mode on"));
+			}
+		}
 		else if (command == _("help"))
 		{
-			pm->addStatusMessage_gui(_("Available commands: /away <message>, /back, /clear, /close, /favorite, /getlist, /grant, /help"), Msg::SYSTEM);
+			pm->addStatusMessage_gui(_("Available commands: /away <message>, /back, /clear, /close, /favorite, /getlist, /grant, /emoticons, /emot, /help"), Msg::SYSTEM);
 		}
 		else
 		{
@@ -825,6 +978,26 @@ gboolean PrivateMessage::onChatVisibilityChanged_gui(GtkWidget* widget, GdkEvent
 	PrivateMessage *pm = (PrivateMessage *)data;
 
 	pm->updateCursor(widget);
+
+	return FALSE;
+}
+
+gboolean PrivateMessage::onEmotButtonRelease_gui(GtkWidget *widget, GdkEventButton *event, gpointer data)
+{
+	PrivateMessage *pm = (PrivateMessage *)data;
+
+	switch (event->button)
+	{
+		case 1: //show emoticons dialog
+
+			pm->emotdialog->showEmotDialog_gui();
+		break;
+
+		case 3: //show emoticons menu
+
+			pm->emotdialog->showEmotMenu_gui();
+		break;
+	}
 
 	return FALSE;
 }
