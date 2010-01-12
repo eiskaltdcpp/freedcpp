@@ -299,6 +299,39 @@
                 <child>
                   <widget class="GtkMenu" id="help1_menu">
                     <child>
+                      <widget class="GtkImageMenuItem" id="homeMenuItem">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">Homepage</property>
+                        <property name="use_underline">True</property>
+                        <child internal-child="image">
+                          <widget class="GtkImage" id="homeMenuImage">
+                            <property name="visible">True</property>
+                            <property name="stock">gtk-home</property>
+                            <property name="icon_size">1</property>
+                          </widget>
+                        </child>
+                      </widget>
+                    </child>
+                    <child>
+                      <widget class="GtkImageMenuItem" id="sourceMenuItem">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">Source(svn)</property>
+                        <property name="use_underline">True</property>
+                        <child internal-child="image">
+                          <widget class="GtkImage" id="sourceMenuImage">
+                            <property name="visible">True</property>
+                            <property name="stock">gtk-file</property>
+                            <property name="icon_size">1</property>
+                          </widget>
+                        </child>
+                      </widget>
+                    </child>
+                    <child>
+                      <widget class="GtkSeparatorMenuItem" id="separator1">
+                        <property name="visible">True</property>
+                      </widget>
+                    </child>
+                    <child>
                       <widget class="GtkImageMenuItem" id="aboutMenuItem">
                         <property name="visible">True</property>
                         <property name="label">gtk-about</property>
