@@ -134,6 +134,8 @@ MainWindow::MainWindow():
 	g_signal_connect(getWidget("previousTabMenuItem"), "activate", G_CALLBACK(onPreviousTabClicked_gui), (gpointer)this);
 	g_signal_connect(getWidget("nextTabMenuItem"), "activate", G_CALLBACK(onNextTabClicked_gui), (gpointer)this);
 	g_signal_connect(getWidget("aboutMenuItem"), "activate", G_CALLBACK(onAboutClicked_gui), (gpointer)this);
+	g_signal_connect(getWidget("homeMenuItem"), "activate", G_CALLBACK(onLinkClicked_gui), (gchar*)"http://freedcpp.narod.ru");
+	g_signal_connect(getWidget("sourceMenuItem"), "activate", G_CALLBACK(onLinkClicked_gui), (gchar*)"http://code.google.com/p/freedcpp/source/checkout");
 
 	// Load window state and position from settings manager
 	gint posX = WGETI("main-window-pos-x");
@@ -1214,6 +1216,11 @@ void MainWindow::onShowInterfaceToggled_gui(GtkCheckMenuItem *item, gpointer dat
 		if (isIconified) gtk_window_iconify(win);
 		gtk_widget_show(GTK_WIDGET(win));
 	}
+}
+
+void MainWindow::onLinkClicked_gui(GtkWidget *widget, const gchar *link)
+{
+	WulforUtil::openURI(link);
 }
 
 void MainWindow::autoConnect_client()
