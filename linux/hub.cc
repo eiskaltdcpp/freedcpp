@@ -51,6 +51,7 @@ Hub::Hub(const string &address, const string &encoding):
 {
 	// Configure the dialog
 	gtk_dialog_set_alternative_button_order(GTK_DIALOG(getWidget("passwordDialog")), GTK_RESPONSE_OK, GTK_RESPONSE_CANCEL, -1);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(getWidget("userListCheckButton")), TRUE);
 
 	// Initialize nick treeview
 	nickView.setView(GTK_TREE_VIEW(getWidget("nickView")), true, "hub");
@@ -130,6 +131,7 @@ Hub::Hub(const string &address, const string &encoding):
 	g_signal_connect(getWidget("searchMagnetItem"), "activate", G_CALLBACK(onSearchMagnetClicked_gui), (gpointer)this);
 	g_signal_connect(getWidget("magnetPropertiesItem"), "activate", G_CALLBACK(onMagnetPropertiesClicked_gui), (gpointer)this);
 	g_signal_connect(getWidget("removeUserItem"), "activate", G_CALLBACK(onRemoveUserItemClicked_gui), (gpointer)this);
+	g_signal_connect(getWidget("userListCheckButton"), "toggled", G_CALLBACK(onUserListToggled_gui), (gpointer)this);
 
 	gtk_widget_set_sensitive(getWidget("favoriteUserItem"), FALSE); // Not implemented yet
 	gtk_widget_grab_focus(getWidget("chatEntry"));
@@ -1431,7 +1433,7 @@ void Hub::onSendMessage_gui(GtkEntry *entry, gpointer data)
 		}
 		else if (command == _("freedcpp"))
 		{
-			hub->addStatusMessage_gui(_("freedcpp 0.0.1.61/0.75, project home: http://freedcpp.narod.ru http://code.google.com/p/freedcpp"), Msg::SYSTEM, Sound::NONE);
+			hub->addStatusMessage_gui(_("freedcpp 0.0.1.62/0.75, project home: http://freedcpp.narod.ru http://code.google.com/p/freedcpp"), Msg::SYSTEM, Sound::NONE);
 		}
 		else if (command == _("help"))
 		{
@@ -1475,9 +1477,9 @@ void Hub::onSendMessage_gui(GtkEntry *entry, gpointer data)
 		else if (command == _("userlist"))
 		{
 			if (GTK_WIDGET_VISIBLE(hub->getWidget("scrolledwindow2")))
-				gtk_widget_hide(hub->getWidget("scrolledwindow2"));
+				gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(hub->getWidget("userListCheckButton")), FALSE);
 			else
-				gtk_widget_show_all(hub->getWidget("scrolledwindow2"));
+				gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(hub->getWidget("userListCheckButton")), TRUE);
 		}
 		else if (BOOLSETTING(SEND_UNKNOWN_COMMANDS))
 		{
@@ -1729,6 +1731,16 @@ void Hub::onMagnetPropertiesClicked_gui(GtkMenuItem *item, gpointer data)
 	Hub *hub = (Hub *)data;
 
 	WulforManager::get()->getMainWindow()->openMagnetDialog_gui(hub->selectedTagStr);
+}
+
+void Hub::onUserListToggled_gui(GtkWidget *widget, gpointer data)
+{
+	Hub *hub = (Hub *)data;
+
+	if (GTK_WIDGET_VISIBLE(hub->getWidget("scrolledwindow2")))
+		gtk_widget_hide(hub->getWidget("scrolledwindow2"));
+	else
+		gtk_widget_show_all(hub->getWidget("scrolledwindow2"));
 }
 
 void Hub::connectClient_client(string address, string encoding)
