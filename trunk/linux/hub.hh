@@ -118,6 +118,7 @@ class Hub:
 		static void onOpenHubClicked_gui(GtkMenuItem *item, gpointer data);
 		static void onSearchMagnetClicked_gui(GtkMenuItem *item, gpointer data);
 		static void onMagnetPropertiesClicked_gui(GtkMenuItem *item, gpointer data);
+		static void onUserListToggled_gui(GtkWidget *widget, gpointer data);
 
 		// Client functions
 		void connectClient_client(std::string address, std::string encoding);
