@@ -105,6 +105,7 @@ class MainWindow:
 		static gboolean onCloseWindow_gui(GtkWidget *widget, GdkEvent *event, gpointer data);
 		static gboolean onKeyPressed_gui(GtkWidget *widget, GdkEventKey *event, gpointer data);
 		static gboolean onButtonReleasePage_gui(GtkWidget *widget, GdkEventButton *event, gpointer data);
+		static gboolean animationStatusIcon_gui(gpointer data);
 		static void onRaisePage_gui(GtkMenuItem *item, gpointer data);
 		static void onPageSwitched_gui(GtkNotebook *notebook, GtkNotebookPage *page, guint num, gpointer data);
 		static void onPaneRealized_gui(GtkWidget *pane, gpointer data);
@@ -150,6 +151,8 @@ class MainWindow:
 		int64_t lastUpdate, lastUp, lastDown;
 		bool minimized;
 		dcpp::StringList EntryList;
+		guint timer;
+		int statusFrame;
 };
 
 #else
