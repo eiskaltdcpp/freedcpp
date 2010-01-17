@@ -55,7 +55,9 @@ MainWindow::MainWindow():
 	lastUpdate(0),
 	lastUp(0),
 	lastDown(0),
-	minimized(FALSE)
+	minimized(FALSE),
+	timer(0),
+	statusFrame(1)
 {
 	window = GTK_WINDOW(getWidget("mainWindow"));
 	gtk_window_set_role(window, getID().c_str());
@@ -200,6 +202,9 @@ MainWindow::~MainWindow()
 	WSET("main-window-maximized", maximized);
 	if (transferPanePosition > 10)
 		WSET("transfer-pane-position", transferPanePosition);
+
+	if (timer > 0)
+		g_source_remove(timer);
 
 	gtk_widget_destroy(GTK_WIDGET(window));
 	g_object_unref(statusIcon);
@@ -580,14 +585,21 @@ void MainWindow::addPrivateMessage_gui(Msg::TypeMsg typemsg, string cid, string 
 		dynamic_cast<PrivateMessage*>(entry)->addMessage_gui(message, typemsg);
 
 		bool show = FALSE;
+		bool anim = FALSE;
 
 		if (!isActive_gui())
 		{
 			show = TRUE;
+			anim = TRUE;
 		}
 		else if (currentPage_gui() != entry->getContainer() && !WGETI("notify-only-not-active"))
 		{
 			show = TRUE;
+		}
+
+		if (anim && timer == 0)
+		{
+			timer = g_timeout_add(1000, animationStatusIcon_gui, (gpointer)this);
 		}
 
 		if (show)
@@ -911,6 +923,23 @@ gboolean MainWindow::onButtonReleasePage_gui(GtkWidget *widget, GdkEventButton *
 	}
 
 	return FALSE;
+}
+
+gboolean MainWindow::animationStatusIcon_gui(gpointer data)
+{
+	MainWindow *mw = (MainWindow *) data;
+
+	if (mw->isActive_gui())
+	{
+		gtk_status_icon_set_from_icon_name(mw->statusIcon, g_get_prgname());
+		mw->timer = 0;
+
+		return FALSE;
+	}
+
+	gtk_status_icon_set_from_icon_name(mw->statusIcon, (mw->statusFrame *= -1) > 0 ? "freedcpp" : "freedcpp-normal");
+
+	return TRUE;
 }
 
 void MainWindow::onRaisePage_gui(GtkMenuItem *item, gpointer data)
