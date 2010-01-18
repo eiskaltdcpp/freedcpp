@@ -137,7 +137,10 @@ MainWindow::MainWindow():
 	g_signal_connect(getWidget("nextTabMenuItem"), "activate", G_CALLBACK(onNextTabClicked_gui), (gpointer)this);
 	g_signal_connect(getWidget("aboutMenuItem"), "activate", G_CALLBACK(onAboutClicked_gui), (gpointer)this);
 	g_signal_connect(getWidget("homeMenuItem"), "activate", G_CALLBACK(onLinkClicked_gui), (gchar*)"http://freedcpp.narod.ru");
-	g_signal_connect(getWidget("sourceMenuItem"), "activate", G_CALLBACK(onLinkClicked_gui), (gchar*)"http://code.google.com/p/freedcpp/source/checkout");
+	g_signal_connect(getWidget("sourceMenuItem"), "activate", G_CALLBACK(onLinkClicked_gui),
+		(gchar*)"http://code.google.com/p/freedcpp/source/checkout");
+	g_signal_connect(getWidget("issueMenuItem"), "activate", G_CALLBACK(onLinkClicked_gui),
+		(gchar*)"http://code.google.com/p/freedcpp/issues/list");
 
 	// Load window state and position from settings manager
 	gint posX = WGETI("main-window-pos-x");
