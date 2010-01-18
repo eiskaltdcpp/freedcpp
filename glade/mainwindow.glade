@@ -327,6 +327,20 @@
                       </widget>
                     </child>
                     <child>
+                      <widget class="GtkImageMenuItem" id="issueMenuItem">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">Report a Bug</property>
+                        <property name="use_underline">True</property>
+                        <child internal-child="image">
+                          <widget class="GtkImage" id="issueMenuImage">
+                            <property name="visible">True</property>
+                            <property name="stock">gtk-edit</property>
+                            <property name="icon_size">1</property>
+                          </widget>
+                        </child>
+                      </widget>
+                    </child>
+                    <child>
                       <widget class="GtkSeparatorMenuItem" id="separator1">
                         <property name="visible">True</property>
                       </widget>
@@ -877,7 +891,7 @@ In addition, as a special exception, compiling, linking, and/or using OpenSSL wi
 Contributors:
   Leliksan Floyd
 </property>
-    <property name="artists"></property>
+    <property name="artists">troll (icons users)</property>
     <property name="wrap_license">True</property>
     <child internal-child="vbox">
       <widget class="GtkVBox" id="dialog-vbox3">
