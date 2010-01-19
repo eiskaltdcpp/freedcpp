@@ -55,13 +55,13 @@ Hub::Hub(const string &address, const string &encoding):
 
 	// Initialize nick treeview
 	nickView.setView(GTK_TREE_VIEW(getWidget("nickView")), true, "hub");
-	nickView.insertColumn("Nick", G_TYPE_STRING, TreeView::ICON_STRING, 100, "Icon");
-	nickView.insertColumn("Shared", G_TYPE_INT64, TreeView::SIZE, 75);
-	nickView.insertColumn("Description", G_TYPE_STRING, TreeView::STRING, 85);
-	nickView.insertColumn("Tag", G_TYPE_STRING, TreeView::STRING, 100);
-	nickView.insertColumn("Connection", G_TYPE_STRING, TreeView::STRING, 85);
+	nickView.insertColumn(_("Nick"), G_TYPE_STRING, TreeView::ICON_STRING, 100, "Icon");
+	nickView.insertColumn(_("Shared"), G_TYPE_INT64, TreeView::SIZE, 75);
+	nickView.insertColumn(_("Description"), G_TYPE_STRING, TreeView::STRING, 85);
+	nickView.insertColumn(_("Tag"), G_TYPE_STRING, TreeView::STRING, 100);
+	nickView.insertColumn(_("Connection"), G_TYPE_STRING, TreeView::STRING, 85);
 	nickView.insertColumn("IP", G_TYPE_STRING, TreeView::STRING, 85);
-	nickView.insertColumn("eMail", G_TYPE_STRING, TreeView::STRING, 90);
+	nickView.insertColumn(_("eMail"), G_TYPE_STRING, TreeView::STRING, 90);
 	nickView.insertHiddenColumn("Icon", G_TYPE_STRING);
 	nickView.insertHiddenColumn("Nick Order", G_TYPE_STRING);
 	nickView.insertHiddenColumn("CID", G_TYPE_STRING);
@@ -71,9 +71,9 @@ Hub::Hub(const string &address, const string &encoding):
 	g_object_unref(nickStore);
 	nickSelection = gtk_tree_view_get_selection(nickView.get());
 	gtk_tree_selection_set_mode(gtk_tree_view_get_selection(nickView.get()), GTK_SELECTION_MULTIPLE);
-	nickView.setSortColumn_gui("Nick", "Nick Order");
+	nickView.setSortColumn_gui(_("Nick"), "Nick Order");
 	gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(nickStore), nickView.col("Nick Order"), GTK_SORT_ASCENDING);
-	gtk_tree_view_column_set_sort_indicator(gtk_tree_view_get_column(nickView.get(), nickView.col("Nick")), TRUE);
+	gtk_tree_view_column_set_sort_indicator(gtk_tree_view_get_column(nickView.get(), nickView.col(_("Nick"))), TRUE);
 	gtk_tree_view_set_fixed_height_mode(nickView.get(), TRUE);
 
 	// Initialize the chat window
@@ -250,8 +250,8 @@ void Hub::updateUser_gui(ParamMap params)
 
 	if (findUser_gui(cid, &iter))
 	{
-		totalShared += shared - nickView.getValue<int64_t>(&iter, "Shared");
-		string nick = nickView.getString(&iter,"Nick");
+		totalShared += shared - nickView.getValue<int64_t>(&iter, _("Shared"));
+		string nick = nickView.getString(&iter, _("Nick"));
 
 		if (nick != params["Nick"])
 		{
@@ -262,13 +262,13 @@ void Hub::updateUser_gui(ParamMap params)
 		}
 	
 		gtk_list_store_set(nickStore, &iter,
-			nickView.col("Nick"), params["Nick"].c_str(),
-			nickView.col("Shared"), shared,
-			nickView.col("Description"), params["Description"].c_str(),
-			nickView.col("Tag"), params["Tag"].c_str(),
- 			nickView.col("Connection"), params["Connection"].c_str(),
+			nickView.col(_("Nick")), params["Nick"].c_str(),
+			nickView.col(_("Shared")), shared,
+			nickView.col(_("Description")), params["Description"].c_str(),
+			nickView.col(_("Tag")), params["Tag"].c_str(),
+ 			nickView.col(_("Connection")), params["Connection"].c_str(),
 			nickView.col("IP"), params["IP"].c_str(),
-			nickView.col("eMail"), params["eMail"].c_str(),
+			nickView.col(_("eMail")), params["eMail"].c_str(),
 			nickView.col("Icon"), icon.c_str(),
 			nickView.col("Nick Order"), params["Nick Order"].c_str(),
 			nickView.col("CID"), cid.c_str(),
@@ -294,13 +294,13 @@ void Hub::updateUser_gui(ParamMap params)
 		}
 
 		gtk_list_store_insert_with_values(nickStore, &iter, userMap.size(),
-			nickView.col("Nick"), params["Nick"].c_str(),
-			nickView.col("Shared"), shared,
-			nickView.col("Description"), params["Description"].c_str(),
-			nickView.col("Tag"), params["Tag"].c_str(),
- 			nickView.col("Connection"), params["Connection"].c_str(),
+			nickView.col(_("Nick")), params["Nick"].c_str(),
+			nickView.col(_("Shared")), shared,
+			nickView.col(_("Description")), params["Description"].c_str(),
+			nickView.col(_("Tag")), params["Tag"].c_str(),
+ 			nickView.col(_("Connection")), params["Connection"].c_str(),
 			nickView.col("IP"), params["IP"].c_str(),
-			nickView.col("eMail"), params["eMail"].c_str(),
+			nickView.col(_("eMail")), params["eMail"].c_str(),
 			nickView.col("Icon"), icon.c_str(),
 			nickView.col("Nick Order"), params["Nick Order"].c_str(),
 			nickView.col("CID"), cid.c_str(),
@@ -320,8 +320,8 @@ void Hub::removeUser_gui(string cid)
 
 	if (findUser_gui(cid, &iter))
 	{
-		nick = nickView.getString(&iter, "Nick");
-		totalShared -= nickView.getValue<int64_t>(&iter, "Shared");
+		nick = nickView.getString(&iter, _("Nick"));
+		totalShared -= nickView.getValue<int64_t>(&iter, _("Shared"));
 		gtk_list_store_remove(nickStore, &iter);
 		removeTag_gui(nick);
 		userMap.erase(nick);
@@ -1130,7 +1130,7 @@ gboolean Hub::onEntryKeyPress_gui(GtkWidget *entry, GdkEventKey *event, gpointer
 
 			while (valid)
 			{
-				string nick = hub->nickView.getString(&iter, "Nick");
+				string nick = hub->nickView.getString(&iter, _("Nick"));
 				string::size_type tagEnd = 0;
 				if (useNext && (tagEnd = Text::toLower(nick).find(key)) != string::npos)
 				{
@@ -1183,7 +1183,7 @@ gboolean Hub::onNickTagEvent_gui(GtkTextTag *tag, GObject *textView, GdkEvent *e
 		{
 			// Select the user in the nick list view
 			GtkTreePath *path = gtk_tree_model_get_path(GTK_TREE_MODEL(hub->nickStore), &nickIter);
-			gtk_tree_view_scroll_to_cell(hub->nickView.get(), path, gtk_tree_view_get_column(hub->nickView.get(), hub->nickView.col("Nick")), FALSE, 0.0, 0.0);
+			gtk_tree_view_scroll_to_cell(hub->nickView.get(), path, gtk_tree_view_get_column(hub->nickView.get(), hub->nickView.col(_("Nick"))), FALSE, 0.0, 0.0);
 			gtk_tree_view_set_cursor(hub->nickView.get(), path, NULL, FALSE);
 			gtk_tree_path_free(path);
 
@@ -1433,7 +1433,7 @@ void Hub::onSendMessage_gui(GtkEntry *entry, gpointer data)
 		}
 		else if (command == _("freedcpp"))
 		{
-			hub->addStatusMessage_gui(_("freedcpp 0.0.1.65/0.75, project home: http://freedcpp.narod.ru http://code.google.com/p/freedcpp"), Msg::SYSTEM, Sound::NONE);
+			hub->addStatusMessage_gui(_("freedcpp 0.0.1.66/0.75, project home: http://freedcpp.narod.ru http://code.google.com/p/freedcpp"), Msg::SYSTEM, Sound::NONE);
 		}
 		else if (command == _("help"))
 		{
@@ -1515,7 +1515,7 @@ void Hub::onNickToChat_gui(GtkMenuItem *item, gpointer data)
 			path = (GtkTreePath *)i->data;
 
 			if (gtk_tree_model_get_iter(GTK_TREE_MODEL(hub->nickStore), &iter, path))
-				nicks += hub->nickView.getString(&iter, "Nick") + ", ";
+				nicks += hub->nickView.getString(&iter, _("Nick")) + ", ";
 
 			gtk_tree_path_free(path);
 		}
@@ -1546,7 +1546,7 @@ void Hub::onCopyNickItemClicked_gui(GtkMenuItem *item, gpointer data)
 			path = (GtkTreePath *)i->data;
 			if (gtk_tree_model_get_iter(GTK_TREE_MODEL(hub->nickStore), &iter, path))
 			{
-				nicks += hub->nickView.getString(&iter, "Nick") + ' ';
+				nicks += hub->nickView.getString(&iter, _("Nick")) + ' ';
 			}
 			gtk_tree_path_free(path);
 		}
