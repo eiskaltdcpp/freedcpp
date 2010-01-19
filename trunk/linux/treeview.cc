@@ -22,6 +22,7 @@
 #include "treeview.hh"
 #include "settingsmanager.hh"
 #include "WulforUtil.hh"
+#include <glib/gi18n.h>
 
 using namespace std;
 
@@ -191,7 +192,7 @@ void TreeView::speedDataFunc(GtkTreeViewColumn *col, GtkCellRenderer *renderer, 
 
 	if (speed >= 0)
 	{
-		speedString = dcpp::Util::formatBytes(speed) + "/s";
+		speedString = dcpp::Util::formatBytes(speed) + "/" + _("s");
 	}
 
 	g_object_set(renderer, "text", speedString.c_str(), NULL);
