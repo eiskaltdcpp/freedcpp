@@ -35,24 +35,24 @@ PublicHubs::PublicHubs():
 
 	// Initialize public hub list treeview
 	hubView.setView(GTK_TREE_VIEW(getWidget("hubView")), true, "publichubs");
-	hubView.insertColumn("Name", G_TYPE_STRING, TreeView::STRING, 200);
-	hubView.insertColumn("Description", G_TYPE_STRING, TreeView::STRING, 350);
-	hubView.insertColumn("Users", G_TYPE_INT, TreeView::INT, 75);
-	hubView.insertColumn("Address", G_TYPE_STRING, TreeView::STRING, 110);
-	hubView.insertColumn("Country", G_TYPE_STRING, TreeView::STRING, 100);
-	hubView.insertColumn("Shared", G_TYPE_INT64, TreeView::SIZE, 70);
-	hubView.insertColumn("Min Share", G_TYPE_INT64, TreeView::SIZE, 80);
-	hubView.insertColumn("Min Slots", G_TYPE_INT, TreeView::INT, 70);
-	hubView.insertColumn("Max Hubs", G_TYPE_INT, TreeView::INT, 80);
-	hubView.insertColumn("Max Users", G_TYPE_INT, TreeView::INT, 80);
-	hubView.insertColumn("Rating", G_TYPE_STRING, TreeView::STRING, 70);
+	hubView.insertColumn(_("Name"), G_TYPE_STRING, TreeView::STRING, 200);
+	hubView.insertColumn(_("Description"), G_TYPE_STRING, TreeView::STRING, 350);
+	hubView.insertColumn(_("Users"), G_TYPE_INT, TreeView::INT, 75);
+	hubView.insertColumn(_("Address"), G_TYPE_STRING, TreeView::STRING, 110);
+	hubView.insertColumn(_("Country"), G_TYPE_STRING, TreeView::STRING, 100);
+	hubView.insertColumn(_("Shared"), G_TYPE_INT64, TreeView::SIZE, 70);
+	hubView.insertColumn(_("Min Share"), G_TYPE_INT64, TreeView::SIZE, 80);
+	hubView.insertColumn(_("Min Slots"), G_TYPE_INT, TreeView::INT, 70);
+	hubView.insertColumn(_("Max Hubs"), G_TYPE_INT, TreeView::INT, 80);
+	hubView.insertColumn(_("Max Users"), G_TYPE_INT, TreeView::INT, 80);
+	hubView.insertColumn(_("Rating"), G_TYPE_STRING, TreeView::STRING, 70);
 	hubView.finalize();
 	hubStore = gtk_list_store_newv(hubView.getColCount(), hubView.getGTypes());
 	gtk_tree_view_set_model(hubView.get(), GTK_TREE_MODEL(hubStore));
 	g_object_unref(hubStore);
 	hubSelection = gtk_tree_view_get_selection(hubView.get());
-	gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(hubStore), hubView.col("Users"), GTK_SORT_DESCENDING);
-	gtk_tree_view_column_set_sort_indicator(gtk_tree_view_get_column(hubView.get(), hubView.col("Users")), TRUE);
+	gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(hubStore), hubView.col(_("Users")), GTK_SORT_DESCENDING);
+	gtk_tree_view_column_set_sort_indicator(gtk_tree_view_get_column(hubView.get(), hubView.col(_("Users"))), TRUE);
 	gtk_tree_view_set_fixed_height_mode(hubView.get(), TRUE);
 
 	// Initialize list of public hub lists treeview
@@ -149,17 +149,17 @@ void PublicHubs::updateList_gui()
 		{
 			gtk_list_store_append(hubStore, &iter);
 			gtk_list_store_set(hubStore, &iter,
-				hubView.col("Name"), i->getName().c_str(),
-				hubView.col("Description"), i->getDescription().c_str(),
-				hubView.col("Users"), i->getUsers(),
-				hubView.col("Address"), i->getServer().c_str(),
-				hubView.col("Country"), i->getCountry().c_str(),
-				hubView.col("Shared"), (int64_t)i->getShared(),
-				hubView.col("Min Share"), (int64_t)i->getMinShare(),
-				hubView.col("Min Slots"), i->getMinSlots(),
-				hubView.col("Max Hubs"), i->getMaxHubs(),
-				hubView.col("Max Users"), i->getMaxUsers(),
-				hubView.col("Rating"), i->getRating().c_str(),
+				hubView.col(_("Name")), i->getName().c_str(),
+				hubView.col(_("Description")), i->getDescription().c_str(),
+				hubView.col(_("Users")), i->getUsers(),
+				hubView.col(_("Address")), i->getServer().c_str(),
+				hubView.col(_("Country")), i->getCountry().c_str(),
+				hubView.col(_("Shared")), (int64_t)i->getShared(),
+				hubView.col(_("Min Share")), (int64_t)i->getMinShare(),
+				hubView.col(_("Min Slots")), i->getMinSlots(),
+				hubView.col(_("Max Hubs")), i->getMaxHubs(),
+				hubView.col(_("Max Users")), i->getMaxUsers(),
+				hubView.col(_("Rating")), i->getRating().c_str(),
 				-1);
 
 			numUsers += i->getUsers();
@@ -262,7 +262,7 @@ void PublicHubs::onConnect_gui(GtkWidget *widget, gpointer data)
 
 	if (gtk_tree_selection_get_selected(ph->hubSelection, NULL, &iter))
 	{
-		string address = ph->hubView.getString(&iter, "Address");
+		string address = ph->hubView.getString(&iter, _("Address"));
 		WulforManager::get()->getMainWindow()->showHub_gui(address);
 	}
 }
@@ -285,9 +285,9 @@ void PublicHubs::onAddFav_gui(GtkMenuItem *item, gpointer data)
 	if (gtk_tree_selection_get_selected(ph->hubSelection, NULL, &iter))
 	{
 		FavoriteHubEntry entry;
-		string name = ph->hubView.getString(&iter, "Name");
-		string description = ph->hubView.getString(&iter, "Description");
-		string address = ph->hubView.getString(&iter, "Address");
+		string name = ph->hubView.getString(&iter, _("Name"));
+		string description = ph->hubView.getString(&iter, _("Description"));
+		string address = ph->hubView.getString(&iter, _("Address"));
 
 		entry.setName(name);
 		entry.setServer(address);

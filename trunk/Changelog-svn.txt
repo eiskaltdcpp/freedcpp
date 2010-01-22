@@ -1,3 +1,6 @@
+r71: 0.0.1.67
+* Маркировка текста (downloadqueue, favoritehubs, finishedtransfers, publichubs, search, sharebrowser).
+
 r70: 0.0.1.66
 * Маркировка текста (hub).
 

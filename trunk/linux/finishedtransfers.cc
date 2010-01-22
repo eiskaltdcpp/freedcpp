@@ -49,13 +49,13 @@ FinishedTransfers::FinishedTransfers(const EntryType type, const string &title, 
 {
 	// Initialize transfer treeview
 	fileView.setView(GTK_TREE_VIEW(getWidget("fileView")), true, "finished");
-	fileView.insertColumn("Time", G_TYPE_STRING, TreeView::STRING, 150);
-	fileView.insertColumn("Filename", G_TYPE_STRING, TreeView::STRING, 100);
-	fileView.insertColumn("Path", G_TYPE_STRING, TreeView::STRING, 200);
-	fileView.insertColumn("Nicks", G_TYPE_STRING, TreeView::STRING, 100);
-	fileView.insertColumn("Transferred", G_TYPE_INT64, TreeView::SIZE, 100);
-	fileView.insertColumn("Speed", G_TYPE_INT64, TreeView::SPEED, 100);
-	fileView.insertColumn("CRC Checked", G_TYPE_STRING, TreeView::STRING, 100);
+	fileView.insertColumn(_("Time"), G_TYPE_STRING, TreeView::STRING, 150);
+	fileView.insertColumn(_("Filename"), G_TYPE_STRING, TreeView::STRING, 100);
+	fileView.insertColumn(_("Path"), G_TYPE_STRING, TreeView::STRING, 200);
+	fileView.insertColumn(_("Nicks"), G_TYPE_STRING, TreeView::STRING, 100);
+	fileView.insertColumn(_("Transferred"), G_TYPE_INT64, TreeView::SIZE, 100);
+	fileView.insertColumn(_("Speed"), G_TYPE_INT64, TreeView::SPEED, 100);
+	fileView.insertColumn(_("CRC Checked"), G_TYPE_STRING, TreeView::STRING, 100);
 	fileView.insertHiddenColumn("Target", G_TYPE_STRING);
 	fileView.insertHiddenColumn("Elapsed Time", G_TYPE_INT64);
 	fileView.finalize();
@@ -63,19 +63,19 @@ FinishedTransfers::FinishedTransfers(const EntryType type, const string &title, 
 	gtk_tree_view_set_model(fileView.get(), GTK_TREE_MODEL(fileStore));
 	g_object_unref(fileStore);
 	fileSelection = gtk_tree_view_get_selection(fileView.get());
-	gtk_tree_view_column_set_sort_indicator(gtk_tree_view_get_column(fileView.get(), fileView.col("Time")), TRUE);
-	gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(fileStore), fileView.col("Time"), GTK_SORT_ASCENDING);
+	gtk_tree_view_column_set_sort_indicator(gtk_tree_view_get_column(fileView.get(), fileView.col(_("Time"))), TRUE);
+	gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(fileStore), fileView.col(_("Time")), GTK_SORT_ASCENDING);
 	gtk_tree_view_set_fixed_height_mode(fileView.get(), TRUE);
 	gtk_tree_selection_set_mode(gtk_tree_view_get_selection(fileView.get()), GTK_SELECTION_MULTIPLE);
 
 	// Initialize user treeview
 	userView.setView(GTK_TREE_VIEW(getWidget("userView")), true, "finished");
-	userView.insertColumn("Time", G_TYPE_STRING, TreeView::STRING, 150);
-	userView.insertColumn("Nick", G_TYPE_STRING, TreeView::STRING, 100);
-	userView.insertColumn("Hub", G_TYPE_STRING, TreeView::STRING, 200);
-	userView.insertColumn("Files", G_TYPE_STRING, TreeView::STRING, 100);
-	userView.insertColumn("Transferred", G_TYPE_INT64, TreeView::SIZE, 100);
-	userView.insertColumn("Speed", G_TYPE_INT64, TreeView::SPEED, 100);
+	userView.insertColumn(_("Time"), G_TYPE_STRING, TreeView::STRING, 150);
+	userView.insertColumn(_("Nick"), G_TYPE_STRING, TreeView::STRING, 100);
+	userView.insertColumn(_("Hub"), G_TYPE_STRING, TreeView::STRING, 200);
+	userView.insertColumn(_("Files"), G_TYPE_STRING, TreeView::STRING, 100);
+	userView.insertColumn(_("Transferred"), G_TYPE_INT64, TreeView::SIZE, 100);
+	userView.insertColumn(_("Speed"), G_TYPE_INT64, TreeView::SPEED, 100);
 	userView.insertHiddenColumn("CID", G_TYPE_STRING);
 	userView.insertHiddenColumn("Elapsed Time", G_TYPE_INT64);
 	userView.finalize();
@@ -83,8 +83,8 @@ FinishedTransfers::FinishedTransfers(const EntryType type, const string &title, 
 	gtk_tree_view_set_model(userView.get(), GTK_TREE_MODEL(userStore));
 	g_object_unref(userStore);
 	userSelection = gtk_tree_view_get_selection(userView.get());
-	gtk_tree_view_column_set_sort_indicator(gtk_tree_view_get_column(userView.get(), userView.col("Time")), TRUE);
-	gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(userStore), userView.col("Time"), GTK_SORT_ASCENDING);
+	gtk_tree_view_column_set_sort_indicator(gtk_tree_view_get_column(userView.get(), userView.col(_("Time"))), TRUE);
+	gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(userStore), userView.col(_("Time")), GTK_SORT_ASCENDING);
 	gtk_tree_view_set_fixed_height_mode(userView.get(), TRUE);
 	gtk_tree_selection_set_mode(gtk_tree_view_get_selection(userView.get()), GTK_SELECTION_MULTIPLE);
 
@@ -165,17 +165,17 @@ void FinishedTransfers::addUser_gui(StringMap params, bool update)
 	}
 	else
 	{	
-		addSize = transferred - userView.getValue<int64_t>(&iter, "Transferred");
+		addSize = transferred - userView.getValue<int64_t>(&iter, _("Transferred"));
 		addTime = time - userView.getValue<int64_t>(&iter, "Elapsed Time");
 	}
 
 	gtk_list_store_set(userStore, &iter,
-		userView.col("Time"), params["Time"].c_str(),
-		userView.col("Nick"), params["Nick"].c_str(),
-		userView.col("Hub"), params["Hub"].c_str(),
-		userView.col("Files"), params["Files"].c_str(),
-		userView.col("Transferred"), transferred,
-		userView.col("Speed"), speed,
+		userView.col(_("Time")), params["Time"].c_str(),
+		userView.col(_("Nick")), params["Nick"].c_str(),
+		userView.col(_("Hub")), params["Hub"].c_str(),
+		userView.col(_("Files")), params["Files"].c_str(),
+		userView.col(_("Transferred")), transferred,
+		userView.col(_("Speed")), speed,
 		userView.col("CID"), params["CID"].c_str(),
 		userView.col("Elapsed Time"), time,
 		-1);
@@ -207,13 +207,13 @@ void FinishedTransfers::addFile_gui(StringMap params, bool update)
 		totalFiles++;
 	}
 	gtk_list_store_set(fileStore, &iter,
-		fileView.col("Time"), params["Time"].c_str(),
-		fileView.col("Filename"), params["Filename"].c_str(),
-		fileView.col("Path"), params["Path"].c_str(),
-		fileView.col("Nicks"), params["Nicks"].c_str(),
-		fileView.col("Transferred"), transferred,
-		fileView.col("Speed"), speed,
-		fileView.col("CRC Checked"), params["CRC Checked"].c_str(),
+		fileView.col(_("Time")), params["Time"].c_str(),
+		fileView.col(_("Filename")), params["Filename"].c_str(),
+		fileView.col(_("Path")), params["Path"].c_str(),
+		fileView.col(_("Nicks")), params["Nicks"].c_str(),
+		fileView.col(_("Transferred")), transferred,
+		fileView.col(_("Speed")), speed,
+		fileView.col(_("CRC Checked")), params["CRC Checked"].c_str(),
 		fileView.col("Target"), params["Target"].c_str(),
 		fileView.col("Elapsed Time"), time,
 		-1);
@@ -451,7 +451,7 @@ void FinishedTransfers::onOpenFolder_gui(GtkMenuItem *item, gpointer data)
 		path = (GtkTreePath *)i->data;
 		if (gtk_tree_model_get_iter(GTK_TREE_MODEL(ft->fileStore), &iter, path))
 		{
-			string target = ft->fileView.getString(&iter, "Path");
+			string target = ft->fileView.getString(&iter, _("Path"));
 			if (!target.empty())
 				WulforUtil::openURI(target);
 		}
@@ -543,7 +543,7 @@ void FinishedTransfers::removeFile_gui(string target)
 	{
 		if (target == fileView.getString(&iter, "Target"))
 		{
-			totalBytes -= fileView.getValue<gint64>(&iter, "Transferred");
+			totalBytes -= fileView.getValue<gint64>(&iter, _("Transferred"));
 			totalTime -= fileView.getValue<gint64>(&iter, "Elapsed Time");
 			gtk_list_store_remove(fileStore, &iter);
 			totalFiles--;
