@@ -43,14 +43,14 @@ FavoriteHubs::FavoriteHubs():
 
 	// Initialize favorite hub list treeview
 	favoriteView.setView(GTK_TREE_VIEW(getWidget("favoriteView")), TRUE, "favoritehubs");
-	favoriteView.insertColumn("Auto Connect", G_TYPE_BOOLEAN, TreeView::BOOL, 100);
-	favoriteView.insertColumn("Name", G_TYPE_STRING, TreeView::STRING, 150);
-	favoriteView.insertColumn("Description", G_TYPE_STRING, TreeView::STRING, 250);
-	favoriteView.insertColumn("Address", G_TYPE_STRING, TreeView::STRING, 175);
-	favoriteView.insertColumn("Nick", G_TYPE_STRING, TreeView::STRING, 100);
-	favoriteView.insertColumn("Password", G_TYPE_STRING, TreeView::STRING, 100);
-	favoriteView.insertColumn("User Description", G_TYPE_STRING, TreeView::STRING, 125);
-	favoriteView.insertColumn("Encoding", G_TYPE_STRING, TreeView::STRING, 125);
+	favoriteView.insertColumn(_("Auto Connect"), G_TYPE_BOOLEAN, TreeView::BOOL, 100);
+	favoriteView.insertColumn(_("Name"), G_TYPE_STRING, TreeView::STRING, 150);
+	favoriteView.insertColumn(_("Description"), G_TYPE_STRING, TreeView::STRING, 250);
+	favoriteView.insertColumn(_("Address"), G_TYPE_STRING, TreeView::STRING, 175);
+	favoriteView.insertColumn(_("Nick"), G_TYPE_STRING, TreeView::STRING, 100);
+	favoriteView.insertColumn(_("Password"), G_TYPE_STRING, TreeView::STRING, 100);
+	favoriteView.insertColumn(_("User Description"), G_TYPE_STRING, TreeView::STRING, 125);
+	favoriteView.insertColumn(_("Encoding"), G_TYPE_STRING, TreeView::STRING, 125);
 	favoriteView.insertHiddenColumn("Hidden Password", G_TYPE_STRING);
 	favoriteView.finalize();
 	favoriteStore = gtk_list_store_newv(favoriteView.getColCount(), favoriteView.getGTypes());
@@ -58,13 +58,13 @@ FavoriteHubs::FavoriteHubs():
 	g_object_unref(favoriteStore);
 	gtk_tree_view_set_fixed_height_mode(favoriteView.get(), TRUE);
 	favoriteSelection = gtk_tree_view_get_selection(favoriteView.get());
-	GList *list = gtk_tree_view_column_get_cell_renderers(gtk_tree_view_get_column(favoriteView.get(), favoriteView.col("Auto Connect")));
+	GList *list = gtk_tree_view_column_get_cell_renderers(gtk_tree_view_get_column(favoriteView.get(), favoriteView.col(_("Auto Connect"))));
 	GtkCellRenderer *renderer = (GtkCellRenderer *)g_list_nth_data(list, 0);
 	g_list_free(list);
 
 	// Treat "Name" as the default col instead of "Auto Connect"
-	gtk_tree_view_set_search_column(favoriteView.get(), favoriteView.col("Name"));
-	GtkTreeViewColumn *column = gtk_tree_view_get_column(favoriteView.get(), favoriteView.col("Name"));
+	gtk_tree_view_set_search_column(favoriteView.get(), favoriteView.col(_("Name")));
+	GtkTreeViewColumn *column = gtk_tree_view_get_column(favoriteView.get(), favoriteView.col(_("Name")));
 	gtk_widget_grab_focus(column->button);
 
 	// Connect the signals to their callback functions.
@@ -109,15 +109,15 @@ void FavoriteHubs::editEntry_gui(StringMap &params, GtkTreeIter *iter)
 	string password = params["Password"].empty() ? "" : string(8, '*');
 
 	gtk_list_store_set(favoriteStore, iter,
-		favoriteView.col("Auto Connect"), Util::toInt(params["Auto Connect"]),
-		favoriteView.col("Name"), params["Name"].c_str(),
-		favoriteView.col("Description"), params["Description"].c_str(),
-		favoriteView.col("Nick"), params["Nick"].c_str(),
-		favoriteView.col("Password"), password.c_str(),
+		favoriteView.col(_("Auto Connect")), Util::toInt(params["Auto Connect"]),
+		favoriteView.col(_("Name")), params["Name"].c_str(),
+		favoriteView.col(_("Description")), params["Description"].c_str(),
+		favoriteView.col(_("Nick")), params["Nick"].c_str(),
+		favoriteView.col(_("Password")), password.c_str(),
 		favoriteView.col("Hidden Password"), params["Password"].c_str(),
-		favoriteView.col("Address"), params["Address"].c_str(),
-		favoriteView.col("User Description"), params["User Description"].c_str(),
-		favoriteView.col("Encoding"), params["Encoding"].c_str(),
+		favoriteView.col(_("Address")), params["Address"].c_str(),
+		favoriteView.col(_("User Description")), params["User Description"].c_str(),
+		favoriteView.col(_("Encoding")), params["Encoding"].c_str(),
 		-1);
 }
 
@@ -129,7 +129,7 @@ void FavoriteHubs::removeEntry_gui(string address)
 
 	while (valid)
 	{
-		if (favoriteView.getString(&iter, "Address") == address)
+		if (favoriteView.getString(&iter, _("Address")) == address)
 		{
 			gtk_list_store_remove(favoriteStore, &iter);
 			break;
@@ -194,8 +194,8 @@ gboolean FavoriteHubs::onButtonReleased_gui(GtkWidget *widget, GdkEventButton *e
 		else if (fh->previous == GDK_2BUTTON_PRESS && event->button == 1)
 		{
 			WulforManager::get()->getMainWindow()->showHub_gui(
-				fh->favoriteView.getString(&iter, "Address"),
-				fh->favoriteView.getString(&iter, "Encoding"));
+				fh->favoriteView.getString(&iter, _("Address")),
+				fh->favoriteView.getString(&iter, _("Encoding")));
 		}
 	}
 
@@ -217,11 +217,11 @@ gboolean FavoriteHubs::onKeyReleased_gui(GtkWidget *widget, GdkEventKey *event, 
 		{
 			GtkTreeViewColumn *column;
 			gtk_tree_view_get_cursor(fh->favoriteView.get(), NULL, &column);
-			if (column && column != gtk_tree_view_get_column(fh->favoriteView.get(), fh->favoriteView.col("Auto Connect")))
+			if (column && column != gtk_tree_view_get_column(fh->favoriteView.get(), fh->favoriteView.col(_("Auto Connect"))))
 			{
 				WulforManager::get()->getMainWindow()->showHub_gui(
-					fh->favoriteView.getString(&iter, "Address"),
-					fh->favoriteView.getString(&iter, "Encoding"));
+					fh->favoriteView.getString(&iter, _("Address")),
+					fh->favoriteView.getString(&iter, _("Encoding")));
 			}
 		}
 		else if (event->keyval == GDK_Delete || event->keyval == GDK_BackSpace)
@@ -271,20 +271,20 @@ void FavoriteHubs::onEditEntry_gui(GtkWidget *widget, gpointer data)
 		return;
 
 	StringMap params;
-	params["Name"] = fh->favoriteView.getString(&iter, "Name");
-	params["Address"] = fh->favoriteView.getString(&iter, "Address");
-	params["Description"] = fh->favoriteView.getString(&iter, "Description");
-	params["Nick"] = fh->favoriteView.getString(&iter, "Nick");
+	params["Name"] = fh->favoriteView.getString(&iter, _("Name"));
+	params["Address"] = fh->favoriteView.getString(&iter, _("Address"));
+	params["Description"] = fh->favoriteView.getString(&iter, _("Description"));
+	params["Nick"] = fh->favoriteView.getString(&iter, _("Nick"));
 	params["Password"] = fh->favoriteView.getString(&iter, "Hidden Password");
-	params["User Description"] = fh->favoriteView.getString(&iter, "User Description");
-	params["Encoding"] = fh->favoriteView.getString(&iter, "Encoding");
-	params["Auto Connect"] = fh->favoriteView.getValue<gboolean>(&iter, "Auto Connect") ? "1" : "0";
+	params["User Description"] = fh->favoriteView.getString(&iter, _("User Description"));
+	params["Encoding"] = fh->favoriteView.getString(&iter, _("Encoding"));
+	params["Auto Connect"] = fh->favoriteView.getValue<gboolean>(&iter, _("Auto Connect")) ? "1" : "0";
 
 	bool entryUpdated = fh->showFavoriteHubDialog_gui(params);
 
 	if (entryUpdated)
 	{
-		string address = fh->favoriteView.getString(&iter, "Address");
+		string address = fh->favoriteView.getString(&iter, _("Address"));
 		fh->editEntry_gui(params, &iter);
 
 		typedef Func2<FavoriteHubs, string, StringMap> F2;
@@ -375,7 +375,7 @@ void FavoriteHubs::onRemoveEntry_gui(GtkWidget *widget, gpointer data)
 	{
 		if (BOOLSETTING(CONFIRM_HUB_REMOVAL))
 		{
-			string name = fh->favoriteView.getString(&iter, "Name").c_str();
+			string name = fh->favoriteView.getString(&iter, _("Name")).c_str();
 			GtkWindow* parent = GTK_WINDOW(WulforManager::get()->getMainWindow()->getContainer());
 			GtkWidget* dialog = gtk_message_dialog_new(parent,
 				GTK_DIALOG_DESTROY_WITH_PARENT, GTK_MESSAGE_QUESTION, GTK_BUTTONS_NONE,
@@ -393,7 +393,7 @@ void FavoriteHubs::onRemoveEntry_gui(GtkWidget *widget, gpointer data)
 		gtk_widget_set_sensitive(fh->getWidget("buttonRemove"), FALSE);
 		gtk_widget_set_sensitive(fh->getWidget("buttonConnect"), FALSE);
 
-		string address = fh->favoriteView.getString(&iter, "Address");
+		string address = fh->favoriteView.getString(&iter, _("Address"));
 
 		typedef Func1<FavoriteHubs, string> F1;
 		F1 *func = new F1(fh, &FavoriteHubs::removeEntry_client, address);
@@ -408,8 +408,8 @@ void FavoriteHubs::onConnect_gui(GtkButton *widget, gpointer data)
 
 	if (gtk_tree_selection_get_selected(fh->favoriteSelection, NULL, &iter))
 		WulforManager::get()->getMainWindow()->showHub_gui(
-			fh->favoriteView.getString(&iter, "Address"),
-			fh->favoriteView.getString(&iter, "Encoding"));
+			fh->favoriteView.getString(&iter, _("Address")),
+			fh->favoriteView.getString(&iter, _("Encoding")));
 }
 
 void FavoriteHubs::onToggledClicked_gui(GtkCellRendererToggle *cell, gchar *path, gpointer data)
@@ -419,10 +419,10 @@ void FavoriteHubs::onToggledClicked_gui(GtkCellRendererToggle *cell, gchar *path
 
 	if (gtk_tree_model_get_iter_from_string(GTK_TREE_MODEL(fh->favoriteStore), &iter, path))
 	{
-		string address = fh->favoriteView.getString(&iter, "Address");
-		bool fixed = fh->favoriteView.getValue<gboolean>(&iter, "Auto Connect");
+		string address = fh->favoriteView.getString(&iter, _("Address"));
+		bool fixed = fh->favoriteView.getValue<gboolean>(&iter, _("Auto Connect"));
 		fixed = !fixed;
-		gtk_list_store_set(fh->favoriteStore, &iter, fh->favoriteView.col("Auto Connect"), fixed, -1);
+		gtk_list_store_set(fh->favoriteStore, &iter, fh->favoriteView.col(_("Auto Connect")), fixed, -1);
 
 		typedef Func2<FavoriteHubs, string, bool> F2;
 		F2 *func = new F2(fh, &FavoriteHubs::setConnect_client, address, fixed);
