@@ -55,7 +55,7 @@ void Hash::updateStats_gui(string file, int64_t bytes, size_t files, uint32_t ti
 	double diff = tick - startTime;
 	if (diff < 1000 || files == 0 || bytes == 0)
 	{
-		gtk_label_set_text(GTK_LABEL(getWidget("labelSpeed")), string("-.-- B/s, " + Util::formatBytes(bytes) + _(" left")).c_str());
+		gtk_label_set_text(GTK_LABEL(getWidget("labelSpeed")), string(string("-.-- ") + _("B/s") + ", " + Util::formatBytes(bytes) + _(" left")).c_str());
 		gtk_label_set_text(GTK_LABEL(getWidget("labelTime")), _("-:--:-- left"));
 		gtk_progress_bar_set_text (GTK_PROGRESS_BAR(getWidget("progressbar")), "0%");
 		gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(getWidget("progressbar")), 0.0);
@@ -64,7 +64,7 @@ void Hash::updateStats_gui(string file, int64_t bytes, size_t files, uint32_t ti
 	{
 		double speedStat = (((double)(startBytes - bytes)) * 1000) / diff;
 
-		gtk_label_set_text(GTK_LABEL(getWidget("labelSpeed")), string(Util::formatBytes((int64_t)speedStat) + "/s, " + Util::formatBytes(bytes) + " left").c_str());
+		gtk_label_set_text(GTK_LABEL(getWidget("labelSpeed")), string(Util::formatBytes((int64_t)speedStat) + "/" + _("s") + ", " + Util::formatBytes(bytes) + " left").c_str());
 
 		if (speedStat == 0)
 		{

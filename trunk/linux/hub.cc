@@ -1433,12 +1433,27 @@ void Hub::onSendMessage_gui(GtkEntry *entry, gpointer data)
 		}
 		else if (command == _("freedcpp"))
 		{
-			hub->addStatusMessage_gui(_("freedcpp 0.0.1.67/0.75, project home: http://freedcpp.narod.ru http://code.google.com/p/freedcpp"), Msg::SYSTEM, Sound::NONE);
+			hub->addStatusMessage_gui(_("freedcpp 0.0.1.68/0.75, project home: http://freedcpp.narod.ru http://code.google.com/p/freedcpp"), Msg::SYSTEM, Sound::NONE);
 		}
 		else if (command == _("help"))
 		{
-			hub->addStatusMessage_gui(_("Available commands: /away <message>, /back, /clear, /close, /favorite, "\
-				 "/getlist <nick>, /grant <nick>, /help, /join <address>, /me <message>, /pm <nick>, /rebuild, /refresh, /userlist, /freedcpp, \"/emoticons, /emot\""), Msg::SYSTEM, Sound::NONE);
+			hub->addMessage_gui(_("*** Available commands:\n\n"\
+			"/away <message>\t\t - Away mode message on/off\n"\
+			"/back\t\t\t\t - Away mode off\n"\
+			"/clear\t\t\t\t - Clear chat\n"\
+			"/close\t\t\t\t - Close chat\n"\
+			"/favorite\t\t\t\t - Add a hub to favorites\n"\
+			"/getlist <nick>\t\t\t - Get file list\n"\
+			"/grant <nick>\t\t\t - Grant extra slot\n"\
+			"/help\t\t\t\t - Show help\n"\
+			"/join <address>\t\t - Connect to the hub\n"\
+			"/me <message>\t\t - Say a third person\n"\
+			"/pm <nick>\t\t\t - Private message\n"\
+			"/rebuild\t\t\t\t - Rebuild hash\n"\
+			"/refresh\t\t\t\t - Update own file list\n"\
+			"/userlist\t\t\t\t - User list show/hide\n"\
+			"/freedcpp\t\t\t\t - Show version\n"\
+			"/emoticons, /emot\t\t - Emoticons on/off\n"), Msg::SYSTEM);
 		}
 		else if (command == _("join") && !param.empty())
 		{

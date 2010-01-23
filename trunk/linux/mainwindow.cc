@@ -1416,9 +1416,9 @@ void MainWindow::on(TimerManagerListener::Second, uint32_t ticks) throw()
 	}
 
 	string hubs = Client::getCounts();
-	string downloadSpeed = Util::formatBytes(downBytes) + "/s";
+	string downloadSpeed = Util::formatBytes(downBytes) + "/" + _("s");
 	string downloaded = Util::formatBytes(Socket::getTotalDown());
-	string uploadSpeed = Util::formatBytes(upBytes) + "/s";
+	string uploadSpeed = Util::formatBytes(upBytes) + "/" + _("s");
 	string uploaded = Util::formatBytes(Socket::getTotalUp());
 
 	lastUpdate = ticks;
