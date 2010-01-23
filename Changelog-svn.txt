@@ -1,3 +1,7 @@
+r72: 0.0.1.68
+* Обновил вывод справки в чате.
+* Исправил ошибки перевода.
+
 r71: 0.0.1.67
 * Маркировка текста (downloadqueue, favoritehubs, finishedtransfers, publichubs, search, sharebrowser).
 

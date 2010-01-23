@@ -1077,14 +1077,14 @@ void Settings::initAppearance_gui()
 
 		GtkIconTheme *iconTheme = gtk_icon_theme_get_default();
 
-		addOption_gui(themeIconsStore, wsm, iconTheme, _("User"), "icon-dc++");
-		addOption_gui(themeIconsStore, wsm, iconTheme, _("User firewall"), "icon-dc++-fw");
-		addOption_gui(themeIconsStore, wsm, iconTheme, _("User operator firewall"), "icon-dc++-fw-op");
-		addOption_gui(themeIconsStore, wsm, iconTheme, _("User operator"), "icon-dc++-op");
-		addOption_gui(themeIconsStore, wsm, iconTheme, _("User normal"), "icon-normal");
-		addOption_gui(themeIconsStore, wsm, iconTheme, _("User normal firewall"), "icon-normal-fw");
-		addOption_gui(themeIconsStore, wsm, iconTheme, _("User operator firewall"), "icon-normal-fw-op");
-		addOption_gui(themeIconsStore, wsm, iconTheme, _("User operator"), "icon-normal-op");
+		addOption_gui(themeIconsStore, wsm, iconTheme, _("User (dc)"), "icon-dc++");
+		addOption_gui(themeIconsStore, wsm, iconTheme, _("User firewall (dc)"), "icon-dc++-fw");
+		addOption_gui(themeIconsStore, wsm, iconTheme, _("User operator firewall (dc)"), "icon-dc++-fw-op");
+		addOption_gui(themeIconsStore, wsm, iconTheme, _("User operator (dc)"), "icon-dc++-op");
+		addOption_gui(themeIconsStore, wsm, iconTheme, _("User (normal)"), "icon-normal");
+		addOption_gui(themeIconsStore, wsm, iconTheme, _("User firewall (normal)"), "icon-normal-fw");
+		addOption_gui(themeIconsStore, wsm, iconTheme, _("User operator firewall (normal)"), "icon-normal-fw-op");
+		addOption_gui(themeIconsStore, wsm, iconTheme, _("User operator (normal)"), "icon-normal-op");
 		addOption_gui(themeIconsStore, wsm, iconTheme, _("Button smile"), "icon-smile");
 		addOption_gui(themeIconsStore, wsm, iconTheme, _("Download"), "icon-download");
 		addOption_gui(themeIconsStore, wsm, iconTheme, _("Upload"), "icon-upload");
