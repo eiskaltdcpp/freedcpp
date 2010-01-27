@@ -209,6 +209,8 @@ MainWindow::~MainWindow()
 	if (timer > 0)
 		g_source_remove(timer);
 
+	WSET("status-icon-blink-use", useStatusIconBlink);
+
 	gtk_widget_destroy(GTK_WIDGET(window));
 	g_object_unref(statusIcon);
 
@@ -449,12 +451,16 @@ void MainWindow::removeTabMenuItem_gui(GtkWidget *menuItem)
  */
 void MainWindow::createStatusIcon_gui()
 {
+	useStatusIconBlink = WGETB("status-icon-blink-use");
 	statusIcon = gtk_status_icon_new_from_icon_name(g_get_prgname());
 
 	g_signal_connect(getWidget("statusIconQuitItem"), "activate", G_CALLBACK(onQuitClicked_gui), (gpointer)this);
 	g_signal_connect(getWidget("statusIconShowInterfaceItem"), "toggled", G_CALLBACK(onShowInterfaceToggled_gui), (gpointer)this);
 	g_signal_connect(statusIcon, "activate", G_CALLBACK(onStatusIconActivated_gui), (gpointer)this);
 	g_signal_connect(statusIcon, "popup-menu", G_CALLBACK(onStatusIconPopupMenu_gui), (gpointer)this);
+
+	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(getWidget("statusIconBlinkUseItem")), useStatusIconBlink);
+	g_signal_connect(getWidget("statusIconBlinkUseItem"), "toggled", G_CALLBACK(onStatusIconBlinkUseToggled_gui), (gpointer)this);
 
 	if (BOOLSETTING(ALWAYS_TRAY))
 		gtk_status_icon_set_visible(statusIcon, TRUE);
@@ -588,21 +594,18 @@ void MainWindow::addPrivateMessage_gui(Msg::TypeMsg typemsg, string cid, string 
 		dynamic_cast<PrivateMessage*>(entry)->addMessage_gui(message, typemsg);
 
 		bool show = FALSE;
-		bool anim = FALSE;
 
 		if (!isActive_gui())
 		{
 			show = TRUE;
-			anim = TRUE;
+			if (useStatusIconBlink && timer == 0)
+			{
+				timer = g_timeout_add(1000, animationStatusIcon_gui, (gpointer)this);
+			}
 		}
 		else if (currentPage_gui() != entry->getContainer() && !WGETI("notify-only-not-active"))
 		{
 			show = TRUE;
-		}
-
-		if (anim && timer == 0)
-		{
-			timer = g_timeout_add(1000, animationStatusIcon_gui, (gpointer)this);
 		}
 
 		if (show)
@@ -634,6 +637,16 @@ void MainWindow::addPrivateMessage_gui(Msg::TypeMsg typemsg, string cid, string 
 
 	if (raise)
 		raisePage_gui(entry->getContainer());
+}
+
+void MainWindow::removeTimerSource_gui()
+{
+	if (timer > 0)
+	{
+		g_source_remove(timer);
+		timer = 0;
+		gtk_status_icon_set_from_icon_name(statusIcon, g_get_prgname());
+	}
 }
 
 void MainWindow::addPrivateStatusMessage_gui(Msg::TypeMsg typemsg, string cid, string message)
@@ -1030,6 +1043,9 @@ void MainWindow::onPreferencesClicked_gui(GtkWidget *widget, gpointer data)
 	unsigned short udpPort = (unsigned short)SETTING(UDP_PORT);
 	int lastConn = SETTING(INCOMING_CONNECTIONS);
 
+	if (mw->useStatusIconBlink != WGETB("status-icon-blink-use"))
+		WSET("status-icon-blink-use", mw->useStatusIconBlink);
+
 	gint response = WulforManager::get()->openSettingsDialog_gui();
 
 	if (response == GTK_RESPONSE_OK)
@@ -1065,6 +1081,9 @@ void MainWindow::onPreferencesClicked_gui(GtkWidget *widget, gpointer data)
 					dynamic_cast<PrivateMessage*>(entry)->updateTags_gui();
 			}
 		}
+
+		// Status menu
+		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(mw->getWidget("statusIconBlinkUseItem")), WGETB("status-icon-blink-use"));
 	}
 }
 
@@ -1248,6 +1267,18 @@ void MainWindow::onShowInterfaceToggled_gui(GtkCheckMenuItem *item, gpointer dat
 		if (isIconified) gtk_window_iconify(win);
 		gtk_widget_show(GTK_WIDGET(win));
 	}
+}
+
+void MainWindow::onStatusIconBlinkUseToggled_gui(GtkWidget *widget, gpointer data)
+{
+	MainWindow *mw = (MainWindow *)data;
+	mw->removeTimerSource_gui();
+
+	if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(mw->getWidget("statusIconBlinkUseItem"))))
+
+		mw->useStatusIconBlink = TRUE;
+	else
+		mw->useStatusIconBlink = FALSE;
 }
 
 void MainWindow::onLinkClicked_gui(GtkWidget *widget, const gchar *link)

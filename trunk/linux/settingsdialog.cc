@@ -825,6 +825,7 @@ void Settings::initAppearance_gui()
 		addOption_gui(appearanceStore, _("Only show joins / parts for favorite users"), SettingsManager::FAV_SHOW_JOINS);
 		addOption_gui(appearanceStore, _("Use OEM monospaced font for chat windows"), SettingsManager::USE_OEM_MONOFONT);
 		addOption_gui(appearanceStore, _("Use magnet split"), "use-magnet-split");
+		addOption_gui(appearanceStore, _("Use blinking status icon when receiving PM"), "status-icon-blink-use");
 		/// @todo: Uncomment when implemented
 		//addOption_gui(appearanceStore, _("Minimize to tray"), SettingsManager::MINIMIZE_TRAY);
 		//addOption_gui(appearanceStore, _("Use system icons"), SettingsManager::USE_SYSTEM_ICONS);

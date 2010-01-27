@@ -86,6 +86,7 @@ WulforSettingsManager::WulforSettingsManager():
 	defaultInt.insert(IntMap::value_type("notify-pm-length", 50));
 	defaultInt.insert(IntMap::value_type("notify-icon-size", 3));
 	defaultInt.insert(IntMap::value_type("notify-only-not-active", 0));
+	defaultInt.insert(IntMap::value_type("status-icon-blink-use", 1));
 	defaultString.insert(StringMap::value_type("downloadqueue-order", ""));
 	defaultString.insert(StringMap::value_type("downloadqueue-width", ""));
 	defaultString.insert(StringMap::value_type("downloadqueue-visibility", ""));
