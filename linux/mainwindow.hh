@@ -98,6 +98,7 @@ class MainWindow:
 			std::string downloaded, std::string uploadSpeed, std::string uploaded);
 		void setTabPosition_gui(int position);
 		void setToolbarStyle_gui(int style);
+		void removeTimerSource_gui();
 
 		// GUI Callbacks
 		static gboolean onWindowState_gui(GtkWidget *widget, GdkEventWindowState *event, gpointer data);
@@ -131,6 +132,7 @@ class MainWindow:
 		static void onCloseBookEntry_gui(GtkWidget *widget, gpointer data);
 		static void onStatusIconActivated_gui(GtkStatusIcon *statusIcon, gpointer data);
 		static void onStatusIconPopupMenu_gui(GtkStatusIcon *statusIcon, guint button, guint time, gpointer data);
+		static void onStatusIconBlinkUseToggled_gui(GtkWidget *widget, gpointer data);
 		static void onShowInterfaceToggled_gui(GtkCheckMenuItem *item, gpointer data);
 		static void onLinkClicked_gui(GtkWidget *widget, const gchar *link);
 
@@ -153,6 +155,7 @@ class MainWindow:
 		dcpp::StringList EntryList;
 		guint timer;
 		int statusFrame;
+		bool useStatusIconBlink;
 };
 
 #else

@@ -1057,6 +1057,19 @@ Contributors:
       </widget>
     </child>
     <child>
+      <widget class="GtkCheckMenuItem" id="statusIconBlinkUseItem">
+        <property name="visible">True</property>
+        <property name="label" translatable="yes">Use Blinking Icon</property>
+        <property name="active">True</property>
+        <property name="use_underline">True</property>
+      </widget>
+    </child>
+    <child>
+      <widget class="GtkSeparatorMenuItem" id="statusIconSeparatorItem">
+        <property name="visible">True</property>
+      </widget>
+    </child>
+    <child>
       <widget class="GtkImageMenuItem" id="statusIconQuitItem">
         <property name="visible">True</property>
         <property name="label" translatable="yes">_Exit</property>
