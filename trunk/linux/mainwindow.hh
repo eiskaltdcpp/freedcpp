@@ -134,7 +134,7 @@ class MainWindow:
 		static void onStatusIconPopupMenu_gui(GtkStatusIcon *statusIcon, guint button, guint time, gpointer data);
 		static void onStatusIconBlinkUseToggled_gui(GtkWidget *widget, gpointer data);
 		static void onShowInterfaceToggled_gui(GtkCheckMenuItem *item, gpointer data);
-		static void onLinkClicked_gui(GtkWidget *widget, const gchar *link);
+		static void onLinkClicked_gui(GtkWidget *widget, gpointer data);
 
 		// Client functions
 		void autoConnect_client();

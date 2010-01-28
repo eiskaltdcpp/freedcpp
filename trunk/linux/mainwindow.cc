@@ -136,11 +136,26 @@ MainWindow::MainWindow():
 	g_signal_connect(getWidget("previousTabMenuItem"), "activate", G_CALLBACK(onPreviousTabClicked_gui), (gpointer)this);
 	g_signal_connect(getWidget("nextTabMenuItem"), "activate", G_CALLBACK(onNextTabClicked_gui), (gpointer)this);
 	g_signal_connect(getWidget("aboutMenuItem"), "activate", G_CALLBACK(onAboutClicked_gui), (gpointer)this);
-	g_signal_connect(getWidget("homeMenuItem"), "activate", G_CALLBACK(onLinkClicked_gui), (gchar*)"http://freedcpp.narod.ru");
-	g_signal_connect(getWidget("sourceMenuItem"), "activate", G_CALLBACK(onLinkClicked_gui),
-		(gchar*)"http://code.google.com/p/freedcpp/source/checkout");
-	g_signal_connect(getWidget("issueMenuItem"), "activate", G_CALLBACK(onLinkClicked_gui),
-		(gchar*)"http://code.google.com/p/freedcpp/issues/list");
+
+	g_object_set_data_full(G_OBJECT(getWidget("homeMenuItem")), "link",
+		g_strdup("http://freedcpp.narod.ru"), g_free);
+	g_signal_connect(getWidget("homeMenuItem"), "activate", G_CALLBACK(onLinkClicked_gui), NULL);
+
+	g_object_set_data_full(G_OBJECT(getWidget("sourceMenuItem")), "link",
+		g_strdup("http://code.google.com/p/freedcpp/source/checkout"), g_free);
+	g_signal_connect(getWidget("sourceMenuItem"), "activate", G_CALLBACK(onLinkClicked_gui), NULL);
+
+	g_object_set_data_full(G_OBJECT(getWidget("issueMenuItem")), "link",
+		g_strdup("http://code.google.com/p/freedcpp/issues/list"), g_free);
+	g_signal_connect(getWidget("issueMenuItem"), "activate", G_CALLBACK(onLinkClicked_gui), NULL);
+
+	g_object_set_data_full(G_OBJECT(getWidget("forumDiscussionItem")), "link",
+		g_strdup("http://forum.ubuntu.ru/index.php?PHPSESSID=b0c7086d3c9790f3a6b4d14a764fb4c3&topic=81512.0"), g_free);
+	g_signal_connect(getWidget("forumDiscussionItem"), "activate", G_CALLBACK(onLinkClicked_gui), NULL);
+
+	g_object_set_data_full(G_OBJECT(getWidget("changeLogItem")), "link",
+		g_strdup((string(_DATADIR) + "/doc/freedcpp/Changelog-svn.txt").c_str()), g_free);
+	g_signal_connect(getWidget("changeLogItem"), "activate", G_CALLBACK(onLinkClicked_gui), NULL);
 
 	// Load window state and position from settings manager
 	gint posX = WGETI("main-window-pos-x");
@@ -1281,8 +1296,9 @@ void MainWindow::onStatusIconBlinkUseToggled_gui(GtkWidget *widget, gpointer dat
 		mw->useStatusIconBlink = FALSE;
 }
 
-void MainWindow::onLinkClicked_gui(GtkWidget *widget, const gchar *link)
+void MainWindow::onLinkClicked_gui(GtkWidget *widget, gpointer data)
 {
+	string link = (gchar*) g_object_get_data(G_OBJECT(widget), "link");
 	WulforUtil::openURI(link);
 }
 

@@ -1361,7 +1361,7 @@ void Hub::onSendMessage_gui(GtkEntry *entry, gpointer data)
 		}
 		std::transform(command.begin(), command.end(), command.begin(), (int(*)(int))tolower);
 
-		if (command == _("away"))
+		if (command == "away")
 		{
 			if (Util::getAway() && param.empty())
 			{
@@ -1377,28 +1377,28 @@ void Hub::onSendMessage_gui(GtkEntry *entry, gpointer data)
 				hub->addStatusMessage_gui(_("Away mode on: ") + Util::getAwayMessage(), Msg::SYSTEM, Sound::NONE);
 			}
 		}
-		else if (command == _("back"))
+		else if (command == "back")
 		{
 			Util::setAway(FALSE);
 			hub->addStatusMessage_gui(_("Away mode off"), Msg::SYSTEM, Sound::NONE);
 		}
-		else if (command == _("clear"))
+		else if (command == "clear")
 		{
 			GtkTextIter startIter, endIter;
 			gtk_text_buffer_get_start_iter(hub->chatBuffer, &startIter);
 			gtk_text_buffer_get_end_iter(hub->chatBuffer, &endIter);
 			gtk_text_buffer_delete(hub->chatBuffer, &startIter, &endIter);
 		}
-		else if (command == _("close"))
+		else if (command == "close")
 		{
 			/// @todo: figure out why this sometimes closes and reopens the tab
 			WulforManager::get()->getMainWindow()->removeBookEntry_gui(hub);
 		}
-		else if (command == _("favorite") || command == _("fav"))
+		else if (command == "favorite" || command == "fav")
 		{
 			WulforManager::get()->dispatchClientFunc(new Func0<Hub>(hub, &Hub::addAsFavorite_client));
 		}
-		else if (command == _("getlist"))
+		else if (command == "getlist")
 		{
 			if (hub->userMap.find(param) != hub->userMap.end())
 			{
@@ -1408,7 +1408,7 @@ void Hub::onSendMessage_gui(GtkEntry *entry, gpointer data)
 			else
 				hub->addStatusMessage_gui(_("User not found"), Msg::SYSTEM, Sound::NONE);
 		}
-		else if (command == _("grant"))
+		else if (command == "grant")
 		{
 			if (hub->userMap.find(param) != hub->userMap.end())
 			{
@@ -1418,7 +1418,7 @@ void Hub::onSendMessage_gui(GtkEntry *entry, gpointer data)
 			else
 				hub->addStatusMessage_gui(_("User not found"), Msg::SYSTEM, Sound::NONE);
 		}
-		else if (command == _("emoticons") || command == _("emot"))
+		else if (command == "emoticons" || command == "emot")
 		{
 			if (hub->useEmoticons)
 			{
@@ -1431,31 +1431,32 @@ void Hub::onSendMessage_gui(GtkEntry *entry, gpointer data)
 				hub->setStatus_gui("statusMain", _(" *** emoticons mode on"));
 			}
 		}
-		else if (command == _("freedcpp"))
+		else if (command == "freedcpp")
 		{
-			hub->addStatusMessage_gui(_("freedcpp 0.0.1.70/0.75, project home: http://freedcpp.narod.ru http://code.google.com/p/freedcpp"), Msg::SYSTEM, Sound::NONE);
+			hub->addStatusMessage_gui(string("freedcpp 0.0.1.71/0.75, ") + _("project home: ") +
+				"http://freedcpp.narod.ru http://code.google.com/p/freedcpp", Msg::SYSTEM, Sound::NONE);
 		}
-		else if (command == _("help"))
+		else if (command == "help")
 		{
-			hub->addMessage_gui(_("*** Available commands:\n\n"\
-			"/away <message>\t\t - Away mode message on/off\n"\
-			"/back\t\t\t\t - Away mode off\n"\
-			"/clear\t\t\t\t - Clear chat\n"\
-			"/close\t\t\t\t - Close chat\n"\
-			"/favorite\t\t\t\t - Add a hub to favorites\n"\
-			"/getlist <nick>\t\t\t - Get file list\n"\
-			"/grant <nick>\t\t\t - Grant extra slot\n"\
-			"/help\t\t\t\t - Show help\n"\
-			"/join <address>\t\t - Connect to the hub\n"\
-			"/me <message>\t\t - Say a third person\n"\
-			"/pm <nick>\t\t\t - Private message\n"\
-			"/rebuild\t\t\t\t - Rebuild hash\n"\
-			"/refresh\t\t\t\t - Update own file list\n"\
-			"/userlist\t\t\t\t - User list show/hide\n"\
-			"/freedcpp\t\t\t\t - Show version\n"\
-			"/emoticons, /emot\t\t - Emoticons on/off\n"), Msg::SYSTEM);
+			hub->addMessage_gui(string(_("*** Available commands:")) + "\n\n" +
+			"/away <message>\t\t - " + _("Away mode message on/off") + "\n" +
+			"/back\t\t\t\t - " + _("Away mode off") + "\n" +
+			"/clear\t\t\t\t - " + _("Clear chat") + "\n" +
+			"/close\t\t\t\t - " + _("Close chat") + "\n" +
+			"/favorite, /fav\t\t\t - " + _("Add a hub to favorites") + "\n" +
+			"/getlist <nick>\t\t\t - " + _("Get file list") + "\n" +
+			"/grant <nick>\t\t\t - " + _("Grant extra slot") + "\n" +
+			"/help\t\t\t\t - " + _("Show help") + "\n" +
+			"/join <address>\t\t - " + _("Connect to the hub") + "\n" +
+			"/me <message>\t\t - " + _("Say a third person") + "\n" +
+			"/pm <nick>\t\t\t - " + _("Private message") + "\n" +
+			"/rebuild\t\t\t\t - " + _("Rebuild hash") + "\n" +
+			"/refresh\t\t\t\t - " + _("Update own file list") + "\n" +
+			"/userlist\t\t\t\t - " + _("User list show/hide") + "\n" +
+			"/freedcpp\t\t\t\t - " + _("Show version") + "\n" +
+			"/emoticons, /emot\t\t - " + _("Emoticons on/off") + "\n", Msg::SYSTEM);
 		}
-		else if (command == _("join") && !param.empty())
+		else if (command == "join" && !param.empty())
 		{
 			if (BOOLSETTING(JOIN_OPEN_NEW_WINDOW))
 			{
@@ -1469,27 +1470,27 @@ void Hub::onSendMessage_gui(GtkEntry *entry, gpointer data)
 				WulforManager::get()->dispatchClientFunc(func);
 			}
 		}
-		else if (command == _("me"))
+		else if (command == "me")
 		{
 			func2 = new F2(hub, &Hub::sendMessage_client, param, true);
 			WulforManager::get()->dispatchClientFunc(func2);
 		}
-		else if (command == _("pm"))
+		else if (command == "pm")
 		{
 			if (hub->userMap.find(param) != hub->userMap.end())
 				WulforManager::get()->getMainWindow()->addPrivateMessage_gui(Msg::UNKNOWN, hub->userMap[param], hub->client->getHubUrl());
 			else
 				hub->addStatusMessage_gui(_("User not found"), Msg::SYSTEM, Sound::NONE);
 		}
-		else if (command == _("rebuild"))
+		else if (command == "rebuild")
 		{
 			WulforManager::get()->dispatchClientFunc(new Func0<Hub>(hub, &Hub::rebuildHashData_client));
 		}
-		else if (command == _("refresh"))
+		else if (command == "refresh")
 		{
 			WulforManager::get()->dispatchClientFunc(new Func0<Hub>(hub, &Hub::refreshFileList_client));
 		}
-		else if (command == _("userlist"))
+		else if (command == "userlist")
 		{
 			if (GTK_WIDGET_VISIBLE(hub->getWidget("scrolledwindow2")))
 				gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(hub->getWidget("userListCheckButton")), FALSE);
