@@ -341,6 +341,39 @@
                       </widget>
                     </child>
                     <child>
+                      <widget class="GtkImageMenuItem" id="forumDiscussionItem">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">Discussion forum</property>
+                        <property name="use_underline">True</property>
+                        <child internal-child="image">
+                          <widget class="GtkImage" id="forumDiscussionMenuImage">
+                            <property name="visible">True</property>
+                            <property name="stock">gtk-edit</property>
+                            <property name="icon_size">1</property>
+                          </widget>
+                        </child>
+                      </widget>
+                    </child>
+                    <child>
+                      <widget class="GtkSeparatorMenuItem" id="separator0">
+                        <property name="visible">True</property>
+                      </widget>
+                    </child>
+                    <child>
+                      <widget class="GtkImageMenuItem" id="changeLogItem">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">Changelog(svn)</property>
+                        <property name="use_underline">True</property>
+                        <child internal-child="image">
+                          <widget class="GtkImage" id="changeLogMenuImage">
+                            <property name="visible">True</property>
+                            <property name="stock">gtk-file</property>
+                            <property name="icon_size">1</property>
+                          </widget>
+                        </child>
+                      </widget>
+                    </child>
+                    <child>
                       <widget class="GtkSeparatorMenuItem" id="separator1">
                         <property name="visible">True</property>
                       </widget>

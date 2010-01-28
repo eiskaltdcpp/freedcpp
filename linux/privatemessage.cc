@@ -778,7 +778,7 @@ void PrivateMessage::onSendMessage_gui(GtkEntry *entry, gpointer data)
 		}
 		std::transform(command.begin(), command.end(), command.begin(), (int(*)(int))tolower);
 
-		if (command == _("away"))
+		if (command == "away")
 		{
 			if (Util::getAway() && param.empty())
 			{
@@ -795,41 +795,42 @@ void PrivateMessage::onSendMessage_gui(GtkEntry *entry, gpointer data)
 				pm->addStatusMessage_gui(_("Away mode on: ") + Util::getAwayMessage(), Msg::SYSTEM);
 			}
 		}
-		else if (command == _("back"))
+		else if (command == "back")
 		{
 			Util::setAway(FALSE);
 			pm->addStatusMessage_gui(_("Away mode off"), Msg::SYSTEM);
 		}
-		else if (command == _("clear"))
+		else if (command == "clear")
 		{
 			GtkTextIter startIter, endIter;
 			gtk_text_buffer_get_start_iter(pm->messageBuffer, &startIter);
 			gtk_text_buffer_get_end_iter(pm->messageBuffer, &endIter);
 			gtk_text_buffer_delete(pm->messageBuffer, &startIter, &endIter);
 		}
-		else if (command == _("close"))
+		else if (command == "close")
 		{
 			WulforManager::get()->getMainWindow()->removeBookEntry_gui(pm);
 		}
-		else if (command == _("favorite") || text == _("fav"))
-		{
-			typedef Func0<PrivateMessage> F0;
-			F0 *func = new F0(pm, &PrivateMessage::addFavoriteUser_client);
-			WulforManager::get()->dispatchClientFunc(func);
-		}
-		else if (command == _("getlist"))
+		//TODO: favorite user, uncomment when implemented
+// 		else if (command == _("favorite") || text == _("fav"))
+// 		{
+// 			typedef Func0<PrivateMessage> F0;
+// 			F0 *func = new F0(pm, &PrivateMessage::addFavoriteUser_client);
+// 			WulforManager::get()->dispatchClientFunc(func);
+// 		}
+		else if (command == "getlist")
 		{
 			typedef Func0<PrivateMessage> F0;
 			F0 *func = new F0(pm, &PrivateMessage::getFileList_client);
 			WulforManager::get()->dispatchClientFunc(func);
 		}
-		else if (command == _("grant"))
+		else if (command == "grant")
 		{
 			typedef Func0<PrivateMessage> F0;
 			F0 *func = new F0(pm, &PrivateMessage::grantSlot_client);
 			WulforManager::get()->dispatchClientFunc(func);
 		}
-		else if (command == _("emoticons") || command == _("emot"))
+		else if (command == "emoticons" || command == "emot")
 		{
 			if (pm->useEmoticons)
 			{
@@ -842,9 +843,19 @@ void PrivateMessage::onSendMessage_gui(GtkEntry *entry, gpointer data)
 				pm->setStatus_gui(_(" *** emoticons mode on"));
 			}
 		}
-		else if (command == _("help"))
+		else if (command == "help")
 		{
-			pm->addStatusMessage_gui(_("Available commands: /away <message>, /back, /clear, /close, /favorite, /getlist, /grant, /emoticons, /emot, /help"), Msg::SYSTEM);
+			pm->addLine_gui(Msg::SYSTEM, string(_("*** Available commands:")) + "\n\n" +
+			"/away <message>\t\t - " + _("Away mode message on/off") + "\n" +
+			"/back\t\t\t\t - " + _("Away mode off") + "\n" +
+			"/clear\t\t\t\t - " + _("Clear PM") + "\n" +
+			"/close\t\t\t\t - " + _("Close PM") + "\n" +
+			//TODO: favorite user, uncomment when implemented
+//			"/favorite, /fav\t\t\t\t - " + _("Add a user to favorites") + "\n" +
+			"/getlist\t\t\t\t - " + _("Get file list") + "\n" +
+			"/grant\t\t\t\t - " + _("Grant extra slot") + "\n" +
+			"/emoticons, /emot\t\t - " + _("Emoticons on/off") + "\n" +
+			"/help\t\t\t\t - " + _("Show help") + "\n");
 		}
 		else
 		{
