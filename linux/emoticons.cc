@@ -65,6 +65,9 @@ void Emoticons::create()
 {
 	clean();
 
+	if (!WGETB("emoticons-use"))
+		return;
+
 	string file = currPackName;
 	string path = WulforManager::get()->getPath() + G_DIR_SEPARATOR_S + "emoticons" + G_DIR_SEPARATOR_S;
 	string packName = file;
