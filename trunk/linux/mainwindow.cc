@@ -150,7 +150,7 @@ MainWindow::MainWindow():
 	g_signal_connect(getWidget("issueMenuItem"), "activate", G_CALLBACK(onLinkClicked_gui), NULL);
 
 	g_object_set_data_full(G_OBJECT(getWidget("forumDiscussionItem")), "link",
-		g_strdup("http://forum.ubuntu.ru/index.php?PHPSESSID=b0c7086d3c9790f3a6b4d14a764fb4c3&topic=81512.0"), g_free);
+		g_strdup("http://forum.ubuntu.ru/index.php?topic=81512.0"), g_free);
 	g_signal_connect(getWidget("forumDiscussionItem"), "activate", G_CALLBACK(onLinkClicked_gui), NULL);
 
 	g_object_set_data_full(G_OBJECT(getWidget("changeLogItem")), "link",
@@ -1060,6 +1060,7 @@ void MainWindow::onPreferencesClicked_gui(GtkWidget *widget, gpointer data)
 
 	if (mw->useStatusIconBlink != WGETB("status-icon-blink-use"))
 		WSET("status-icon-blink-use", mw->useStatusIconBlink);
+	bool emoticons = WGETB("emoticons-use");
 
 	gint response = WulforManager::get()->openSettingsDialog_gui();
 
@@ -1099,6 +1100,10 @@ void MainWindow::onPreferencesClicked_gui(GtkWidget *widget, gpointer data)
 
 		// Status menu
 		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(mw->getWidget("statusIconBlinkUseItem")), WGETB("status-icon-blink-use"));
+
+		// Emoticons
+		if (emoticons != WGETB("emoticons-use"))
+			Emoticons::get()->reloadPack_gui();
 	}
 }
 
