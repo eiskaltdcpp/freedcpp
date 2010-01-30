@@ -269,6 +269,7 @@ else:
 
 	glade_files = glob.glob('glade/*.glade')
 	text_files = glob.glob('*.txt')
+	prefix = env['FAKE_ROOT'] + os.path.join(env['PREFIX'], 'share')
 
 	mo_files = []
 	locale = []
@@ -278,7 +279,7 @@ else:
 	languages = os.listdir(path)
 
 	for lang in languages:
-		locale.append(env['FAKE_ROOT'] + env['PREFIX'] + '/share/locale/' + lang + '/LC_MESSAGES/' + APP_NAME + '.mo')
+		locale.append(os.path.join(prefix, 'locale', lang, 'LC_MESSAGES', APP_NAME + '.mo'))
 		mo_files.append(path + lang)
 
 	# dcpp library
@@ -286,15 +287,31 @@ else:
 	languages = os.listdir(path)
 	
 	for lang in languages:
-		locale.append(env['FAKE_ROOT'] + env['PREFIX'] + '/share/locale/' + lang + '/LC_MESSAGES/' + LIB_NAME + '.mo')
+		locale.append(os.path.join(prefix, 'locale', lang, 'LC_MESSAGES', LIB_NAME + '.mo'))
 		mo_files.append(path + lang)
+
+	target_icons = []
+	source_icons = []
+
+	for root, dirs, files in os.walk('icons/hicolor/'):
+		for file in files:
+			filename = file.rsplit('.', 1)
+
+			if (len(filename) == 2):
+				if (filename[1] == 'png'):
+					target_icons.append(os.path.join(prefix, APP_NAME, root, file))
+					source_icons.append(os.path.join(root, file))
+
+				elif filename[1] == 'svg':
+					target_icons.append(os.path.join(prefix, APP_NAME, root, file))
+					source_icons.append(os.path.join(root, file))
 
 	# install glade files
 	env.Alias('install', env.Install(dir = env['FAKE_ROOT'] + env['PREFIX'] + '/share/' + APP_NAME + '/glade', source = glade_files))
-
-	# install pixmap files
-	env.Alias('install', env.Install(dir = env['FAKE_ROOT'] + env['PREFIX'] + '/share/' + APP_NAME, source = 'icons/'))
-
+	
+	# install icons
+	env.Alias('install', env.InstallAs(target = target_icons, source = source_icons))
+	
 	# install text files
 	env.Alias('install', env.Install(dir = env['FAKE_ROOT'] + env['PREFIX'] + '/share/doc/' + APP_NAME, source = text_files))
 	
