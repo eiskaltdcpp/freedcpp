@@ -156,6 +156,7 @@ class MainWindow:
 		guint timer;
 		int statusFrame;
 		bool useStatusIconBlink;
+		bool onQuit;
 };
 
 #else

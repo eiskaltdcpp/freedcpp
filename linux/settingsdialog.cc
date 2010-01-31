@@ -827,6 +827,7 @@ void Settings::initAppearance_gui()
 		addOption_gui(appearanceStore, _("Use magnet split"), "use-magnet-split");
 		addOption_gui(appearanceStore, _("Use blinking status icon when receiving PM"), "status-icon-blink-use");
 		addOption_gui(appearanceStore, _("Use emoticons"), "emoticons-use");
+		addOption_gui(appearanceStore, _("Do not close the program, hide in the system tray"), "main-window-no-close");
 		/// @todo: Uncomment when implemented
 		//addOption_gui(appearanceStore, _("Minimize to tray"), SettingsManager::MINIMIZE_TRAY);
 		//addOption_gui(appearanceStore, _("Use system icons"), SettingsManager::USE_SYSTEM_ICONS);
