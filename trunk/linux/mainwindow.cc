@@ -157,6 +157,8 @@ MainWindow::MainWindow():
 		g_strdup((string(_DATADIR) + "/doc/freedcpp/Changelog-svn.txt").c_str()), g_free);
 	g_signal_connect(getWidget("changeLogItem"), "activate", G_CALLBACK(onLinkClicked_gui), NULL);
 
+	onQuit = FALSE;
+
 	// Load window state and position from settings manager
 	gint posX = WGETI("main-window-pos-x");
 	gint posY = WGETI("main-window-pos-y");
@@ -900,6 +902,17 @@ gboolean MainWindow::onCloseWindow_gui(GtkWidget *widget, GdkEvent *event, gpoin
 {
 	MainWindow *mw = (MainWindow *)data;
 
+	if (mw->onQuit)
+	{
+		mw->onQuit = FALSE;
+	}
+	else if (WGETB("main-window-no-close") && BOOLSETTING(ALWAYS_TRAY))
+	{
+		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(mw->getWidget("statusIconShowInterfaceItem")), FALSE);
+
+		return TRUE;
+	}
+
 	if (!BOOLSETTING(CONFIRM_EXIT))
 	{
 		WulforManager::get()->deleteMainWindow();
@@ -1139,6 +1152,7 @@ void MainWindow::onFinishedUploadsClicked_gui(GtkWidget *widget, gpointer data)
 void MainWindow::onQuitClicked_gui(GtkWidget *widget, gpointer data)
 {
 	MainWindow *mw = (MainWindow *)data;
+	mw->onQuit = TRUE;
 	gboolean retVal; // Not interested in the value, though.
 	g_signal_emit_by_name(mw->window, "delete-event", NULL, &retVal);
 }
