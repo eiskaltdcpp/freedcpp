@@ -34,6 +34,7 @@
 #include "WulforUtil.hh"
 
 #define ICON_SIZE 32
+#define ICON_SIZE_NORMAL 22
 
 using namespace std;
 using namespace dcpp;
@@ -326,6 +327,18 @@ void Settings::saveSettings_client()
 			wsm->set("theme-name", theme);
 		}
 
+		{ // Toolbar
+			GtkTreeIter iter;
+			GtkTreeModel *m = GTK_TREE_MODEL(toolbarStore);
+			gboolean valid = gtk_tree_model_get_iter_first(m, &iter);
+
+			while (valid)
+			{
+				wsm->set(toolbarView.getString(&iter, "keyUse"), toolbarView.getValue<int>(&iter, ("Use")));
+				valid = gtk_tree_model_iter_next(m, &iter);
+			}
+		}
+
 		{ // Window
 			// Auto-open on startup
 			saveOptionsView_gui(windowView1, sm);
@@ -485,6 +498,27 @@ void Settings::addOption_gui(GtkListStore *store, WulforSettingsManager *wsm, Gt
 		g_object_unref(icon);
 
 	set(key1, iconName);
+}
+
+/* Adds a toolbar buttons options*/
+void Settings::addOption_gui(GtkListStore *store, WulforSettingsManager *wsm, GtkIconTheme *iconTheme,
+	const string &name, const string &key1, const string &key2)
+{
+	string iconName = wsm->getString(key2);
+	GdkPixbuf *icon = gtk_icon_theme_load_icon(iconTheme, iconName.c_str(),
+		ICON_SIZE_NORMAL, GTK_ICON_LOOKUP_FORCE_SVG, NULL);
+
+	GtkTreeIter iter;
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter,
+		0, wsm->getInt(key1),
+		1, name.c_str(),
+		2, icon,
+		3, key1.c_str(),
+		-1);
+
+	if (icon != NULL)
+		g_object_unref(icon);
 }
 
 /* Adds a colors and fonts options */
@@ -1111,6 +1145,46 @@ void Settings::initAppearance_gui()
 		g_signal_connect(getWidget("defaultThemeButton"), "clicked", G_CALLBACK(onDefaultThemeButton_gui), (gpointer)this);
 
 		gtk_label_set_text(GTK_LABEL(getWidget("currentThemeLabel")), wsm->getString("theme-name").c_str());
+	}
+
+	{ // Toolbar
+		toolbarView.setView(GTK_TREE_VIEW(getWidget("toolbarTreeView")));
+		toolbarView.insertColumn("Use", G_TYPE_BOOLEAN, TreeView::BOOL, -1);
+		toolbarView.insertColumn("Name", G_TYPE_STRING, TreeView::PIXBUF_STRING, -1, "icon");
+		toolbarView.insertHiddenColumn("icon", GDK_TYPE_PIXBUF);
+		toolbarView.insertHiddenColumn("keyUse", G_TYPE_STRING);
+		toolbarView.finalize();
+
+		toolbarStore = gtk_list_store_newv(toolbarView.getColCount(), toolbarView.getGTypes());
+		gtk_tree_view_set_model(toolbarView.get(), GTK_TREE_MODEL(toolbarStore));
+		g_object_unref(toolbarStore);
+
+		GList *list = gtk_tree_view_column_get_cell_renderers(gtk_tree_view_get_column(toolbarView.get(), toolbarView.col("Use")));
+		GObject *renderer = (GObject *)g_list_nth_data(list, 0);
+		g_signal_connect(renderer, "toggled", G_CALLBACK(onOptionsViewToggled_gui), (gpointer)toolbarStore);
+		g_list_free(list);
+
+		GtkIconTheme *iconTheme = gtk_icon_theme_get_default();
+		addOption_gui(toolbarStore, wsm, iconTheme, _("Connect"), "toolbar-button-connect",
+			"icon-connect");
+		addOption_gui(toolbarStore, wsm, iconTheme, _("Favorite Hubs"), "toolbar-button-fav-hubs",
+			"icon-favorite-hubs");
+		addOption_gui(toolbarStore, wsm, iconTheme, _("Public Hubs"), "toolbar-button-public-hubs",
+			"icon-public-hubs");
+		addOption_gui(toolbarStore, wsm, iconTheme, _("Preferences"), "toolbar-button-settings",
+			"icon-preferences");
+		addOption_gui(toolbarStore, wsm, iconTheme, _("Hash"), "toolbar-button-hash",
+			"icon-hash");
+		addOption_gui(toolbarStore, wsm, iconTheme, _("Search"), "toolbar-button-search",
+			"icon-search");
+		addOption_gui(toolbarStore, wsm, iconTheme, _("Queue"), "toolbar-button-queue",
+			"icon-queue");
+		addOption_gui(toolbarStore, wsm, iconTheme, _("Finished Downloads"), "toolbar-button-finished-downloads",
+			"icon-finished-downloads");
+		addOption_gui(toolbarStore, wsm, iconTheme, _("Finished Uploads"), "toolbar-button-finished-uploads",
+			"icon-finished-uploads");
+		addOption_gui(toolbarStore, wsm, iconTheme, _("Quit"), "toolbar-button-quit",
+			"icon-quit");
 	}
 
 	{ // Window

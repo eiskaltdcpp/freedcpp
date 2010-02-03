@@ -96,6 +96,7 @@ class MainWindow:
 		void updateStatusIconTooltip_gui(std::string download, std::string upload);
 		void setStats_gui(std::string hubs, std::string downloadSpeed,
 			std::string downloaded, std::string uploadSpeed, std::string uploaded);
+		void setToolbarButton_gui();
 		void setTabPosition_gui(int position);
 		void setToolbarStyle_gui(int style);
 		void removeTimerSource_gui();
@@ -135,6 +136,7 @@ class MainWindow:
 		static void onStatusIconBlinkUseToggled_gui(GtkWidget *widget, gpointer data);
 		static void onShowInterfaceToggled_gui(GtkCheckMenuItem *item, gpointer data);
 		static void onLinkClicked_gui(GtkWidget *widget, gpointer data);
+		static void onTransferToggled_gui(GtkWidget *widget, gpointer data);
 
 		// Client functions
 		void autoConnect_client();
