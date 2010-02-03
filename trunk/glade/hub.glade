@@ -123,6 +123,7 @@
         <child>
           <widget class="GtkCheckButton" id="userListCheckButton">
             <property name="visible">True</property>
+            <property name="tooltip" translatable="yes">Show/Hide user list</property>
             <property name="can_focus">True</property>
             <property name="label">+/-</property>
             <property name="response_id">0</property>

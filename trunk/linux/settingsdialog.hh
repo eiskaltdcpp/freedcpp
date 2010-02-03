@@ -52,6 +52,8 @@ class Settings:
 			const std::string &key1, const std::string &key2);
 		void addOption_gui(GtkListStore *store, WulforSettingsManager *wsm, GtkIconTheme *iconTheme,
 			const std::string &name, const std::string &key1);
+		void addOption_gui(GtkListStore *store, WulforSettingsManager *wsm, GtkIconTheme *iconTheme,
+			const std::string &name, const std::string &key1, const std::string &key2);
 		void createOptionsView_gui(TreeView &treeView, GtkListStore *&store, const std::string &widgetName);
 		void saveOptionsView_gui(TreeView &treeView, dcpp::SettingsManager *sm);
 		void initPersonal_gui();
@@ -155,11 +157,13 @@ class Settings:
 		GtkListStore *downloadToStore, *publicListStore, *queueStore,
 			*shareStore, *appearanceStore, *tabStore, *windowStore1,
 			*windowStore2, *windowStore3, *advancedStore, *certificatesStore, *userCommandStore,
-			*previewAppToStore, *soundStore, *textStyleStore, *notifyStore, *themeIconsStore;
+			*previewAppToStore, *soundStore, *textStyleStore, *notifyStore, *themeIconsStore,
+			*toolbarStore;
 		TreeView downloadToView, publicListView, queueView, shareView,
 			appearanceView, tabView, windowView1, windowView2,
 			windowView3, advancedView, certificatesView, userCommandView,
-			previewAppView, soundView, textStyleView, notifyView, themeIconsView;
+			previewAppView, soundView, textStyleView, notifyView, themeIconsView,
+			toolbarView;
 		GtkTextBuffer *textStyleBuffer;
 
 		typedef std::map<std::string, int> IntMap;

@@ -72,6 +72,7 @@ MainWindow::MainWindow():
 	gtk_window_set_transient_for(GTK_WINDOW(getWidget("flistDialog")), window);
 	gtk_window_set_transient_for(GTK_WINDOW(getWidget("ucLineDialog")), window);
 	gtk_window_set_transient_for(GTK_WINDOW(getWidget("magnetDialog")), window);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(getWidget("transferCheckButton")), TRUE);
 
 	// set logo 96x96 about dialog
 	GtkIconTheme *iconTheme = gtk_icon_theme_get_default();
@@ -136,6 +137,7 @@ MainWindow::MainWindow():
 	g_signal_connect(getWidget("previousTabMenuItem"), "activate", G_CALLBACK(onPreviousTabClicked_gui), (gpointer)this);
 	g_signal_connect(getWidget("nextTabMenuItem"), "activate", G_CALLBACK(onNextTabClicked_gui), (gpointer)this);
 	g_signal_connect(getWidget("aboutMenuItem"), "activate", G_CALLBACK(onAboutClicked_gui), (gpointer)this);
+	g_signal_connect(getWidget("transferCheckButton"), "toggled", G_CALLBACK(onTransferToggled_gui), (gpointer)this);
 
 	g_object_set_data_full(G_OBJECT(getWidget("homeMenuItem")), "link",
 		g_strdup("http://freedcpp.narod.ru"), g_free);
@@ -180,6 +182,7 @@ MainWindow::MainWindow():
 	// (seems we have rather poor standards for cool?)
 	gtk_widget_show_all(GTK_WIDGET(window));
 
+	setToolbarButton_gui();
 	setTabPosition_gui(WGETI("tab-position"));
 	setToolbarStyle_gui(WGETI("toolbar-style"));
 
@@ -723,6 +726,30 @@ void MainWindow::addSearch_gui(string magnet)
 	}
 }
 
+void MainWindow::setToolbarButton_gui()
+{
+	if (!WGETB("toolbar-button-connect"))
+		gtk_widget_hide(getWidget("connect"));
+	if (!WGETB("toolbar-button-fav-hubs"))
+		gtk_widget_hide(getWidget("favHubs"));
+	if (!WGETB("toolbar-button-public-hubs"))
+		gtk_widget_hide(getWidget("publicHubs"));
+	if (!WGETB("toolbar-button-settings"))
+		gtk_widget_hide(getWidget("settings"));
+	if (!WGETB("toolbar-button-hash"))
+		gtk_widget_hide(getWidget("hash"));
+	if (!WGETB("toolbar-button-search"))
+		gtk_widget_hide(getWidget("search"));
+	if (!WGETB("toolbar-button-queue"))
+		gtk_widget_hide(getWidget("queue"));
+	if (!WGETB("toolbar-button-quit"))
+		gtk_widget_hide(getWidget("quit"));
+	if (!WGETB("toolbar-button-finished-downloads"))
+		gtk_widget_hide(getWidget("finishedDownloads"));
+	if (!WGETB("toolbar-button-finished-uploads"))
+		gtk_widget_hide(getWidget("finishedUploads"));
+}
+
 void MainWindow::setTabPosition_gui(int position)
 {
 	GtkPositionType tabPosition;
@@ -1117,7 +1144,22 @@ void MainWindow::onPreferencesClicked_gui(GtkWidget *widget, gpointer data)
 		// Emoticons
 		if (emoticons != WGETB("emoticons-use"))
 			Emoticons::get()->reloadPack_gui();
+
+		// Toolbar
+		gtk_widget_show_all(mw->getWidget("toolbar1"));
+		mw->setToolbarButton_gui();
 	}
+}
+
+void MainWindow::onTransferToggled_gui(GtkWidget *widget, gpointer data)
+{
+	MainWindow *mw = (MainWindow *)data;
+	GtkWidget *transfer = mw->transfers->getContainer();
+
+	if (GTK_WIDGET_VISIBLE(transfer))
+		gtk_widget_hide(transfer);
+	else
+		gtk_widget_show_all(transfer);
 }
 
 void MainWindow::onHashClicked_gui(GtkWidget *widget, gpointer data)

@@ -72,6 +72,16 @@ WulforSettingsManager::WulforSettingsManager():
 	defaultInt.insert(IntMap::value_type("text-timestamp-italic", TEXT_STYLE_NORMAL));
 	defaultInt.insert(IntMap::value_type("text-mynick-bold", TEXT_WEIGHT_BOLD));
 	defaultInt.insert(IntMap::value_type("text-mynick-italic", TEXT_STYLE_NORMAL));
+	defaultInt.insert(IntMap::value_type("toolbar-button-connect", 1));
+	defaultInt.insert(IntMap::value_type("toolbar-button-fav-hubs", 1));
+	defaultInt.insert(IntMap::value_type("toolbar-button-public-hubs", 1));
+	defaultInt.insert(IntMap::value_type("toolbar-button-settings", 1));
+	defaultInt.insert(IntMap::value_type("toolbar-button-hash", 1));
+	defaultInt.insert(IntMap::value_type("toolbar-button-search", 1));
+	defaultInt.insert(IntMap::value_type("toolbar-button-queue", 1));
+	defaultInt.insert(IntMap::value_type("toolbar-button-quit", 1));
+	defaultInt.insert(IntMap::value_type("toolbar-button-finished-downloads", 1));
+	defaultInt.insert(IntMap::value_type("toolbar-button-finished-uploads", 1));
 //	TODO: favorite user, uncomment when implemented
 // 	defaultInt.insert(IntMap::value_type("text-fav-bold", TEXT_WEIGHT_BOLD));
 // 	defaultInt.insert(IntMap::value_type("text-fav-italic", TEXT_STYLE_NORMAL));

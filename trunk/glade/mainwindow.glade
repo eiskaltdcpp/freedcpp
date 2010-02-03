@@ -579,6 +579,30 @@
             <property name="visible">True</property>
             <property name="spacing">10</property>
             <child>
+              <widget class="GtkCheckButton" id="transferCheckButton">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="tooltip" translatable="yes">Show/Hide transfers panel</property>
+                <property name="label" translatable="yes">+/-</property>
+                <property name="response_id">0</property>
+                <property name="active">True</property>
+                <property name="draw_indicator">True</property>
+              </widget>
+              <packing>
+                <property name="expand">False</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkVSeparator" id="separatorTransferCheck">
+                <property name="visible">True</property>
+              </widget>
+              <packing>
+                <property name="expand">False</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
               <widget class="GtkLabel" id="labelStatus">
                 <property name="visible">True</property>
                 <property name="xalign">0</property>
@@ -586,7 +610,7 @@
                 <property name="ellipsize">3</property>
               </widget>
               <packing>
-                <property name="position">0</property>
+                <property name="position">2</property>
               </packing>
             </child>
             <child>
@@ -617,7 +641,7 @@
                 </child>
               </widget>
               <packing>
-                <property name="position">1</property>
+                <property name="position">3</property>
                 <property name="expand">False</property>
               </packing>
             </child>
@@ -626,7 +650,7 @@
                 <property name="visible">True</property>
               </widget>
               <packing>
-                <property name="position">2</property>
+                <property name="position">4</property>
                 <property name="expand">False</property>
               </packing>
             </child>
@@ -658,7 +682,7 @@
                 </child>
               </widget>
               <packing>
-                <property name="position">3</property>
+                <property name="position">5</property>
                 <property name="expand">False</property>
               </packing>
             </child>
@@ -667,7 +691,7 @@
                 <property name="visible">True</property>
               </widget>
               <packing>
-                <property name="position">4</property>
+                <property name="position">6</property>
                 <property name="expand">False</property>
               </packing>
             </child>
@@ -680,7 +704,7 @@
                 <property name="label" translatable="no">0 B</property>
               </widget>
               <packing>
-                <property name="position">5</property>
+                <property name="position">7</property>
                 <property name="expand">False</property>
               </packing>
             </child>
@@ -689,7 +713,7 @@
                 <property name="visible">True</property>
               </widget>
               <packing>
-                <property name="position">6</property>
+                <property name="position">8</property>
                 <property name="expand">False</property>
               </packing>
             </child>
@@ -721,16 +745,17 @@
                 </child>
               </widget>
               <packing>
-                <property name="position">7</property>
+                <property name="position">9</property>
                 <property name="expand">False</property>
               </packing>
             </child>
+
             <child>
               <widget class="GtkVSeparator" id="separatorUpload">
                 <property name="visible">True</property>
               </widget>
               <packing>
-                <property name="position">8</property>
+                <property name="position">10</property>
                 <property name="expand">False</property>
               </packing>
             </child>
@@ -743,7 +768,7 @@
                 <property name="label" translatable="no">0 B</property>
               </widget>
               <packing>
-                <property name="position">9</property>
+                <property name="position">11</property>
                 <property name="expand">False</property>
                 <property name="padding">5</property>
               </packing>
