@@ -44,7 +44,13 @@
             <property name="visible">True</property>
             <property name="tooltip" translatable="yes">Emoticons</property>
             <property name="focus_on_click">False</property>
-            <property name="response_id">0</property>
+            <child>
+              <widget class="GtkImage" id="emotButtonImage">
+                <property name="visible">True</property>
+                <property name="stock">freedcpp-smile</property>
+                <property name="icon_size">1</property>
+              </widget>
+            </child>
           </widget>
           <packing>
             <property name="expand">False</property>

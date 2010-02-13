@@ -68,6 +68,12 @@ PrivateMessage::PrivateMessage(const string &cid, const string &hubUrl):
 
 	GtkAdjustment *adjustment = gtk_scrolled_window_get_vadjustment(GTK_SCROLLED_WINDOW(getWidget("scroll")));
 
+	// Emoticons dialog
+	emotdialog = new EmoticonsDialog(getWidget("entry"), getWidget("emotButton"), getWidget("emotMenu"));
+	if (!WGETB("emoticons-use"))
+		gtk_widget_set_sensitive(getWidget("emotButton"), FALSE);
+	useEmoticons = TRUE;
+
 	// Connect the signals to their callback functions.
 	g_signal_connect(getContainer(), "focus-in-event", G_CALLBACK(onFocusIn_gui), (gpointer)this);
 	g_signal_connect(getWidget("entry"), "activate", G_CALLBACK(onSendMessage_gui), (gpointer)this);
@@ -83,6 +89,7 @@ PrivateMessage::PrivateMessage(const string &cid, const string &hubUrl):
 	g_signal_connect(getWidget("copyMagnetItem"), "activate", G_CALLBACK(onCopyURIClicked_gui), (gpointer)this);
 	g_signal_connect(getWidget("searchMagnetItem"), "activate", G_CALLBACK(onSearchMagnetClicked_gui), (gpointer)this);
 	g_signal_connect(getWidget("magnetPropertiesItem"), "activate", G_CALLBACK(onMagnetPropertiesClicked_gui), (gpointer)this);
+	g_signal_connect(getWidget("emotButton"), "button-release-event", G_CALLBACK(onEmotButtonRelease_gui), (gpointer)this);
 
 	gtk_widget_grab_focus(getWidget("entry"));
 	history.push_back("");
@@ -90,13 +97,6 @@ PrivateMessage::PrivateMessage(const string &cid, const string &hubUrl):
 	isBot = user ? user->isSet(User::BOT) : FALSE;
 
 	setLabel_gui(_("PM: ") + WulforUtil::getNicks(cid) + " [" + WulforUtil::getHubNames(cid) + "]");
-
-	/* initial emoticons dialog */
-	emotdialog = new EmoticonsDialog(getWidget("entry"), getWidget("emotButton"), getWidget("emotMenu"));
-	gtk_button_set_image(GTK_BUTTON(getWidget("emotButton")), gtk_image_new_from_stock("freedcpp-smile", GTK_ICON_SIZE_BUTTON));
-	g_signal_connect(G_OBJECT(getWidget("emotButton")), "button-release-event", G_CALLBACK(onEmotButtonRelease_gui), (gpointer)this);
-
-	useEmoticons = TRUE;
 
 	/* initial tags map */
 	TagsMap[TAG_PRIVATE] = createTag_gui("TAG_PRIVATE", TAG_PRIVATE);
@@ -197,6 +197,17 @@ void PrivateMessage::updateTags_gui()
 	}
 
 	gtk_widget_queue_draw(getWidget("text"));
+	gtk_widget_queue_draw(getWidget("emotButton"));
+
+	if (!WGETB("emoticons-use"))
+	{
+		if (GTK_WIDGET_IS_SENSITIVE(getWidget("emotButton")))
+			gtk_widget_set_sensitive(getWidget("emotButton"), FALSE);
+	}
+	else if (!GTK_WIDGET_IS_SENSITIVE(getWidget("emotButton")))
+	{
+		gtk_widget_set_sensitive(getWidget("emotButton"), TRUE);
+	}
 }
 
 void PrivateMessage::setStatus_gui(string text)
