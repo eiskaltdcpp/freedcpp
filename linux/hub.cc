@@ -104,6 +104,12 @@ Hub::Hub(const string &address, const string &encoding):
 	userCommandMenu = new UserCommandMenu(getWidget("usercommandMenu"), ::UserCommand::CONTEXT_CHAT);
 	addChild(userCommandMenu);
 
+	// Emoticons dialog
+	emotdialog = new EmoticonsDialog(getWidget("chatEntry"), getWidget("emotButton"), getWidget("emotPacksMenu"));
+	if (!WGETB("emoticons-use"))
+		gtk_widget_set_sensitive(getWidget("emotButton"), FALSE);
+	useEmoticons = TRUE;
+
 	GtkAdjustment *adjustment = gtk_scrolled_window_get_vadjustment(GTK_SCROLLED_WINDOW(getWidget("chatScroll")));
 
 	// Connect the signals to their callback functions.
@@ -132,6 +138,7 @@ Hub::Hub(const string &address, const string &encoding):
 	g_signal_connect(getWidget("magnetPropertiesItem"), "activate", G_CALLBACK(onMagnetPropertiesClicked_gui), (gpointer)this);
 	g_signal_connect(getWidget("removeUserItem"), "activate", G_CALLBACK(onRemoveUserItemClicked_gui), (gpointer)this);
 	g_signal_connect(getWidget("userListCheckButton"), "toggled", G_CALLBACK(onUserListToggled_gui), (gpointer)this);
+	g_signal_connect(getWidget("emotButton"), "button-release-event", G_CALLBACK(onEmotButtonRelease_gui), (gpointer)this);
 
 	gtk_widget_set_sensitive(getWidget("favoriteUserItem"), FALSE); // Not implemented yet
 	gtk_widget_grab_focus(getWidget("chatEntry"));
@@ -147,13 +154,6 @@ Hub::Hub(const string &address, const string &encoding):
 	}
 
 	history.push_back("");
-
-	/* initial emoticons dialog */
-	emotdialog = new EmoticonsDialog(getWidget("chatEntry"), getWidget("emotButton"), getWidget("emotPacksMenu"));
-	gtk_button_set_image(GTK_BUTTON(getWidget("emotButton")), gtk_image_new_from_stock("freedcpp-smile", GTK_ICON_SIZE_BUTTON));
-	g_signal_connect(G_OBJECT(getWidget("emotButton")), "button-release-event", G_CALLBACK(onEmotButtonRelease_gui), (gpointer)this);
-
-	useEmoticons = TRUE;
 
 	/* initial tags map */
 	TagsMap[TAG_GENERAL] = createTag_gui("TAG_GENERAL", TAG_GENERAL);
@@ -874,6 +874,16 @@ void Hub::updateTags_gui()
 	gtk_widget_queue_draw(getWidget("chatText"));
 	gtk_widget_queue_draw(getWidget("nickView"));
 	gtk_widget_queue_draw(getWidget("emotButton"));
+
+	if (!WGETB("emoticons-use"))
+	{
+		if (GTK_WIDGET_IS_SENSITIVE(getWidget("emotButton")))
+			gtk_widget_set_sensitive(getWidget("emotButton"), FALSE);
+	}
+	else if (!GTK_WIDGET_IS_SENSITIVE(getWidget("emotButton")))
+	{
+		gtk_widget_set_sensitive(getWidget("emotButton"), TRUE);
+	}
 }
 
 void Hub::getSettingTag_gui(WulforSettingsManager *wsm, TypeTag type, string &fore, string &back, int &bold, int &italic)
@@ -1433,7 +1443,7 @@ void Hub::onSendMessage_gui(GtkEntry *entry, gpointer data)
 		}
 		else if (command == "freedcpp")
 		{
-			hub->addStatusMessage_gui(string("freedcpp 0.0.1.75/0.75, ") + _("project home: ") +
+			hub->addStatusMessage_gui(string("freedcpp 0.0.1.76/0.75, ") + _("project home: ") +
 				"http://freedcpp.narod.ru http://code.google.com/p/freedcpp", Msg::SYSTEM, Sound::NONE);
 		}
 		else if (command == "help")
