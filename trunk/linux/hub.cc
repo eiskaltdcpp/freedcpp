@@ -64,15 +64,18 @@ Hub::Hub(const string &address, const string &encoding):
 	nickView.insertColumn(_("eMail"), G_TYPE_STRING, TreeView::STRING, 90);
 	nickView.insertHiddenColumn("Icon", G_TYPE_STRING);
 	nickView.insertHiddenColumn("Nick Order", G_TYPE_STRING);
+	nickView.insertHiddenColumn("Favorite", G_TYPE_STRING);
 	nickView.insertHiddenColumn("CID", G_TYPE_STRING);
 	nickView.finalize();
 	nickStore = gtk_list_store_newv(nickView.getColCount(), nickView.getGTypes());
 	gtk_tree_view_set_model(nickView.get(), GTK_TREE_MODEL(nickStore));
 	g_object_unref(nickStore);
+
 	nickSelection = gtk_tree_view_get_selection(nickView.get());
 	gtk_tree_selection_set_mode(gtk_tree_view_get_selection(nickView.get()), GTK_SELECTION_MULTIPLE);
-	nickView.setSortColumn_gui(_("Nick"), "Nick Order");
-	gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(nickStore), nickView.col("Nick Order"), GTK_SORT_ASCENDING);
+	string sort = BOOLSETTING(SORT_FAVUSERS_FIRST)? "Favorite" : "Nick Order";
+	nickView.setSortColumn_gui(_("Nick"), sort);
+	gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(nickStore), nickView.col(sort), GTK_SORT_ASCENDING);
 	gtk_tree_view_column_set_sort_indicator(gtk_tree_view_get_column(nickView.get(), nickView.col(_("Nick"))), TRUE);
 	gtk_tree_view_set_fixed_height_mode(nickView.get(), TRUE);
 
@@ -139,8 +142,8 @@ Hub::Hub(const string &address, const string &encoding):
 	g_signal_connect(getWidget("removeUserItem"), "activate", G_CALLBACK(onRemoveUserItemClicked_gui), (gpointer)this);
 	g_signal_connect(getWidget("userListCheckButton"), "toggled", G_CALLBACK(onUserListToggled_gui), (gpointer)this);
 	g_signal_connect(getWidget("emotButton"), "button-release-event", G_CALLBACK(onEmotButtonRelease_gui), (gpointer)this);
+	g_signal_connect(getWidget("favoriteUserItem"), "activate", G_CALLBACK(onAddFavoriteUserClicked_gui), (gpointer)this);
 
-	gtk_widget_set_sensitive(getWidget("favoriteUserItem"), FALSE); // Not implemented yet
 	gtk_widget_grab_focus(getWidget("chatEntry"));
 
 	// Set the pane position
@@ -165,9 +168,20 @@ Hub::Hub(const string &address, const string &encoding):
 	TagsMap[TAG_MYNICK] = createTag_gui("TAG_MYNICK", TAG_MYNICK);
 	TagsMap[TAG_NICK] = createTag_gui("TAG_NICK", TAG_NICK);
 	TagsMap[TAG_OPERATOR] = createTag_gui("TAG_OPERATOR", TAG_OPERATOR);
+	TagsMap[TAG_FAVORITE] = createTag_gui("TAG_FAVORITE", TAG_FAVORITE);
 	TagsMap[TAG_URL] = createTag_gui("TAG_URL", TAG_URL);
 
-	myNick = "";
+	// Initialize favorite users list
+	FavoriteManager::FavoriteMap map = FavoriteManager::getInstance()->getFavoriteUsers();
+	FavoriteManager::FavoriteMap::const_iterator it;
+
+	for (it = map.begin(); it != map.end(); ++it)
+	{
+		if (it->second.getUrl() == address)
+		{
+			userFavoriteMap.insert(UserMap::value_type(it->second.getNick(), it->first.toBase32()));
+		}
+	}
 
 	// set default select tag (fix error show cursor in neutral space).
 	selectedTag = TagsMap[TAG_GENERAL];
@@ -247,22 +261,25 @@ void Hub::updateUser_gui(ParamMap params)
 	int64_t shared = Util::toInt64(params["Shared"]);
 	const string& cid = params["CID"];
 	const string icon = "freedcpp-" + params["Icon"];
+	const string &Nick = params["Nick"];
+	const string &nickOrder = params["Nick Order"];
+	bool favorite = userFavoriteMap.find(Nick) != userFavoriteMap.end();
 
 	if (findUser_gui(cid, &iter))
 	{
 		totalShared += shared - nickView.getValue<int64_t>(&iter, _("Shared"));
 		string nick = nickView.getString(&iter, _("Nick"));
 
-		if (nick != params["Nick"])
+		if (nick != Nick)
 		{
 			// User has changed nick, update userMap and remove the old Nick tag
 			userMap.erase(nick);
 			removeTag_gui(nick);
-			userMap[params["Nick"]] = cid;
+			userMap.insert(UserMap::value_type(Nick, cid));
 		}
-	
+
 		gtk_list_store_set(nickStore, &iter,
-			nickView.col(_("Nick")), params["Nick"].c_str(),
+			nickView.col(_("Nick")), Nick.c_str(),
 			nickView.col(_("Shared")), shared,
 			nickView.col(_("Description")), params["Description"].c_str(),
 			nickView.col(_("Tag")), params["Tag"].c_str(),
@@ -270,31 +287,18 @@ void Hub::updateUser_gui(ParamMap params)
 			nickView.col("IP"), params["IP"].c_str(),
 			nickView.col(_("eMail")), params["eMail"].c_str(),
 			nickView.col("Icon"), icon.c_str(),
-			nickView.col("Nick Order"), params["Nick Order"].c_str(),
+			nickView.col("Nick Order"), nickOrder.c_str(),
+			nickView.col("Favorite"), favorite? ("f" + nickOrder).c_str() : nickOrder.c_str(),
 			nickView.col("CID"), cid.c_str(),
 			-1);
 	}
 	else
 	{
 		totalShared += shared;
-		userMap[params["Nick"]] = cid;
-		myNick = params["MyNick"];
-
-		if (BOOLSETTING(SHOW_JOINS))
-		{
-			addStatusMessage_gui(params["Nick"] + _(" has joined"), Msg::SYSTEM, Sound::NONE);
-			string line = params["Nick"] + _(" has joined hub ") + client->getHubName();
-			WulforManager::get()->getMainWindow()->addPrivateStatusMessage_gui(Msg::SYSTEM, cid, line);
-		}
-		else if (BOOLSETTING(FAV_SHOW_JOINS))
-		{
-			typedef Func1<Hub, string> F1;
-			F1 *func = new F1(this, &Hub::checkFavoriteUserJoin_client, cid);
-			WulforManager::get()->dispatchClientFunc(func);
-		}
+		userMap.insert(UserMap::value_type(Nick, cid));
 
 		gtk_list_store_insert_with_values(nickStore, &iter, userMap.size(),
-			nickView.col(_("Nick")), params["Nick"].c_str(),
+			nickView.col(_("Nick")), Nick.c_str(),
 			nickView.col(_("Shared")), shared,
 			nickView.col(_("Description")), params["Description"].c_str(),
 			nickView.col(_("Tag")), params["Tag"].c_str(),
@@ -302,11 +306,25 @@ void Hub::updateUser_gui(ParamMap params)
 			nickView.col("IP"), params["IP"].c_str(),
 			nickView.col(_("eMail")), params["eMail"].c_str(),
 			nickView.col("Icon"), icon.c_str(),
-			nickView.col("Nick Order"), params["Nick Order"].c_str(),
+			nickView.col("Nick Order"), nickOrder.c_str(),
+			nickView.col("Favorite"), favorite? ("f" + nickOrder).c_str() : nickOrder.c_str(),
 			nickView.col("CID"), cid.c_str(),
 			-1);
 
-		userIters[cid] = iter;
+		userIters.insert(UserIters::value_type(cid, iter));
+
+		if (BOOLSETTING(SHOW_JOINS))
+		{
+			addStatusMessage_gui(Nick + _(" has joined"), Msg::SYSTEM, Sound::NONE);
+			string line = Nick + _(" has joined hub ") + client->getHubName();
+			WulforManager::get()->getMainWindow()->addPrivateStatusMessage_gui(Msg::SYSTEM, cid, line);
+		}
+		else if (BOOLSETTING(FAV_SHOW_JOINS) && userFavoriteMap.find(Nick) != userFavoriteMap.end())
+		{
+			addStatusMessage_gui(Nick + _(" has joined"), Msg::STATUS, Sound::NONE);
+			WulforManager::get()->getMainWindow()->addPrivateStatusMessage_gui(Msg::SYSTEM, cid,
+				Nick + _(" has joined hub ") + client->getHubName());
+		}
 	}
 
 	setStatus_gui("statusUsers", Util::toString(userMap.size()) + _(" Users"));
@@ -328,6 +346,13 @@ void Hub::removeUser_gui(string cid)
 		userIters.erase(cid);
 		setStatus_gui("statusUsers", Util::toString(userMap.size()) + _(" Users"));
 		setStatus_gui("statusShared", Util::formatBytes(totalShared));
+
+		if (BOOLSETTING(SHOW_JOINS) || (BOOLSETTING(FAV_SHOW_JOINS) && userFavoriteMap.find(nick) != userFavoriteMap.end()))
+		{
+			addStatusMessage_gui(nick + _(" has quit"), Msg::STATUS, Sound::NONE);
+			WulforManager::get()->getMainWindow()->addPrivateStatusMessage_gui(Msg::SYSTEM, cid,
+				nick + _(" has quit hub ") + client->getHubName());
+		}
 	}
 }
 
@@ -573,7 +598,9 @@ void Hub::applyTags_gui(const string &line)
 				isNick = TRUE;
 				callback = G_CALLBACK(onNickTagEvent_gui);
 
-				if (tagName == myNick)
+				if (userFavoriteMap.find(tagName) != userFavoriteMap.end())
+					tagStyle = TAG_FAVORITE;
+				else if (tagName == client->getMyNick())
 					tagStyle = TAG_MYNICK;
 				else
 					tagStyle = tagNick;
@@ -884,6 +911,11 @@ void Hub::updateTags_gui()
 	{
 		gtk_widget_set_sensitive(getWidget("emotButton"), TRUE);
 	}
+
+	// resort users
+	string sort = BOOLSETTING(SORT_FAVUSERS_FIRST)? "Favorite" : "Nick Order";
+	nickView.setSortColumn_gui(_("Nick"), sort);
+	gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(nickStore), nickView.col(sort), GTK_SORT_ASCENDING);
 }
 
 void Hub::getSettingTag_gui(WulforSettingsManager *wsm, TypeTag type, string &fore, string &back, int &bold, int &italic)
@@ -936,6 +968,14 @@ void Hub::getSettingTag_gui(WulforSettingsManager *wsm, TypeTag type, string &fo
 			back = wsm->getString("text-op-back-color");
 			bold = wsm->getInt("text-op-bold");
 			italic = wsm->getInt("text-op-italic");
+		break;
+
+		case TAG_FAVORITE:
+
+			fore = wsm->getString("text-fav-fore-color");
+			back = wsm->getString("text-fav-back-color");
+			bold = wsm->getInt("text-fav-bold");
+			italic = wsm->getInt("text-fav-italic");
 		break;
 
 		case TAG_URL:
@@ -1408,6 +1448,35 @@ void Hub::onSendMessage_gui(GtkEntry *entry, gpointer data)
 		{
 			WulforManager::get()->dispatchClientFunc(new Func0<Hub>(hub, &Hub::addAsFavorite_client));
 		}
+		else if (command == "fuser" || command == "fu")
+		{
+			if (hub->client->getMyNick() == param)
+				return;
+
+			if (hub->userFavoriteMap.find(param) == hub->userFavoriteMap.end())
+			{
+				if (hub->userMap.find(param) != hub->userMap.end())
+				{
+					Func1<Hub, string> *func = new Func1<Hub, string>(hub, &Hub::addFavoriteUser_client, hub->userMap[param]);
+					WulforManager::get()->dispatchClientFunc(func);
+				} else
+					hub->addStatusMessage_gui(_("User not found"), Msg::SYSTEM, Sound::NONE);
+			} else
+				hub->addStatusMessage_gui(param + _(" is favorite user"), Msg::STATUS, Sound::NONE);
+		}
+		else if (command == "removefu" || command == "rmfu")
+		{
+			if (hub->client->getMyNick() == param)
+				return;
+
+			if (hub->userFavoriteMap.find(param) != hub->userFavoriteMap.end())
+			{
+				Func1<Hub, string> *func = new Func1<Hub, string>(hub, &Hub::removeFavoriteUser_client, hub->userFavoriteMap[param]);
+				WulforManager::get()->dispatchClientFunc(func);
+			}
+			else
+				hub->addStatusMessage_gui(_("User not found"), Msg::SYSTEM, Sound::NONE);
+		}
 		else if (command == "getlist")
 		{
 			if (hub->userMap.find(param) != hub->userMap.end())
@@ -1443,7 +1512,7 @@ void Hub::onSendMessage_gui(GtkEntry *entry, gpointer data)
 		}
 		else if (command == "freedcpp")
 		{
-			hub->addStatusMessage_gui(string("freedcpp 0.0.1.76/0.75, ") + _("project home: ") +
+			hub->addStatusMessage_gui(string("freedcpp 0.0.1.77/0.75, ") + _("project home: ") +
 				"http://freedcpp.narod.ru http://code.google.com/p/freedcpp", Msg::SYSTEM, Sound::NONE);
 		}
 		else if (command == "help")
@@ -1454,6 +1523,8 @@ void Hub::onSendMessage_gui(GtkEntry *entry, gpointer data)
 			"/clear\t\t\t\t - " + _("Clear chat") + "\n" +
 			"/close\t\t\t\t - " + _("Close chat") + "\n" +
 			"/favorite, /fav\t\t\t - " + _("Add a hub to favorites") + "\n" +
+			"/fuser, /fu <nick>\t\t - " + _("Add user to favorites list") + "\n" +
+			"/removefu, /rmfu <nick>\t - " + _("Remove user favorite") + "\n" +
 			"/getlist <nick>\t\t\t - " + _("Get file list") + "\n" +
 			"/grant <nick>\t\t\t - " + _("Grant extra slot") + "\n" +
 			"/help\t\t\t\t - " + _("Show help") + "\n" +
@@ -1769,6 +1840,116 @@ void Hub::onUserListToggled_gui(GtkWidget *widget, gpointer data)
 		gtk_widget_show_all(hub->getWidget("scrolledwindow2"));
 }
 
+void Hub::onAddFavoriteUserClicked_gui(GtkMenuItem *item, gpointer data)
+{
+	Hub *hub = (Hub *)data;
+
+	if (gtk_tree_selection_count_selected_rows(hub->nickSelection) > 0)
+	{
+		string cid, nick;
+		GtkTreeIter iter;
+		GtkTreePath *path;
+		typedef Func1<Hub, string> F1;
+		GList *list = gtk_tree_selection_get_selected_rows(hub->nickSelection, NULL);
+
+		for (GList *i = list; i; i = i->next)
+		{
+			path = (GtkTreePath *)i->data;
+
+			if (gtk_tree_model_get_iter(GTK_TREE_MODEL(hub->nickStore), &iter, path))
+			{
+				cid = hub->nickView.getString(&iter, "CID");
+				nick = hub->nickView.getString(&iter, _("Nick"));
+
+				if (!cid.empty() && nick != hub->client->getMyNick())
+				{
+					if (hub->userFavoriteMap.find(nick) == hub->userFavoriteMap.end())
+					{
+						F1 *func = new F1(hub, &Hub::addFavoriteUser_client, cid);
+						WulforManager::get()->dispatchClientFunc(func);
+					}
+					else
+						hub->addStatusMessage_gui(nick + _(" is favorite user"), Msg::STATUS, Sound::NONE);
+				}
+			}
+			gtk_tree_path_free(path);
+		}
+		g_list_free(list);
+	}
+}
+
+void Hub::addFavoriteUser_gui(ParamMap params)
+{
+	const string &nick = params["Nick"];
+
+	if (userFavoriteMap.find(nick) == userFavoriteMap.end())
+	{
+		GtkTreeIter iter;
+		const string &cid = params["CID"];
+
+		userFavoriteMap.insert(UserMap::value_type(nick, cid));
+
+		// resort users
+		if (findUser_gui(cid, &iter))
+		{
+			gtk_list_store_set(nickStore, &iter,
+				nickView.col("Favorite"), ("f" + params["Order"] + nick).c_str(),
+				-1);
+		}
+
+		string message = nick + _(" added to favorites list");
+		addStatusMessage_gui(message, Msg::STATUS, Sound::NONE);
+		WulforManager::get()->getMainWindow()->addPrivateStatusMessage_gui(Msg::SYSTEM, cid, message);
+	}
+}
+
+void Hub::removeFavoriteUser_gui(ParamMap params)
+{
+	const string &nick = params["Nick"];
+
+	if (userFavoriteMap.find(nick) != userFavoriteMap.end())
+	{
+		GtkTreeIter iter;
+		const string &cid = params["CID"];
+
+		userFavoriteMap.erase(nick);
+
+		// resort users
+		if (findUser_gui(cid, &iter))
+		{
+			string nickOrder = nickView.getString(&iter, "Nick Order");
+			gtk_list_store_set(nickStore, &iter,
+				nickView.col("Favorite"), nickOrder.c_str(),
+				-1);
+			removeTag_gui(nick);
+		}
+
+		string message = nick + _(" removed from favorites list");
+		addStatusMessage_gui(message, Msg::STATUS, Sound::NONE);
+		WulforManager::get()->getMainWindow()->addPrivateStatusMessage_gui(Msg::SYSTEM, cid, message);
+	}
+}
+
+void Hub::addFavoriteUser_client(const string cid)
+{
+	UserPtr user = ClientManager::getInstance()->findUser(CID(cid));
+
+	if (user)
+	{
+		FavoriteManager::getInstance()->addFavoriteUser(user);
+	}
+}
+
+void Hub::removeFavoriteUser_client(const string cid)
+{
+	UserPtr user = ClientManager::getInstance()->findUser(CID(cid));
+
+	if (user)
+	{
+		FavoriteManager::getInstance()->removeFavoriteUser(user);
+	}
+}
+
 void Hub::connectClient_client(string address, string encoding)
 {
 	dcassert(client == NULL);
@@ -1790,12 +1971,14 @@ void Hub::connectClient_client(string address, string encoding)
 	client->setEncoding(encoding);
 	client->addListener(this);
 	client->connect();
+	FavoriteManager::getInstance()->addListener(this);
 }
 
 void Hub::disconnect_client()
 {
 	if (client)
 	{
+		FavoriteManager::getInstance()->removeListener(this);
 		client->removeListener(this);
 		client->disconnect(TRUE);
 		ClientManager::getInstance()->putClient(client);
@@ -1971,31 +2154,12 @@ void Hub::reconnect_client()
 		client->reconnect();
 }
 
-void Hub::checkFavoriteUserJoin_client(string cid)
-{
-	UserPtr user = ClientManager::getInstance()->findUser(CID(cid));
-
-	if (user && FavoriteManager::getInstance()->isFavoriteUser(user))
-	{
-		string message = WulforUtil::getNicks(user) + _(" has joined");
-		typedef Func3<Hub, string, Msg::TypeMsg, Sound::TypeSound> F3a;
-		F3a *func3a = new F3a(this, &Hub::addStatusMessage_gui, message, Msg::STATUS, Sound::NONE);
-		WulforManager::get()->dispatchGuiFunc(func3a);
-
-		string statusMessage = WulforUtil::getNicks(user) + _(" has joined hub ") + client->getHubName();
-		typedef Func3<MainWindow, Msg::TypeMsg, string, string> F3b;
-		F3b *func3b = new F3b(WulforManager::get()->getMainWindow(),
-			&MainWindow::addPrivateStatusMessage_gui, Msg::STATUS, cid, statusMessage);
-		WulforManager::get()->dispatchGuiFunc(func3b);
-	}
-}
-
 void Hub::getParams_client(ParamMap &params, Identity &id)
 {
 	if (id.getUser()->isSet(User::DCPLUSPLUS))
-		params["Icon"] = "dc++";
+		params.insert(ParamMap::value_type("Icon", "dc++"));
 	else
-		params["Icon"] = "normal";
+		params.insert(ParamMap::value_type("Icon", "normal"));
 
 	if (id.getUser()->isSet(User::PASSIVE))
 		params["Icon"] += "-fw";
@@ -2003,22 +2167,48 @@ void Hub::getParams_client(ParamMap &params, Identity &id)
 	if (id.isOp())
 	{
 		params["Icon"] += "-op";
-		params["Nick Order"] = "o" + id.getNick();
+		params.insert(ParamMap::value_type("Nick Order", "o" + id.getNick()));
 	}
 	else
 	{
-		params["Nick Order"] = "u" + id.getNick();
+		params.insert(ParamMap::value_type("Nick Order", "u" + id.getNick()));
 	}
 
-	params["MyNick"] = client->getMyNick();
-	params["Nick"] = id.getNick();
-	params["Shared"] = Util::toString(id.getBytesShared());
-	params["Description"] = id.getDescription();
-	params["Tag"] = id.getTag();
-	params["Connection"] = id.getConnection();
-	params["IP"] = id.getIp();
-	params["eMail"] = id.getEmail();
-	params["CID"] = id.getUser()->getCID().toBase32();
+	params.insert(ParamMap::value_type("Nick", id.getNick()));
+	params.insert(ParamMap::value_type("Shared", Util::toString(id.getBytesShared())));
+	params.insert(ParamMap::value_type("Description", id.getDescription()));
+	params.insert(ParamMap::value_type("Tag", id.getTag()));
+	params.insert(ParamMap::value_type("Connection", id.getConnection()));
+	params.insert(ParamMap::value_type("IP", id.getIp()));
+	params.insert(ParamMap::value_type("eMail", id.getEmail()));
+	params.insert(ParamMap::value_type("CID", id.getUser()->getCID().toBase32()));
+}
+
+void Hub::on(FavoriteManagerListener::UserAdded, const FavoriteUser &user) throw()
+{
+	if (user.getUrl() != address)
+		return;
+
+	ParamMap params;
+	params.insert(ParamMap::value_type("Nick", user.getNick()));
+	params.insert(ParamMap::value_type("CID", user.getUser()->getCID().toBase32()));
+	params.insert(ParamMap::value_type("Order", ClientManager::getInstance()->isOp(user.getUser(), user.getUrl()) ? "o" : "u"));
+
+	Func1<Hub, ParamMap> *func = new Func1<Hub, ParamMap>(this, &Hub::addFavoriteUser_gui, params);
+	WulforManager::get()->dispatchGuiFunc(func);
+}
+
+void Hub::on(FavoriteManagerListener::UserRemoved, const FavoriteUser &user) throw()
+{
+	if (user.getUrl() != address)
+		return;
+
+	ParamMap params;
+	params.insert(ParamMap::value_type("Nick", user.getNick()));
+	params.insert(ParamMap::value_type("CID", user.getUser()->getCID().toBase32()));
+
+	Func1<Hub, ParamMap> *func = new Func1<Hub, ParamMap>(this, &Hub::removeFavoriteUser_gui, params);
+	WulforManager::get()->dispatchGuiFunc(func);
 }
 
 void Hub::on(ClientListener::Connecting, Client *) throw()
@@ -2069,26 +2259,7 @@ void Hub::on(ClientListener::UsersUpdated, Client *, const OnlineUserList &list)
 
 void Hub::on(ClientListener::UserRemoved, Client *, const OnlineUser &user) throw()
 {
-	string nick = user.getIdentity().getNick();
-	string cid = user.getUser()->getCID().toBase32();
-	typedef Func1<Hub, string> F1;
-	F1 *func;
-
-	if (BOOLSETTING(SHOW_JOINS) || (BOOLSETTING(FAV_SHOW_JOINS) &&
-		FavoriteManager::getInstance()->isFavoriteUser(user.getUser())))
-	{
-		typedef Func3<Hub, string, Msg::TypeMsg, Sound::TypeSound> F3a;
-		F3a *func3a = new F3a(this, &Hub::addStatusMessage_gui, nick + _(" has quit"), Msg::STATUS, Sound::NONE);
-		WulforManager::get()->dispatchGuiFunc(func3a);
-
-		string statusMessage = nick + _(" has quit hub ") + client->getHubName();
-		typedef Func3<MainWindow, Msg::TypeMsg, string, string> F3b;
-		F3b *func3b = new F3b(WulforManager::get()->getMainWindow(),
-			&MainWindow::addPrivateStatusMessage_gui, Msg::STATUS, cid, statusMessage);
-		WulforManager::get()->dispatchGuiFunc(func3b);
-	}
-
-	func = new F1(this, &Hub::removeUser_gui, cid);
+	Func1<Hub, string> *func = new Func1<Hub, string>(this, &Hub::removeUser_gui, user.getUser()->getCID().toBase32());
 	WulforManager::get()->dispatchGuiFunc(func);
 }
 

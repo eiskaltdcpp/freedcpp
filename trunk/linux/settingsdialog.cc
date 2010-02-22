@@ -91,9 +91,8 @@ Settings::Settings(GtkWindow* parent):
 	defaultStringTheme.insert(StringMap::value_type("text-timestamp-fore-color", "#43629A"));
 	defaultStringTheme.insert(StringMap::value_type("text-mynick-back-color", "#FFFFFF"));
 	defaultStringTheme.insert(StringMap::value_type("text-mynick-fore-color", "#A52A2A"));
-//	TODO: favorite user, uncomment when implemented
-// 	defaultStringTheme.insert(StringMap::value_type("text-fav-back-color", "#FFFFFF"));
-// 	defaultStringTheme.insert(StringMap::value_type("text-fav-fore-color", "#FFA500"));
+	defaultStringTheme.insert(StringMap::value_type("text-fav-back-color", "#FFFFFF"));
+	defaultStringTheme.insert(StringMap::value_type("text-fav-fore-color", "#FFA500"));
 	defaultStringTheme.insert(StringMap::value_type("text-op-back-color", "#FFFFFF"));
 	defaultStringTheme.insert(StringMap::value_type("text-op-fore-color", "#0000FF"));
 	defaultStringTheme.insert(StringMap::value_type("text-url-back-color", "#FFFFFF"));
@@ -112,9 +111,8 @@ Settings::Settings(GtkWindow* parent):
 	defaultIntTheme.insert(IntMap::value_type("text-timestamp-italic", TEXT_STYLE_NORMAL));
 	defaultIntTheme.insert(IntMap::value_type("text-mynick-bold", TEXT_WEIGHT_BOLD));
 	defaultIntTheme.insert(IntMap::value_type("text-mynick-italic", TEXT_STYLE_NORMAL));
-//	TODO: favorite user, uncomment when implemented
-// 	defaultIntTheme.insert(IntMap::value_type("text-fav-bold", TEXT_WEIGHT_BOLD));
-// 	defaultIntTheme.insert(IntMap::value_type("text-fav-italic", TEXT_STYLE_NORMAL));
+	defaultIntTheme.insert(IntMap::value_type("text-fav-bold", TEXT_WEIGHT_BOLD));
+	defaultIntTheme.insert(IntMap::value_type("text-fav-italic", TEXT_STYLE_NORMAL));
 	defaultIntTheme.insert(IntMap::value_type("text-op-bold", TEXT_WEIGHT_BOLD));
 	defaultIntTheme.insert(IntMap::value_type("text-op-italic", TEXT_STYLE_NORMAL));
 	defaultIntTheme.insert(IntMap::value_type("text-url-bold", TEXT_WEIGHT_NORMAL));
@@ -857,6 +855,7 @@ void Settings::initAppearance_gui()
 		addOption_gui(appearanceStore, _("View status messages in main chat"), SettingsManager::STATUS_IN_CHAT);
 		addOption_gui(appearanceStore, _("Show joins / parts in chat by default"), SettingsManager::SHOW_JOINS);
 		addOption_gui(appearanceStore, _("Only show joins / parts for favorite users"), SettingsManager::FAV_SHOW_JOINS);
+		addOption_gui(appearanceStore, _("Sort favorite users first"), SettingsManager::SORT_FAVUSERS_FIRST);
 		addOption_gui(appearanceStore, _("Use OEM monospaced font for chat windows"), SettingsManager::USE_OEM_MONOFONT);
 		addOption_gui(appearanceStore, _("Use magnet split"), "use-magnet-split");
 		addOption_gui(appearanceStore, _("Use blinking status icon when receiving PM"), "status-icon-blink-use");
@@ -969,9 +968,8 @@ void Settings::initAppearance_gui()
 		addOption_gui(textStyleStore, wsm, _("URL"),
 			"text-url-fore-color", "text-url-back-color", "text-url-bold", "text-url-italic");
 
-//		TODO: favorite user, uncomment when implemented
-// 		addOption_gui(textStyleStore, wsm, _("Favorite User"),
-// 			"text-fav-fore-color", "text-fav-back-color", "text-fav-bold", "text-fav-italic");
+		addOption_gui(textStyleStore, wsm, _("Favorite User"),
+			"text-fav-fore-color", "text-fav-back-color", "text-fav-bold", "text-fav-italic");
 
 		addOption_gui(textStyleStore, wsm, _("Operator"),
 			"text-op-fore-color", "text-op-back-color", "text-op-bold", "text-op-italic");
