@@ -25,6 +25,7 @@
 #include <dcpp/stdinc.h>
 #include <dcpp/DCPlusPlus.h>
 #include <dcpp/Client.h>
+#include <dcpp/FavoriteManager.h>
 
 #include "bookentry.hh"
 #include "treeview.hh"
@@ -38,7 +39,8 @@ class EmoticonsDialog;
 
 class Hub:
 	public BookEntry,
-	public dcpp::ClientListener
+	public dcpp::ClientListener,
+	public dcpp::FavoriteManagerListener
 {
 	public:
 		Hub(const std::string &address, const std::string &encoding);
@@ -64,11 +66,14 @@ class Hub:
 			TAG_MYNICK,
 			TAG_NICK,
 			TAG_OPERATOR,
+			TAG_FAVORITE,
 			TAG_URL,
 			TAG_LAST
 		} TypeTag;
 
 		typedef std::map<std::string, std::string> ParamMap;
+		typedef std::tr1::unordered_map<std::string, std::string> UserMap;
+		typedef std::tr1::unordered_map<std::string, GtkTreeIter> UserIters;
 
 		// GUI functions
 		void setStatus_gui(std::string statusBar, std::string text);
@@ -89,6 +94,8 @@ class Hub:
 		GtkTextTag* createTag_gui(const std::string &tagname, TypeTag type);
 		void addStatusMessage_gui(std::string message, Msg::TypeMsg typemsg, Sound::TypeSound sound, Notify::TypeNotify notify);
 		void nickToChat_gui(const std::string &nick);
+		void addFavoriteUser_gui(ParamMap params);
+		void removeFavoriteUser_gui(ParamMap params);
 
 		// GUI callbacks
 		static gboolean onFocusIn_gui(GtkWidget *widget, GdkEventFocus *event, gpointer data);
@@ -119,8 +126,11 @@ class Hub:
 		static void onSearchMagnetClicked_gui(GtkMenuItem *item, gpointer data);
 		static void onMagnetPropertiesClicked_gui(GtkMenuItem *item, gpointer data);
 		static void onUserListToggled_gui(GtkWidget *widget, gpointer data);
+		static void onAddFavoriteUserClicked_gui(GtkMenuItem *item, gpointer data);
 
 		// Client functions
+		void addFavoriteUser_client(const std::string cid);
+		void removeFavoriteUser_client(const std::string cid);
 		void connectClient_client(std::string address, std::string encoding);
 		void disconnect_client();
 		void setPassword_client(std::string password);
@@ -134,6 +144,10 @@ class Hub:
 		void addAsFavorite_client();
 		void checkFavoriteUserJoin_client(std::string cid);
 		void getParams_client(ParamMap &user, dcpp::Identity &id);
+
+		// Favorite callbacks
+		virtual void on(dcpp::FavoriteManagerListener::UserAdded, const dcpp::FavoriteUser &user) throw();
+		virtual void on(dcpp::FavoriteManagerListener::UserRemoved, const dcpp::FavoriteUser &user) throw();
 
 		// Client callbacks
 		virtual void on(dcpp::ClientListener::Connecting, dcpp::Client *) throw();
@@ -152,8 +166,9 @@ class Hub:
 		virtual void on(dcpp::ClientListener::NickTaken, dcpp::Client *) throw();
 		virtual void on(dcpp::ClientListener::SearchFlood, dcpp::Client *, const std::string &message) throw();
 
-		std::tr1::unordered_map<std::string, std::string> userMap;
-		std::tr1::unordered_map<std::string, GtkTreeIter> userIters;
+		UserMap userMap;
+		UserIters userIters;
+		UserMap userFavoriteMap;
 		GtkTextTag *TagsMap[TAG_LAST];
 		std::string completionKey;
 		dcpp::Client *client;
@@ -175,7 +190,6 @@ class Hub:
 		std::string address;
 		std::string encoding;
 		bool scrollToBottom;
-		std::string myNick;
 		static const std::string tagPrefix;
 		TypeTag tagMsg, tagNick;
 		bool useEmoticons;

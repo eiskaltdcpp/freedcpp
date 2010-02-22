@@ -82,9 +82,8 @@ WulforSettingsManager::WulforSettingsManager():
 	defaultInt.insert(IntMap::value_type("toolbar-button-quit", 1));
 	defaultInt.insert(IntMap::value_type("toolbar-button-finished-downloads", 1));
 	defaultInt.insert(IntMap::value_type("toolbar-button-finished-uploads", 1));
-//	TODO: favorite user, uncomment when implemented
-// 	defaultInt.insert(IntMap::value_type("text-fav-bold", TEXT_WEIGHT_BOLD));
-// 	defaultInt.insert(IntMap::value_type("text-fav-italic", TEXT_STYLE_NORMAL));
+	defaultInt.insert(IntMap::value_type("text-fav-bold", TEXT_WEIGHT_BOLD));
+	defaultInt.insert(IntMap::value_type("text-fav-italic", TEXT_STYLE_NORMAL));
 	defaultInt.insert(IntMap::value_type("text-op-bold", TEXT_WEIGHT_BOLD));
 	defaultInt.insert(IntMap::value_type("text-op-italic", TEXT_STYLE_NORMAL));
 	defaultInt.insert(IntMap::value_type("text-url-bold", TEXT_WEIGHT_NORMAL));
@@ -146,9 +145,8 @@ WulforSettingsManager::WulforSettingsManager():
 	defaultString.insert(StringMap::value_type("text-timestamp-fore-color", "#43629A"));
 	defaultString.insert(StringMap::value_type("text-mynick-back-color", "#FFFFFF"));
 	defaultString.insert(StringMap::value_type("text-mynick-fore-color", "#A52A2A"));
-//	TODO: favorite user, uncomment when implemented
-// 	defaultString.insert(StringMap::value_type("text-fav-back-color", "#FFFFFF"));
-// 	defaultString.insert(StringMap::value_type("text-fav-fore-color", "#FFA500"));
+	defaultString.insert(StringMap::value_type("text-fav-back-color", "#FFFFFF"));
+	defaultString.insert(StringMap::value_type("text-fav-fore-color", "#FFA500"));
 	defaultString.insert(StringMap::value_type("text-op-back-color", "#FFFFFF"));
 	defaultString.insert(StringMap::value_type("text-op-fore-color", "#0000FF"));
 	defaultString.insert(StringMap::value_type("text-url-back-color", "#FFFFFF"));
