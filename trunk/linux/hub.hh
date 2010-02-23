@@ -96,6 +96,7 @@ class Hub:
 		void nickToChat_gui(const std::string &nick);
 		void addFavoriteUser_gui(ParamMap params);
 		void removeFavoriteUser_gui(ParamMap params);
+		void addPrivateMessage_gui(Msg::TypeMsg typemsg, std::string nick, std::string cid, std::string url, std::string message, bool useSetting);
 
 		// GUI callbacks
 		static gboolean onFocusIn_gui(GtkWidget *widget, GdkEventFocus *event, gpointer data);
