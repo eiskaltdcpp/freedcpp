@@ -108,6 +108,7 @@ PrivateMessage::PrivateMessage(const string &cid, const string &hubUrl):
 	TagsMap[TAG_MYNICK] = createTag_gui("TAG_MYNICK", TAG_MYNICK);
 	TagsMap[TAG_NICK] = createTag_gui("TAG_NICK", TAG_NICK);
 	TagsMap[TAG_OPERATOR] = createTag_gui("TAG_OPERATOR", TAG_OPERATOR);
+	TagsMap[TAG_FAVORITE] = createTag_gui("TAG_FAVORITE", TAG_FAVORITE);
 	TagsMap[TAG_URL] = createTag_gui("TAG_URL", TAG_URL);
 
 	// set default select tag (fix error show cursor in neutral space)
@@ -260,6 +261,12 @@ void PrivateMessage::addLine_gui(Msg::TypeMsg typemsg, const string &message)
 
 			tagMsg = TAG_PRIVATE;
 			tagNick = TAG_OPERATOR;
+		break;
+
+		case Msg::FAVORITE:
+
+			tagMsg = TAG_PRIVATE;
+			tagNick = TAG_FAVORITE;
 		break;
 
 		case Msg::PRIVATE:
@@ -632,6 +639,14 @@ void PrivateMessage::getSettingTag_gui(WulforSettingsManager *wsm, TypeTag type,
 			italic = wsm->getInt("text-op-italic");
 		break;
 
+		case TAG_FAVORITE:
+
+			fore = wsm->getString("text-fav-fore-color");
+			back = wsm->getString("text-fav-back-color");
+			bold = wsm->getInt("text-fav-bold");
+			italic = wsm->getInt("text-fav-italic");
+		break;
+
 		case TAG_URL:
 
 			fore = wsm->getString("text-url-fore-color");
@@ -822,13 +837,18 @@ void PrivateMessage::onSendMessage_gui(GtkEntry *entry, gpointer data)
 		{
 			WulforManager::get()->getMainWindow()->removeBookEntry_gui(pm);
 		}
-		//TODO: favorite user, uncomment when implemented
-// 		else if (command == _("favorite") || text == _("fav"))
-// 		{
-// 			typedef Func0<PrivateMessage> F0;
-// 			F0 *func = new F0(pm, &PrivateMessage::addFavoriteUser_client);
-// 			WulforManager::get()->dispatchClientFunc(func);
-// 		}
+		else if (command == "fuser" || command == "fu")
+		{
+			typedef Func0<PrivateMessage> F0;
+			F0 *func = new F0(pm, &PrivateMessage::addFavoriteUser_client);
+			WulforManager::get()->dispatchClientFunc(func);
+		}
+		else if (command == "removefu" || command == "rmfu")
+		{
+			typedef Func0<PrivateMessage> F0;
+			F0 *func = new F0(pm, &PrivateMessage::removeFavoriteUser_client);
+			WulforManager::get()->dispatchClientFunc(func);
+		}
 		else if (command == "getlist")
 		{
 			typedef Func0<PrivateMessage> F0;
@@ -861,8 +881,8 @@ void PrivateMessage::onSendMessage_gui(GtkEntry *entry, gpointer data)
 			"/back\t\t\t\t - " + _("Away mode off") + "\n" +
 			"/clear\t\t\t\t - " + _("Clear PM") + "\n" +
 			"/close\t\t\t\t - " + _("Close PM") + "\n" +
-			//TODO: favorite user, uncomment when implemented
-//			"/favorite, /fav\t\t\t\t - " + _("Add a user to favorites") + "\n" +
+			"/fuser, /fu\t\t\t\t - " + _("Add user to favorites list") + "\n" +
+			"/removefu, /rmfu\t\t - " + _("Remove user favorite") + "\n" +
 			"/getlist\t\t\t\t - " + _("Get file list") + "\n" +
 			"/grant\t\t\t\t - " + _("Grant extra slot") + "\n" +
 			"/emoticons, /emot\t\t - " + _("Emoticons on/off") + "\n" +
@@ -1100,14 +1120,31 @@ void PrivateMessage::sendMessage_client(string message)
 void PrivateMessage::addFavoriteUser_client()
 {
 	UserPtr user = ClientManager::getInstance()->findUser(CID(cid));
-	if (user)
+
+	if (user && FavoriteManager::getInstance()->isFavoriteUser(user))
+	{
+		typedef Func2<PrivateMessage, string, Msg::TypeMsg> F2;
+		F2 *func = new F2(this, &PrivateMessage::addStatusMessage_gui, WulforUtil::getNicks(user) + _(" is favorite user"), Msg::STATUS);
+		WulforManager::get()->dispatchGuiFunc(func);
+	}
+	else
 	{
 		FavoriteManager::getInstance()->addFavoriteUser(user);
+	}
+}
+
+void PrivateMessage::removeFavoriteUser_client()
+{
+	UserPtr user = ClientManager::getInstance()->findUser(CID(cid));
+
+	if (user && FavoriteManager::getInstance()->isFavoriteUser(user))
+	{
+		FavoriteManager::getInstance()->removeFavoriteUser(user);
 	}
 	else
 	{
 		typedef Func2<PrivateMessage, string, Msg::TypeMsg> F2;
-		F2 *func = new F2(this, &PrivateMessage::addStatusMessage_gui, _("Added user to favorites list"), Msg::STATUS);
+		F2 *func = new F2(this, &PrivateMessage::addStatusMessage_gui, WulforUtil::getNicks(user) + _(" is not favorite user"), Msg::STATUS);
 		WulforManager::get()->dispatchGuiFunc(func);
 	}
 }

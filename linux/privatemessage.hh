@@ -56,6 +56,7 @@ class PrivateMessage:
 			TAG_MYNICK,
 			TAG_NICK,
 			TAG_OPERATOR,
+			TAG_FAVORITE,
 			TAG_URL,
 			TAG_LAST
 		} TypeTag;
@@ -90,6 +91,7 @@ class PrivateMessage:
 		// Client functions
 		void sendMessage_client(std::string message);
 		void addFavoriteUser_client();
+		void removeFavoriteUser_client();
 		void getFileList_client();
 		void grantSlot_client();
 

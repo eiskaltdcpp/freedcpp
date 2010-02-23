@@ -1512,7 +1512,7 @@ void Hub::onSendMessage_gui(GtkEntry *entry, gpointer data)
 		}
 		else if (command == "freedcpp")
 		{
-			hub->addStatusMessage_gui(string("freedcpp 0.0.1.77/0.75, ") + _("project home: ") +
+			hub->addStatusMessage_gui(string("freedcpp 0.0.1.78/0.75, ") + _("project home: ") +
 				"http://freedcpp.narod.ru http://code.google.com/p/freedcpp", Msg::SYSTEM, Sound::NONE);
 		}
 		else if (command == "help")
@@ -1895,11 +1895,12 @@ void Hub::addFavoriteUser_gui(ParamMap params)
 			gtk_list_store_set(nickStore, &iter,
 				nickView.col("Favorite"), ("f" + params["Order"] + nick).c_str(),
 				-1);
+			removeTag_gui(nick);
 		}
 
 		string message = nick + _(" added to favorites list");
 		addStatusMessage_gui(message, Msg::STATUS, Sound::NONE);
-		WulforManager::get()->getMainWindow()->addPrivateStatusMessage_gui(Msg::SYSTEM, cid, message);
+		WulforManager::get()->getMainWindow()->addPrivateStatusMessage_gui(Msg::STATUS, cid, message);
 	}
 }
 
@@ -1926,8 +1927,16 @@ void Hub::removeFavoriteUser_gui(ParamMap params)
 
 		string message = nick + _(" removed from favorites list");
 		addStatusMessage_gui(message, Msg::STATUS, Sound::NONE);
-		WulforManager::get()->getMainWindow()->addPrivateStatusMessage_gui(Msg::SYSTEM, cid, message);
+		WulforManager::get()->getMainWindow()->addPrivateStatusMessage_gui(Msg::STATUS, cid, message);
 	}
+}
+
+void Hub::addPrivateMessage_gui(Msg::TypeMsg typemsg, std::string nick, std::string cid, std::string url, std::string message, bool useSetting)
+{
+	if (userFavoriteMap.find(nick) != userFavoriteMap.end())
+		typemsg = Msg::FAVORITE;
+
+	WulforManager::get()->getMainWindow()->addPrivateMessage_gui(typemsg, cid, url, message, useSetting);
 }
 
 void Hub::addFavoriteUser_client(const string cid)
@@ -2433,9 +2442,9 @@ void Hub::on(ClientListener::PrivateMessage, Client *, const OnlineUser &from,
 	}
 	else
 	{
-		typedef Func5<MainWindow, Msg::TypeMsg, string, string, string, bool> F5;
-		F5 *func = new F5(WulforManager::get()->getMainWindow(), &MainWindow::addPrivateMessage_gui,
-			typemsg, user.getUser()->getCID().toBase32(), client->getHubUrl(), line, TRUE);
+		typedef Func6<Hub, Msg::TypeMsg, string, string, string, string, bool> F6;
+		F6 *func = new F6(this, &Hub::addPrivateMessage_gui, typemsg, from.getIdentity().getNick(), user.getUser()->getCID().toBase32(),
+			client->getHubUrl(), line, TRUE);
 		WulforManager::get()->dispatchGuiFunc(func);
 	}
 }
