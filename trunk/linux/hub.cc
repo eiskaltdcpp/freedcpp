@@ -473,29 +473,20 @@ void Hub::addMessage_gui(string message, Msg::TypeMsg typemsg)
 	{
 		case Msg::MYOWN:
 			tagMsg = TAG_MYOWN;
-			tagNick = TAG_MYNICK;
 			break;
 
 		case Msg::SYSTEM:
 			tagMsg = TAG_SYSTEM;
-			tagNick = TAG_NICK;
 			break;
 
 		case Msg::STATUS:
 			tagMsg = TAG_STATUS;
-			tagNick = TAG_NICK;
-			break;
-
-		case Msg::OPERATOR:
-			tagMsg = TAG_GENERAL;
-			tagNick = TAG_OPERATOR;
 			break;
 
 		case Msg::GENERAL:
 
 		default:
 			tagMsg = TAG_GENERAL;
-			tagNick = TAG_NICK;
 	}
 
 	totalEmoticons = 0;
@@ -585,6 +576,7 @@ void Hub::applyTags_gui(const string &line)
 		if (!C_EMPTY(temp))
 		{
 			tagName = temp;
+			GtkTreeIter iter;
 
 			// Special case: catch nicks in the form <nick> at the beginning of the line.
 			if (!firstNick && tagName[0] == '<' && tagName[tagName.size() - 1] == '>')
@@ -593,17 +585,20 @@ void Hub::applyTags_gui(const string &line)
 				firstNick = TRUE;
 			}
 
-			if (findNick_gui(tagName, NULL))
+			if (findNick_gui(tagName, &iter))
 			{
 				isNick = TRUE;
 				callback = G_CALLBACK(onNickTagEvent_gui);
+				string order = nickView.getString(&iter, "Favorite");
 
-				if (userFavoriteMap.find(tagName) != userFavoriteMap.end())
-					tagStyle = TAG_FAVORITE;
-				else if (tagName == client->getMyNick())
+				if (tagName == client->getMyNick())
 					tagStyle = TAG_MYNICK;
-				else
-					tagStyle = tagNick;
+				else if (order[0] == 'f')
+					tagStyle = TAG_FAVORITE;
+				else if (order[0] == 'o')
+					tagStyle = TAG_OPERATOR;
+				else if (order[0] == 'u')
+					tagStyle = TAG_NICK;
 
 				tagName = tagPrefix + tagName;
 			}
@@ -1512,7 +1507,7 @@ void Hub::onSendMessage_gui(GtkEntry *entry, gpointer data)
 		}
 		else if (command == "freedcpp")
 		{
-			hub->addStatusMessage_gui(string("freedcpp 0.0.1.78/0.75, ") + _("project home: ") +
+			hub->addStatusMessage_gui(string("freedcpp 0.0.1.79/0.75, ") + _("project home: ") +
 				"http://freedcpp.narod.ru http://code.google.com/p/freedcpp", Msg::SYSTEM, Sound::NONE);
 		}
 		else if (command == "help")
@@ -2325,7 +2320,6 @@ void Hub::on(ClientListener::Message, Client *, const OnlineUser &from, const st
 		Msg::TypeMsg typemsg;
 
 		if (from.getIdentity().isHub()) typemsg = Msg::STATUS;
-		else if (from.getIdentity().isOp()) typemsg = Msg::OPERATOR;
 		else if (from.getUser() == client->getMyIdentity().getUser()) typemsg = Msg::MYOWN;
 		else typemsg = Msg::GENERAL;
 
