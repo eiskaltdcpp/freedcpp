@@ -39,6 +39,7 @@ class TreeView
 			PIXBUF,
 			PIXBUF_STRING,
 			ICON_STRING,
+			ICON_STRING_TEXT_COLOR,
 			EDIT_STRING,
 			PROGRESS,
 			SPEED,
@@ -52,6 +53,8 @@ class TreeView
 		void setView(GtkTreeView *view, bool padding, const std::string &name = "");
 		GtkTreeView *get();
 		void insertColumn(const std::string &title, const GType &gtype, const columnType type, const int width, const std::string &linkedCol = "");
+		void insertColumn(const std::string &title, const GType &gtype, const columnType type, const int width,
+			const std::string &linkedCol, const std::string &linkedTextColor);
 		void insertHiddenColumn(const std::string &title, const GType &gtype);
 		void finalize();
 		int getColCount();
@@ -84,6 +87,17 @@ class TreeView
 				Column() {};
 				Column(const std::string &title, int id, GType gtype, TreeView::columnType type, int width, const std::string &linkedCol = "") :
 					title(title), id(id), gtype(gtype), type(type), width(width), pos(id), linkedCol(linkedCol), visible(true) {};
+				Column(const std::string &title, int id, GType gtype, TreeView::columnType type, int width,
+					const std::string &linkedCol, const std::string &linkedTextColor) :
+					title(title),
+					id(id),
+					gtype(gtype),
+					type(type),
+					width(width),
+					pos(id),
+					linkedCol(linkedCol),
+					linkedTextColor(linkedTextColor),
+					visible(true) {};
 				Column(const std::string &title, int id, GType gtype) :
 					title(title), id(id), gtype(gtype), pos(id) {};
 				std::string title;
@@ -93,6 +107,7 @@ class TreeView
 				int width;
 				int pos;
 				std::string linkedCol;
+				std::string linkedTextColor;
 				bool visible;
 				bool operator<(const Column &right) const
 				{

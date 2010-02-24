@@ -55,7 +55,7 @@ Hub::Hub(const string &address, const string &encoding):
 
 	// Initialize nick treeview
 	nickView.setView(GTK_TREE_VIEW(getWidget("nickView")), true, "hub");
-	nickView.insertColumn(_("Nick"), G_TYPE_STRING, TreeView::ICON_STRING, 100, "Icon");
+	nickView.insertColumn(_("Nick"), G_TYPE_STRING, TreeView::ICON_STRING_TEXT_COLOR, 100, "Icon", "NickColor");
 	nickView.insertColumn(_("Shared"), G_TYPE_INT64, TreeView::SIZE, 75);
 	nickView.insertColumn(_("Description"), G_TYPE_STRING, TreeView::STRING, 85);
 	nickView.insertColumn(_("Tag"), G_TYPE_STRING, TreeView::STRING, 100);
@@ -66,6 +66,7 @@ Hub::Hub(const string &address, const string &encoding):
 	nickView.insertHiddenColumn("Nick Order", G_TYPE_STRING);
 	nickView.insertHiddenColumn("Favorite", G_TYPE_STRING);
 	nickView.insertHiddenColumn("CID", G_TYPE_STRING);
+	nickView.insertHiddenColumn("NickColor", G_TYPE_STRING);
 	nickView.finalize();
 	nickStore = gtk_list_store_newv(nickView.getColCount(), nickView.getGTypes());
 	gtk_tree_view_set_model(nickView.get(), GTK_TREE_MODEL(nickStore));
@@ -290,6 +291,7 @@ void Hub::updateUser_gui(ParamMap params)
 			nickView.col("Nick Order"), nickOrder.c_str(),
 			nickView.col("Favorite"), favorite? ("f" + nickOrder).c_str() : nickOrder.c_str(),
 			nickView.col("CID"), cid.c_str(),
+			nickView.col("NickColor"), favorite? "#ff0000" : "#000000",
 			-1);
 	}
 	else
@@ -309,6 +311,7 @@ void Hub::updateUser_gui(ParamMap params)
 			nickView.col("Nick Order"), nickOrder.c_str(),
 			nickView.col("Favorite"), favorite? ("f" + nickOrder).c_str() : nickOrder.c_str(),
 			nickView.col("CID"), cid.c_str(),
+			nickView.col("NickColor"), favorite? "#ff0000" : "#000000",
 			-1);
 
 		userIters.insert(UserIters::value_type(cid, iter));
@@ -1507,7 +1510,7 @@ void Hub::onSendMessage_gui(GtkEntry *entry, gpointer data)
 		}
 		else if (command == "freedcpp")
 		{
-			hub->addStatusMessage_gui(string("freedcpp 0.0.1.79/0.75, ") + _("project home: ") +
+			hub->addStatusMessage_gui(string("freedcpp 0.0.1.80/0.75, ") + _("project home: ") +
 				"http://freedcpp.narod.ru http://code.google.com/p/freedcpp", Msg::SYSTEM, Sound::NONE);
 		}
 		else if (command == "help")
@@ -1889,6 +1892,7 @@ void Hub::addFavoriteUser_gui(ParamMap params)
 		{
 			gtk_list_store_set(nickStore, &iter,
 				nickView.col("Favorite"), ("f" + params["Order"] + nick).c_str(),
+				nickView.col("NickColor"), "#ff0000",
 				-1);
 			removeTag_gui(nick);
 		}
@@ -1916,6 +1920,7 @@ void Hub::removeFavoriteUser_gui(ParamMap params)
 			string nickOrder = nickView.getString(&iter, "Nick Order");
 			gtk_list_store_set(nickStore, &iter,
 				nickView.col("Favorite"), nickOrder.c_str(),
+				nickView.col("NickColor"), "#000000",
 				-1);
 			removeTag_gui(nick);
 		}
