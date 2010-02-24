@@ -97,6 +97,20 @@ void TreeView::insertColumn(const string &title, const GType &gtype, const colum
 	++count;
 }
 
+void TreeView::insertColumn(const string &title, const GType &gtype, const columnType type, const int width,
+	const string &linkedCol, const string &linkedTextColor)
+{
+	// All insertColumn's have to be called before any insertHiddenColumn's.
+	dcassert(hiddenColumns.size() == 0);
+
+	// Title must be unique.
+	dcassert(!title.empty() && columns.find(title) == columns.end());
+
+	columns[title] = Column(title, count, gtype, type, width, linkedCol, linkedTextColor);
+	sortedColumns[count] = title;
+	++count;
+}
+
 void TreeView::insertHiddenColumn(const string &title, const GType &gtype)
 {
 	// Title must be unique.
@@ -289,6 +303,19 @@ void TreeView::addColumn_gui(Column& column)
 			renderer = gtk_cell_renderer_text_new();
 			gtk_tree_view_column_pack_start(col, renderer, true);
 			gtk_tree_view_column_add_attribute(col, renderer, "text", column.pos);
+			break;
+		case ICON_STRING_TEXT_COLOR:
+			// icon
+			renderer = gtk_cell_renderer_pixbuf_new();
+			col = gtk_tree_view_column_new();
+			gtk_tree_view_column_set_title(col, column.title.c_str());
+			gtk_tree_view_column_pack_start(col, renderer, false);
+			gtk_tree_view_column_add_attribute(col, renderer, "stock-id", TreeView::col(column.linkedCol));
+			// text
+			renderer = gtk_cell_renderer_text_new();
+			gtk_tree_view_column_pack_start(col, renderer, true);
+			gtk_tree_view_column_add_attribute(col, renderer, "text", column.pos);
+			gtk_tree_view_column_add_attribute(col, renderer, "foreground", TreeView::col(column.linkedTextColor));
 			break;
 		case EDIT_STRING:
 			renderer = gtk_cell_renderer_text_new();
