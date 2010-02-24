@@ -192,7 +192,7 @@ class Hub:
 		std::string encoding;
 		bool scrollToBottom;
 		static const std::string tagPrefix;
-		TypeTag tagMsg, tagNick;
+		TypeTag tagMsg;
 		bool useEmoticons;
 		gint totalEmoticons;
 		EmoticonsDialog *emotdialog;
