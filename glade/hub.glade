@@ -267,10 +267,27 @@
       </widget>
     </child>
     <child>
+      <widget class="GtkSeparatorMenuItem" id="separator2">
+        <property name="visible">True</property>
+      </widget>
+    </child>
+    <child>
       <widget class="GtkMenuItem" id="favoriteUserItem">
         <property name="visible">True</property>
         <property name="label" translatable="yes">_Add to favorites</property>
         <property name="use_underline">True</property>
+      </widget>
+    </child>
+    <child>
+      <widget class="GtkMenuItem" id="removeFavoriteUserItem">
+        <property name="visible">True</property>
+        <property name="label" translatable="yes">_Remove from favorites</property>
+        <property name="use_underline">True</property>
+      </widget>
+    </child>
+    <child>
+      <widget class="GtkSeparatorMenuItem" id="separator3">
+        <property name="visible">True</property>
       </widget>
     </child>
     <child>

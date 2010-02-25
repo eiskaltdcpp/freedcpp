@@ -128,6 +128,7 @@ class Hub:
 		static void onMagnetPropertiesClicked_gui(GtkMenuItem *item, gpointer data);
 		static void onUserListToggled_gui(GtkWidget *widget, gpointer data);
 		static void onAddFavoriteUserClicked_gui(GtkMenuItem *item, gpointer data);
+		static void onRemoveFavoriteUserClicked_gui(GtkMenuItem *item, gpointer data);
 
 		// Client functions
 		void addFavoriteUser_client(const std::string cid);
