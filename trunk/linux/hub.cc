@@ -144,6 +144,7 @@ Hub::Hub(const string &address, const string &encoding):
 	g_signal_connect(getWidget("userListCheckButton"), "toggled", G_CALLBACK(onUserListToggled_gui), (gpointer)this);
 	g_signal_connect(getWidget("emotButton"), "button-release-event", G_CALLBACK(onEmotButtonRelease_gui), (gpointer)this);
 	g_signal_connect(getWidget("favoriteUserItem"), "activate", G_CALLBACK(onAddFavoriteUserClicked_gui), (gpointer)this);
+	g_signal_connect(getWidget("removeFavoriteUserItem"), "activate", G_CALLBACK(onRemoveFavoriteUserClicked_gui), (gpointer)this);
 
 	gtk_widget_grab_focus(getWidget("chatEntry"));
 
@@ -322,7 +323,7 @@ void Hub::updateUser_gui(ParamMap params)
 			string line = Nick + _(" has joined hub ") + client->getHubName();
 			WulforManager::get()->getMainWindow()->addPrivateStatusMessage_gui(Msg::SYSTEM, cid, line);
 		}
-		else if (BOOLSETTING(FAV_SHOW_JOINS) && userFavoriteMap.find(Nick) != userFavoriteMap.end())
+		else if (BOOLSETTING(FAV_SHOW_JOINS) && favorite)
 		{
 			addStatusMessage_gui(Nick + _(" has joined"), Msg::STATUS, Sound::NONE);
 			WulforManager::get()->getMainWindow()->addPrivateStatusMessage_gui(Msg::SYSTEM, cid,
@@ -1029,7 +1030,7 @@ GtkTextTag* Hub::createTag_gui(const string &tagname, TypeTag type)
 	return tag;
 }
 
-void Hub::addStatusMessage_gui(std::string message, Msg::TypeMsg typemsg, Sound::TypeSound sound, Notify::TypeNotify notify)
+void Hub::addStatusMessage_gui(string message, Msg::TypeMsg typemsg, Sound::TypeSound sound, Notify::TypeNotify notify)
 {
 	addStatusMessage_gui(message, typemsg, sound);
 	Notify::get()->showNotify("<b>" + client->getHubUrl() + ":</b> ", message, notify);
@@ -1473,7 +1474,20 @@ void Hub::onSendMessage_gui(GtkEntry *entry, gpointer data)
 				WulforManager::get()->dispatchClientFunc(func);
 			}
 			else
-				hub->addStatusMessage_gui(_("User not found"), Msg::SYSTEM, Sound::NONE);
+				hub->addStatusMessage_gui(param + _(" is not favorite user"), Msg::STATUS, Sound::NONE);
+		}
+		else if (command == "listfu" || command == "lsfu")
+		{
+			string list;
+
+			for (UserMap::const_iterator it = hub->userFavoriteMap.begin(); it != hub->userFavoriteMap.end(); ++it)
+			{
+				if (hub->findNick_gui(it->first, NULL))
+					list += "\n" + it->first + _(" has joined");
+				else
+					list += "\n" + it->first + _(" has quit");
+			}
+			hub->addMessage_gui(_("User favorite list: ") + (list.empty()? list = _("empty...") : list), Msg::SYSTEM);
 		}
 		else if (command == "getlist")
 		{
@@ -1510,7 +1524,7 @@ void Hub::onSendMessage_gui(GtkEntry *entry, gpointer data)
 		}
 		else if (command == "freedcpp")
 		{
-			hub->addStatusMessage_gui(string("freedcpp 0.0.1.80/0.75, ") + _("project home: ") +
+			hub->addStatusMessage_gui(string("freedcpp 0.0.1.81/0.75, ") + _("project home: ") +
 				"http://freedcpp.narod.ru http://code.google.com/p/freedcpp", Msg::SYSTEM, Sound::NONE);
 		}
 		else if (command == "help")
@@ -1523,6 +1537,7 @@ void Hub::onSendMessage_gui(GtkEntry *entry, gpointer data)
 			"/favorite, /fav\t\t\t - " + _("Add a hub to favorites") + "\n" +
 			"/fuser, /fu <nick>\t\t - " + _("Add user to favorites list") + "\n" +
 			"/removefu, /rmfu <nick>\t - " + _("Remove user favorite") + "\n" +
+			"/listfu, /lsfu\t\t\t - " + _("Show favorites list") + "\n" +
 			"/getlist <nick>\t\t\t - " + _("Get file list") + "\n" +
 			"/grant <nick>\t\t\t - " + _("Grant extra slot") + "\n" +
 			"/help\t\t\t\t - " + _("Show help") + "\n" +
@@ -1844,7 +1859,7 @@ void Hub::onAddFavoriteUserClicked_gui(GtkMenuItem *item, gpointer data)
 
 	if (gtk_tree_selection_count_selected_rows(hub->nickSelection) > 0)
 	{
-		string cid, nick;
+		string cid, nick, order;
 		GtkTreeIter iter;
 		GtkTreePath *path;
 		typedef Func1<Hub, string> F1;
@@ -1858,16 +1873,56 @@ void Hub::onAddFavoriteUserClicked_gui(GtkMenuItem *item, gpointer data)
 			{
 				cid = hub->nickView.getString(&iter, "CID");
 				nick = hub->nickView.getString(&iter, _("Nick"));
+				order = hub->nickView.getString(&iter, "Favorite");
 
 				if (!cid.empty() && nick != hub->client->getMyNick())
 				{
-					if (hub->userFavoriteMap.find(nick) == hub->userFavoriteMap.end())
+					if (order[0] == 'o' || order[0] == 'u')
 					{
 						F1 *func = new F1(hub, &Hub::addFavoriteUser_client, cid);
 						WulforManager::get()->dispatchClientFunc(func);
 					}
 					else
 						hub->addStatusMessage_gui(nick + _(" is favorite user"), Msg::STATUS, Sound::NONE);
+				}
+			}
+			gtk_tree_path_free(path);
+		}
+		g_list_free(list);
+	}
+}
+
+void Hub::onRemoveFavoriteUserClicked_gui(GtkMenuItem *item, gpointer data)
+{
+	Hub *hub = (Hub *)data;
+
+	if (gtk_tree_selection_count_selected_rows(hub->nickSelection) > 0)
+	{
+		string cid, nick, order;
+		GtkTreeIter iter;
+		GtkTreePath *path;
+		typedef Func1<Hub, string> F1;
+		GList *list = gtk_tree_selection_get_selected_rows(hub->nickSelection, NULL);
+
+		for (GList *i = list; i; i = i->next)
+		{
+			path = (GtkTreePath *)i->data;
+
+			if (gtk_tree_model_get_iter(GTK_TREE_MODEL(hub->nickStore), &iter, path))
+			{
+				cid = hub->nickView.getString(&iter, "CID");
+				nick = hub->nickView.getString(&iter, _("Nick"));
+				order = hub->nickView.getString(&iter, "Favorite");
+
+				if (!cid.empty() && nick != hub->client->getMyNick())
+				{
+					if (order[0] == 'f')
+					{
+						F1 *func = new F1(hub, &Hub::removeFavoriteUser_client, cid);
+						WulforManager::get()->dispatchClientFunc(func);
+					}
+					else
+						hub->addStatusMessage_gui(nick + _(" is not favorite user"), Msg::STATUS, Sound::NONE);
 				}
 			}
 			gtk_tree_path_free(path);
@@ -1931,7 +1986,7 @@ void Hub::removeFavoriteUser_gui(ParamMap params)
 	}
 }
 
-void Hub::addPrivateMessage_gui(Msg::TypeMsg typemsg, std::string nick, std::string cid, std::string url, std::string message, bool useSetting)
+void Hub::addPrivateMessage_gui(Msg::TypeMsg typemsg, string nick, string cid, string url, string message, bool useSetting)
 {
 	if (userFavoriteMap.find(nick) != userFavoriteMap.end())
 		typemsg = Msg::FAVORITE;
