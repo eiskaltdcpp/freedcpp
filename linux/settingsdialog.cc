@@ -97,26 +97,26 @@ Settings::Settings(GtkWindow* parent):
 	defaultStringTheme.insert(StringMap::value_type("text-op-fore-color", "#0000FF"));
 	defaultStringTheme.insert(StringMap::value_type("text-url-back-color", "#FFFFFF"));
 	defaultStringTheme.insert(StringMap::value_type("text-url-fore-color", "#0000FF"));
-	defaultIntTheme.insert(IntMap::value_type("text-general-bold", TEXT_WEIGHT_NORMAL));
-	defaultIntTheme.insert(IntMap::value_type("text-general-italic", TEXT_STYLE_NORMAL));
-	defaultIntTheme.insert(IntMap::value_type("text-myown-bold", TEXT_WEIGHT_BOLD));
-	defaultIntTheme.insert(IntMap::value_type("text-myown-italic", TEXT_STYLE_NORMAL));
-	defaultIntTheme.insert(IntMap::value_type("text-private-bold", TEXT_WEIGHT_NORMAL));
-	defaultIntTheme.insert(IntMap::value_type("text-private-italic", TEXT_STYLE_NORMAL));
-	defaultIntTheme.insert(IntMap::value_type("text-system-bold", TEXT_WEIGHT_BOLD));
-	defaultIntTheme.insert(IntMap::value_type("text-system-italic", TEXT_STYLE_NORMAL));
-	defaultIntTheme.insert(IntMap::value_type("text-status-bold", TEXT_WEIGHT_BOLD));
-	defaultIntTheme.insert(IntMap::value_type("text-status-italic", TEXT_STYLE_NORMAL));
-	defaultIntTheme.insert(IntMap::value_type("text-timestamp-bold", TEXT_WEIGHT_BOLD));
-	defaultIntTheme.insert(IntMap::value_type("text-timestamp-italic", TEXT_STYLE_NORMAL));
-	defaultIntTheme.insert(IntMap::value_type("text-mynick-bold", TEXT_WEIGHT_BOLD));
-	defaultIntTheme.insert(IntMap::value_type("text-mynick-italic", TEXT_STYLE_NORMAL));
-	defaultIntTheme.insert(IntMap::value_type("text-fav-bold", TEXT_WEIGHT_BOLD));
-	defaultIntTheme.insert(IntMap::value_type("text-fav-italic", TEXT_STYLE_NORMAL));
-	defaultIntTheme.insert(IntMap::value_type("text-op-bold", TEXT_WEIGHT_BOLD));
-	defaultIntTheme.insert(IntMap::value_type("text-op-italic", TEXT_STYLE_NORMAL));
-	defaultIntTheme.insert(IntMap::value_type("text-url-bold", TEXT_WEIGHT_NORMAL));
-	defaultIntTheme.insert(IntMap::value_type("text-url-italic", TEXT_STYLE_NORMAL));
+	defaultIntTheme.insert(IntMap::value_type("text-general-bold", 0));
+	defaultIntTheme.insert(IntMap::value_type("text-general-italic", 0));
+	defaultIntTheme.insert(IntMap::value_type("text-myown-bold", 1));
+	defaultIntTheme.insert(IntMap::value_type("text-myown-italic", 0));
+	defaultIntTheme.insert(IntMap::value_type("text-private-bold", 0));
+	defaultIntTheme.insert(IntMap::value_type("text-private-italic", 0));
+	defaultIntTheme.insert(IntMap::value_type("text-system-bold", 1));
+	defaultIntTheme.insert(IntMap::value_type("text-system-italic", 0));
+	defaultIntTheme.insert(IntMap::value_type("text-status-bold", 1));
+	defaultIntTheme.insert(IntMap::value_type("text-status-italic", 0));
+	defaultIntTheme.insert(IntMap::value_type("text-timestamp-bold", 1));
+	defaultIntTheme.insert(IntMap::value_type("text-timestamp-italic", 0));
+	defaultIntTheme.insert(IntMap::value_type("text-mynick-bold", 1));
+	defaultIntTheme.insert(IntMap::value_type("text-mynick-italic", 0));
+	defaultIntTheme.insert(IntMap::value_type("text-fav-bold", 1));
+	defaultIntTheme.insert(IntMap::value_type("text-fav-italic", 0));
+	defaultIntTheme.insert(IntMap::value_type("text-op-bold", 1));
+	defaultIntTheme.insert(IntMap::value_type("text-op-italic", 0));
+	defaultIntTheme.insert(IntMap::value_type("text-url-bold", 0));
+	defaultIntTheme.insert(IntMap::value_type("text-url-italic", 0));
 
 	// Initialize the tabs in the GtkNotebook.
 	initPersonal_gui();
@@ -993,8 +993,8 @@ void Settings::initAppearance_gui()
 		GtkTextTag *tagTimeStamp = gtk_text_buffer_create_tag(textStyleBuffer, _("Timestamp"),
 			"background", back.c_str(),
 			"foreground", fore.c_str(),
-			"weight", (PangoWeight)bold,
-			"style", (PangoStyle)italic,
+			"weight", bold ? TEXT_WEIGHT_BOLD : TEXT_WEIGHT_NORMAL,
+			"style", italic ? TEXT_STYLE_ITALIC : TEXT_STYLE_NORMAL,
 			NULL);
 
 		gint row_count = 0;
@@ -1022,8 +1022,8 @@ void Settings::initAppearance_gui()
 				tag = gtk_text_buffer_create_tag(textStyleBuffer, style.c_str(),
 					"background", back.c_str(),
 					"foreground", fore.c_str(),
-					"weight", (PangoWeight)bold,
-					"style", (PangoStyle)italic,
+					"weight", bold ? TEXT_WEIGHT_BOLD : TEXT_WEIGHT_NORMAL,
+					"style", italic ? TEXT_STYLE_ITALIC : TEXT_STYLE_NORMAL,
 					NULL);
 			else
 				tag = tagTimeStamp;
@@ -1661,8 +1661,8 @@ void Settings::applyTextTheme(bool useDefault)
 			g_object_set(tag,
 				"foreground", fore.c_str(),
 				"background", back.c_str(),
-				"weight", (PangoWeight)bolt,
-				"style", (PangoStyle)italic,
+				"weight", bolt ? TEXT_WEIGHT_BOLD : TEXT_WEIGHT_NORMAL,
+				"style", italic ? TEXT_STYLE_ITALIC : TEXT_STYLE_NORMAL,
 				NULL);
 
 		valid = gtk_tree_model_iter_next(m, &iter);
@@ -2174,8 +2174,8 @@ void Settings::selectTextStyle_gui(const int select)
 				g_object_set(tag,
 					"foreground", fore.c_str(),
 					"background", back.c_str(),
-					"weight", (PangoWeight)bolt,
-					"style", (PangoStyle)italic,
+					"weight", bolt ? TEXT_WEIGHT_BOLD : TEXT_WEIGHT_NORMAL,
+					"style", italic ? TEXT_STYLE_ITALIC : TEXT_STYLE_NORMAL,
 					NULL);
 
 			valid = gtk_tree_model_iter_next(m, &iter);
@@ -2205,9 +2205,10 @@ void Settings::selectTextStyle_gui(const int select)
 		if (temp)
 		{
 			string font_name = temp;
+			g_free(temp);
 
-			font_name.find("Bold") != string::npos ? bolt = TEXT_WEIGHT_BOLD: bolt = TEXT_WEIGHT_NORMAL;
-			font_name.find("Italic") != string::npos ? italic = TEXT_STYLE_ITALIC: italic = TEXT_STYLE_NORMAL;
+			bolt = font_name.find("Bold") != string::npos ? 1 : 0;
+			italic = font_name.find("Italic") != string::npos ? 1 : 0;
 
 			style = textStyleView.getString(&iter, "Style");
 			gtk_list_store_set(textStyleStore, &iter, textStyleView.col("Bolt"), bolt, textStyleView.col("Italic"), italic, -1);
@@ -2215,10 +2216,10 @@ void Settings::selectTextStyle_gui(const int select)
 			tag = gtk_text_tag_table_lookup(gtk_text_buffer_get_tag_table(textStyleBuffer), style.c_str());
 
 			if (tag)
-				g_object_set(tag, "weight", (PangoWeight)bolt, "style", (PangoStyle)italic, NULL);
-
-			g_free(temp);
-
+				g_object_set(tag,
+					"weight", bolt ? TEXT_WEIGHT_BOLD : TEXT_WEIGHT_NORMAL,
+					"style", italic ? TEXT_STYLE_ITALIC : TEXT_STYLE_NORMAL,
+					NULL);
 			gtk_widget_queue_draw(getWidget("textViewPreviewStyles"));
 		}
 	}

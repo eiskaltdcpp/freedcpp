@@ -192,8 +192,8 @@ void PrivateMessage::updateTags_gui()
 		g_object_set(TagsMap[i],
 			"foreground", fore.c_str(),
 			"background", back.c_str(),
-			"weight", (PangoWeight)bold,
-			"style", (PangoStyle)italic,
+			"weight", bold ? TEXT_WEIGHT_BOLD : TEXT_WEIGHT_NORMAL,
+			"style", italic ? TEXT_STYLE_ITALIC : TEXT_STYLE_NORMAL,
 			NULL);
 	}
 
@@ -662,9 +662,9 @@ void PrivateMessage::getSettingTag_gui(WulforSettingsManager *wsm, TypeTag type,
 			italic = wsm->getInt("text-private-italic");
 
 			if (wsm->getBool("text-bold-autors"))
-				bold = TEXT_WEIGHT_BOLD;
+				bold = 1;
 			else
-				bold = TEXT_WEIGHT_NORMAL;
+				bold = 0;
 		break;
 
 		case TAG_PRIVATE:
@@ -693,8 +693,8 @@ GtkTextTag* PrivateMessage::createTag_gui(const string &tagname, TypeTag type)
 		tag = gtk_text_buffer_create_tag(messageBuffer, tagname.c_str(),
 			"foreground", fore.c_str(),
 			"background", back.c_str(),
-			"weight", (PangoWeight)bold,
-			"style", (PangoStyle)italic,
+			"weight", bold ? TEXT_WEIGHT_BOLD : TEXT_WEIGHT_NORMAL,
+			"style", italic ? TEXT_STYLE_ITALIC : TEXT_STYLE_NORMAL,
 			NULL);
 	}
 

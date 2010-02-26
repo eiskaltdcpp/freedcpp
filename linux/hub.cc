@@ -892,8 +892,8 @@ void Hub::updateTags_gui()
 		g_object_set(TagsMap[i],
 			"foreground", fore.c_str(),
 			"background", back.c_str(),
-			"weight", (PangoWeight)bold,
-			"style", (PangoStyle)italic,
+			"weight", bold ? TEXT_WEIGHT_BOLD : TEXT_WEIGHT_NORMAL,
+			"style", italic ? TEXT_STYLE_ITALIC : TEXT_STYLE_NORMAL,
 			NULL);
 	}
 
@@ -992,9 +992,9 @@ void Hub::getSettingTag_gui(WulforSettingsManager *wsm, TypeTag type, string &fo
 			italic = wsm->getInt("text-general-italic");
 
 			if (wsm->getBool("text-bold-autors"))
-				bold = TEXT_WEIGHT_BOLD;
+				bold = 1;
 			else
-				bold = TEXT_WEIGHT_NORMAL;
+				bold = 0;
 		break;
 
 		case TAG_GENERAL:
@@ -1022,8 +1022,8 @@ GtkTextTag* Hub::createTag_gui(const string &tagname, TypeTag type)
 		tag = gtk_text_buffer_create_tag(chatBuffer, tagname.c_str(),
 			"foreground", fore.c_str(),
 			"background", back.c_str(),
-			"weight", (PangoWeight)bold,
-			"style", (PangoStyle)italic,
+			"weight", bold ? TEXT_WEIGHT_BOLD : TEXT_WEIGHT_NORMAL,
+			"style", italic ? TEXT_STYLE_ITALIC : TEXT_STYLE_NORMAL,
 			NULL);
 	}
 
@@ -1524,7 +1524,7 @@ void Hub::onSendMessage_gui(GtkEntry *entry, gpointer data)
 		}
 		else if (command == "freedcpp")
 		{
-			hub->addStatusMessage_gui(string("freedcpp 0.0.1.81/0.75, ") + _("project home: ") +
+			hub->addStatusMessage_gui(string("freedcpp 0.0.1.82/0.75, ") + _("project home: ") +
 				"http://freedcpp.narod.ru http://code.google.com/p/freedcpp", Msg::SYSTEM, Sound::NONE);
 		}
 		else if (command == "help")
