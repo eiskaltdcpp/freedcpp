@@ -34,10 +34,10 @@
 #define WGETB(key) WulforSettingsManager::getInstance()->getBool(key)
 
 /* default font theme */
-#define TEXT_WEIGHT_NORMAL 400
-#define TEXT_WEIGHT_BOLD   700
-#define TEXT_STYLE_NORMAL  0
-#define TEXT_STYLE_ITALIC  2
+#define TEXT_WEIGHT_NORMAL PANGO_WEIGHT_NORMAL
+#define TEXT_WEIGHT_BOLD   PANGO_WEIGHT_BOLD
+#define TEXT_STYLE_NORMAL  PANGO_STYLE_NORMAL
+#define TEXT_STYLE_ITALIC  PANGO_STYLE_ITALIC
 
 class PreviewApp
 {
