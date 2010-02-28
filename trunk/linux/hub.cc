@@ -319,15 +319,21 @@ void Hub::updateUser_gui(ParamMap params)
 
 		if (BOOLSETTING(SHOW_JOINS))
 		{
-			addStatusMessage_gui(Nick + _(" has joined"), Msg::SYSTEM, Sound::NONE);
-			string line = Nick + _(" has joined hub ") + client->getHubName();
-			WulforManager::get()->getMainWindow()->addPrivateStatusMessage_gui(Msg::SYSTEM, cid, line);
+			// Show joins in chat by default
+			addStatusMessage_gui(Nick + _(" has joined"), Msg::STATUS, favorite? Sound::FAVORITE_USER_JOIN : Sound::NONE);
+			string message = Nick + _(" has joined hub ") + client->getHubName();
+			WulforManager::get()->getMainWindow()->addPrivateStatusMessage_gui(Msg::STATUS, cid, message);
+
+			if (favorite)
+				Notify::get()->showNotify("", message, Notify::FAVORITE_USER_JOIN);
 		}
 		else if (BOOLSETTING(FAV_SHOW_JOINS) && favorite)
 		{
-			addStatusMessage_gui(Nick + _(" has joined"), Msg::STATUS, Sound::NONE);
-			WulforManager::get()->getMainWindow()->addPrivateStatusMessage_gui(Msg::SYSTEM, cid,
-				Nick + _(" has joined hub ") + client->getHubName());
+			// Only show joins for favorite users
+			string message = Nick + _(" has joined hub ") + client->getHubName();
+			addStatusMessage_gui(Nick + _(" has joined"), Msg::STATUS, Sound::FAVORITE_USER_JOIN);
+			WulforManager::get()->getMainWindow()->addPrivateStatusMessage_gui(Msg::STATUS, cid, message);
+			Notify::get()->showNotify("", message, Notify::FAVORITE_USER_JOIN);
 		}
 	}
 
@@ -338,10 +344,11 @@ void Hub::updateUser_gui(ParamMap params)
 void Hub::removeUser_gui(string cid)
 {
 	GtkTreeIter iter;
-	string nick;
+	string nick, order;
 
 	if (findUser_gui(cid, &iter))
 	{
+		order = nickView.getString(&iter, "Favorite");
 		nick = nickView.getString(&iter, _("Nick"));
 		totalShared -= nickView.getValue<int64_t>(&iter, _("Shared"));
 		gtk_list_store_remove(nickStore, &iter);
@@ -351,11 +358,23 @@ void Hub::removeUser_gui(string cid)
 		setStatus_gui("statusUsers", Util::toString(userMap.size()) + _(" Users"));
 		setStatus_gui("statusShared", Util::formatBytes(totalShared));
 
-		if (BOOLSETTING(SHOW_JOINS) || (BOOLSETTING(FAV_SHOW_JOINS) && userFavoriteMap.find(nick) != userFavoriteMap.end()))
+		if (BOOLSETTING(SHOW_JOINS))
 		{
-			addStatusMessage_gui(nick + _(" has quit"), Msg::STATUS, Sound::NONE);
-			WulforManager::get()->getMainWindow()->addPrivateStatusMessage_gui(Msg::SYSTEM, cid,
-				nick + _(" has quit hub ") + client->getHubName());
+			// Show parts in chat by default
+			string message = nick + _(" has quit hub ") + client->getHubName();
+			addStatusMessage_gui(nick + _(" has quit"), Msg::STATUS, order[0] == 'f'? Sound::FAVORITE_USER_QUIT : Sound::NONE);
+			WulforManager::get()->getMainWindow()->addPrivateStatusMessage_gui(Msg::STATUS, cid, message);
+
+			if (order[0] == 'f')
+				Notify::get()->showNotify("", message, Notify::FAVORITE_USER_QUIT);
+		}
+		else if (BOOLSETTING(FAV_SHOW_JOINS) && order[0] == 'f')
+		{
+			// Only show parts for favorite users
+			string message = nick + _(" has quit hub ") + client->getHubName();
+			addStatusMessage_gui(nick + _(" has quit"), Msg::STATUS, Sound::FAVORITE_USER_QUIT);
+			WulforManager::get()->getMainWindow()->addPrivateStatusMessage_gui(Msg::STATUS, cid, message);
+			Notify::get()->showNotify("", message, Notify::FAVORITE_USER_QUIT);
 		}
 	}
 }
@@ -1524,7 +1543,7 @@ void Hub::onSendMessage_gui(GtkEntry *entry, gpointer data)
 		}
 		else if (command == "freedcpp")
 		{
-			hub->addStatusMessage_gui(string("freedcpp 0.0.1.82/0.75, ") + _("project home: ") +
+			hub->addStatusMessage_gui(string("freedcpp 0.0.1.83/0.75, ") + _("project home: ") +
 				"http://freedcpp.narod.ru http://code.google.com/p/freedcpp", Msg::SYSTEM, Sound::NONE);
 		}
 		else if (command == "help")
@@ -2250,7 +2269,7 @@ void Hub::getParams_client(ParamMap &params, Identity &id)
 
 void Hub::on(FavoriteManagerListener::UserAdded, const FavoriteUser &user) throw()
 {
-	if (user.getUrl() != address)
+	if (user.getUrl() != client->getHubUrl())
 		return;
 
 	ParamMap params;
@@ -2264,7 +2283,7 @@ void Hub::on(FavoriteManagerListener::UserAdded, const FavoriteUser &user) throw
 
 void Hub::on(FavoriteManagerListener::UserRemoved, const FavoriteUser &user) throw()
 {
-	if (user.getUrl() != address)
+	if (user.getUrl() != client->getHubUrl())
 		return;
 
 	ParamMap params;
