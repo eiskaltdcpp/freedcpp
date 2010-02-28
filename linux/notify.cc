@@ -140,10 +140,10 @@ void Notify::showNotify(const string &head, const string &body, TypeNotify notif
 			if (wsm->getInt("notify-download-finished-use"))
 			{
 				notify_notification_add_action(notification, "1", _("Open file"),
-					(NotifyActionCallback) onActon, g_strdup(body.c_str()), g_free);
+					(NotifyActionCallback) onAction, g_strdup(body.c_str()), g_free);
 
 				notify_notification_add_action(notification, "2", _("Open folder"),
-					(NotifyActionCallback) onActon, g_strdup(Util::getFilePath(body).c_str()), g_free);
+					(NotifyActionCallback) onAction, g_strdup(Util::getFilePath(body).c_str()), g_free);
 
 				showNotify(wsm->getString("notify-download-finished-title"), head, Util::getFileName(body),
 					wsm->getString("notify-download-finished-icon"), wsm->getInt("notify-icon-size"), NOTIFY_URGENCY_NORMAL);
@@ -179,6 +179,20 @@ void Notify::showNotify(const string &head, const string &body, TypeNotify notif
 			if (wsm->getInt("notify-hub-disconnect-use"))
 			showNotify(wsm->getString("notify-hub-disconnect-title"), head, body,
 				wsm->getString("notify-hub-disconnect-icon"), wsm->getInt("notify-icon-size"), NOTIFY_URGENCY_CRITICAL);
+			break;
+
+		case FAVORITE_USER_JOIN:
+
+			if (wsm->getInt("notify-fuser-join"))
+			showNotify(wsm->getString("notify-fuser-join-title"), head, body,
+				wsm->getString("notify-fuser-join-icon"), wsm->getInt("notify-icon-size"), NOTIFY_URGENCY_NORMAL);
+			break;
+
+		case FAVORITE_USER_QUIT:
+
+			if (wsm->getInt("notify-fuser-quit"))
+			showNotify(wsm->getString("notify-fuser-quit-title"), head, body,
+				wsm->getString("notify-fuser-quit-icon"), wsm->getInt("notify-icon-size"), NOTIFY_URGENCY_NORMAL);
 			break;
 
 		default: break;
@@ -238,7 +252,7 @@ void Notify::showNotify(const string &title, const string &head, const string &b
 	notify_notification_show(notification, NULL);
 }
 
-void Notify::onActon(NotifyNotification *notify, const char *action, gpointer data)
+void Notify::onAction(NotifyNotification *notify, const char *action, gpointer data)
 {
 	string target = (gchar*)data;
 

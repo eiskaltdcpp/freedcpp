@@ -912,6 +912,8 @@ void Settings::initAppearance_gui()
 		addOption_gui(soundStore, wsm, _("Private message"), "sound-private-message-use", "sound-private-message");
 		addOption_gui(soundStore, wsm, _("Hub connected"), "sound-hub-connect-use", "sound-hub-connect");
 		addOption_gui(soundStore, wsm, _("Hub disconnected"), "sound-hub-disconnect-use", "sound-hub-disconnect");
+		addOption_gui(soundStore, wsm, _("Favorite user joined"), "sound-fuser-join-use", "sound-fuser-join");
+		addOption_gui(soundStore, wsm, _("Favorite user quit"), "sound-fuser-quit-use", "sound-fuser-quit");
 
 		gtk_widget_set_sensitive(getWidget("soundPlayButton"), TRUE);
 		gtk_widget_set_sensitive(getWidget("soundFileBrowseButton"), TRUE);
@@ -1084,6 +1086,14 @@ void Settings::initAppearance_gui()
 		addOption_gui(notifyStore, wsm, _("Hub disconnect"),
 			"notify-hub-disconnect-use", "notify-hub-disconnect-title",
 			"notify-hub-disconnect-icon", NOTIFY_URGENCY_CRITICAL);
+
+		addOption_gui(notifyStore, wsm, _("Favorite user joined"),
+			"notify-fuser-join", "notify-fuser-join-title",
+			"notify-fuser-join-icon", NOTIFY_URGENCY_NORMAL);
+
+		addOption_gui(notifyStore, wsm, _("Favorite user quit"),
+			"notify-fuser-quit", "notify-fuser-quit-title",
+			"notify-fuser-quit-icon", NOTIFY_URGENCY_NORMAL);
 
 		g_signal_connect(getWidget("notifyTestButton"), "clicked", G_CALLBACK(onNotifyTestButton_gui), (gpointer)this);
 		g_signal_connect(getWidget("notifyIconFileBrowseButton"), "clicked", G_CALLBACK(onNotifyIconFileBrowseClicked_gui), (gpointer)this);

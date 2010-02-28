@@ -56,6 +56,8 @@ WulforSettingsManager::WulforSettingsManager():
 	defaultInt.insert(IntMap::value_type("sound-private-message-use", 0));
 	defaultInt.insert(IntMap::value_type("sound-hub-connect-use", 0));
 	defaultInt.insert(IntMap::value_type("sound-hub-disconnect-use", 0));
+	defaultInt.insert(IntMap::value_type("sound-fuser-join-use", 0));
+	defaultInt.insert(IntMap::value_type("sound-fuser-quit-use", 0));
 	defaultInt.insert(IntMap::value_type("use-magnet-split", 1));
 	defaultInt.insert(IntMap::value_type("text-bold-autors", 1));
 	defaultInt.insert(IntMap::value_type("text-general-bold", 0));
@@ -93,6 +95,8 @@ WulforSettingsManager::WulforSettingsManager():
 	defaultInt.insert(IntMap::value_type("notify-private-message-use", 0));
 	defaultInt.insert(IntMap::value_type("notify-hub-disconnect-use", 0));
 	defaultInt.insert(IntMap::value_type("notify-hub-connect-use", 0));
+	defaultInt.insert(IntMap::value_type("notify-fuser-join", 0));
+	defaultInt.insert(IntMap::value_type("notify-fuser-quit", 0));
 	defaultInt.insert(IntMap::value_type("notify-pm-length", 50));
 	defaultInt.insert(IntMap::value_type("notify-icon-size", 3));
 	defaultInt.insert(IntMap::value_type("notify-only-not-active", 0));
@@ -131,6 +135,8 @@ WulforSettingsManager::WulforSettingsManager():
 	defaultString.insert(StringMap::value_type("sound-private-message", ""));
 	defaultString.insert(StringMap::value_type("sound-hub-connect", ""));
 	defaultString.insert(StringMap::value_type("sound-hub-disconnect", ""));
+	defaultString.insert(StringMap::value_type("sound-fuser-join", ""));
+	defaultString.insert(StringMap::value_type("sound-fuser-quit", ""));
 	defaultString.insert(StringMap::value_type("text-general-back-color", "#FFFFFF"));
 	defaultString.insert(StringMap::value_type("text-general-fore-color", "#4D4D4D"));
 	defaultString.insert(StringMap::value_type("text-myown-back-color", "#FFFFFF"));
@@ -163,6 +169,10 @@ WulforSettingsManager::WulforSettingsManager():
 	defaultString.insert(StringMap::value_type("notify-hub-disconnect-icon", ""));
 	defaultString.insert(StringMap::value_type("notify-hub-connect-title", _("Hub connect")));
 	defaultString.insert(StringMap::value_type("notify-hub-connect-icon", ""));
+	defaultString.insert(StringMap::value_type("notify-fuser-join-title", _("Favorite user joined")));
+	defaultString.insert(StringMap::value_type("notify-fuser-join-icon", ""));
+	defaultString.insert(StringMap::value_type("notify-fuser-quit-title", _("Favorite user quit")));
+	defaultString.insert(StringMap::value_type("notify-fuser-quit-icon", ""));
 	defaultString.insert(StringMap::value_type("theme-name", "default"));
 	defaultString.insert(StringMap::value_type("icon-dc++", "freedcpp-dc++"));
 	defaultString.insert(StringMap::value_type("icon-dc++-fw", "freedcpp-dc++-fw"));

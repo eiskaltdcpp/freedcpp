@@ -103,6 +103,18 @@ void Sound::playSound(TypeSound sound)
 				playSound(wsm->getString("sound-hub-disconnect"));
 		break;
 
+		case FAVORITE_USER_JOIN:
+
+			if (wsm->getInt("sound-fuser-join-use"))
+				playSound(wsm->getString("sound-fuser-join"));
+		break;
+
+		case FAVORITE_USER_QUIT:
+
+			if (wsm->getInt("sound-fuser-quit-use"))
+				playSound(wsm->getString("sound-fuser-quit"));
+		break;
+
 		default: break;
 	}
 }

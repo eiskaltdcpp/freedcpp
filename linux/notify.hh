@@ -50,6 +50,8 @@ class Notify
 			PRIVATE_MESSAGE,
 			HUB_CONNECT,
 			HUB_DISCONNECT,
+			FAVORITE_USER_JOIN,
+			FAVORITE_USER_QUIT,
 			NONE
 		};
 
@@ -79,7 +81,7 @@ class Notify
 		bool action;
 
 		//GUI callback functions
-		static void onActon(NotifyNotification *notify, const char *action, gpointer data);
+		static void onAction(NotifyNotification *notify, const char *action, gpointer data);
 };
 
 #else
