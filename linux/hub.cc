@@ -181,7 +181,7 @@ Hub::Hub(const string &address, const string &encoding):
 	{
 		if (it->second.getUrl() == address)
 		{
-			userFavoriteMap.insert(UserMap::value_type(it->second.getNick(), it->first.toBase32()));
+			userFavoriteMap.insert(UserMap::value_type(it->first.toBase32(), it->second.getNick()));
 		}
 	}
 
@@ -265,7 +265,7 @@ void Hub::updateUser_gui(ParamMap params)
 	const string icon = "freedcpp-" + params["Icon"];
 	const string &Nick = params["Nick"];
 	const string &nickOrder = params["Nick Order"];
-	bool favorite = userFavoriteMap.find(Nick) != userFavoriteMap.end();
+	bool favorite = userFavoriteMap.find(cid) != userFavoriteMap.end();
 
 	if (findUser_gui(cid, &iter))
 	{
@@ -278,6 +278,10 @@ void Hub::updateUser_gui(ParamMap params)
 			userMap.erase(nick);
 			removeTag_gui(nick);
 			userMap.insert(UserMap::value_type(Nick, cid));
+
+			// update favorite
+			if (favorite)
+				userFavoriteMap[cid] = Nick;
 		}
 
 		gtk_list_store_set(nickStore, &iter,
@@ -1471,25 +1475,29 @@ void Hub::onSendMessage_gui(GtkEntry *entry, gpointer data)
 			if (hub->client->getMyNick() == param)
 				return;
 
-			if (hub->userFavoriteMap.find(param) == hub->userFavoriteMap.end())
+			if (hub->userMap.find(param) != hub->userMap.end())
 			{
-				if (hub->userMap.find(param) != hub->userMap.end())
+				string &cid = hub->userMap[param];
+				if (hub->userFavoriteMap.find(cid) == hub->userFavoriteMap.end())
 				{
-					Func1<Hub, string> *func = new Func1<Hub, string>(hub, &Hub::addFavoriteUser_client, hub->userMap[param]);
+					Func1<Hub, string> *func = new Func1<Hub, string>(hub, &Hub::addFavoriteUser_client, cid);
 					WulforManager::get()->dispatchClientFunc(func);
 				} else
-					hub->addStatusMessage_gui(_("User not found"), Msg::SYSTEM, Sound::NONE);
+					hub->addStatusMessage_gui(param + _(" is favorite user"), Msg::STATUS, Sound::NONE);
 			} else
-				hub->addStatusMessage_gui(param + _(" is favorite user"), Msg::STATUS, Sound::NONE);
+				hub->addStatusMessage_gui(_("User not found"), Msg::SYSTEM, Sound::NONE);
 		}
 		else if (command == "removefu" || command == "rmfu")
 		{
 			if (hub->client->getMyNick() == param)
 				return;
 
-			if (hub->userFavoriteMap.find(param) != hub->userFavoriteMap.end())
+			UserMap::const_iterator it = find_if(hub->userFavoriteMap.begin(), hub->userFavoriteMap.end(),
+				CompareSecond<string, string>(param));
+
+			if (it != hub->userFavoriteMap.end())
 			{
-				Func1<Hub, string> *func = new Func1<Hub, string>(hub, &Hub::removeFavoriteUser_client, hub->userFavoriteMap[param]);
+				Func1<Hub, string> *func = new Func1<Hub, string>(hub, &Hub::removeFavoriteUser_client, it->first);
 				WulforManager::get()->dispatchClientFunc(func);
 			}
 			else
@@ -1498,15 +1506,11 @@ void Hub::onSendMessage_gui(GtkEntry *entry, gpointer data)
 		else if (command == "listfu" || command == "lsfu")
 		{
 			string list;
-
 			for (UserMap::const_iterator it = hub->userFavoriteMap.begin(); it != hub->userFavoriteMap.end(); ++it)
 			{
-				if (hub->findNick_gui(it->first, NULL))
-					list += "\n" + it->first + _(" has joined");
-				else
-					list += "\n" + it->first + _(" has quit");
+				list += " " + it->second;
 			}
-			hub->addMessage_gui(_("User favorite list: ") + (list.empty()? list = _("empty...") : list), Msg::SYSTEM);
+			hub->addMessage_gui(_("User favorite list:") + (list.empty()? list = _(" empty...") : list), Msg::SYSTEM);
 		}
 		else if (command == "getlist")
 		{
@@ -1543,7 +1547,7 @@ void Hub::onSendMessage_gui(GtkEntry *entry, gpointer data)
 		}
 		else if (command == "freedcpp")
 		{
-			hub->addStatusMessage_gui(string("freedcpp 0.0.1.83/0.75, ") + _("project home: ") +
+			hub->addStatusMessage_gui(string("freedcpp 0.0.1.84/0.75, ") + _("project home: ") +
 				"http://freedcpp.narod.ru http://code.google.com/p/freedcpp", Msg::SYSTEM, Sound::NONE);
 		}
 		else if (command == "help")
@@ -1952,14 +1956,13 @@ void Hub::onRemoveFavoriteUserClicked_gui(GtkMenuItem *item, gpointer data)
 
 void Hub::addFavoriteUser_gui(ParamMap params)
 {
-	const string &nick = params["Nick"];
+	const string &cid = params["CID"];
 
-	if (userFavoriteMap.find(nick) == userFavoriteMap.end())
+	if (userFavoriteMap.find(cid) == userFavoriteMap.end())
 	{
 		GtkTreeIter iter;
-		const string &cid = params["CID"];
-
-		userFavoriteMap.insert(UserMap::value_type(nick, cid));
+		const string &nick = params["Nick"];
+		userFavoriteMap.insert(UserMap::value_type(cid, nick));
 
 		// resort users
 		if (findUser_gui(cid, &iter))
@@ -1979,14 +1982,13 @@ void Hub::addFavoriteUser_gui(ParamMap params)
 
 void Hub::removeFavoriteUser_gui(ParamMap params)
 {
-	const string &nick = params["Nick"];
+	const string &cid = params["CID"];
 
-	if (userFavoriteMap.find(nick) != userFavoriteMap.end())
+	if (userFavoriteMap.find(cid) != userFavoriteMap.end())
 	{
 		GtkTreeIter iter;
-		const string &cid = params["CID"];
-
-		userFavoriteMap.erase(nick);
+		const string &nick = params["Nick"];
+		userFavoriteMap.erase(cid);
 
 		// resort users
 		if (findUser_gui(cid, &iter))
@@ -2005,9 +2007,9 @@ void Hub::removeFavoriteUser_gui(ParamMap params)
 	}
 }
 
-void Hub::addPrivateMessage_gui(Msg::TypeMsg typemsg, string nick, string cid, string url, string message, bool useSetting)
+void Hub::addPrivateMessage_gui(Msg::TypeMsg typemsg, string CID, string cid, string url, string message, bool useSetting)
 {
-	if (userFavoriteMap.find(nick) != userFavoriteMap.end())
+	if (userFavoriteMap.find(CID) != userFavoriteMap.end())
 		typemsg = Msg::FAVORITE;
 
 	WulforManager::get()->getMainWindow()->addPrivateMessage_gui(typemsg, cid, url, message, useSetting);
@@ -2516,8 +2518,8 @@ void Hub::on(ClientListener::PrivateMessage, Client *, const OnlineUser &from,
 	else
 	{
 		typedef Func6<Hub, Msg::TypeMsg, string, string, string, string, bool> F6;
-		F6 *func = new F6(this, &Hub::addPrivateMessage_gui, typemsg, from.getIdentity().getNick(), user.getUser()->getCID().toBase32(),
-			client->getHubUrl(), line, TRUE);
+		F6 *func = new F6(this, &Hub::addPrivateMessage_gui, typemsg, from.getUser()->getCID().toBase32(),
+			user.getUser()->getCID().toBase32(), client->getHubUrl(), line, TRUE);
 		WulforManager::get()->dispatchGuiFunc(func);
 	}
 }

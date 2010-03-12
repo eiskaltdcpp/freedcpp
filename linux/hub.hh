@@ -144,7 +144,6 @@ class Hub:
 		void rebuildHashData_client();
 		void refreshFileList_client();
 		void addAsFavorite_client();
-		void checkFavoriteUserJoin_client(std::string cid);
 		void getParams_client(ParamMap &user, dcpp::Identity &id);
 
 		// Favorite callbacks
