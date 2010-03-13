@@ -740,6 +740,10 @@ void Hub::applyEmoticons_gui()
 		setStatus_gui("statusMain", _(" *** emoticons over"));
 		return;
 	}
+	else if (tagMsg == TAG_SYSTEM || tagMsg == TAG_STATUS)
+	{
+		return;
+	}
 
 	bool search;
 	gint searchEmoticons = 0;
@@ -1547,7 +1551,7 @@ void Hub::onSendMessage_gui(GtkEntry *entry, gpointer data)
 		}
 		else if (command == "freedcpp")
 		{
-			hub->addStatusMessage_gui(string("freedcpp 0.0.1.84/0.75, ") + _("project home: ") +
+			hub->addStatusMessage_gui(string("freedcpp 0.0.1.85/0.75, ") + _("project home: ") +
 				"http://freedcpp.narod.ru http://code.google.com/p/freedcpp", Msg::SYSTEM, Sound::NONE);
 		}
 		else if (command == "help")

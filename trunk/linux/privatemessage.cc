@@ -485,6 +485,10 @@ void PrivateMessage::applyEmoticons_gui()
 		setStatus_gui(_(" *** emoticons over"));
 		return;
 	}
+	else if (tagMsg == TAG_SYSTEM || tagMsg == TAG_STATUS)
+	{
+		return;
+	}
 
 	bool search;
 	gint searchEmoticons = 0;
