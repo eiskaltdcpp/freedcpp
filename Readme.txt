@@ -1,7 +1,7 @@
-Introduction
-------------
+Introduction:
+-------------
 FreeDC++ -DC++ клиент основан на исходном коде LinuxDC++
-Изменения смотрите в Changelog.txt
+Изменения смотрите в Changelog.txt, Changelog-svn.txt
 
 Dependencies:
 -------------
@@ -15,6 +15,9 @@ pthread
 zlib
 libbz2
 libssl
+libgnome
+libnotify >= 0.4.1
+libboost
 
 Compiling:
 ----------
@@ -41,7 +44,7 @@ or if you used scons to install into the file system then use the same scons com
 
 License:
 --------
-The GPL (couldn't be any other, could it?)
+GNU GPL Version 2
 See License.txt for details.
 
 Contact:
