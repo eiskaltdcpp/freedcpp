@@ -929,7 +929,7 @@
   <widget class="GtkAboutDialog" id="aboutDialog">
     <property name="destroy_with_parent">True</property>
     <property name="type_hint">GDK_WINDOW_TYPE_HINT_DIALOG</property>
-    <property name="copyright" translatable="yes">Copyright © 2009 FreeDC++</property>
+    <property name="copyright" translatable="yes">Copyright © 2009-2010 FreeDC++</property>
     <property name="comments" translatable="yes">DC++ Client based on the source code LinuxDC++
 
 FreeDC++ version: 0.0.1
