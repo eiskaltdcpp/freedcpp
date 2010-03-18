@@ -1489,7 +1489,7 @@ void Hub::onSendMessage_gui(GtkEntry *entry, gpointer data)
 				} else
 					hub->addStatusMessage_gui(param + _(" is favorite user"), Msg::STATUS, Sound::NONE);
 			} else
-				hub->addStatusMessage_gui(_("User not found"), Msg::SYSTEM, Sound::NONE);
+				hub->addStatusMessage_gui(_("Not found user: ") + param, Msg::SYSTEM, Sound::NONE);
 		}
 		else if (command == "removefu" || command == "rmfu")
 		{
@@ -1524,7 +1524,7 @@ void Hub::onSendMessage_gui(GtkEntry *entry, gpointer data)
 				WulforManager::get()->dispatchClientFunc(func2);
 			}
 			else
-				hub->addStatusMessage_gui(_("User not found"), Msg::SYSTEM, Sound::NONE);
+				hub->addStatusMessage_gui(_("Not found user: ") + param, Msg::SYSTEM, Sound::NONE);
 		}
 		else if (command == "grant")
 		{
@@ -1534,7 +1534,7 @@ void Hub::onSendMessage_gui(GtkEntry *entry, gpointer data)
 				WulforManager::get()->dispatchClientFunc(func);
 			}
 			else
-				hub->addStatusMessage_gui(_("User not found"), Msg::SYSTEM, Sound::NONE);
+				hub->addStatusMessage_gui(_("Not found user: ") + param, Msg::SYSTEM, Sound::NONE);
 		}
 		else if (command == "emoticons" || command == "emot")
 		{
@@ -1551,7 +1551,7 @@ void Hub::onSendMessage_gui(GtkEntry *entry, gpointer data)
 		}
 		else if (command == "freedcpp")
 		{
-			hub->addStatusMessage_gui(string("freedcpp 0.0.1.88/0.75, ") + _("project home: ") +
+			hub->addStatusMessage_gui(string("freedcpp 0.0.1.89/0.75, ") + _("project home: ") +
 				"http://freedcpp.narod.ru http://code.google.com/p/freedcpp", Msg::SYSTEM, Sound::NONE);
 		}
 		else if (command == "help")
@@ -1601,7 +1601,7 @@ void Hub::onSendMessage_gui(GtkEntry *entry, gpointer data)
 			if (hub->userMap.find(param) != hub->userMap.end())
 				WulforManager::get()->getMainWindow()->addPrivateMessage_gui(Msg::UNKNOWN, hub->userMap[param], hub->client->getHubUrl());
 			else
-				hub->addStatusMessage_gui(_("User not found"), Msg::SYSTEM, Sound::NONE);
+				hub->addStatusMessage_gui(_("Not found user: ") + param, Msg::SYSTEM, Sound::NONE);
 		}
 		else if (command == "rebuild")
 		{
