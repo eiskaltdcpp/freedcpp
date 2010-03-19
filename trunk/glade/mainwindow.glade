@@ -381,9 +381,15 @@
                     <child>
                       <widget class="GtkImageMenuItem" id="aboutMenuItem">
                         <property name="visible">True</property>
-                        <property name="label">gtk-about</property>
+                        <property name="label" translatable="yes">About FreeDC++</property>
                         <property name="use_underline">True</property>
-                        <property name="use_stock">True</property>
+                        <child internal-child="image">
+                          <widget class="GtkImage" id="aboutMenuImage">
+                            <property name="visible">True</property>
+                            <property name="stock">freedcpp</property>
+                            <property name="icon_size">1</property>
+                          </widget>
+                        </child>
                       </widget>
                     </child>
                   </widget>
@@ -949,7 +955,7 @@ In addition, as a special exception, compiling, linking, and/or using OpenSSL wi
 Contributors:
   Leliksan Floyd
 </property>
-    <property name="artists">troll (icons users)</property>
+    <property name="artists">troll (icons: users, logo)</property>
     <property name="wrap_license">True</property>
     <child internal-child="vbox">
       <widget class="GtkVBox" id="dialog-vbox3">
