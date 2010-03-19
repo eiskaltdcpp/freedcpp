@@ -725,23 +725,23 @@ void Hub::applyEmoticons_gui()
 	gtk_text_buffer_apply_tag(chatBuffer, TagsMap[tagMsg], &start_iter, &end_iter);
 
 	/* emoticons */
-	if (!Emoticons::get()->useEmoticons_gui())
+	if (tagMsg == TAG_SYSTEM || tagMsg == TAG_STATUS)
 	{
-		setStatus_gui("statusMain", _(" *** emoticons no loads"));
+		return;
+	}
+	else if (!Emoticons::get()->useEmoticons_gui())
+	{
+		setStatus_gui("statusMain", _(" *** Emoticons no loads"));
 		return;
 	}
 	else if (!useEmoticons)
 	{
-		setStatus_gui("statusMain", _(" *** emoticons mode off"));
+		setStatus_gui("statusMain", _(" *** Emoticons mode off"));
 		return;
 	}
 	else if (totalEmoticons >= EMOTICONS_MAX)
 	{
-		setStatus_gui("statusMain", _(" *** emoticons over"));
-		return;
-	}
-	else if (tagMsg == TAG_SYSTEM || tagMsg == TAG_STATUS)
-	{
+		setStatus_gui("statusMain", _(" *** Emoticons over"));
 		return;
 	}
 
@@ -1541,17 +1541,17 @@ void Hub::onSendMessage_gui(GtkEntry *entry, gpointer data)
 			if (hub->useEmoticons)
 			{
 				hub->useEmoticons = FALSE;
-				hub->setStatus_gui("statusMain", _(" *** emoticons mode off"));
+				hub->addStatusMessage_gui(_("Emoticons mode off"), Msg::SYSTEM, Sound::NONE);
 			}
 			else
 			{
 				hub->useEmoticons = TRUE;
-				hub->setStatus_gui("statusMain", _(" *** emoticons mode on"));
+				hub->addStatusMessage_gui(_("Emoticons mode on"), Msg::SYSTEM, Sound::NONE);
 			}
 		}
 		else if (command == "freedcpp")
 		{
-			hub->addStatusMessage_gui(string("freedcpp 0.0.1.89/0.75, ") + _("project home: ") +
+			hub->addStatusMessage_gui(string("freedcpp 0.0.1.90/0.75, ") + _("project home: ") +
 				"http://freedcpp.narod.ru http://code.google.com/p/freedcpp", Msg::SYSTEM, Sound::NONE);
 		}
 		else if (command == "help")
