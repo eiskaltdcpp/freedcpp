@@ -1460,20 +1460,6 @@ void MainWindow::openOwnList_client(bool useSetting)
 	WulforManager::get()->dispatchGuiFunc(func);
 }
 
-string MainWindow::getFilename_client(Transfer *t)
-{
-	string filename;
-
- 	if (t->getType() == Transfer::TYPE_FULL_LIST || t->getType() == Transfer::TYPE_PARTIAL_LIST)
-		filename = _("File list");
-	else if (t->getType() == Transfer::TYPE_TREE)
-		filename = _("TTH: ") + Util::getFileName(t->getPath());
-	else 
-		filename = Util::getFileName(t->getPath());
-
-	return filename;
-}
-
 void MainWindow::on(LogManagerListener::Message, time_t t, const string &message) throw()
 {
 	typedef Func2<MainWindow, string, time_t> F2;

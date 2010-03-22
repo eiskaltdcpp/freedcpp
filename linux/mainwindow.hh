@@ -142,7 +142,6 @@ class MainWindow:
 		void autoConnect_client();
 		void startSocket_client();
 		void refreshFileList_client();
-		std::string getFilename_client(dcpp::Transfer *t);
 
 		// Client callbacks
 		virtual void on(dcpp::LogManagerListener::Message, time_t t, const std::string &m) throw();
