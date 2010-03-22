@@ -42,9 +42,6 @@ using namespace dcpp;
 Transfers::Transfers() :
 	Entry(Entry::TRANSFERS, "transfers.glade")
 {
-	// Should this FINALLY be implemented?
-	gtk_widget_set_sensitive(getWidget("addToFavoritesItem"), FALSE);
-
 	// Initialize the user command menu
 	userCommandMenu = new UserCommandMenu(getWidget("userCommandMenu"), ::UserCommand::CONTEXT_CHAT);
 	addChild(userCommandMenu);
