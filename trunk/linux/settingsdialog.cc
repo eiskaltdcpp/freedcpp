@@ -858,7 +858,7 @@ void Settings::initAppearance_gui()
 		addOption_gui(appearanceStore, _("Sort favorite users first"), SettingsManager::SORT_FAVUSERS_FIRST);
 		addOption_gui(appearanceStore, _("Use OEM monospaced font for chat windows"), SettingsManager::USE_OEM_MONOFONT);
 		addOption_gui(appearanceStore, _("Use magnet split"), "use-magnet-split");
-		addOption_gui(appearanceStore, _("Use blinking status icon when receiving PM"), "status-icon-blink-use");
+		addOption_gui(appearanceStore, _("Use blinking status icon"), "status-icon-blink-use");
 		addOption_gui(appearanceStore, _("Use emoticons"), "emoticons-use");
 		addOption_gui(appearanceStore, _("Do not close the program, hide in the system tray"), "main-window-no-close");
 		/// @todo: Uncomment when implemented
@@ -1079,11 +1079,11 @@ void Settings::initAppearance_gui()
 			"notify-private-message-use", "notify-private-message-title",
 			"notify-private-message-icon", NOTIFY_URGENCY_NORMAL);
 
-		addOption_gui(notifyStore, wsm, _("Hub connect"),
+		addOption_gui(notifyStore, wsm, _("Hub connected"),
 			"notify-hub-connect-use", "notify-hub-connect-title",
 			"notify-hub-connect-icon", NOTIFY_URGENCY_NORMAL);
 
-		addOption_gui(notifyStore, wsm, _("Hub disconnect"),
+		addOption_gui(notifyStore, wsm, _("Hub disconnected"),
 			"notify-hub-disconnect-use", "notify-hub-disconnect-title",
 			"notify-hub-disconnect-icon", NOTIFY_URGENCY_CRITICAL);
 
@@ -1609,7 +1609,7 @@ void Settings::onDefaultThemeButton_gui(GtkWidget *widget, gpointer data)
 {
 	Settings *s = (Settings *)data;
 
-	gtk_label_set_text(GTK_LABEL(s->getWidget("currentThemeLabel")), _("default icons and text styles"));
+	gtk_label_set_text(GTK_LABEL(s->getWidget("currentThemeLabel")), _("default theme"));
 	s->applyIconsTheme(TRUE);
 	s->applyTextTheme(TRUE);
 }
@@ -1917,7 +1917,7 @@ void Settings::onPreviewAdd_gui(GtkWidget *widget, gpointer data)
 
 	if (name.empty() || app.empty() || ext.empty())
 	{
-		s->showErrorDialog(_("Name and command must not be empty"));
+		s->showErrorDialog(_("Must not be empty..."));
 		return;
 	}
 
@@ -1925,7 +1925,7 @@ void Settings::onPreviewAdd_gui(GtkWidget *widget, gpointer data)
 
 	if (wsm->getPreviewApp(name))
 	{
-		s->showErrorDialog(_("Add player failed"));
+		s->showErrorDialog(_("Error"));
 		return;
 	}
 
@@ -1939,7 +1939,6 @@ void Settings::onPreviewAdd_gui(GtkWidget *widget, gpointer data)
 			s->previewAppView.col(_("Extensions")), ext.c_str(),
 			-1);
 	}
-	else s->showErrorDialog(_(":("));
 }
 
 void Settings::onPreviewRemove_gui(GtkWidget *widget, gpointer data)
@@ -2004,7 +2003,7 @@ void Settings::onPreviewApply_gui(GtkWidget *widget, gpointer data)
 
 	if (name.empty() || app.empty() || ext.empty())
 	{
-		s->showErrorDialog(_("Name and command must not be empty"));
+		s->showErrorDialog(_("Must not be empty..."));
 		return;
 	}
 

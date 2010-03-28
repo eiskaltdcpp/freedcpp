@@ -165,9 +165,9 @@ WulforSettingsManager::WulforSettingsManager():
 	defaultString.insert(StringMap::value_type("notify-download-finished-ul-icon", ""));
 	defaultString.insert(StringMap::value_type("notify-private-message-title", _("Private message")));
 	defaultString.insert(StringMap::value_type("notify-private-message-icon", ""));
-	defaultString.insert(StringMap::value_type("notify-hub-disconnect-title", _("Hub disconnect")));
+	defaultString.insert(StringMap::value_type("notify-hub-disconnect-title", _("Hub disconnected")));
 	defaultString.insert(StringMap::value_type("notify-hub-disconnect-icon", ""));
-	defaultString.insert(StringMap::value_type("notify-hub-connect-title", _("Hub connect")));
+	defaultString.insert(StringMap::value_type("notify-hub-connect-title", _("Hub connected")));
 	defaultString.insert(StringMap::value_type("notify-hub-connect-icon", ""));
 	defaultString.insert(StringMap::value_type("notify-fuser-join-title", _("Favorite user joined")));
 	defaultString.insert(StringMap::value_type("notify-fuser-join-icon", ""));

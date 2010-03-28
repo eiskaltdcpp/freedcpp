@@ -470,23 +470,23 @@ void PrivateMessage::applyEmoticons_gui()
 	gtk_text_buffer_apply_tag(messageBuffer, TagsMap[tagMsg], &start_iter, &end_iter);
 
 	/* emoticons */
-	if (!Emoticons::get()->useEmoticons_gui())
+	if (tagMsg == TAG_SYSTEM || tagMsg == TAG_STATUS)
 	{
-		setStatus_gui(_(" *** emoticons no loads"));
+		return;
+	}
+	else if (!Emoticons::get()->useEmoticons_gui())
+	{
+		setStatus_gui(_(" *** Emoticons not loaded"));
 		return;
 	}
 	else if (!useEmoticons)
 	{
-		setStatus_gui(_(" *** emoticons mode off"));
+		setStatus_gui(_(" *** Emoticons mode off"));
 		return;
 	}
 	else if (totalEmoticons >= EMOTICONS_MAX)
 	{
-		setStatus_gui(_(" *** emoticons over"));
-		return;
-	}
-	else if (tagMsg == TAG_SYSTEM || tagMsg == TAG_STATUS)
-	{
+		setStatus_gui(_(" *** Emoticons limit"));
 		return;
 	}
 
@@ -565,7 +565,7 @@ void PrivateMessage::applyEmoticons_gui()
 		{
 			if (totalEmoticons >= EMOTICONS_MAX)
 			{
-				setStatus_gui(_(" *** emoticons no loads"));
+				setStatus_gui(_(" *** Emoticons limit"));
 				return;
 			}
 
@@ -870,12 +870,12 @@ void PrivateMessage::onSendMessage_gui(GtkEntry *entry, gpointer data)
 			if (pm->useEmoticons)
 			{
 				pm->useEmoticons = FALSE;
-				pm->setStatus_gui(_(" *** emoticons mode off"));
+				pm->addStatusMessage_gui(_("Emoticons mode off"), Msg::SYSTEM);
 			}
 			else
 			{
 				pm->useEmoticons = TRUE;
-				pm->setStatus_gui(_(" *** emoticons mode on"));
+				pm->addStatusMessage_gui(_("Emoticons mode on"), Msg::SYSTEM);
 			}
 		}
 		else if (command == "help")
