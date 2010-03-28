@@ -693,8 +693,8 @@ void Transfers::initTransfer_gui(StringMap params)
 		else
 		{
 			string filename = params[_("Filename")];
-			if (filename.find(_("TTH: ")) != string::npos)
-				filename = filename.substr((string(_("TTH: "))).length());
+			if (filename.find("TTH: ") != string::npos)
+				filename = filename.substr((string("TTH: ")).length());
 			gtk_tree_store_append(transferStore, &newParent, NULL);
 			newParentValid = TRUE;
 			gtk_tree_store_set(transferStore, &newParent,
@@ -858,7 +858,7 @@ void Transfers::getParams_client(StringMap& params, Transfer* tr)
 	if (tr->getType() == Transfer::TYPE_FULL_LIST || tr->getType() == Transfer::TYPE_PARTIAL_LIST)
 		params[_("Filename")] = _("File list");
 	else if (tr->getType() == Transfer::TYPE_TREE)
-		params[_("Filename")] = _("TTH: ") + Util::getFileName(tr->getPath());
+		params[_("Filename")] = "TTH: " + Util::getFileName(tr->getPath());
 	else 
 		params[_("Filename")] = Util::getFileName(tr->getPath());
 	params[_("User")] = WulforUtil::getNicks(user);

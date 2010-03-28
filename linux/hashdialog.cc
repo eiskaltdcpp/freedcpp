@@ -64,7 +64,7 @@ void Hash::updateStats_gui(string file, int64_t bytes, size_t files, uint32_t ti
 	{
 		double speedStat = (((double)(startBytes - bytes)) * 1000) / diff;
 
-		gtk_label_set_text(GTK_LABEL(getWidget("labelSpeed")), string(Util::formatBytes((int64_t)speedStat) + "/" + _("s") + ", " + Util::formatBytes(bytes) + " left").c_str());
+		gtk_label_set_text(GTK_LABEL(getWidget("labelSpeed")), string(Util::formatBytes((int64_t)speedStat) + "/" + _("s") + ", " + Util::formatBytes(bytes) + _(" left")).c_str());
 
 		if (speedStat == 0)
 		{

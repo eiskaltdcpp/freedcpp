@@ -273,7 +273,7 @@
                           <widget class="GtkLabel" id="tlsLabel">
                             <property name="visible">True</property>
                             <property name="xalign">1</property>
-                            <property name="label" translatable="yes">TLS</property>
+                            <property name="label">TLS</property>
                           </widget>
                           <packing>
                             <property name="left_attach">2</property>
@@ -353,7 +353,7 @@
                           <widget class="GtkLabel" id="udpLabel">
                             <property name="visible">True</property>
                             <property name="xalign">1</property>
-                            <property name="label" translatable="yes">UDP</property>
+                            <property name="label">UDP</property>
                           </widget>
                           <packing>
                             <property name="left_attach">2</property>
@@ -368,7 +368,7 @@
                           <widget class="GtkLabel" id="tcpLabel">
                             <property name="visible">True</property>
                             <property name="xalign">1</property>
-                            <property name="label" translatable="yes">TCP</property>
+                            <property name="label">TCP</property>
                             <property name="justify">GTK_JUSTIFY_RIGHT</property>
                           </widget>
                           <packing>
@@ -675,7 +675,7 @@
                               <widget class="GtkRadioButton" id="socksRadioButton">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
-                                <property name="label" translatable="yes">SOCKS5</property>
+                                <property name="label">SOCKS5</property>
                                 <property name="use_underline">True</property>
                                 <property name="response_id">0</property>
                                 <property name="draw_indicator">True</property>
@@ -2735,7 +2735,7 @@ see man strftime for details.</property>
                               <widget class="GtkCheckButton" id="soundPMReceivedCheckButton">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
-                                <property name="label" translatable="yes">Make an annoying sound avery time a private is received.</property>
+                                <property name="label" translatable="yes">Every time a private message is received</property>
                                 <property name="response_id">0</property>
                                 <property name="draw_indicator">True</property>
                               </widget>
@@ -2747,7 +2747,7 @@ see man strftime for details.</property>
                               <widget class="GtkCheckButton" id="soundPMWindowCheckButton">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
-                                <property name="label" translatable="yes">Make an annoyng sound when a private message windows is open.</property>
+                                <property name="label" translatable="yes">When a private message window is opened</property>
                                 <property name="response_id">0</property>
                                 <property name="draw_indicator">True</property>
                               </widget>
@@ -3124,7 +3124,7 @@ default</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">True</property>
-                                    <property name="label" translatable="yes">ok</property>
+                                    <property name="label">ok</property>
                                     <property name="response_id">0</property>
                                   </widget>
                                   <packing>
@@ -4111,7 +4111,7 @@ default</property>
                               <widget class="GtkLabel" id="label161">
                                 <property name="visible">True</property>
                                 <property name="xalign">1</property>
-                                <property name="label" translatable="yes">CID</property>
+                                <property name="label">CID</property>
                               </widget>
                               <packing>
                                 <property name="expand">False</property>

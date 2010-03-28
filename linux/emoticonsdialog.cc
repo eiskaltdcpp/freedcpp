@@ -134,7 +134,7 @@ void EmoticonsDialog::addIconSizeMenu(GtkWidget *item)
 			check_item = gtk_separator_menu_item_new();
 			gtk_menu_shell_append(GTK_MENU_SHELL(menu), check_item);
 
-			check_item = gtk_check_menu_item_new_with_label(_("Default"));
+			check_item = gtk_check_menu_item_new_with_label("100%");
 			gtk_menu_shell_append(GTK_MENU_SHELL(menu), check_item);
 		}
 

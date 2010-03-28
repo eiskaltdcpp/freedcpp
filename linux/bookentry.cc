@@ -96,7 +96,7 @@ void BookEntry::setLabel_gui(string text)
 	if (len > labelSize)
 	{
 		gchar truncatedText[text.size()];
-		const string clipText = _("...");
+		const string clipText = "...";
 		len = labelSize - g_utf8_strlen(clipText.c_str(), -1);
 		g_utf8_strncpy(truncatedText, text.c_str(), len);
 		truncatedLabelText = truncatedText + clipText;

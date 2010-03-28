@@ -731,7 +731,7 @@ void Hub::applyEmoticons_gui()
 	}
 	else if (!Emoticons::get()->useEmoticons_gui())
 	{
-		setStatus_gui("statusMain", _(" *** Emoticons no loads"));
+		setStatus_gui("statusMain", _(" *** Emoticons not loaded"));
 		return;
 	}
 	else if (!useEmoticons)
@@ -741,7 +741,7 @@ void Hub::applyEmoticons_gui()
 	}
 	else if (totalEmoticons >= EMOTICONS_MAX)
 	{
-		setStatus_gui("statusMain", _(" *** Emoticons over"));
+		setStatus_gui("statusMain", _(" *** Emoticons limit"));
 		return;
 	}
 
@@ -820,7 +820,7 @@ void Hub::applyEmoticons_gui()
 		{
 			if (totalEmoticons >= EMOTICONS_MAX)
 			{
-				setStatus_gui("statusMain", _(" *** emoticons over"));
+				setStatus_gui("statusMain", _(" *** Emoticons limit"));
 				return;
 			}
 
@@ -1551,8 +1551,8 @@ void Hub::onSendMessage_gui(GtkEntry *entry, gpointer data)
 		}
 		else if (command == "freedcpp")
 		{
-			hub->addStatusMessage_gui(string("freedcpp 0.0.1.93/0.75, ") + _("project home: ") +
-				"http://freedcpp.narod.ru http://code.google.com/p/freedcpp", Msg::SYSTEM, Sound::NONE);
+			hub->addStatusMessage_gui(string("freedcpp 0.0.1.94/0.75, ") + _("project home: ") +
+				"http://code.google.com/p/freedcpp", Msg::SYSTEM, Sound::NONE);
 		}
 		else if (command == "help")
 		{
