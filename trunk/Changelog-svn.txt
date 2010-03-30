@@ -1,3 +1,8 @@
+		--- freedcpp 0.0.x ---
+
+r99: 0.0.1.95
+* Обновил Changelog.txt
+
 r98: 0.0.1.94
 * Обновил freedcpp.pot, ru.po (перевод).
 
@@ -352,6 +357,8 @@ r5: 0.0.1.1
   * Minor Transfers cleanup.
   * Fixed exit and about dialogs from appearing as top-level windows.
   * Fix transferview sorting.
+
+		--- freedcpp 0.0.1 ---
 
 r3: 0.0.1
 * Программа сменила имя на FreeDC++.
