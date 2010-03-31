@@ -102,6 +102,7 @@ WulforSettingsManager::WulforSettingsManager():
 	defaultInt.insert(IntMap::value_type("notify-only-not-active", 0));
 	defaultInt.insert(IntMap::value_type("status-icon-blink-use", 1));
 	defaultInt.insert(IntMap::value_type("emoticons-use", 1));
+	defaultInt.insert(IntMap::value_type("pm", 0));//Send private message when double clicked in the user list.
 	defaultString.insert(StringMap::value_type("downloadqueue-order", ""));
 	defaultString.insert(StringMap::value_type("downloadqueue-width", ""));
 	defaultString.insert(StringMap::value_type("downloadqueue-visibility", ""));
