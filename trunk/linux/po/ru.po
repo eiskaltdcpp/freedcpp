@@ -783,17 +783,16 @@ msgid "Country"
 msgstr "Страна"
 
 #: mainwindow.glade:939
-#, fuzzy
 msgid ""
 "DC++ Client based on the source code LinuxDC++\n"
 "\n"
-"FreeDC++ version: 0.0.1\n"
+"FreeDC++ version: 0.0.2\n"
 "Core version: 0.75"
 msgstr ""
 "DC++ клиент основан на исходном коде LinuxDC++\n"
 "\n"
-"FreeDC++ версия: 0.0.1\n"
-"Версия ядра: 0.7091"
+"FreeDC++ версия: 0.0.2\n"
+"Версия ядра: 0.75"
 
 #: settingsdialog.glade:3177 emoticonsdialog.cc:104 previewmenu.cc:88
 msgid "Default"
