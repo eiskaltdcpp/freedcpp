@@ -1106,7 +1106,10 @@ gboolean Hub::onNickListButtonRelease_gui(GtkWidget *widget, GdkEventButton *eve
 	{
 		if (event->button == 1 && hub->oldType == GDK_2BUTTON_PRESS)
 		{
-			hub->onBrowseItemClicked_gui(NULL, data);
+			if (WGETB("pm"))
+				hub->onMsgItemClicked_gui(NULL, data);
+			else
+				hub->onBrowseItemClicked_gui(NULL, data);
 		}
 		else if (event->button == 2 && event->type == GDK_BUTTON_RELEASE)
 		{
@@ -1551,7 +1554,7 @@ void Hub::onSendMessage_gui(GtkEntry *entry, gpointer data)
 		}
 		else if (command == "freedcpp")
 		{
-			hub->addStatusMessage_gui(string("freedcpp 0.0.2/0.75, ") + _("project home: ") +
+			hub->addStatusMessage_gui(string("freedcpp 0.0.2.1/0.75, ") + _("project home: ") +
 				"http://code.google.com/p/freedcpp", Msg::SYSTEM, Sound::NONE);
 		}
 		else if (command == "help")
