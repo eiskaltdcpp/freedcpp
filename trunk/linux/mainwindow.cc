@@ -31,6 +31,7 @@
 #include <dcpp/Upload.h>
 #include <dcpp/Download.h>
 #include <dcpp/ClientManager.h>
+#include <dcpp/version.h>
 #include "downloadqueue.hh"
 #include "favoritehubs.hh"
 #include "finishedtransfers.hh"
@@ -45,6 +46,7 @@
 #include "UserCommandMenu.hh"
 #include "wulformanager.hh"
 #include "WulforUtil.hh"
+#include "version.hh"
 
 using namespace std;
 using namespace dcpp;
@@ -74,7 +76,13 @@ MainWindow::MainWindow():
 	gtk_window_set_transient_for(GTK_WINDOW(getWidget("magnetDialog")), window);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(getWidget("transferCheckButton")), TRUE);
 
-	// set logo 96x96 about dialog
+	// About dialog
+	gchar *comments = g_strdup_printf(_("DC++ Client based on the source code LinuxDC++\n\nFreeDC++ version: %s.%s\nCore version: %s"),
+		GUI_VERSION_STRING, GUI_VERSION_BUILD_STRING, VERSIONSTRING);
+	gtk_about_dialog_set_comments(GTK_ABOUT_DIALOG(getWidget("aboutDialog")), comments);
+	g_free(comments);
+
+	// set logo 96x96
 	GtkIconTheme *iconTheme = gtk_icon_theme_get_default();
 	GdkPixbuf *logo = gtk_icon_theme_load_icon(iconTheme, g_get_prgname(), 96, GTK_ICON_LOOKUP_FORCE_SVG, NULL);
 
@@ -139,6 +147,7 @@ MainWindow::MainWindow():
 	g_signal_connect(getWidget("aboutMenuItem"), "activate", G_CALLBACK(onAboutClicked_gui), (gpointer)this);
 	g_signal_connect(getWidget("transferCheckButton"), "toggled", G_CALLBACK(onTransferToggled_gui), (gpointer)this);
 
+	// Help menu
 	g_object_set_data_full(G_OBJECT(getWidget("homeMenuItem")), "link",
 		g_strdup("http://freedcpp.narod.ru"), g_free);
 	g_signal_connect(getWidget("homeMenuItem"), "activate", G_CALLBACK(onLinkClicked_gui), NULL);

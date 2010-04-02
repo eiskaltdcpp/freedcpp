@@ -26,6 +26,7 @@
 #include <dcpp/SearchManager.h>
 #include <dcpp/ShareManager.h>
 #include <dcpp/UserCommand.h>
+#include <dcpp/version.h>
 #include "privatemessage.hh"
 #include "search.hh"
 #include "settingsmanager.hh"
@@ -34,6 +35,7 @@
 #include "UserCommandMenu.hh"
 #include "wulformanager.hh"
 #include "WulforUtil.hh"
+#include "version.hh"
 
 using namespace std;
 using namespace dcpp;
@@ -1554,8 +1556,7 @@ void Hub::onSendMessage_gui(GtkEntry *entry, gpointer data)
 		}
 		else if (command == "freedcpp")
 		{
-			hub->addStatusMessage_gui(string("freedcpp 0.0.2.1/0.75, ") + _("project home: ") +
-				"http://code.google.com/p/freedcpp", Msg::SYSTEM, Sound::NONE);
+			hub->addStatusMessage_gui(string(GUI_PACKAGE " " GUI_VERSION_STRING "." GUI_VERSION_BUILD_STRING "/" VERSIONSTRING ", ") + _("project home: ") + "http://code.google.com/p/freedcpp", Msg::SYSTEM, Sound::NONE);
 		}
 		else if (command == "help")
 		{
