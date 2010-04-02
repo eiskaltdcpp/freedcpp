@@ -312,8 +312,14 @@ else:
 	# install icons
 	env.Alias('install', env.InstallAs(target = target_icons, source = source_icons))
 	
+	# install pixmap file
+	env.Alias('install', env.Install(dir = env['FAKE_ROOT'] + env['PREFIX'] + '/share/pixmaps/', source = 'icons/' + APP_NAME + '.xpm'))
+	
 	# install text files
 	env.Alias('install', env.Install(dir = env['FAKE_ROOT'] + env['PREFIX'] + '/share/doc/' + APP_NAME, source = text_files))
+	
+	# install desktop file
+	env.Alias('install', env.Install(dir = env['FAKE_ROOT'] + env['PREFIX'] + '/share/applications/', source = APP_NAME + '.desktop'))
 	
 	# install app file
 	env.Alias('install', env.Install(dir = env['FAKE_ROOT'] + env['PREFIX'] + '/bin', source = APP_NAME))
