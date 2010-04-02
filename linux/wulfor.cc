@@ -30,10 +30,10 @@
 #include "settingsmanager.hh"
 #include "wulformanager.hh"
 #include "WulforUtil.hh"
+#include "version.hh"
 #include <iostream>
 #include <signal.h>
 
-#define GUI_PACKAGE "freedcpp"
 #define GUI_LOCALE_DIR _DATADIR PATH_SEPARATOR_STR "locale"
 
 BaconMessageConnection *connection = NULL;

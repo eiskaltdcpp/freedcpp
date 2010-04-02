@@ -936,10 +936,6 @@
     <property name="destroy_with_parent">True</property>
     <property name="type_hint">GDK_WINDOW_TYPE_HINT_DIALOG</property>
     <property name="copyright">Copyright © FreeDC++ 2009-2010</property>
-    <property name="comments" translatable="yes">DC++ Client based on the source code LinuxDC++
-
-FreeDC++ version: 0.0.2
-Core version: 0.75</property>
     <property name="license" translatable="yes">
 This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
 
