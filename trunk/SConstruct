@@ -182,6 +182,11 @@ if not 'install' in COMMAND_LINE_TARGETS:
 		print '\tNote: You might have the lib but not the headers'
 		Exit(1)
 
+	# Needed for XFlush(). Headers shouldn't be needed since we include gdk/gdkx.h
+	if not conf.CheckLib('X11'):
+		print '\tX11 library not found'
+		Exit(1)
+
 	if not conf.CheckHeader('iconv.h'):
 		Exit(1)
 	elif conf.CheckLibWithHeader('iconv', 'iconv.h', 'c', 'iconv(0, (const char **)0, 0, (char**)0, 0);'):

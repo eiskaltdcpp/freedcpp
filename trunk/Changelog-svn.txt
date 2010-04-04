@@ -1,5 +1,10 @@
 		--- freedcpp 0.0.x ---
 
+r105: 0.0.2.4
+* Антифриз для GUI (Issue 33).
+* Ревизия 350 (linuxdcpp, fixed libX11 linking issue).
+* Ревизия 349 (linuxdcpp, fixed an issue with the GUI randomly freezing).
+
 r104: 0.0.2.3
 * Добавил .desktop файл (Issue 31).
 
