@@ -1,5 +1,8 @@
 		--- freedcpp 0.0.x ---
 
+r106: 0.0.2.5
+* Доработка r102 (Issue 32).
+
 r105: 0.0.2.4
 * Антифриз для GUI (Issue 33).
 * Ревизия 350 (linuxdcpp, fixed libX11 linking issue).
