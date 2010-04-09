@@ -1203,6 +1203,11 @@ void MainWindow::onFinishedUploadsClicked_gui(GtkWidget *widget, gpointer data)
 void MainWindow::onQuitClicked_gui(GtkWidget *widget, gpointer data)
 {
 	MainWindow *mw = (MainWindow *)data;
+
+	// fix emit signal (status-icon menu quit)
+	if (GTK_WIDGET_VISIBLE(mw->getWidget("exitDialog")))
+		return;
+
 	mw->onQuit = TRUE;
 	gboolean retVal; // Not interested in the value, though.
 	g_signal_emit_by_name(mw->window, "delete-event", NULL, &retVal);
