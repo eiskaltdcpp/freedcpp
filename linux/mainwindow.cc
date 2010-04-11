@@ -1302,7 +1302,12 @@ void MainWindow::onNextTabClicked_gui(GtkWidget* widget, gpointer data)
 void MainWindow::onAboutClicked_gui(GtkWidget *widget, gpointer data)
 {
 	MainWindow *mw = (MainWindow *)data;
-	gtk_dialog_run(GTK_DIALOG(mw->getWidget("aboutDialog")));
+	gint response = gtk_dialog_run(GTK_DIALOG(mw->getWidget("aboutDialog")));
+
+	// Fix crash, if the dialog gets programmatically destroyed.
+	if (response == GTK_RESPONSE_NONE)
+		return;
+
 	gtk_widget_hide(mw->getWidget("aboutDialog"));
 }
 
