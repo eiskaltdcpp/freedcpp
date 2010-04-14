@@ -1102,7 +1102,7 @@ void PrivateMessage::onMagnetPropertiesClicked_gui(GtkMenuItem *item, gpointer d
 {
 	PrivateMessage *pm = (PrivateMessage *)data;
 
-	WulforManager::get()->getMainWindow()->openMagnetDialog_gui(pm->selectedTagStr);
+	MainWindow::openMagnetDialog_gui(pm->selectedTagStr);
 }
 
 void PrivateMessage::sendMessage_client(string message)

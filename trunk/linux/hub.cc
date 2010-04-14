@@ -1874,7 +1874,7 @@ void Hub::onMagnetPropertiesClicked_gui(GtkMenuItem *item, gpointer data)
 {
 	Hub *hub = (Hub *)data;
 
-	WulforManager::get()->getMainWindow()->openMagnetDialog_gui(hub->selectedTagStr);
+	MainWindow::openMagnetDialog_gui(hub->selectedTagStr);
 }
 
 void Hub::onUserListToggled_gui(GtkWidget *widget, gpointer data)
