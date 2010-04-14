@@ -36,6 +36,9 @@ FavoriteHubs::FavoriteHubs():
 	gtk_widget_set_sensitive(getWidget("entryNick"), FALSE);
 	gtk_widget_set_sensitive(getWidget("entryUserDescription"), FALSE);
 
+	gtk_window_set_transient_for(GTK_WINDOW(getWidget("favoriteHubsDialog")), GTK_WINDOW(WulforManager::get()->getMainWindow()->getContainer()));
+	gtk_window_set_destroy_with_parent(GTK_WINDOW(getWidget("favoriteHubsDialog")), TRUE);
+
 	// Fill the charset drop-down list in edit fav hub dialog.
 	vector<string> &charsets = WulforUtil::getCharsets();
 	for (vector<string>::const_iterator it = charsets.begin(); it != charsets.end(); ++it)
@@ -88,6 +91,8 @@ FavoriteHubs::FavoriteHubs():
 FavoriteHubs::~FavoriteHubs()
 {
 	FavoriteManager::getInstance()->removeListener(this);
+
+	gtk_widget_destroy(getWidget("favoriteHubsDialog"));
 }
 
 void FavoriteHubs::show()
@@ -138,12 +143,20 @@ void FavoriteHubs::removeEntry_gui(string address)
 	}
 }
 
-void FavoriteHubs::showErrorDialog_gui(const string &description)
+bool FavoriteHubs::showErrorDialog_gui(const string &description, FavoriteHubs *fh)
 {
-	GtkWidget* dialog = gtk_message_dialog_new(GTK_WINDOW(getWidget("favoriteHubsDialog")),
+	GtkWidget* dialog = gtk_message_dialog_new(GTK_WINDOW(fh->getWidget("favoriteHubsDialog")),
 		GTK_DIALOG_DESTROY_WITH_PARENT, GTK_MESSAGE_WARNING, GTK_BUTTONS_OK, "%s", description.c_str());
-	gtk_dialog_run(GTK_DIALOG(dialog));
+
+	gint response = gtk_dialog_run(GTK_DIALOG(dialog));
+
+	// Fix crash, if the dialog gets programmatically destroyed.
+	if (response == GTK_RESPONSE_NONE)
+		return FALSE;
+
 	gtk_widget_destroy(dialog);
+
+	return TRUE;
 }
 
 void FavoriteHubs::popupMenu_gui()
@@ -252,7 +265,7 @@ void FavoriteHubs::onAddEntry_gui(GtkWidget *widget, gpointer data)
 	params["Encoding"] = emptyString;
 	params["Auto Connect"] = "0";
 
-	bool updatedEntry = fh->showFavoriteHubDialog_gui(params);
+	bool updatedEntry = fh->showFavoriteHubDialog_gui(params, fh);
 
 	if (updatedEntry)
 	{
@@ -280,7 +293,7 @@ void FavoriteHubs::onEditEntry_gui(GtkWidget *widget, gpointer data)
 	params["Encoding"] = fh->favoriteView.getString(&iter, _("Encoding"));
 	params["Auto Connect"] = fh->favoriteView.getValue<gboolean>(&iter, _("Auto Connect")) ? "1" : "0";
 
-	bool entryUpdated = fh->showFavoriteHubDialog_gui(params);
+	bool entryUpdated = showFavoriteHubDialog_gui(params, fh);
 
 	if (entryUpdated)
 	{
@@ -293,76 +306,88 @@ void FavoriteHubs::onEditEntry_gui(GtkWidget *widget, gpointer data)
 	}
 }
 
-bool FavoriteHubs::showFavoriteHubDialog_gui(StringMap &params)
+bool FavoriteHubs::showFavoriteHubDialog_gui(StringMap &params, FavoriteHubs *fh)
 {
 	// Populate the dialog with initial values
-	gtk_entry_set_text(GTK_ENTRY(getWidget("entryName")), params["Name"].c_str());
-	gtk_entry_set_text(GTK_ENTRY(getWidget("entryAddress")), params["Address"].c_str());
-	gtk_entry_set_text(GTK_ENTRY(getWidget("entryDescription")), params["Description"].c_str());
-	gtk_entry_set_text(GTK_ENTRY(getWidget("entryNick")), params["Nick"].c_str());
-	gtk_entry_set_text(GTK_ENTRY(getWidget("entryPassword")), params["Password"].c_str());
-	gtk_entry_set_text(GTK_ENTRY(getWidget("entryUserDescription")), params["User Description"].c_str());
-	gtk_entry_set_text(GTK_ENTRY(getWidget("comboboxentryCharset")), params["Encoding"].c_str());
+	gtk_entry_set_text(GTK_ENTRY(fh->getWidget("entryName")), params["Name"].c_str());
+	gtk_entry_set_text(GTK_ENTRY(fh->getWidget("entryAddress")), params["Address"].c_str());
+	gtk_entry_set_text(GTK_ENTRY(fh->getWidget("entryDescription")), params["Description"].c_str());
+	gtk_entry_set_text(GTK_ENTRY(fh->getWidget("entryNick")), params["Nick"].c_str());
+	gtk_entry_set_text(GTK_ENTRY(fh->getWidget("entryPassword")), params["Password"].c_str());
+	gtk_entry_set_text(GTK_ENTRY(fh->getWidget("entryUserDescription")), params["User Description"].c_str());
+	gtk_entry_set_text(GTK_ENTRY(fh->getWidget("comboboxentryCharset")), params["Encoding"].c_str());
 
 	// Set the auto connect checkbox
 	gboolean autoConnect = params["Auto Connect"] == "1" ? TRUE : FALSE;
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(getWidget("checkButtonAutoConnect")), autoConnect);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(fh->getWidget("checkButtonAutoConnect")), autoConnect);
 
 	// Set the override default encoding checkbox. Check for "Global hub default"
 	// for backwards compatability w/ 1.0.3. Should be removed at some point.
 	gboolean overrideEncoding = !(params["Encoding"].empty() || params["Encoding"] == "Global hub default");
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(getWidget("checkbuttonEncoding")), overrideEncoding);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(fh->getWidget("checkbuttonEncoding")), overrideEncoding);
 
 	// Set the override default nick checkbox
 	gboolean overrideNick = !(params["Nick"].empty() || params["Nick"] == SETTING(NICK));
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(getWidget("checkbuttonNick")), overrideNick);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(fh->getWidget("checkbuttonNick")), overrideNick);
 
 	// Set the override default user description checkbox
 	gboolean overrideUserDescription = !(params["User Description"].empty() || params["User Description"] == SETTING(DESCRIPTION));
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(getWidget("checkbuttonUserDescription")), overrideUserDescription);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(fh->getWidget("checkbuttonUserDescription")), overrideUserDescription);
 
 	// Show the dialog
-	gint response = gtk_dialog_run(GTK_DIALOG(getWidget("favoriteHubsDialog")));
+	gint response = gtk_dialog_run(GTK_DIALOG(fh->getWidget("favoriteHubsDialog")));
+
+	// Fix crash, if the dialog gets programmatically destroyed.
+	if (response == GTK_RESPONSE_NONE)
+		return FALSE;
 
 	while (response == GTK_RESPONSE_OK)
 	{
 		params.clear();
-		params["Name"] = gtk_entry_get_text(GTK_ENTRY(getWidget("entryName")));
-		params["Address"] = gtk_entry_get_text(GTK_ENTRY(getWidget("entryAddress")));
-		params["Description"] = gtk_entry_get_text(GTK_ENTRY(getWidget("entryDescription")));
-		params["Password"] = gtk_entry_get_text(GTK_ENTRY(getWidget("entryPassword")));
-		params["Auto Connect"] = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(getWidget("checkButtonAutoConnect"))) ? "1" : "0";
+		params["Name"] = gtk_entry_get_text(GTK_ENTRY(fh->getWidget("entryName")));
+		params["Address"] = gtk_entry_get_text(GTK_ENTRY(fh->getWidget("entryAddress")));
+		params["Description"] = gtk_entry_get_text(GTK_ENTRY(fh->getWidget("entryDescription")));
+		params["Password"] = gtk_entry_get_text(GTK_ENTRY(fh->getWidget("entryPassword")));
+		params["Auto Connect"] = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(fh->getWidget("checkButtonAutoConnect"))) ? "1" : "0";
 
-		if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(getWidget("checkbuttonEncoding"))))
+		if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(fh->getWidget("checkbuttonEncoding"))))
 		{
-			gchar *encoding = gtk_combo_box_get_active_text(GTK_COMBO_BOX(getWidget("comboboxCharset")));
+			gchar *encoding = gtk_combo_box_get_active_text(GTK_COMBO_BOX(fh->getWidget("comboboxCharset")));
 			params["Encoding"] = string(encoding);
 			g_free(encoding);
 		}
 
-		if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(getWidget("checkbuttonNick"))))
+		if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(fh->getWidget("checkbuttonNick"))))
 		{
-			params["Nick"] = gtk_entry_get_text(GTK_ENTRY(getWidget("entryNick")));
+			params["Nick"] = gtk_entry_get_text(GTK_ENTRY(fh->getWidget("entryNick")));
 		}
 
-		if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(getWidget("checkbuttonUserDescription"))))
+		if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(fh->getWidget("checkbuttonUserDescription"))))
 		{
-			params["User Description"] = gtk_entry_get_text(GTK_ENTRY(getWidget("entryUserDescription")));
+			params["User Description"] = gtk_entry_get_text(GTK_ENTRY(fh->getWidget("entryUserDescription")));
 		}
 
 		if (params["Name"].empty() || params["Address"].empty())
 		{
-			showErrorDialog_gui(_("The name and address fields are required"));
-			response = gtk_dialog_run(GTK_DIALOG(getWidget("favoriteHubsDialog")));
+			if (showErrorDialog_gui(_("The name and address fields are required"), fh))
+			{
+				response = gtk_dialog_run(GTK_DIALOG(fh->getWidget("favoriteHubsDialog")));
+
+				// Fix crash, if the dialog gets programmatically destroyed.
+				if (response == GTK_RESPONSE_NONE)
+					return FALSE;
+			}
+			else
+				return FALSE;
 		}
 		else
 		{
-			gtk_widget_hide(getWidget("favoriteHubsDialog"));
+			gtk_widget_hide(fh->getWidget("favoriteHubsDialog"));
 			return TRUE;
 		}
 	}
 
-	gtk_widget_hide(getWidget("favoriteHubsDialog"));
+	gtk_widget_hide(fh->getWidget("favoriteHubsDialog"));
 	return FALSE;
 }
 
