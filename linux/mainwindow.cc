@@ -827,6 +827,7 @@ bool MainWindow::getUserCommandLines_gui(const string &command, StringMap &ucPar
 	string::size_type i = 0;
 	string::size_type j = 0;
 	string text = string("<b>") + _("Enter value for ") + "\'";
+	MainWindow *mw = WulforManager::get()->getMainWindow();
 
 	while ((i = command.find("%[line:", i)) != string::npos)
 	{
@@ -841,15 +842,20 @@ bool MainWindow::getUserCommandLines_gui(const string &command, StringMap &ucPar
 			line.clear();
 			label = text + name + "\'</b>";
 
-			gtk_label_set_label(GTK_LABEL(getWidget("ucLabel")), label.c_str());
-			gtk_entry_set_text(GTK_ENTRY(getWidget("ucLineEntry")), "");
-			gtk_widget_grab_focus(getWidget("ucLineEntry"));
+			gtk_label_set_label(GTK_LABEL(mw->getWidget("ucLabel")), label.c_str());
+			gtk_entry_set_text(GTK_ENTRY(mw->getWidget("ucLineEntry")), "");
+			gtk_widget_grab_focus(mw->getWidget("ucLineEntry"));
 
-			gint response = gtk_dialog_run(GTK_DIALOG(getWidget("ucLineDialog")));
-			gtk_widget_hide(getWidget("ucLineDialog"));
+			gint response = gtk_dialog_run(GTK_DIALOG(mw->getWidget("ucLineDialog")));
+
+			// Fix crash, if the dialog gets programmatically destroyed.
+			if (response == GTK_RESPONSE_NONE)
+				return false;
+
+			gtk_widget_hide(mw->getWidget("ucLineDialog"));
 
 			if (response == GTK_RESPONSE_OK)
-				line = gtk_entry_get_text(GTK_ENTRY(getWidget("ucLineEntry")));
+				line = gtk_entry_get_text(GTK_ENTRY(mw->getWidget("ucLineEntry")));
 
 			if (!line.empty())
 			{
@@ -872,15 +878,21 @@ void MainWindow::openMagnetDialog_gui(const string &magnet)
 	string tth;
 
 	WulforUtil::splitMagnet(magnet, name, size, tth);
+	MainWindow *mw = WulforManager::get()->getMainWindow();
 
-	gtk_entry_set_text(GTK_ENTRY(getWidget("magnetEntry")), magnet.c_str());
-	gtk_entry_set_text(GTK_ENTRY(getWidget("magnetNameEntry")), name.c_str());
-	gtk_entry_set_text(GTK_ENTRY(getWidget("magnetSizeEntry")), Util::formatBytes(size).c_str());
-	gtk_entry_set_text(GTK_ENTRY(getWidget("exactSizeEntry")), Util::formatExactSize(size).c_str());
-	gtk_entry_set_text(GTK_ENTRY(getWidget("tthEntry")), tth.c_str());
+	gtk_entry_set_text(GTK_ENTRY(mw->getWidget("magnetEntry")), magnet.c_str());
+	gtk_entry_set_text(GTK_ENTRY(mw->getWidget("magnetNameEntry")), name.c_str());
+	gtk_entry_set_text(GTK_ENTRY(mw->getWidget("magnetSizeEntry")), Util::formatBytes(size).c_str());
+	gtk_entry_set_text(GTK_ENTRY(mw->getWidget("exactSizeEntry")), Util::formatExactSize(size).c_str());
+	gtk_entry_set_text(GTK_ENTRY(mw->getWidget("tthEntry")), tth.c_str());
 
-	gtk_dialog_run(GTK_DIALOG(getWidget("magnetDialog")));
-	gtk_widget_hide(getWidget("magnetDialog"));
+	gint response = gtk_dialog_run(GTK_DIALOG(mw->getWidget("magnetDialog")));
+
+	// Fix crash, if the dialog gets programmatically destroyed.
+	if (response == GTK_RESPONSE_NONE)
+		return;
+
+	gtk_widget_hide(mw->getWidget("magnetDialog"));
 }
 
 void MainWindow::showMessageDialog_gui(const string primaryText, const string secondaryText)
@@ -894,8 +906,9 @@ void MainWindow::showMessageDialog_gui(const string primaryText, const string se
 	if (!secondaryText.empty())
 		gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(dialog), "%s", secondaryText.c_str());
 
-	gtk_dialog_run(GTK_DIALOG(dialog));
-	gtk_widget_destroy(dialog);
+	gtk_window_set_modal(GTK_WINDOW(dialog), TRUE);
+	g_signal_connect(dialog, "response", G_CALLBACK(gtk_widget_destroy), dialog);
+	gtk_widget_show(dialog);
 }
 
 gboolean MainWindow::onWindowState_gui(GtkWidget *widget, GdkEventWindowState *event, gpointer data)
@@ -955,7 +968,7 @@ gboolean MainWindow::onCloseWindow_gui(GtkWidget *widget, GdkEvent *event, gpoin
 		return FALSE;
 	}
 
-	int response = gtk_dialog_run(GTK_DIALOG(mw->getWidget("exitDialog")));
+	gint response = gtk_dialog_run(GTK_DIALOG(mw->getWidget("exitDialog")));
 	gtk_widget_hide(mw->getWidget("exitDialog"));
 
 	if (response == GTK_RESPONSE_OK)
@@ -1076,7 +1089,13 @@ void MainWindow::onConnectClicked_gui(GtkWidget *widget, gpointer data)
 
 	gtk_editable_select_region(GTK_EDITABLE(mw->getWidget("connectEntry")), 0, -1);
 	gtk_widget_grab_focus(mw->getWidget("connectEntry"));
-	int response = gtk_dialog_run(GTK_DIALOG(mw->getWidget("connectDialog")));
+
+	gint response = gtk_dialog_run(GTK_DIALOG(mw->getWidget("connectDialog")));
+
+	// Fix crash, if the dialog gets programmatically destroyed.
+	if (response == GTK_RESPONSE_NONE)
+		return;
+
 	gtk_widget_hide(mw->getWidget("connectDialog"));
 
 	if (response == GTK_RESPONSE_OK)
@@ -1219,10 +1238,15 @@ void MainWindow::onOpenFileListClicked_gui(GtkWidget *widget, gpointer data)
 
 	gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(mw->getWidget("flistDialog")), Text::fromUtf8(Util::getListPath()).c_str());
 
- 	int ret = gtk_dialog_run(GTK_DIALOG(mw->getWidget("flistDialog")));
+	gint response = gtk_dialog_run(GTK_DIALOG(mw->getWidget("flistDialog")));
+
+	// Fix crash, if the dialog gets programmatically destroyed.
+	if (response == GTK_RESPONSE_NONE)
+		return;
+
 	gtk_widget_hide(mw->getWidget("flistDialog"));
 
-	if (ret == GTK_RESPONSE_OK)
+	if (response == GTK_RESPONSE_OK)
 	{
 		gchar *temp = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(mw->getWidget("flistDialog")));
 		if (temp)
