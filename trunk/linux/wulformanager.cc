@@ -154,6 +154,19 @@ void WulforManager::createMainWindow()
 
 void WulforManager::deleteMainWindow()
 {
+	// response dialogs: hash, settings
+	DialogEntry *hashDialogEntry = getHashDialog_gui();
+	DialogEntry *settingsDialogEntry = getSettingsDialog_gui();
+
+	if (hashDialogEntry != NULL)
+	{
+		gtk_dialog_response(GTK_DIALOG(hashDialogEntry->getContainer()), GTK_RESPONSE_OK);
+	}
+	if (settingsDialogEntry != NULL)
+	{
+		dynamic_cast<Settings*>(settingsDialogEntry)->response_gui();
+	}
+
 	mainWin->remove();
 	gtk_main_quit();
 }
@@ -397,3 +410,12 @@ gint WulforManager::openSettingsDialog_gui()
 	return response;
 }
 
+DialogEntry *WulforManager::getHashDialog_gui()
+{
+	return getDialogEntry_gui(Util::toString(Entry::HASH_DIALOG) + ":");
+}
+
+DialogEntry *WulforManager::getSettingsDialog_gui()
+{
+	return getDialogEntry_gui(Util::toString(Entry::SETTINGS_DIALOG) + ":");
+}

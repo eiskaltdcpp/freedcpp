@@ -143,6 +143,20 @@ Settings::~Settings()
 	gtk_widget_destroy(getWidget("colorSelectionDialog"));
 }
 
+void Settings::response_gui()
+{
+	gtk_dialog_response(GTK_DIALOG(getContainer()), GTK_RESPONSE_CANCEL);
+
+	gtk_dialog_response(GTK_DIALOG(getWidget("favoriteNameDialog")), GTK_RESPONSE_CANCEL);
+	gtk_dialog_response(GTK_DIALOG(getWidget("publicHubsDialog")), GTK_RESPONSE_CANCEL);
+	gtk_dialog_response(GTK_DIALOG(getWidget("virtualNameDialog")), GTK_RESPONSE_CANCEL);
+	gtk_dialog_response(GTK_DIALOG(getWidget("dirChooserDialog")), GTK_RESPONSE_CANCEL);
+	gtk_dialog_response(GTK_DIALOG(getWidget("fileChooserDialog")), GTK_RESPONSE_CANCEL);
+	gtk_dialog_response(GTK_DIALOG(getWidget("commandDialog")), GTK_RESPONSE_CANCEL);
+	gtk_dialog_response(GTK_DIALOG(getWidget("fontSelectionDialog")), GTK_RESPONSE_CANCEL);
+	gtk_dialog_response(GTK_DIALOG(getWidget("colorSelectionDialog")), GTK_RESPONSE_CANCEL);
+}
+
 void Settings::saveSettings_client()
 {
 	SettingsManager *sm = SettingsManager::getInstance();
@@ -2380,9 +2394,10 @@ bool Settings::validateUserCommandInput(const string &oldName)
 void Settings::showErrorDialog(const string error)
 {
 	GtkWidget *errorDialog = gtk_message_dialog_new(GTK_WINDOW(getWidget("dialog")),
-		GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_OK, "%s", error.c_str());
-	gtk_dialog_run(GTK_DIALOG(errorDialog));
-	gtk_widget_destroy(errorDialog);
+		GTK_DIALOG_DESTROY_WITH_PARENT, GTK_MESSAGE_ERROR, GTK_BUTTONS_OK, "%s", error.c_str());
+	gtk_window_set_modal(GTK_WINDOW(errorDialog), TRUE);
+	g_signal_connect(errorDialog, "response", G_CALLBACK(gtk_widget_destroy), errorDialog);
+	gtk_widget_show(errorDialog);
 }
 
 void Settings::onOptionsViewToggled_gui(GtkCellRendererToggle *cell, gchar *path, gpointer data)
