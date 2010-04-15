@@ -39,6 +39,8 @@ class Settings:
 		Settings(GtkWindow* parent = NULL);
 		~Settings();
 
+		void response_gui();
+
 	private:
 		// GUI functions
 		void addOption_gui(GtkListStore *store, const std::string &name, dcpp::SettingsManager::IntSetting setting);
