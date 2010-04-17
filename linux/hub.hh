@@ -198,6 +198,7 @@ class Hub:
 		gint totalEmoticons;
 		EmoticonsDialog *emotdialog;
 		bool PasswordDialog;
+		bool WaitingPassword;
 };
 
 #else

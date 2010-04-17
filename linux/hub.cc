@@ -50,7 +50,8 @@ Hub::Hub(const string &address, const string &encoding):
 	address(address),
 	encoding(encoding),
 	scrollToBottom(TRUE),
-	PasswordDialog(FALSE)
+	PasswordDialog(FALSE),
+	WaitingPassword(FALSE)
 {
 	// Configure the dialog
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(getWidget("userListCheckButton")), TRUE);
@@ -437,6 +438,21 @@ void Hub::popupNickMenu_gui()
 
 void Hub::getPassword_gui()
 {
+	if(!BOOLSETTING(PROMPT_PASSWORD))
+	{
+		addStatusMessage_gui(_("Waiting for input password (don't remove /password before your password)"), Msg::STATUS, Sound::NONE);
+
+		gint pos = 0;
+		GtkWidget *chatEntry = getWidget("chatEntry");
+		gtk_editable_delete_text(GTK_EDITABLE(chatEntry), pos, -1);
+		gtk_editable_insert_text(GTK_EDITABLE(chatEntry), "/password ", -1, &pos);
+		gtk_editable_set_position(GTK_EDITABLE(chatEntry), pos);
+
+		if (!WaitingPassword)
+			WaitingPassword = TRUE;
+		return;
+	}
+
 	if (PasswordDialog)
 		return;
 
@@ -475,6 +491,7 @@ void Hub::getPassword_gui()
 	gtk_widget_show_all(dialog);
 
 	PasswordDialog = TRUE;
+	WaitingPassword = TRUE;
 }
 
 void Hub::onPasswordDialog(GtkWidget *dialog, gint response, gpointer data)
@@ -494,6 +511,7 @@ void Hub::onPasswordDialog(GtkWidget *dialog, gint response, gpointer data)
 
 	gtk_widget_destroy(dialog);
 	hub->PasswordDialog = FALSE;
+	hub->WaitingPassword = FALSE;
 }
 
 void Hub::addStatusMessage_gui(string message, Msg::TypeMsg typemsg, Sound::TypeSound sound)
@@ -1665,6 +1683,16 @@ void Hub::onSendMessage_gui(GtkEntry *entry, gpointer data)
 				gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(hub->getWidget("userListCheckButton")), FALSE);
 			else
 				gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(hub->getWidget("userListCheckButton")), TRUE);
+		}
+		// protect command
+		else if (command == "password")
+		{
+			if (!hub->WaitingPassword)
+				return;
+
+			F1 *func = new F1(hub, &Hub::setPassword_client, param);
+			WulforManager::get()->dispatchClientFunc(func);
+			hub->WaitingPassword = FALSE;
 		}
 		else if (BOOLSETTING(SEND_UNKNOWN_COMMANDS))
 		{

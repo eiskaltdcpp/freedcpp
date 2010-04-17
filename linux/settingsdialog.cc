@@ -876,6 +876,7 @@ void Settings::initAppearance_gui()
 		addOption_gui(appearanceStore, _("Use emoticons"), "emoticons-use");
 		addOption_gui(appearanceStore, _("Do not close the program, hide in the system tray"), "main-window-no-close");
 		addOption_gui(appearanceStore, _("Send PM when double clicked in the user list"), "pm");
+
 		/// @todo: Uncomment when implemented
 		//addOption_gui(appearanceStore, _("Minimize to tray"), SettingsManager::MINIMIZE_TRAY);
 		//addOption_gui(appearanceStore, _("Use system icons"), SettingsManager::USE_SYSTEM_ICONS);
@@ -1230,6 +1231,7 @@ void Settings::initAppearance_gui()
 		addOption_gui(windowStore2, _("Open new window when using /join"), SettingsManager::JOIN_OPEN_NEW_WINDOW);
 		addOption_gui(windowStore2, _("Ignore private messages from the hub"), SettingsManager::IGNORE_HUB_PMS);
 		addOption_gui(windowStore2, _("Ignore private messages from bots"), SettingsManager::IGNORE_BOT_PMS);
+		addOption_gui(windowStore2, _("Popup box to input password for hubs"), SettingsManager::PROMPT_PASSWORD);
 
 		// Confirmation dialog
 		createOptionsView_gui(windowView3, windowStore3, "windowsConfirmTreeView");
