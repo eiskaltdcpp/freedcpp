@@ -778,13 +778,17 @@ void ShareBrowser::onMatchButtonClicked_gui(GtkWidget *widget, gpointer data)
 void ShareBrowser::onFindButtonClicked_gui(GtkWidget *widget, gpointer data)
 {
 	ShareBrowser *sb = (ShareBrowser *)data;
-	gint ret;
 
 	gtk_widget_grab_focus(GTK_WIDGET(sb->getWidget("findEntry")));
-	ret = gtk_dialog_run(GTK_DIALOG(sb->getWidget("findDialog")));
+	gint response = gtk_dialog_run(GTK_DIALOG(sb->getWidget("findDialog")));
+
+	// Fix crash, if the dialog gets programmatically destroyed.
+	if (response == GTK_RESPONSE_NONE)
+		return;
+
 	gtk_widget_hide(sb->getWidget("findDialog"));
 
-	if (ret == GTK_RESPONSE_OK)
+	if (response == GTK_RESPONSE_OK)
 	{
 		string text = gtk_entry_get_text(GTK_ENTRY(sb->getWidget("findEntry")));
 		if (!text.empty())
@@ -820,6 +824,11 @@ void ShareBrowser::onDownloadToClicked_gui(GtkMenuItem *item, gpointer data)
 	ShareBrowser *sb = (ShareBrowser *)data;
 
 	gint response = gtk_dialog_run(GTK_DIALOG(sb->getWidget("dirChooserDialog")));
+
+	// Fix crash, if the dialog gets programmatically destroyed.
+	if (response == GTK_RESPONSE_NONE)
+		return;
+
 	gtk_widget_hide(sb->getWidget("dirChooserDialog"));
 
 	if (response == GTK_RESPONSE_OK)
@@ -855,6 +864,11 @@ void ShareBrowser::onDownloadDirToClicked_gui(GtkMenuItem *item, gpointer data)
 	ShareBrowser *sb = (ShareBrowser *)data;
 
 	gint response = gtk_dialog_run(GTK_DIALOG(sb->getWidget("dirChooserDialog")));
+
+	// Fix crash, if the dialog gets programmatically destroyed.
+	if (response == GTK_RESPONSE_NONE)
+		return;
+
 	gtk_widget_hide(sb->getWidget("dirChooserDialog"));
 
 	if (response == GTK_RESPONSE_OK)

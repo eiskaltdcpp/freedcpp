@@ -656,7 +656,12 @@ void DownloadQueue::onDirMoveClicked_gui(GtkMenuItem *menuItem, gpointer data)
 		GtkWidget *dialog = dq->getWidget("dirChooserDialog");
 		gtk_file_chooser_set_action(GTK_FILE_CHOOSER(dialog), GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER);
 		gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dialog), path.c_str());
-		int response = gtk_dialog_run(GTK_DIALOG(dialog));
+		gint response = gtk_dialog_run(GTK_DIALOG(dialog));
+
+		// Widget failed if the dialog gets programmatically destroyed.
+		if (response == GTK_RESPONSE_NONE)
+			return;
+
 		gtk_widget_hide(dialog);
 
 		if (response == GTK_RESPONSE_OK)
@@ -780,8 +785,11 @@ void DownloadQueue::onFileMoveClicked_gui(GtkMenuItem *menuItem, gpointer data)
 			string target = Text::fromUtf8(dq->fileView.getString(&iter, _("Filename")));
 			gtk_file_chooser_set_action(GTK_FILE_CHOOSER(dialog), GTK_FILE_CHOOSER_ACTION_SAVE);
 			gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(dialog), target.c_str());
-			int response = gtk_dialog_run(GTK_DIALOG(dialog));
-			gtk_widget_hide(dialog);
+			gint response = gtk_dialog_run(GTK_DIALOG(dialog));
+
+			// Widget failed if the dialog gets programmatically destroyed.
+			if (response != GTK_RESPONSE_NONE)
+				gtk_widget_hide(dialog);
 
 			if (response == GTK_RESPONSE_OK)
 			{
@@ -801,8 +809,11 @@ void DownloadQueue::onFileMoveClicked_gui(GtkMenuItem *menuItem, gpointer data)
 	else if (count > 1)
 	{
 		gtk_file_chooser_set_action(GTK_FILE_CHOOSER(dialog), GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER);
-		int response = gtk_dialog_run(GTK_DIALOG(dialog));
-		gtk_widget_hide(dialog);
+		gint response = gtk_dialog_run(GTK_DIALOG(dialog));
+
+		// Widget failed if the dialog gets programmatically destroyed.
+		if (response != GTK_RESPONSE_NONE)
+			gtk_widget_hide(dialog);
 
 		if (response == GTK_RESPONSE_OK)
 		{
