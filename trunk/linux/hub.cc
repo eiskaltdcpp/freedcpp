@@ -53,7 +53,6 @@ Hub::Hub(const string &address, const string &encoding):
 	PasswordDialog(FALSE)
 {
 	// Configure the dialog
-	gtk_dialog_set_alternative_button_order(GTK_DIALOG(getWidget("passwordDialog")), GTK_RESPONSE_OK, GTK_RESPONSE_CANCEL, -1);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(getWidget("userListCheckButton")), TRUE);
 
 	// Initialize nick treeview
@@ -203,8 +202,6 @@ Hub::~Hub()
 	gint panePosition = width - gtk_paned_get_position(GTK_PANED(getWidget("pane")));
 	if (panePosition > 10)
 		WSET("nick-pane-position", panePosition);
-
-	gtk_widget_destroy(getWidget("passwordDialog"));
 
 	if (handCursor)
 	{
