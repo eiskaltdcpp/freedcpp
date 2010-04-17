@@ -1050,7 +1050,12 @@ void Search::onDownloadToClicked_gui(GtkMenuItem *item, gpointer data)
 {
 	Search *s = (Search *)data;
 
-	int response = gtk_dialog_run(GTK_DIALOG(s->getWidget("dirChooserDialog")));
+	gint response = gtk_dialog_run(GTK_DIALOG(s->getWidget("dirChooserDialog")));
+
+	// Fix crash, if the dialog gets programmatically destroyed.
+	if (response == GTK_RESPONSE_NONE)
+		return;
+
 	gtk_widget_hide(s->getWidget("dirChooserDialog"));
 
 	if (response == GTK_RESPONSE_OK)
@@ -1223,6 +1228,11 @@ void Search::onDownloadDirToClicked_gui(GtkMenuItem *item, gpointer data)
 	Search *s = (Search *)data;
 
 	gint response = gtk_dialog_run(GTK_DIALOG(s->getWidget("dirChooserDialog")));
+
+	// Fix crash, if the dialog gets programmatically destroyed.
+	if (response == GTK_RESPONSE_NONE)
+		return;
+
 	gtk_widget_hide(s->getWidget("dirChooserDialog"));
 
 	if (response == GTK_RESPONSE_OK)

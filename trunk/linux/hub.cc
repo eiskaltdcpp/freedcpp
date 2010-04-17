@@ -49,7 +49,8 @@ Hub::Hub(const string &address, const string &encoding):
 	totalShared(0),
 	address(address),
 	encoding(encoding),
-	scrollToBottom(TRUE)
+	scrollToBottom(TRUE),
+	PasswordDialog(FALSE)
 {
 	// Configure the dialog
 	gtk_dialog_set_alternative_button_order(GTK_DIALOG(getWidget("passwordDialog")), GTK_RESPONSE_OK, GTK_RESPONSE_CANCEL, -1);
@@ -439,20 +440,63 @@ void Hub::popupNickMenu_gui()
 
 void Hub::getPassword_gui()
 {
-	gint ret;
+	if (PasswordDialog)
+		return;
 
-	ret = gtk_dialog_run(GTK_DIALOG(getWidget("passwordDialog")));
-	gtk_widget_hide(getWidget("passwordDialog"));
+	// Create password dialog
+	string title = client->getHubUrl(); //_("Enter hub password")
+	GtkWidget *dialog = gtk_dialog_new_with_buttons(title.c_str(),
+		GTK_WINDOW(WulforManager::get()->getMainWindow()->getContainer()),
+		GTK_DIALOG_DESTROY_WITH_PARENT,
+		GTK_STOCK_OK,
+		GTK_RESPONSE_OK,
+		GTK_STOCK_CANCEL,
+		GTK_RESPONSE_CANCEL,
+		NULL);
+	gtk_window_set_modal(GTK_WINDOW(dialog), TRUE);
+	gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
 
-	if (ret == GTK_RESPONSE_OK)
+	GtkWidget *box = gtk_vbox_new(TRUE, 0);
+	GtkWidget *entry = gtk_entry_new();
+	g_object_set(entry, "can-focus", TRUE, "visibility", FALSE, "activates-default", TRUE, NULL);
+
+	gtk_box_pack_start(GTK_BOX(box), entry, FALSE, FALSE, 8);
+
+	GtkWidget *frame = gtk_frame_new(NULL);
+	g_object_set(frame, "border-width", 8, NULL);
+
+	GtkWidget *label = gtk_label_new(NULL);
+	gtk_label_set_markup(GTK_LABEL(label), _("<b>Enter your password</b>"));
+	gtk_frame_set_label_widget(GTK_FRAME(frame), label);
+
+	gtk_container_add(GTK_CONTAINER(frame), box);
+	gtk_container_add(GTK_CONTAINER(GTK_DIALOG(dialog)->vbox), frame);
+
+	g_object_set_data(G_OBJECT(dialog), "password-entry", (gpointer) entry);
+
+	g_signal_connect(dialog, "response", G_CALLBACK(onPasswordDialog), (gpointer) this);
+	gtk_widget_show_all(dialog);
+
+	PasswordDialog = TRUE;
+}
+
+void Hub::onPasswordDialog(GtkWidget *dialog, gint response, gpointer data)
+{
+	Hub *hub = (Hub *) data;
+	GtkWidget *entry = (GtkWidget *) g_object_get_data(G_OBJECT(dialog), "password-entry");
+
+	if (response == GTK_RESPONSE_OK)
 	{
-		string password = gtk_entry_get_text(GTK_ENTRY(getWidget("passwordEntry")));
+		string password = gtk_entry_get_text(GTK_ENTRY(entry));
 		typedef Func1<Hub, string> F1;
-		F1 *func = new F1(this, &Hub::setPassword_client, password);
+		F1 *func = new F1(hub, &Hub::setPassword_client, password);
 		WulforManager::get()->dispatchClientFunc(func);
 	}
 	else
-		client->disconnect(TRUE);
+		hub->client->disconnect(TRUE);
+
+	gtk_widget_destroy(dialog);
+	hub->PasswordDialog = FALSE;
 }
 
 void Hub::addStatusMessage_gui(string message, Msg::TypeMsg typemsg, Sound::TypeSound sound)

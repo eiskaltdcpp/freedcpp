@@ -129,6 +129,7 @@ class Hub:
 		static void onUserListToggled_gui(GtkWidget *widget, gpointer data);
 		static void onAddFavoriteUserClicked_gui(GtkMenuItem *item, gpointer data);
 		static void onRemoveFavoriteUserClicked_gui(GtkMenuItem *item, gpointer data);
+		static void onPasswordDialog(GtkWidget *dialog, gint response, gpointer data);
 
 		// Client functions
 		void addFavoriteUser_client(const std::string cid);
@@ -196,6 +197,7 @@ class Hub:
 		bool useEmoticons;
 		gint totalEmoticons;
 		EmoticonsDialog *emotdialog;
+		bool PasswordDialog;
 };
 
 #else

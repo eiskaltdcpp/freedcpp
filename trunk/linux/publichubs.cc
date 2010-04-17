@@ -311,10 +311,15 @@ void PublicHubs::onConfigure_gui(GtkWidget *widget, gpointer data)
 	string active = string(temp);
 	g_free(temp);
 
-	gint ret = gtk_dialog_run(GTK_DIALOG(ph->getWidget("configureDialog")));
+	gint response = gtk_dialog_run(GTK_DIALOG(ph->getWidget("configureDialog")));
+
+	// Fix crash, if the dialog gets programmatically destroyed.
+	if (response == GTK_RESPONSE_NONE)
+		return;
+
 	gtk_widget_hide(ph->getWidget("configureDialog"));
 
-	if (ret == GTK_RESPONSE_OK)
+	if (response == GTK_RESPONSE_OK)
 	{
 		string lists, url;
 		GtkTreeIter iter;
