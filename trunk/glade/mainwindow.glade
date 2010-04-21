@@ -432,6 +432,19 @@
               </packing>
             </child>
             <child>
+              <widget class="GtkToolButton" id="favUsers">
+                <property name="visible">True</property>
+                <property name="tooltip" translatable="yes">Favorite Users</property>
+                <property name="is_important">True</property>
+                <property name="label" translatable="yes">Users</property>
+                <property name="use_underline">True</property>
+                <property name="stock_id">freedcpp-favorite-users</property>
+              </widget>
+              <packing>
+                <property name="expand">False</property>
+              </packing>
+            </child>
+            <child>
               <widget class="GtkToolButton" id="publicHubs">
                 <property name="visible">True</property>
                 <property name="tooltip" translatable="yes">Browse the list of public hubs</property>
