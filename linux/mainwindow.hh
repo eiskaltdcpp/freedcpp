@@ -66,6 +66,7 @@ class MainWindow:
 		void showMessageDialog_gui(const std::string primaryText, const std::string secondaryText);
 		void showDownloadQueue_gui();
 		void showFavoriteHubs_gui();
+		void showFavoriteUsers_gui();
 		void showFinishedDownloads_gui();
 		void showFinishedUploads_gui();
 		void showHub_gui(std::string address, std::string encoding = "");
@@ -113,6 +114,7 @@ class MainWindow:
 		static void onPaneRealized_gui(GtkWidget *pane, gpointer data);
 		static void onConnectClicked_gui(GtkWidget *widget, gpointer data);
 		static void onFavoriteHubsClicked_gui(GtkWidget *widget, gpointer data);
+		static void onFavoriteUsersClicked_gui(GtkWidget *widget, gpointer data);
 		static void onPublicHubsClicked_gui(GtkWidget *widget, gpointer data);
 		static void onPreferencesClicked_gui(GtkWidget *widget, gpointer data);
 		static void onHashClicked_gui(GtkWidget *widget, gpointer data);

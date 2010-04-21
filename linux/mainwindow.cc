@@ -34,6 +34,7 @@
 #include <dcpp/version.h>
 #include "downloadqueue.hh"
 #include "favoritehubs.hh"
+#include "favoriteusers.hh"
 #include "finishedtransfers.hh"
 #include "func.hh"
 #include "hub.hh"
@@ -101,9 +102,6 @@ MainWindow::MainWindow():
 	// Set all windows to the default icon
 	gtk_window_set_default_icon_name(g_get_prgname());
 
-	// Disable un-implemented menu items.
-	gtk_widget_set_sensitive(getWidget("favoriteUsersMenuItem"), FALSE);
-
 	// All notebooks created in glade need one page.
 	// In our case, this is just a placeholder, so we remove it.
 	gtk_notebook_remove_page(GTK_NOTEBOOK(getWidget("book")), -1);
@@ -119,6 +117,7 @@ MainWindow::MainWindow():
 	g_signal_connect_after(getWidget("pane"), "realize", G_CALLBACK(onPaneRealized_gui), (gpointer)this);
 	g_signal_connect(getWidget("connect"), "clicked", G_CALLBACK(onConnectClicked_gui), (gpointer)this);
 	g_signal_connect(getWidget("favHubs"), "clicked", G_CALLBACK(onFavoriteHubsClicked_gui), (gpointer)this);
+	g_signal_connect(getWidget("favUsers"), "clicked", G_CALLBACK(onFavoriteUsersClicked_gui), (gpointer)this);
 	g_signal_connect(getWidget("publicHubs"), "clicked", G_CALLBACK(onPublicHubsClicked_gui), (gpointer)this);
 	g_signal_connect(getWidget("settings"), "clicked", G_CALLBACK(onPreferencesClicked_gui), (gpointer)this);
 	g_signal_connect(getWidget("hash"), "clicked", G_CALLBACK(onHashClicked_gui), (gpointer)this);
@@ -136,6 +135,7 @@ MainWindow::MainWindow():
 	g_signal_connect(getWidget("closeMenuItem"), "activate", G_CALLBACK(onCloseClicked_gui), (gpointer)this);
 	g_signal_connect(getWidget("exitMenuItem"), "activate", G_CALLBACK(onQuitClicked_gui), (gpointer)this);
 	g_signal_connect(getWidget("favoriteHubsMenuItem"), "activate", G_CALLBACK(onFavoriteHubsClicked_gui), (gpointer)this);
+	g_signal_connect(getWidget("favoriteUsersMenuItem"), "activate", G_CALLBACK(onFavoriteUsersClicked_gui), (gpointer)this);
 	g_signal_connect(getWidget("publicHubsMenuItem"), "activate", G_CALLBACK(onPublicHubsClicked_gui), (gpointer)this);
 	g_signal_connect(getWidget("indexingProgressMenuItem"), "activate", G_CALLBACK(onHashClicked_gui), (gpointer)this);
 	g_signal_connect(getWidget("searchMenuItem"), "activate", G_CALLBACK(onSearchClicked_gui), (gpointer)this);
@@ -313,6 +313,7 @@ void MainWindow::loadIcons_gui()
 
 	// Reset the stock IDs manually to force the icon to refresh
 	gtk_tool_button_set_stock_id(GTK_TOOL_BUTTON(getWidget("favHubs")), "freedcpp-favorite-hubs");
+	gtk_tool_button_set_stock_id(GTK_TOOL_BUTTON(getWidget("favUsers")), "freedcpp-favorite-users");
 	gtk_tool_button_set_stock_id(GTK_TOOL_BUTTON(getWidget("publicHubs")), "freedcpp-public-hubs");
 	gtk_tool_button_set_stock_id(GTK_TOOL_BUTTON(getWidget("settings")), "freedcpp-preferences");
 	gtk_tool_button_set_stock_id(GTK_TOOL_BUTTON(getWidget("hash")), "freedcpp-hash");
@@ -335,6 +336,8 @@ void MainWindow::autoOpen_gui()
 		showDownloadQueue_gui();
 	if (BOOLSETTING(OPEN_FAVORITE_HUBS))
 		showFavoriteHubs_gui();
+	if (BOOLSETTING(OPEN_FAVORITE_USERS))
+		showFavoriteUsers_gui();
 	if (BOOLSETTING(OPEN_FINISHED_DOWNLOADS))
 		showFinishedDownloads_gui();
 	if (BOOLSETTING(OPEN_FINISHED_UPLOADS))
@@ -554,6 +557,19 @@ void MainWindow::showFavoriteHubs_gui()
 	if (entry == NULL)
 	{
 		entry = new FavoriteHubs();
+		addBookEntry_gui(entry);
+	}
+
+	raisePage_gui(entry->getContainer());
+}
+
+void MainWindow::showFavoriteUsers_gui()
+{
+	BookEntry *entry = findBookEntry(Entry::FAVORITE_USERS);
+
+	if (entry == NULL)
+	{
+		entry = new FavoriteUsers();
 		addBookEntry_gui(entry);
 	}
 
@@ -1109,6 +1125,12 @@ void MainWindow::onFavoriteHubsClicked_gui(GtkWidget *widget, gpointer data)
 {
 	MainWindow *mw = (MainWindow *)data;
 	mw->showFavoriteHubs_gui();
+}
+
+void MainWindow::onFavoriteUsersClicked_gui(GtkWidget *widget, gpointer data)
+{
+	MainWindow *mw = (MainWindow *)data;
+	mw->showFavoriteUsers_gui();
 }
 
 void MainWindow::onPublicHubsClicked_gui(GtkWidget *widget, gpointer data)

@@ -109,6 +109,9 @@ WulforSettingsManager::WulforSettingsManager():
 	defaultString.insert(StringMap::value_type("favoritehubs-order", ""));
 	defaultString.insert(StringMap::value_type("favoritehubs-width", ""));
 	defaultString.insert(StringMap::value_type("favoritehubs-visibility", ""));
+	defaultString.insert(StringMap::value_type("favoriteusers-order", ""));
+	defaultString.insert(StringMap::value_type("favoriteusers-width", ""));
+	defaultString.insert(StringMap::value_type("favoriteusers-visibility", ""));
 	defaultString.insert(StringMap::value_type("finished-order", ""));
 	defaultString.insert(StringMap::value_type("finished-width", ""));
 	defaultString.insert(StringMap::value_type("finished-visibility", ""));

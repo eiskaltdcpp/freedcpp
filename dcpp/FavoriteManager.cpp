@@ -732,32 +732,28 @@ void FavoriteManager::on(TypeBZ2, HttpConnection*) throw() {
 void FavoriteManager::on(UserUpdated, const OnlineUser& user) throw() {
 	userUpdated(user);
 }
-void FavoriteManager::on(UserDisconnected, const UserPtr& user) throw() {
-	bool isFav = false;
+void FavoriteManager::on(UserDisconnected, const UserPtr& user) throw()
+{
+	Lock l(cs);
+
+	FavoriteMap::iterator i = users.find(user->getCID());
+	if (i != users.end())
 	{
-		Lock l(cs);
-		FavoriteMap::iterator i = users.find(user->getCID());
-		if(i != users.end()) {
-			isFav = true;
-			i->second.setLastSeen(GET_TIME());
-			save();
-		}
+		i->second.setLastSeen(GET_TIME());
+		fire(FavoriteManagerListener::StatusChanged(), i->second);
+		save();
 	}
-	if(isFav)
-		fire(FavoriteManagerListener::StatusChanged(), user);
 }
 
-void FavoriteManager::on(UserConnected, const UserPtr& user) throw() {
-	bool isFav = false;
+void FavoriteManager::on(UserConnected, const UserPtr& user) throw()
+{
+	Lock l(cs);
+
+	FavoriteMap::iterator i = users.find(user->getCID());
+	if (i != users.end())
 	{
-		Lock l(cs);
-		FavoriteMap::iterator i = users.find(user->getCID());
-		if(i != users.end()) {
-			isFav = true;
-		}
+		fire(FavoriteManagerListener::StatusChanged(), i->second);
 	}
-	if(isFav)
-		fire(FavoriteManagerListener::StatusChanged(), user);
 }
 
 } // namespace dcpp

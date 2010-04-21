@@ -45,7 +45,7 @@ public:
 	virtual void on(FavoriteRemoved, const FavoriteHubEntryPtr) throw() { }
 	virtual void on(UserAdded, const FavoriteUser&) throw() { }
 	virtual void on(UserRemoved, const FavoriteUser&) throw() { }
-	virtual void on(StatusChanged, const UserPtr&) throw() { }
+	virtual void on(StatusChanged, const FavoriteUser&) throw() { }
 	virtual void on(LoadedFromCache, const string&) throw() { }
 };
 
