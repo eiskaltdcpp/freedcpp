@@ -492,6 +492,7 @@ void WulforUtil::registerIcons()
 	icons["freedcpp-smile"] = wsm->getString("icon-smile");
 	icons["freedcpp-download"] = wsm->getString("icon-download");
 	icons["freedcpp-favorite-hubs"] = wsm->getString("icon-favorite-hubs");
+	icons["freedcpp-favorite-users"] = wsm->getString("icon-favorite-users");
 	icons["freedcpp-finished-downloads"] = wsm->getString("icon-finished-downloads");
 	icons["freedcpp-finished-uploads"] = wsm->getString("icon-finished-uploads");
 	icons["freedcpp-hash"] = wsm->getString("icon-hash");

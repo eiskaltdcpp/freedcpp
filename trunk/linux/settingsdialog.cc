@@ -65,6 +65,7 @@ Settings::Settings(GtkWindow* parent):
 	defaultStringTheme.insert(StringMap::value_type("icon-smile", "freedcpp-smile"));
 	defaultStringTheme.insert(StringMap::value_type("icon-download", "freedcpp-download"));
 	defaultStringTheme.insert(StringMap::value_type("icon-favorite-hubs", "freedcpp-favorite-hubs"));
+	defaultStringTheme.insert(StringMap::value_type("icon-favorite-users", "freedcpp-favorite-users"));
 	defaultStringTheme.insert(StringMap::value_type("icon-finished-downloads", "freedcpp-finished-downloads"));
 	defaultStringTheme.insert(StringMap::value_type("icon-finished-uploads", "freedcpp-finished-uploads"));
 	defaultStringTheme.insert(StringMap::value_type("icon-hash", "freedcpp-hash"));
@@ -1150,6 +1151,7 @@ void Settings::initAppearance_gui()
 		addOption_gui(themeIconsStore, wsm, iconTheme, _("Download"), "icon-download");
 		addOption_gui(themeIconsStore, wsm, iconTheme, _("Upload"), "icon-upload");
 		addOption_gui(themeIconsStore, wsm, iconTheme, _("Favorite Hubs"), "icon-favorite-hubs");
+		addOption_gui(themeIconsStore, wsm, iconTheme, _("Favorite Users"), "icon-favorite-users");
 		addOption_gui(themeIconsStore, wsm, iconTheme, _("Finished Downloads"), "icon-finished-downloads");
 		addOption_gui(themeIconsStore, wsm, iconTheme, _("Finished Uploads"), "icon-finished-uploads");
 		addOption_gui(themeIconsStore, wsm, iconTheme, _("Hash"), "icon-hash");
