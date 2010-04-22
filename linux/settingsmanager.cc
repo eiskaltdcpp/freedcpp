@@ -189,6 +189,7 @@ WulforSettingsManager::WulforSettingsManager():
 	defaultString.insert(StringMap::value_type("icon-smile", "freedcpp-smile"));
 	defaultString.insert(StringMap::value_type("icon-download", "freedcpp-download"));
 	defaultString.insert(StringMap::value_type("icon-favorite-hubs", "freedcpp-favorite-hubs"));
+	defaultString.insert(StringMap::value_type("icon-favorite-users", "freedcpp-favorite-users"));
 	defaultString.insert(StringMap::value_type("icon-finished-downloads", "freedcpp-finished-downloads"));
 	defaultString.insert(StringMap::value_type("icon-finished-uploads", "freedcpp-finished-uploads"));
 	defaultString.insert(StringMap::value_type("icon-hash", "freedcpp-hash"));

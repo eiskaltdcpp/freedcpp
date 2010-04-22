@@ -158,11 +158,18 @@
                       </widget>
                     </child>
                     <child>
-                      <widget class="GtkMenuItem" id="favoriteUsersMenuItem">
+                      <widget class="GtkImageMenuItem" id="favoriteUsersMenuItem">
                         <property name="visible">True</property>
                         <property name="label" translatable="yes">Favorite Users</property>
                         <property name="use_underline">True</property>
                         <accelerator key="U" modifiers="GDK_CONTROL_MASK" signal="activate"/>
+                        <child internal-child="image">
+                          <widget class="GtkImage" id="favoriteUsersMenuImage">
+                            <property name="visible">True</property>
+                            <property name="stock">freedcpp-favorite-users</property>
+                            <property name="icon_size">1</property>
+                          </widget>
+                        </child>
                       </widget>
                     </child>
                     <child>
