@@ -359,7 +359,6 @@ void FavoriteUsers::onDescriptionItemClicked_gui(GtkMenuItem *item, gpointer dat
 
 		if (list != NULL)
 		{
-			ParamMap params;
 			GtkTreeIter iter;
 			GtkTreePath *path = (GtkTreePath *) list->data;
 			string description, nick, cid;
@@ -390,7 +389,7 @@ void FavoriteUsers::onDescriptionItemClicked_gui(GtkMenuItem *item, gpointer dat
 
 			if (fu->findUser_gui(cid, &iter))
 			{
-				string description = gtk_entry_get_text(GTK_ENTRY(fu->getWidget("descriptionEntry")));
+				description = gtk_entry_get_text(GTK_ENTRY(fu->getWidget("descriptionEntry")));
 				gtk_list_store_set(fu->favoriteUserStore, &iter, fu->favoriteUserView.col(_("Description")), description.c_str(), -1);
 
 				typedef Func2<FavoriteUsers, string, string> F2;

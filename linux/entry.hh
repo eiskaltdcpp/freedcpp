@@ -48,7 +48,8 @@ class Entry
 			SETTINGS_DIALOG,
 			SHARE_BROWSER,
 			TRANSFERS,
-			USER_COMMAND_MENU
+			USER_COMMAND_MENU,
+			SEARCH_SPY
 		} EntryType;
 
 		Entry() : xml(NULL) {}

@@ -504,6 +504,19 @@
               </packing>
             </child>
             <child>
+              <widget class="GtkToolButton" id="searchSpy">
+                <property name="visible">True</property>
+                <property name="tooltip" translatable="yes">Search Spy</property>
+                <property name="is_important">True</property>
+                <property name="label" translatable="yes">Spy</property>
+                <property name="use_underline">True</property>
+                <property name="stock_id">freedcpp-search-spy</property>
+              </widget>
+              <packing>
+                <property name="expand">False</property>
+              </packing>
+            </child>
+            <child>
               <widget class="GtkToolButton" id="queue">
                 <property name="visible">True</property>
                 <property name="tooltip" translatable="yes">View the files to be downloaded</property>

@@ -21,6 +21,7 @@ gui_files = [
 	'privatemessage.cc',
 	'publichubs.cc',
 	'search.cc',
+	'searchspy.cc',
 	'settingsdialog.cc',
 	'settingsmanager.cc',
 	'sharebrowser.cc',

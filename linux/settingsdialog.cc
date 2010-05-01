@@ -362,6 +362,10 @@ void Settings::saveSettings_client()
 			// Confirm dialog options
 			saveOptionsView_gui(windowView3, sm);
 		}
+
+		{ //TODO: Search Spy
+
+		}
 	}
 
 	{ // Logs

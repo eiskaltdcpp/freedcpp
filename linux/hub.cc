@@ -967,7 +967,7 @@ void Hub::updateCursor_gui(GtkWidget *widget)
 	}
 }
 
-void Hub::updateTags_gui()
+void Hub::preferences_gui()
 {
 	WulforSettingsManager *wsm = WulforSettingsManager::getInstance();
 	string fore, back;

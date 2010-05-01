@@ -51,7 +51,7 @@ class Hub:
 		void reconnect_client();
 
 		// GUI functions
-		void updateTags_gui();
+		void preferences_gui();
 
 	private:
 		typedef enum

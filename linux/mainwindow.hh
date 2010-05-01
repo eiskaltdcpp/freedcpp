@@ -70,6 +70,7 @@ class MainWindow:
 		void showFinishedDownloads_gui();
 		void showFinishedUploads_gui();
 		void showHub_gui(std::string address, std::string encoding = "");
+		void showSearchSpy_gui();
 		void addPrivateMessage_gui(Msg::TypeMsg typemsg, std::string cid, std::string hubUrl = "", std::string message = "", bool useSetting = FALSE);
 		void addPrivateStatusMessage_gui(Msg::TypeMsg typemsg, std::string cid, std::string message = "");
 		void showPublicHubs_gui();
@@ -119,6 +120,7 @@ class MainWindow:
 		static void onPreferencesClicked_gui(GtkWidget *widget, gpointer data);
 		static void onHashClicked_gui(GtkWidget *widget, gpointer data);
 		static void onSearchClicked_gui(GtkWidget *widget, gpointer data);
+		static void onSearchSpyClicked_gui(GtkWidget *widget, gpointer data);
 		static void onDownloadQueueClicked_gui(GtkWidget *widget, gpointer data);
 		static void onFinishedDownloadsClicked_gui(GtkWidget *widget, gpointer data);
 		static void onFinishedUploadsClicked_gui(GtkWidget *widget, gpointer data);

@@ -41,6 +41,7 @@
 #include "privatemessage.hh"
 #include "publichubs.hh"
 #include "search.hh"
+#include "searchspy.hh"
 #include "settingsmanager.hh"
 #include "sharebrowser.hh"
 #include "emoticons.hh"
@@ -122,6 +123,7 @@ MainWindow::MainWindow():
 	g_signal_connect(getWidget("settings"), "clicked", G_CALLBACK(onPreferencesClicked_gui), (gpointer)this);
 	g_signal_connect(getWidget("hash"), "clicked", G_CALLBACK(onHashClicked_gui), (gpointer)this);
 	g_signal_connect(getWidget("search"), "clicked", G_CALLBACK(onSearchClicked_gui), (gpointer)this);
+	g_signal_connect(getWidget("searchSpy"), "clicked", G_CALLBACK(onSearchSpyClicked_gui), (gpointer)this);
 	g_signal_connect(getWidget("queue"), "clicked", G_CALLBACK(onDownloadQueueClicked_gui), (gpointer)this);
 	g_signal_connect(getWidget("quit"), "clicked", G_CALLBACK(onQuitClicked_gui), (gpointer)this);
 	g_signal_connect(getWidget("finishedDownloads"), "clicked", G_CALLBACK(onFinishedDownloadsClicked_gui), (gpointer)this);
@@ -342,6 +344,8 @@ void MainWindow::autoOpen_gui()
 		showFinishedDownloads_gui();
 	if (BOOLSETTING(OPEN_FINISHED_UPLOADS))
 		showFinishedUploads_gui();
+	if (BOOLSETTING(OPEN_SEARCH_SPY))
+		showSearchSpy_gui();
 }
 
 void MainWindow::addBookEntry_gui(BookEntry *entry)
@@ -612,6 +616,19 @@ void MainWindow::showHub_gui(string address, string encoding)
 		addBookEntry_gui(entry);
 
 		EntryList.push_back(address);
+	}
+
+	raisePage_gui(entry->getContainer());
+}
+
+void MainWindow::showSearchSpy_gui()
+{
+	BookEntry *entry = findBookEntry(Entry::SEARCH_SPY);
+
+	if (entry == NULL)
+	{
+		entry = new SearchSpy();
+		addBookEntry_gui(entry);
 	}
 
 	raisePage_gui(entry->getContainer());
@@ -1173,20 +1190,27 @@ void MainWindow::onPreferencesClicked_gui(GtkWidget *widget, gpointer data)
 		// Reload the icons only if the setting has changed
 		mw->loadIcons_gui();
 
+		// All hubs and PMs
 		for (StringIterC it = mw->EntryList.begin(); it != mw->EntryList.end(); ++it)
 		{
 			BookEntry *entry = mw->findBookEntry(Entry::HUB, *it);
 
 			if (entry != NULL)
-				dynamic_cast<Hub*>(entry)->updateTags_gui();
+				dynamic_cast<Hub*>(entry)->preferences_gui();
 			else
 			{
 				entry = mw->findBookEntry(Entry::PRIVATE_MESSAGE, *it);
 
 				if (entry != NULL)
-					dynamic_cast<PrivateMessage*>(entry)->updateTags_gui();
+					dynamic_cast<PrivateMessage*>(entry)->preferences_gui();
 			}
 		}
+
+		// Search Spy
+		BookEntry *entry = mw->findBookEntry(Entry::SEARCH_SPY);
+
+		if (entry != NULL)
+			dynamic_cast<SearchSpy *>(entry)->preferences_gui();
 
 		// Status menu
 		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(mw->getWidget("statusIconBlinkUseItem")), WGETB("status-icon-blink-use"));
@@ -1221,6 +1245,12 @@ void MainWindow::onSearchClicked_gui(GtkWidget *widget, gpointer data)
 {
 	MainWindow *mw = (MainWindow *)data;
 	mw->addSearch_gui();
+}
+
+void MainWindow::onSearchSpyClicked_gui(GtkWidget *widget, gpointer data)
+{
+	MainWindow *mw = (MainWindow *)data;
+	mw->showSearchSpy_gui();
 }
 
 void MainWindow::onDownloadQueueClicked_gui(GtkWidget *widget, gpointer data)

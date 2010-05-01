@@ -179,7 +179,7 @@ void PrivateMessage::addStatusMessage_gui(string message, Msg::TypeMsg typemsg)
 	addLine_gui(typemsg, "*** " + message);
 }
 
-void PrivateMessage::updateTags_gui()
+void PrivateMessage::preferences_gui()
 {
 	WulforSettingsManager *wsm = WulforSettingsManager::getInstance();
 	string fore, back;
