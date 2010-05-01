@@ -41,7 +41,7 @@ class PrivateMessage:
 		// GUI functions
 		void addMessage_gui(std::string message, Msg::TypeMsg typemsg);
 		void addStatusMessage_gui(std::string message, Msg::TypeMsg typemsg);
-		void updateTags_gui();
+		void preferences_gui();
 
 	private:
 		typedef enum
