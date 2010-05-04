@@ -71,9 +71,9 @@ class SearchSpy:
 		virtual void on(dcpp::ClientManagerListener::IncomingSearch, const std::string& s) throw();
 		virtual void on(dcpp::TimerManagerListener::Minute, uint32_t tick) throw();
 
-		SearchType FrameSize;    //TODO: add to preference
-		guint Waiting;           //TODO: add to preference
-		guint Top;               //TODO: add to preference
+		SearchType FrameSize;
+		guint Waiting;
+		guint Top;
 		GdkEventType previous;
 		TreeView searchView;
 		GtkListStore *searchStore;
@@ -81,6 +81,7 @@ class SearchSpy:
 		SearchIters searchIters;
 		TreeView topView;
 		GtkListStore *topStore;
+		std::string aSearchColor, cSearchColor, rSearchColor, tSearchColor, qSearchColor;
 };
 
 #else

@@ -352,6 +352,29 @@ void Settings::saveSettings_client()
 			}
 		}
 
+		{ // Search Spy
+			GdkColor color;
+
+			gtk_color_button_get_color(GTK_COLOR_BUTTON(getWidget("aSPColorButton")), &color);
+			WSET("search-spy-a-color", WulforUtil::colorToString(&color));
+
+			gtk_color_button_get_color(GTK_COLOR_BUTTON(getWidget("tSPColorButton")), &color);
+			WSET("search-spy-t-color", WulforUtil::colorToString(&color));
+
+			gtk_color_button_get_color(GTK_COLOR_BUTTON(getWidget("qSPColorButton")), &color);
+			WSET("search-spy-q-color", WulforUtil::colorToString(&color));
+
+			gtk_color_button_get_color(GTK_COLOR_BUTTON(getWidget("cSPColorButton")), &color);
+			WSET("search-spy-c-color", WulforUtil::colorToString(&color));
+
+			gtk_color_button_get_color(GTK_COLOR_BUTTON(getWidget("rSPColorButton")), &color);
+			WSET("search-spy-r-color", WulforUtil::colorToString(&color));
+
+			WSET("search-spy-frame", (int)gtk_spin_button_get_value(GTK_SPIN_BUTTON(getWidget("frameSPSpinButton"))));
+			WSET("search-spy-waiting", (int)gtk_spin_button_get_value(GTK_SPIN_BUTTON(getWidget("waitingSPSpinButton"))));
+			WSET("search-spy-top", (int)gtk_spin_button_get_value(GTK_SPIN_BUTTON(getWidget("topSPSpinButton"))));
+		}
+
 		{ // Window
 			// Auto-open on startup
 			saveOptionsView_gui(windowView1, sm);
@@ -361,10 +384,6 @@ void Settings::saveSettings_client()
 
 			// Confirm dialog options
 			saveOptionsView_gui(windowView3, sm);
-		}
-
-		{ //TODO: Search Spy
-
 		}
 	}
 
@@ -1217,6 +1236,32 @@ void Settings::initAppearance_gui()
 			"icon-quit");
 	}
 
+	{ // Search Spy
+		GdkColor color;
+
+		if (gdk_color_parse(wsm->getString("search-spy-a-color").c_str(), &color))
+			gtk_color_button_set_color(GTK_COLOR_BUTTON(getWidget("aSPColorButton")), &color);
+
+		if (gdk_color_parse(wsm->getString("search-spy-t-color").c_str(), &color))
+			gtk_color_button_set_color(GTK_COLOR_BUTTON(getWidget("tSPColorButton")), &color);
+
+		if (gdk_color_parse(wsm->getString("search-spy-q-color").c_str(), &color))
+			gtk_color_button_set_color(GTK_COLOR_BUTTON(getWidget("qSPColorButton")), &color);
+
+		if (gdk_color_parse(wsm->getString("search-spy-c-color").c_str(), &color))
+			gtk_color_button_set_color(GTK_COLOR_BUTTON(getWidget("cSPColorButton")), &color);
+
+		if (gdk_color_parse(wsm->getString("search-spy-r-color").c_str(), &color))
+			gtk_color_button_set_color(GTK_COLOR_BUTTON(getWidget("rSPColorButton")), &color);
+
+		gtk_spin_button_set_value(GTK_SPIN_BUTTON(getWidget("frameSPSpinButton")), (double)WGETI("search-spy-frame"));
+		gtk_spin_button_set_value(GTK_SPIN_BUTTON(getWidget("waitingSPSpinButton")), (double)WGETI("search-spy-waiting"));
+		gtk_spin_button_set_value(GTK_SPIN_BUTTON(getWidget("topSPSpinButton")), (double)WGETI("search-spy-top"));
+
+		g_signal_connect(getWidget("defaultColorsSPButton"), "clicked", G_CALLBACK(onDefaultColorsSPButton_gui), (gpointer)this);
+		g_signal_connect(getWidget("defaultFrameSPButton"), "clicked", G_CALLBACK(onDefaultFrameSPButton_gui), (gpointer)this);
+	}
+
 	{ // Window
 		// Auto-open
 		createOptionsView_gui(windowView1, windowStore1, "windowsAutoOpenTreeView");
@@ -1635,6 +1680,39 @@ void Settings::onDefaultThemeButton_gui(GtkWidget *widget, gpointer data)
 	gtk_label_set_text(GTK_LABEL(s->getWidget("currentThemeLabel")), _("default theme"));
 	s->applyIconsTheme(TRUE);
 	s->applyTextTheme(TRUE);
+}
+
+void Settings::onDefaultColorsSPButton_gui(GtkWidget *widget, gpointer data)
+{
+	Settings *s = (Settings *)data;
+
+	GdkColor color;
+	WulforSettingsManager *wsm = WulforSettingsManager::getInstance();
+
+	if (gdk_color_parse(wsm->getString("search-spy-a-color", TRUE).c_str(), &color))
+		gtk_color_button_set_color(GTK_COLOR_BUTTON(s->getWidget("aSPColorButton")), &color);
+
+	if (gdk_color_parse(wsm->getString("search-spy-t-color", TRUE).c_str(), &color))
+		gtk_color_button_set_color(GTK_COLOR_BUTTON(s->getWidget("tSPColorButton")), &color);
+
+	if (gdk_color_parse(wsm->getString("search-spy-q-color", TRUE).c_str(), &color))
+		gtk_color_button_set_color(GTK_COLOR_BUTTON(s->getWidget("qSPColorButton")), &color);
+
+	if (gdk_color_parse(wsm->getString("search-spy-c-color", TRUE).c_str(), &color))
+		gtk_color_button_set_color(GTK_COLOR_BUTTON(s->getWidget("cSPColorButton")), &color);
+
+	if (gdk_color_parse(wsm->getString("search-spy-r-color", TRUE).c_str(), &color))
+		gtk_color_button_set_color(GTK_COLOR_BUTTON(s->getWidget("rSPColorButton")), &color);
+}
+
+void Settings::onDefaultFrameSPButton_gui(GtkWidget *widget, gpointer data)
+{
+	Settings *s = (Settings *)data;
+
+	WulforSettingsManager *wsm = WulforSettingsManager::getInstance();
+	gtk_spin_button_set_value(GTK_SPIN_BUTTON(s->getWidget("frameSPSpinButton")), double(wsm->getInt("search-spy-frame", TRUE)));
+	gtk_spin_button_set_value(GTK_SPIN_BUTTON(s->getWidget("waitingSPSpinButton")), double(wsm->getInt("search-spy-waiting", TRUE)));
+	gtk_spin_button_set_value(GTK_SPIN_BUTTON(s->getWidget("topSPSpinButton")), double(wsm->getInt("search-spy-top", TRUE)));
 }
 
 void Settings::applyIconsTheme(bool useDefault)

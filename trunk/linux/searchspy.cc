@@ -35,11 +35,16 @@ using namespace dcpp;
 SearchSpy::SearchSpy():
 	BookEntry(Entry::SEARCH_SPY, _("Search Spy"), "searchspy.glade")
 {
+	FrameSize = (SearchType)WGETI("search-spy-frame");
+	Waiting = (guint)WGETI("search-spy-waiting");
+	Top = (guint)WGETI("search-spy-top");
+
 	// Configure the dialog
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(getWidget("ignoreTTHSearchCheckButton")), BOOLSETTING(SPY_FRAME_IGNORE_TTH_SEARCHES));
 	gtk_window_set_transient_for(GTK_WINDOW(getWidget("TopSearchDialog")), GTK_WINDOW(WulforManager::get()->getMainWindow()->getContainer()));
-	gtk_label_set_text(GTK_LABEL(getWidget("frameSearchSizeLabel")), (Util::toString(WGETI("search-spy-frame"))).c_str());
-	gtk_label_set_text(GTK_LABEL(getWidget("waitingSearchLabel")), (Util::toString(WGETI("search-spy-waiting")) + " " + _("s")).c_str());
+	gtk_label_set_text(GTK_LABEL(getWidget("frameSearchSizeLabel")), Util::toString(FrameSize).c_str());
+	gtk_label_set_text(GTK_LABEL(getWidget("waitingSearchLabel")), (Util::toString(Waiting) + " " + _("s")).c_str());
+	gtk_label_set_text(GTK_LABEL(getWidget("topSearchLabel")), Util::toString(Top).c_str());
 
 	// Initialize search list treeview
 	searchView.setView(GTK_TREE_VIEW(getWidget("searchSpyView")), TRUE, "searchspy");
@@ -88,9 +93,11 @@ SearchSpy::SearchSpy():
 	g_signal_connect(searchView.get(), "button-release-event", G_CALLBACK(onButtonReleased_gui), (gpointer)this);
 	g_signal_connect(searchView.get(), "key-release-event", G_CALLBACK(onKeyReleased_gui), (gpointer)this);
 
-	FrameSize = (SearchType)WGETI("search-spy-frame");
-	Waiting = (guint)WGETI("search-spy-waiting");
-	Top = (guint)WGETI("search-spy-top");
+	aSearchColor = WGETS("search-spy-a-color");
+	tSearchColor = WGETS("search-spy-t-color");
+	qSearchColor = WGETS("search-spy-q-color");
+	cSearchColor = WGETS("search-spy-c-color");
+	rSearchColor = WGETS("search-spy-r-color");
 }
 
 SearchSpy::~SearchSpy()
@@ -109,34 +116,68 @@ void SearchSpy::show()
 
 void SearchSpy::preferences_gui()
 {
-//	TODO: uncomment when implemented
-//
-// 	FrameSize = (SearchType)WGETI("search-spy-frame");
-// 	Waiting = (guint)WGETI("search-spy-waiting");
-// 	Top = (guint)WGETI("search-spy-top");
-// 
-// 	if (FrameSize > 0 && searchIters.size() > FrameSize)
-// 	{
-// 		GtkTreeIter iter;
-// 		GtkTreeModel *m = GTK_TREE_MODEL(searchStore);
-// 		gboolean valid = gtk_tree_model_get_iter_first(m, &iter);
-// 
-// 		SearchType i = 0;
-// 		gtk_tree_selection_select_all(searchSelection);
-// 
-// 		while (valid)
-// 		{
-// 			if (++i > FrameSize)
-// 				break;
-// 
-// 			gtk_tree_selection_unselect_iter(searchSelection, &iter);
-// 			valid = gtk_tree_model_iter_next(m, &iter);
-// 		}
-// 		onRemoveItemClicked_gui(NULL, (gpointer)this);
-// 	}
-//
-//	gtk_label_set_text(GTK_LABEL(getWidget("frameSearchSizeLabel")), Util::toString(FrameSize).c_str());
-//	gtk_label_set_text(GTK_LABEL(getWidget("waitingSearchLabel")), (Util::toString(Waiting) + " " + _("s")).c_str());
+	FrameSize = (SearchType)WGETI("search-spy-frame");
+	Waiting = (guint)WGETI("search-spy-waiting");
+	Top = (guint)WGETI("search-spy-top");
+
+	// reset frame
+	GtkTreeIter iter;
+
+	if (FrameSize > 0 && searchIters.size() > FrameSize)
+	{
+		SearchType i = 0;
+		gtk_tree_selection_select_all(searchSelection);
+
+		for (SearchIters::const_iterator it = searchIters.begin(); it != searchIters.end(); ++it)
+		{
+			if (++i > FrameSize)
+				break;
+
+			iter = it->second;
+			gtk_tree_selection_unselect_iter(searchSelection, &iter);
+		}
+		onRemoveItemClicked_gui(NULL, (gpointer)this);
+	}
+
+	// reset colors
+	aSearchColor = WGETS("search-spy-a-color");
+	tSearchColor = WGETS("search-spy-t-color");
+	qSearchColor = WGETS("search-spy-q-color");
+	cSearchColor = WGETS("search-spy-c-color");
+	rSearchColor = WGETS("search-spy-r-color");
+
+	string color, order;
+
+	for (SearchIters::const_iterator it = searchIters.begin(); it != searchIters.end(); ++it)
+	{
+		iter = it->second;
+		order = searchView.getString(&iter, "order");
+		guint count = searchView.getValue<guint>(&iter, "count");
+
+		// reset count
+		if (count > Top)
+		{
+			gtk_list_store_set(searchStore, &iter,
+				searchView.col(_("Count")), Util::toString(Top).c_str(),
+				searchView.col("count"), Top,
+				-1);
+		}
+
+		switch (order[0])
+		{
+			case 'a': color = aSearchColor; break;
+			case 'c': color = cSearchColor; break;
+			case 'r': color = rSearchColor; break;
+			case 't': color = tSearchColor; break;
+			case 'q': color = qSearchColor; break;
+		}
+		gtk_list_store_set(searchStore, &iter, searchView.col("color"), color.c_str(), -1);
+	}
+
+	// reset label
+	gtk_label_set_text(GTK_LABEL(getWidget("frameSearchSizeLabel")), Util::toString(FrameSize).c_str());
+	gtk_label_set_text(GTK_LABEL(getWidget("waitingSearchLabel")), (Util::toString(Waiting) + " " + _("s")).c_str());
+	gtk_label_set_text(GTK_LABEL(getWidget("topSearchLabel")), Util::toString(Top).c_str());
 }
 
 bool SearchSpy::findIter_gui(const string &search, GtkTreeIter *iter)
@@ -237,7 +278,7 @@ void SearchSpy::updateFrameSearch_gui(const string search, const string type)
 					searchView.col("tick"), tick,
 					searchView.col("icon"), GTK_STOCK_FIND,
 					searchView.col("order"), "r",
-					searchView.col("color"), "#6c85ca",
+					searchView.col("color"), rSearchColor.c_str(),
 					-1);
 				return;
 			}
@@ -291,7 +332,8 @@ bool SearchSpy::updateFrameStatus_gui(GtkTreeIter *iter, uint64_t tick)
 			status = "?";
 			icon = GTK_STOCK_DIALOG_QUESTION;
 
-			color = "#b0b0b0"; //TODO: add to preference?
+			color = qSearchColor;
+			gtk_list_store_set(searchStore, &itree, searchView.col("order"), "q", -1);
 		}
 		else
 		{
@@ -308,10 +350,10 @@ bool SearchSpy::updateFrameStatus_gui(GtkTreeIter *iter, uint64_t tick)
 
 			switch (order[0])
 			{
-				case 'a': color = "#339900"; break; //TODO: add to preference?
-				case 'c': color = "#b28600"; break; //TODO: add to preference?
-				case 'r': color = "#6c85ca"; break; //TODO: add to preference?
-				case 't': color = "#ff0000"; break; //TODO: add to preference?
+				case 'a': color = aSearchColor; break;
+				case 'c': color = cSearchColor; break;
+				case 'r': color = rSearchColor; break;
+				case 't': color = tSearchColor; break;
 			}
 		}
 		gtk_list_store_set(searchStore, &itree,

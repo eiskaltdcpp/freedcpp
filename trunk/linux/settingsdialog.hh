@@ -146,6 +146,8 @@ class Settings:
 		static void onDefaultIconsThemeButton_gui(GtkWidget *widget, gpointer data);
 		static void onSystemIconsThemeButton_gui(GtkWidget *widget, gpointer data);
 		static void onDefaultThemeButton_gui(GtkWidget *widget, gpointer data);
+		static void onDefaultColorsSPButton_gui(GtkWidget *widget, gpointer data);
+		static void onDefaultFrameSPButton_gui(GtkWidget *widget, gpointer data);
 
 		// Client functions
 		void saveSettings_client();
