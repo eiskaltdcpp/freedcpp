@@ -2187,6 +2187,7 @@
               <widget class="GtkNotebook" id="notebook4">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
+                <property name="scrollable">True</property>
                 <child>
                   <widget class="GtkVBox" id="vbox58">
                     <property name="visible">True</property>
@@ -3572,6 +3573,396 @@ default</property>
                   <packing>
                     <property name="type">tab</property>
                     <property name="position">7</property>
+                    <property name="tab_fill">False</property>
+                  </packing>
+                </child>
+                <child>
+                  <widget class="GtkVBox" id="vbox18">
+                    <property name="visible">True</property>
+                    <child>
+                      <widget class="GtkVBox" id="vbox35">
+                        <property name="visible">True</property>
+                        <property name="spacing">8</property>
+                        <child>
+                          <widget class="GtkFrame" id="frame27">
+                            <property name="visible">True</property>
+                            <property name="border_width">4</property>
+                            <property name="label_xalign">0</property>
+                            <child>
+                              <widget class="GtkVBox" id="vbox36">
+                                <property name="visible">True</property>
+                                <property name="border_width">4</property>
+                                <property name="spacing">4</property>
+                                <child>
+                                  <widget class="GtkHBox" id="hbox53">
+                                    <property name="visible">True</property>
+                                    <property name="spacing">4</property>
+                                    <child>
+                                      <widget class="GtkColorButton" id="aSPColorButton">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="receives_default">True</property>
+                                        <property name="response_id">0</property>
+                                        <property name="color">#000000000000</property>
+                                      </widget>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <widget class="GtkLabel" id="label97">
+                                        <property name="visible">True</property>
+                                        <property name="label" translatable="yes">Новая строка или TTH</property>
+                                      </widget>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="position">1</property>
+                                      </packing>
+                                    </child>
+                                  </widget>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <widget class="GtkHBox" id="hbox55">
+                                    <property name="visible">True</property>
+                                    <property name="spacing">4</property>
+                                    <child>
+                                      <widget class="GtkColorButton" id="tSPColorButton">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="receives_default">True</property>
+                                        <property name="response_id">0</property>
+                                        <property name="color">#000000000000</property>
+                                      </widget>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <widget class="GtkLabel" id="label99">
+                                        <property name="visible">True</property>
+                                        <property name="label" translatable="yes">Добавление строки или TTH в топ</property>
+                                      </widget>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="position">1</property>
+                                      </packing>
+                                    </child>
+                                  </widget>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="position">1</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <widget class="GtkHBox" id="hbox57">
+                                    <property name="visible">True</property>
+                                    <property name="spacing">4</property>
+                                    <child>
+                                      <widget class="GtkColorButton" id="qSPColorButton">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="receives_default">True</property>
+                                        <property name="response_id">0</property>
+                                        <property name="color">#000000000000</property>
+                                      </widget>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <widget class="GtkLabel" id="label101">
+                                        <property name="visible">True</property>
+                                        <property name="label" translatable="yes">Состояние готовности</property>
+                                      </widget>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="position">1</property>
+                                      </packing>
+                                    </child>
+                                  </widget>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="position">2</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <widget class="GtkHBox" id="hbox59">
+                                    <property name="visible">True</property>
+                                    <property name="spacing">4</property>
+                                    <child>
+                                      <widget class="GtkColorButton" id="cSPColorButton">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="receives_default">True</property>
+                                        <property name="response_id">0</property>
+                                        <property name="color">#000000000000</property>
+                                      </widget>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <widget class="GtkLabel" id="label103">
+                                        <property name="visible">True</property>
+                                        <property name="label" translatable="yes">Совпадения</property>
+                                      </widget>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="position">1</property>
+                                      </packing>
+                                    </child>
+                                  </widget>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="position">3</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <widget class="GtkHBox" id="hbox61">
+                                    <property name="visible">True</property>
+                                    <property name="spacing">4</property>
+                                    <child>
+                                      <widget class="GtkColorButton" id="rSPColorButton">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="receives_default">True</property>
+                                        <property name="response_id">0</property>
+                                        <property name="color">#000000000000</property>
+                                      </widget>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <widget class="GtkLabel" id="label106">
+                                        <property name="visible">True</property>
+                                        <property name="label" translatable="yes">Обновление строки или TTH</property>
+                                      </widget>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="position">1</property>
+                                      </packing>
+                                    </child>
+                                  </widget>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="position">4</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <widget class="GtkHBox" id="hbox30">
+                                    <property name="visible">True</property>
+                                    <child>
+                                      <widget class="GtkAlignment" id="alignment12">
+                                        <property name="visible">True</property>
+                                        <child>
+                                          <placeholder/>
+                                        </child>
+                                      </widget>
+                                    </child>
+                                    <child>
+                                      <widget class="GtkButton" id="defaultColorsSPButton">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="receives_default">True</property>
+                                        <property name="label" translatable="yes">Default</property>
+                                        <property name="response_id">0</property>
+                                      </widget>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="position">1</property>
+                                      </packing>
+                                    </child>
+                                  </widget>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="position">5</property>
+                                  </packing>
+                                </child>
+                              </widget>
+                            </child>
+                            <child>
+                              <widget class="GtkLabel" id="label64">
+                                <property name="visible">True</property>
+                                <property name="label" translatable="yes">&lt;b&gt;Colors&lt;/b&gt;</property>
+                                <property name="use_markup">True</property>
+                              </widget>
+                              <packing>
+                                <property name="type">label_item</property>
+                              </packing>
+                            </child>
+                          </widget>
+                        </child>
+                        <child>
+                          <widget class="GtkFrame" id="frame31">
+                            <property name="visible">True</property>
+                            <property name="border_width">4</property>
+                            <property name="label_xalign">0</property>
+                            <child>
+                              <widget class="GtkVBox" id="vbox37">
+                                <property name="visible">True</property>
+                                <property name="border_width">4</property>
+                                <property name="spacing">4</property>
+                                <child>
+                                  <widget class="GtkHBox" id="hbox63">
+                                    <property name="visible">True</property>
+                                    <property name="spacing">4</property>
+                                    <child>
+                                      <widget class="GtkSpinButton" id="frameSPSpinButton">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="tooltip" translatable="yes">Размер кадра определяет ширину обзора, большие значения влияют на производительность</property>
+                                        <property name="adjustment">50 10 256 1 10 10</property>
+                                      </widget>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <widget class="GtkLabel" id="label108">
+                                        <property name="visible">True</property>
+                                        <property name="label" translatable="yes">Кадр (размер)</property>
+                                      </widget>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="position">1</property>
+                                      </packing>
+                                    </child>
+                                  </widget>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <widget class="GtkHBox" id="hbox65">
+                                    <property name="visible">True</property>
+                                    <property name="spacing">4</property>
+                                    <child>
+                                      <widget class="GtkSpinButton" id="waitingSPSpinButton">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="tooltip" translatable="yes">Увеличение времени ожидания увеличивает вероятность добавления в топ, но снижает динамику(обновление) кадра</property>
+                                        <property name="adjustment">40 1 300 1 10 10</property>
+                                      </widget>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <widget class="GtkLabel" id="label110">
+                                        <property name="visible">True</property>
+                                        <property name="label" translatable="yes">Ожидание (секунд)</property>
+                                      </widget>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="position">1</property>
+                                      </packing>
+                                    </child>
+                                  </widget>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="position">1</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <widget class="GtkHBox" id="hbox67">
+                                    <property name="visible">True</property>
+                                    <property name="spacing">4</property>
+                                    <child>
+                                      <widget class="GtkSpinButton" id="topSPSpinButton">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="tooltip" translatable="yes">Количество совпадений для добавления в топ</property>
+                                        <property name="adjustment">2 2 100 1 10 10</property>
+                                      </widget>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <widget class="GtkLabel" id="label112">
+                                        <property name="visible">True</property>
+                                        <property name="label" translatable="yes">Топ (число совпадений, больше)</property>
+                                      </widget>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="position">1</property>
+                                      </packing>
+                                    </child>
+                                  </widget>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="position">2</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <widget class="GtkHBox" id="hbox32">
+                                    <property name="visible">True</property>
+                                    <child>
+                                      <widget class="GtkAlignment" id="alignment14">
+                                        <property name="visible">True</property>
+                                        <child>
+                                          <placeholder/>
+                                        </child>
+                                      </widget>
+                                    </child>
+                                    <child>
+                                      <widget class="GtkButton" id="defaultFrameSPButton">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="receives_default">True</property>
+                                        <property name="label" translatable="yes">Default</property>
+                                        <property name="response_id">0</property>
+                                      </widget>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="position">1</property>
+                                      </packing>
+                                    </child>
+                                  </widget>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="position">3</property>
+                                  </packing>
+                                </child>
+                              </widget>
+                            </child>
+                            <child>
+                              <widget class="GtkLabel" id="label75">
+                                <property name="visible">True</property>
+                                <property name="label" translatable="yes">&lt;b&gt;Frame&lt;/b&gt;</property>
+                                <property name="use_markup">True</property>
+                              </widget>
+                              <packing>
+                                <property name="type">label_item</property>
+                              </packing>
+                            </child>
+                          </widget>
+                          <packing>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                      </widget>
+                      <packing>
+                        <property name="expand">False</property>
+                      </packing>
+                    </child>
+                  </widget>
+                  <packing>
+                    <property name="position">8</property>
+                  </packing>
+                </child>
+                <child>
+                  <widget class="GtkLabel" id="label58">
+                    <property name="visible">True</property>
+                    <property name="label" translatable="yes">Search Spy</property>
+                  </widget>
+                  <packing>
+                    <property name="type">tab</property>
+                    <property name="position">8</property>
                     <property name="tab_fill">False</property>
                   </packing>
                 </child>

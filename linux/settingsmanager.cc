@@ -167,6 +167,11 @@ WulforSettingsManager::WulforSettingsManager():
 	defaultString.insert(StringMap::value_type("text-op-fore-color", "#0000FF"));
 	defaultString.insert(StringMap::value_type("text-url-back-color", "#FFFFFF"));
 	defaultString.insert(StringMap::value_type("text-url-fore-color", "#0000FF"));
+	defaultString.insert(StringMap::value_type("search-spy-a-color", "#339900"));
+	defaultString.insert(StringMap::value_type("search-spy-t-color", "#ff0000"));
+	defaultString.insert(StringMap::value_type("search-spy-q-color", "#b0b0b0"));
+	defaultString.insert(StringMap::value_type("search-spy-c-color", "#b28600"));
+	defaultString.insert(StringMap::value_type("search-spy-r-color", "#6c85ca"));
 	defaultString.insert(StringMap::value_type("emoticons-pack", ""));
 	defaultString.insert(StringMap::value_type("emoticons-icon-size", "24x24"));
 	defaultString.insert(StringMap::value_type("notify-download-finished-title", _("Download finished")));
