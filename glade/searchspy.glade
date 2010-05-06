@@ -24,7 +24,7 @@
     <child>
       <widget class="GtkHBox" id="hbox5">
         <property name="visible">True</property>
-        <property name="spacing">8</property>
+        <property name="spacing">4</property>
         <child>
           <widget class="GtkCheckButton" id="ignoreTTHSearchCheckButton">
             <property name="visible">True</property>
@@ -49,20 +49,22 @@
           </packing>
         </child>
         <child>
-          <widget class="GtkAlignment" id="alignment1">
+          <widget class="GtkButton" id="okButton">
             <property name="visible">True</property>
-            <child>
-              <placeholder/>
-            </child>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="tooltip" translatable="yes">Применить настройки</property>
+            <property name="label">ok</property>
+            <property name="response_id">0</property>
           </widget>
           <packing>
+            <property name="expand">False</property>
             <property name="position">2</property>
           </packing>
         </child>
         <child>
-          <widget class="GtkLabel" id="label4">
+          <widget class="GtkLabel" id="topLabel">
             <property name="visible">True</property>
-            <property name="tooltip" translatable="yes">Frame search size</property>
             <property name="label" translatable="yes">Top: &gt;</property>
           </widget>
           <packing>
@@ -71,8 +73,11 @@
           </packing>
         </child>
         <child>
-          <widget class="GtkLabel" id="topSearchLabel">
+          <widget class="GtkSpinButton" id="topSpinButton">
             <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="tooltip" translatable="yes">Количество совпадений для добавления в топ</property>
+            <property name="adjustment">2 2 100 1 10 10</property>
           </widget>
           <packing>
             <property name="expand">False</property>
@@ -80,9 +85,8 @@
           </packing>
         </child>
         <child>
-          <widget class="GtkLabel" id="label3">
+          <widget class="GtkLabel" id="waitingLabel">
             <property name="visible">True</property>
-            <property name="tooltip" translatable="yes">Frame search size</property>
             <property name="label" translatable="yes">Waiting:</property>
           </widget>
           <packing>
@@ -91,8 +95,11 @@
           </packing>
         </child>
         <child>
-          <widget class="GtkLabel" id="waitingSearchLabel">
+          <widget class="GtkSpinButton" id="waitingSpinButton">
             <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="tooltip" translatable="yes">Увеличение времени ожидания увеличивает вероятность добавления в топ, но снижает динамику(обновление) кадра</property>
+            <property name="adjustment">1 1 300 1 10 10</property>
           </widget>
           <packing>
             <property name="expand">False</property>
@@ -100,9 +107,8 @@
           </packing>
         </child>
         <child>
-          <widget class="GtkLabel" id="label1">
+          <widget class="GtkLabel" id="frameLabel">
             <property name="visible">True</property>
-            <property name="tooltip" translatable="yes">Frame search size</property>
             <property name="label" translatable="yes">Frame:</property>
           </widget>
           <packing>
@@ -111,8 +117,11 @@
           </packing>
         </child>
         <child>
-          <widget class="GtkLabel" id="frameSearchSizeLabel">
+          <widget class="GtkSpinButton" id="frameSpinButton">
             <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="tooltip" translatable="yes">Размер кадра определяет ширину обзора, большие значения влияют на производительность</property>
+            <property name="adjustment">10 10 256 1 10 10</property>
           </widget>
           <packing>
             <property name="expand">False</property>

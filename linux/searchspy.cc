@@ -42,9 +42,9 @@ SearchSpy::SearchSpy():
 	// Configure the dialog
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(getWidget("ignoreTTHSearchCheckButton")), BOOLSETTING(SPY_FRAME_IGNORE_TTH_SEARCHES));
 	gtk_window_set_transient_for(GTK_WINDOW(getWidget("TopSearchDialog")), GTK_WINDOW(WulforManager::get()->getMainWindow()->getContainer()));
-	gtk_label_set_text(GTK_LABEL(getWidget("frameSearchSizeLabel")), Util::toString(FrameSize).c_str());
-	gtk_label_set_text(GTK_LABEL(getWidget("waitingSearchLabel")), (Util::toString(Waiting) + " " + _("s")).c_str());
-	gtk_label_set_text(GTK_LABEL(getWidget("topSearchLabel")), Util::toString(Top).c_str());
+	gtk_spin_button_set_value(GTK_SPIN_BUTTON(getWidget("frameSpinButton")), (double)FrameSize);
+	gtk_spin_button_set_value(GTK_SPIN_BUTTON(getWidget("waitingSpinButton")), (double)Waiting);
+	gtk_spin_button_set_value(GTK_SPIN_BUTTON(getWidget("topSpinButton")), (double)Top);
 
 	// Initialize search list treeview
 	searchView.setView(GTK_TREE_VIEW(getWidget("searchSpyView")), TRUE, "searchspy");
@@ -92,6 +92,7 @@ SearchSpy::SearchSpy():
 	g_signal_connect(searchView.get(), "button-press-event", G_CALLBACK(onButtonPressed_gui), (gpointer)this);
 	g_signal_connect(searchView.get(), "button-release-event", G_CALLBACK(onButtonReleased_gui), (gpointer)this);
 	g_signal_connect(searchView.get(), "key-release-event", G_CALLBACK(onKeyReleased_gui), (gpointer)this);
+	g_signal_connect(getWidget("okButton"), "clicked", G_CALLBACK(onOKButtonClicked_gui), (gpointer)this);
 
 	aSearchColor = WGETS("search-spy-a-color");
 	tSearchColor = WGETS("search-spy-t-color");
@@ -102,6 +103,10 @@ SearchSpy::SearchSpy():
 
 SearchSpy::~SearchSpy()
 {
+	WSET("search-spy-frame", (int)gtk_spin_button_get_value(GTK_SPIN_BUTTON(getWidget("frameSpinButton"))));
+	WSET("search-spy-waiting", (int)gtk_spin_button_get_value(GTK_SPIN_BUTTON(getWidget("waitingSpinButton"))));
+	WSET("search-spy-top", (int)gtk_spin_button_get_value(GTK_SPIN_BUTTON(getWidget("topSpinButton"))));
+
 	gtk_widget_destroy(getWidget("TopSearchDialog"));
 
 	TimerManager::getInstance()->removeListener(this);
@@ -120,24 +125,7 @@ void SearchSpy::preferences_gui()
 	Waiting = (guint)WGETI("search-spy-waiting");
 	Top = (guint)WGETI("search-spy-top");
 
-	// reset frame
-	GtkTreeIter iter;
-
-	if (FrameSize > 0 && searchIters.size() > FrameSize)
-	{
-		SearchType i = 0;
-		gtk_tree_selection_select_all(searchSelection);
-
-		for (SearchIters::const_iterator it = searchIters.begin(); it != searchIters.end(); ++it)
-		{
-			if (++i > FrameSize)
-				break;
-
-			iter = it->second;
-			gtk_tree_selection_unselect_iter(searchSelection, &iter);
-		}
-		onRemoveItemClicked_gui(NULL, (gpointer)this);
-	}
+	resetFrame();
 
 	// reset colors
 	aSearchColor = WGETS("search-spy-a-color");
@@ -147,6 +135,7 @@ void SearchSpy::preferences_gui()
 	rSearchColor = WGETS("search-spy-r-color");
 
 	string color, order;
+	GtkTreeIter iter;
 
 	for (SearchIters::const_iterator it = searchIters.begin(); it != searchIters.end(); ++it)
 	{
@@ -174,10 +163,31 @@ void SearchSpy::preferences_gui()
 		gtk_list_store_set(searchStore, &iter, searchView.col("color"), color.c_str(), -1);
 	}
 
-	// reset label
-	gtk_label_set_text(GTK_LABEL(getWidget("frameSearchSizeLabel")), Util::toString(FrameSize).c_str());
-	gtk_label_set_text(GTK_LABEL(getWidget("waitingSearchLabel")), (Util::toString(Waiting) + " " + _("s")).c_str());
-	gtk_label_set_text(GTK_LABEL(getWidget("topSearchLabel")), Util::toString(Top).c_str());
+	// reset spin button
+	gtk_spin_button_set_value(GTK_SPIN_BUTTON(getWidget("frameSpinButton")), (double)FrameSize);
+	gtk_spin_button_set_value(GTK_SPIN_BUTTON(getWidget("waitingSpinButton")), (double)Waiting);
+	gtk_spin_button_set_value(GTK_SPIN_BUTTON(getWidget("topSpinButton")), (double)Top);
+}
+
+void SearchSpy::resetFrame()
+{
+	GtkTreeIter iter;
+
+	if (FrameSize > 0 && searchIters.size() > FrameSize)
+	{
+		SearchType i = 0;
+		gtk_tree_selection_select_all(searchSelection);
+
+		for (SearchIters::const_iterator it = searchIters.begin(); it != searchIters.end(); ++it)
+		{
+			if (++i > FrameSize)
+				break;
+
+			iter = it->second;
+			gtk_tree_selection_unselect_iter(searchSelection, &iter);
+		}
+		onRemoveItemClicked_gui(NULL, (gpointer)this);
+	}
 }
 
 bool SearchSpy::findIter_gui(const string &search, GtkTreeIter *iter)
@@ -221,20 +231,23 @@ void SearchSpy::addTop_gui(const string &search, const string &type)
 
 void SearchSpy::updateFrameSearch_gui(const string search, const string type)
 {
+	g_return_if_fail(FrameSize > 0 && FrameSize < 500);
+
 	GtkTreeIter iter;
 
 	if (findIter_gui(search, &iter))
 	{
 		uint64_t tick = GET_TICK();
-		string time = Util::formatTime("%H:%M:%S", GET_TIME());
-		guint count = searchView.getValue<guint>(&iter, "count");
-		string order = "c";
 
 		if (searchView.getString(&iter, "order")[0] == 't')
 		{
 			updateFrameStatus_gui(NULL, tick);
 			return;
 		}
+
+		string time = Util::formatTime("%H:%M:%S", GET_TIME());
+		guint count = searchView.getValue<guint>(&iter, "count");
+		string order = "c";
 
 		if (count >= Top)
 		{
@@ -258,7 +271,7 @@ void SearchSpy::updateFrameSearch_gui(const string search, const string type)
 		string time = Util::formatTime("%H:%M:%S", GET_TIME());
 		uint64_t tick = GET_TICK();
 
-		if (FrameSize > 0 && searchIters.size() >= FrameSize)
+		if (searchIters.size() >= FrameSize)
 		{
 			if (updateFrameStatus_gui(&iter, tick))
 			{
@@ -354,6 +367,7 @@ bool SearchSpy::updateFrameStatus_gui(GtkTreeIter *iter, uint64_t tick)
 				case 'c': color = cSearchColor; break;
 				case 'r': color = rSearchColor; break;
 				case 't': color = tSearchColor; break;
+				default:  color = qSearchColor; // fix don't know color
 			}
 		}
 		gtk_list_store_set(searchStore, &itree,
@@ -379,6 +393,42 @@ void SearchSpy::setStatus_gui(const string text)
 		GtkWidget *status = getWidget("statusbar");
 		gtk_statusbar_pop(GTK_STATUSBAR(status), 0);
 		gtk_statusbar_push(GTK_STATUSBAR(status), 0, ("[" + Util::getShortTimeString() + "] " + text).c_str());
+	}
+}
+
+void SearchSpy::onOKButtonClicked_gui(GtkWidget *widget, gpointer data)
+{
+	SearchSpy *s =  (SearchSpy *) data;
+
+	s->FrameSize = (SearchType)gtk_spin_button_get_value(GTK_SPIN_BUTTON(s->getWidget("frameSpinButton")));
+	s->Waiting = (guint)gtk_spin_button_get_value(GTK_SPIN_BUTTON(s->getWidget("waitingSpinButton")));
+	s->Top = (guint)gtk_spin_button_get_value(GTK_SPIN_BUTTON(s->getWidget("topSpinButton")));
+	s->resetFrame();
+	s->resetCount();
+
+	s->setStatus_gui(_("top/waiting/frame: ") + Util::toString(s->Top) + "/" + Util::toString(s->Waiting) + "/" +
+		Util::toString(s->FrameSize));
+
+	WSET("search-spy-frame", int(s->FrameSize));
+	WSET("search-spy-waiting", int(s->Waiting));
+	WSET("search-spy-top", int(s->Top));
+}
+
+void SearchSpy::resetCount()
+{
+	GtkTreeIter iter;
+	for (SearchIters::const_iterator it = searchIters.begin(); it != searchIters.end(); ++it)
+	{
+		iter = it->second;
+		guint count = searchView.getValue<guint>(&iter, "count");
+
+		if (count > Top)
+		{
+			gtk_list_store_set(searchStore, &iter,
+				searchView.col(_("Count")), Util::toString(Top).c_str(),
+				searchView.col("count"), Top,
+				-1);
+		}
 	}
 }
 
