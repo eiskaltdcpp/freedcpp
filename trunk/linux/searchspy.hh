@@ -52,6 +52,8 @@ class SearchSpy:
 		void updateFrameSearch_gui(const std::string search, const std::string type);
 		void setStatus_gui(const std::string text);
 		void addTop_gui(const std::string &search, const std::string &type);
+		void resetFrame();
+		void resetCount();
 
 		// GUI callbacks
 		static void onSearchItemClicked_gui(GtkMenuItem *item, gpointer data);
@@ -63,6 +65,7 @@ class SearchSpy:
 		static void onClearTopClicked_gui(GtkWidget *widget, gpointer data);
 		static void onRemoveTopClicked_gui(GtkWidget *widget, gpointer data);
 		static void onIgnoreTTHSearchToggled_gui(GtkWidget *widget, gpointer data);
+		static void onOKButtonClicked_gui(GtkWidget *widget, gpointer data);
 		static gboolean onButtonPressed_gui(GtkWidget *widget, GdkEventButton *event, gpointer data);
 		static gboolean onButtonReleased_gui(GtkWidget *widget, GdkEventButton *event, gpointer data);
 		static gboolean onKeyReleased_gui(GtkWidget *widget, GdkEventKey *event, gpointer data);
