@@ -1,5 +1,10 @@
 		--- freedcpp 0.0.x ---
 
+r120: 0.0.2.19
+* Лишние итерации (хеширование).
+* Ревизия 352 (linuxdcpp, added a setting to disable fast hashing method).
+* Ревизия 351 (linuxdcpp, remove unnecessary iteration in fast hash loop).
+
 r119: 0.0.2.18
 * Добавил кнопки (поисковый шпион).
 
