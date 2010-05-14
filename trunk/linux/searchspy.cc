@@ -231,7 +231,7 @@ void SearchSpy::addTop_gui(const string &search, const string &type)
 
 void SearchSpy::updateFrameSearch_gui(const string search, const string type)
 {
-	g_return_if_fail(FrameSize > 0 && FrameSize < 500);
+	g_return_if_fail(FrameSize > 0 && FrameSize <= 256);
 
 	GtkTreeIter iter;
 
@@ -293,12 +293,8 @@ void SearchSpy::updateFrameSearch_gui(const string search, const string type)
 					searchView.col("order"), "r",
 					searchView.col("color"), rSearchColor.c_str(),
 					-1);
-				return;
 			}
-			else
-			{
-				return;
-			}
+			return;
 		}
 
 		gtk_list_store_insert_with_values(searchStore, &iter, searchIters.size(),

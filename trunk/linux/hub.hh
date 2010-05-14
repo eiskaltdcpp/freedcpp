@@ -130,6 +130,8 @@ class Hub:
 		static void onAddFavoriteUserClicked_gui(GtkMenuItem *item, gpointer data);
 		static void onRemoveFavoriteUserClicked_gui(GtkMenuItem *item, gpointer data);
 		static void onPasswordDialog(GtkWidget *dialog, gint response, gpointer data);
+		static void onDownloadToClicked_gui(GtkMenuItem *item, gpointer data);
+		static void onDownloadClicked_gui(GtkMenuItem *item, gpointer data);
 
 		// Client functions
 		void addFavoriteUser_client(const std::string cid);

@@ -391,7 +391,7 @@ void WulforManager::onReceived_gui(const string link)
 		mainWin->showHub_gui(link);
 
 	else if (WulforUtil::isMagnet(link) && BOOLSETTING(MAGNET_REGISTER))
-		mainWin->addSearch_gui(link);
+		mainWin->actionMagnet_gui(link);
 }
 
 gint WulforManager::openHashDialog_gui()

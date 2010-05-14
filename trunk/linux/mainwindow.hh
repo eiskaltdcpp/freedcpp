@@ -62,7 +62,7 @@ class MainWindow:
 		GtkWidget *currentPage_gui();
 		void raisePage_gui(GtkWidget *page);
 		static bool getUserCommandLines_gui(const std::string &command, dcpp::StringMap &ucParams);
-		static void openMagnetDialog_gui(const std::string &magnet);
+		void propertiesMagnetDialog_gui(std::string magnet);
 		void showMessageDialog_gui(const std::string primaryText, const std::string secondaryText);
 		void showDownloadQueue_gui();
 		void showFavoriteHubs_gui();
@@ -77,8 +77,11 @@ class MainWindow:
 		void showShareBrowser_gui(dcpp::UserPtr user, std::string file, std::string dir, bool useSetting);
 		Search *addSearch_gui();
 		void addSearch_gui(std::string magnet);
+		void actionMagnet_gui(std::string magnet);
 		void setMainStatus_gui(std::string text, time_t t = time(NULL));
 		void showNotification_gui(std::string head, std::string body, Notify::TypeNotify notify);
+		GtkWidget* getChooserDialog_gui();
+		void fileToDownload_gui(std::string magnet, std::string path);
 
 		// Client functions
 		void openOwnList_client(bool useSetting);
@@ -102,6 +105,9 @@ class MainWindow:
 		void setTabPosition_gui(int position);
 		void setToolbarStyle_gui(int style);
 		void removeTimerSource_gui();
+		void setChooseMagnetDialog_gui();
+		void showMagnetDialog_gui(const std::string &magnet, const std::string &name, const int64_t size,
+			const std::string &tth);
 
 		// GUI Callbacks
 		static gboolean onWindowState_gui(GtkWidget *widget, GdkEventWindowState *event, gpointer data);
@@ -141,11 +147,18 @@ class MainWindow:
 		static void onShowInterfaceToggled_gui(GtkCheckMenuItem *item, gpointer data);
 		static void onLinkClicked_gui(GtkWidget *widget, gpointer data);
 		static void onTransferToggled_gui(GtkWidget *widget, gpointer data);
+		static void onBrowseMagnetButton_gui(GtkWidget *widget, gpointer data);
+		static void onDowloadQueueToggled_gui(GtkWidget *widget, gpointer data);
+		static void onSearchMagnetToggled_gui(GtkWidget *widget, gpointer data);
+		static void onSetMagnetChoiceDialog_gui(GtkWidget *widget, gpointer data);
+		static void onResponseMagnetDialog_gui(GtkWidget *dialog, gint response, gpointer data);
+		static gboolean onDeleteEventMagnetDialog_gui(GtkWidget *dialog, GdkEvent *event, gpointer data);
 
 		// Client functions
 		void autoConnect_client();
 		void startSocket_client();
 		void refreshFileList_client();
+		void addFileDownloadQueue_client(std::string name, int64_t size, std::string tth);
 
 		// Client callbacks
 		virtual void on(dcpp::LogManagerListener::Message, time_t t, const std::string &m) throw();

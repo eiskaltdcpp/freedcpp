@@ -87,6 +87,8 @@ class PrivateMessage:
 		static void onOpenHubClicked_gui(GtkMenuItem *item, gpointer data);
 		static void onSearchMagnetClicked_gui(GtkMenuItem *item, gpointer data);
 		static void onMagnetPropertiesClicked_gui(GtkMenuItem *item, gpointer data);
+		static void onDownloadToClicked_gui(GtkMenuItem *item, gpointer data);
+		static void onDownloadClicked_gui(GtkMenuItem *item, gpointer data);
 
 		// Client functions
 		void sendMessage_client(std::string message);

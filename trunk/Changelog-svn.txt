@@ -1,5 +1,8 @@
 		--- freedcpp 0.0.x ---
 
+r121: 0.0.2.20
+* Магнет Выбор (как у win-DC клиентов).
+
 r120: 0.0.2.19
 * Лишние итерации (хеширование).
 * Ревизия 352 (linuxdcpp, added a setting to disable fast hashing method).

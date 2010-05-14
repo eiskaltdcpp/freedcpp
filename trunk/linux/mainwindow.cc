@@ -76,6 +76,14 @@ MainWindow::MainWindow():
 	gtk_window_set_transient_for(GTK_WINDOW(getWidget("flistDialog")), window);
 	gtk_window_set_transient_for(GTK_WINDOW(getWidget("ucLineDialog")), window);
 	gtk_window_set_transient_for(GTK_WINDOW(getWidget("magnetDialog")), window);
+
+	// magnet dialog
+	gtk_dialog_set_alternative_button_order(GTK_DIALOG(getWidget("MagnetDialog")), GTK_RESPONSE_OK, GTK_RESPONSE_CANCEL, -1);
+	gtk_window_set_transient_for(GTK_WINDOW(getWidget("MagnetDialog")), window);
+	setChooseMagnetDialog_gui();
+	g_signal_connect(getWidget("MagnetDialog"), "response", G_CALLBACK(onResponseMagnetDialog_gui), (gpointer) this);
+	g_signal_connect(getWidget("MagnetDialog"), "delete-event", G_CALLBACK(onDeleteEventMagnetDialog_gui), (gpointer) this);
+
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(getWidget("transferCheckButton")), TRUE);
 
 	// About dialog
@@ -148,6 +156,11 @@ MainWindow::MainWindow():
 	g_signal_connect(getWidget("nextTabMenuItem"), "activate", G_CALLBACK(onNextTabClicked_gui), (gpointer)this);
 	g_signal_connect(getWidget("aboutMenuItem"), "activate", G_CALLBACK(onAboutClicked_gui), (gpointer)this);
 	g_signal_connect(getWidget("transferCheckButton"), "toggled", G_CALLBACK(onTransferToggled_gui), (gpointer)this);
+	g_signal_connect(getWidget("browseButton"), "clicked", G_CALLBACK(onBrowseMagnetButton_gui), (gpointer)this);
+	g_signal_connect(getWidget("dowloadQueueRadioButton"), "toggled", G_CALLBACK(onDowloadQueueToggled_gui), (gpointer)this);
+	g_signal_connect(getWidget("searchRadioButton"), "toggled", G_CALLBACK(onSearchMagnetToggled_gui), (gpointer)this);
+	g_signal_connect(getWidget("showRadioButton"), "toggled", G_CALLBACK(onSearchMagnetToggled_gui), (gpointer)this);
+	g_signal_connect(getWidget("setMagnetChoiceItem"), "activate", G_CALLBACK(onSetMagnetChoiceDialog_gui), (gpointer)this);
 
 	// Help menu
 	g_object_set_data_full(G_OBJECT(getWidget("homeMenuItem")), "link",
@@ -768,6 +781,58 @@ void MainWindow::addSearch_gui(string magnet)
 	}
 }
 
+void MainWindow::fileToDownload_gui(string magnet, string path)
+{
+	string name;
+	int64_t size;
+	string tth;
+
+	if (!WulforUtil::splitMagnet(magnet, name, size, tth))
+		return;
+	name = path + name;
+
+	typedef Func3<MainWindow, string, int64_t, string> F3;
+	F3 *func = new F3(this, &MainWindow::addFileDownloadQueue_client, name, size, tth);
+	WulforManager::get()->dispatchClientFunc(func);
+}
+
+GtkWidget* MainWindow::getChooserDialog_gui()
+{
+	return getWidget("flistDialog");
+}
+
+void MainWindow::actionMagnet_gui(string magnet)
+{
+	if (GTK_WIDGET_VISIBLE(getWidget("MagnetDialog")))
+		return;
+
+	string name, tth;
+	int64_t size;
+	int action = WGETI("magnet-action");
+	bool split = WulforUtil::splitMagnet(magnet, name, size, tth);
+
+	if (action == 0 && split)
+	{
+		Search *s = addSearch_gui();
+		s->putValue_gui(tth, 0, SearchManager::SIZE_DONTCARE, SearchManager::TYPE_TTH);
+	}
+	else if (action == 1 && split)
+	{
+		name = WGETS("magnet-choose-dir") + name;
+
+		if (!File::isAbsolute(name))
+			name = SETTING(DOWNLOAD_DIRECTORY) + name;
+
+		typedef Func3<MainWindow, string, int64_t, string> F3;
+		F3 *func = new F3(this, &MainWindow::addFileDownloadQueue_client, name, size, tth);
+		WulforManager::get()->dispatchClientFunc(func);
+	}
+	else if (split)
+	{
+		showMagnetDialog_gui(magnet, name, size, tth);
+	}
+}
+
 void MainWindow::setToolbarButton_gui()
 {
 	if (!WGETB("toolbar-button-connect"))
@@ -904,28 +969,207 @@ bool MainWindow::getUserCommandLines_gui(const string &command, StringMap &ucPar
 	return true;
 }
 
-void MainWindow::openMagnetDialog_gui(const string &magnet)
+void MainWindow::propertiesMagnetDialog_gui(string magnet)
 {
 	string name;
 	int64_t size;
 	string tth;
 
-	WulforUtil::splitMagnet(magnet, name, size, tth);
-	MainWindow *mw = WulforManager::get()->getMainWindow();
+	if (WulforUtil::splitMagnet(magnet, name, size, tth))
+		showMagnetDialog_gui(magnet, name, size, tth);
+}
 
-	gtk_entry_set_text(GTK_ENTRY(mw->getWidget("magnetEntry")), magnet.c_str());
-	gtk_entry_set_text(GTK_ENTRY(mw->getWidget("magnetNameEntry")), name.c_str());
-	gtk_entry_set_text(GTK_ENTRY(mw->getWidget("magnetSizeEntry")), Util::formatBytes(size).c_str());
-	gtk_entry_set_text(GTK_ENTRY(mw->getWidget("exactSizeEntry")), Util::formatExactSize(size).c_str());
-	gtk_entry_set_text(GTK_ENTRY(mw->getWidget("tthEntry")), tth.c_str());
+void MainWindow::showMagnetDialog_gui(const string &magnet, const string &name, const int64_t size, const string &tth)
+{
+	gtk_window_set_title(GTK_WINDOW(getWidget("MagnetDialog")), _("Magnet Properties / Choice"));
+	// entry
+	gtk_entry_set_text(GTK_ENTRY(getWidget("magnetEntry")), magnet.c_str());
+	gtk_entry_set_text(GTK_ENTRY(getWidget("magnetNameEntry")), name.c_str());
+	gtk_entry_set_text(GTK_ENTRY(getWidget("magnetSizeEntry")), Util::formatBytes(size).c_str());
+	gtk_entry_set_text(GTK_ENTRY(getWidget("exactSizeEntry")), Util::formatExactSize(size).c_str());
+	gtk_entry_set_text(GTK_ENTRY(getWidget("tthEntry")), tth.c_str());
+	// chooser dialog
+	GtkWidget *chooser = getWidget("flistDialog");
+	gtk_window_set_title(GTK_WINDOW(chooser), _("Choose a directory"));
+	gtk_file_chooser_set_action(GTK_FILE_CHOOSER(chooser), GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER);
+	gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(chooser), Text::fromUtf8(WGETS("magnet-choose-dir")).c_str());
+	// choose
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(getWidget("choiceCheckButton")), FALSE);
+	setChooseMagnetDialog_gui();
 
-	gint response = gtk_dialog_run(GTK_DIALOG(mw->getWidget("magnetDialog")));
+	gtk_widget_show_all(getWidget("MagnetDialog"));
+}
 
-	// Fix crash, if the dialog gets programmatically destroyed.
+void MainWindow::setChooseMagnetDialog_gui()
+{
+	switch (WGETI("magnet-action"))
+	{
+		case 0: // start a search for this file
+			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(getWidget("searchRadioButton")), TRUE);
+			gtk_widget_set_sensitive(getWidget("browseButton"), FALSE);
+		break;
+
+		case 1: // add this file to your download queue
+			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(getWidget("dowloadQueueRadioButton")), TRUE);
+			gtk_widget_set_sensitive(getWidget("browseButton"), TRUE);
+		break;
+
+		default: // show magnet dialog
+			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(getWidget("showRadioButton")), TRUE);
+			gtk_widget_set_sensitive(getWidget("browseButton"), FALSE);
+	}
+}
+
+void MainWindow::onBrowseMagnetButton_gui(GtkWidget *widget, gpointer data)
+{
+	MainWindow *mw = (MainWindow *)data;
+
+	GtkWidget *dialog = mw->getWidget("flistDialog");
+	gint response = gtk_dialog_run(GTK_DIALOG(dialog));
+
+	// if the dialog gets programmatically destroyed.
 	if (response == GTK_RESPONSE_NONE)
 		return;
 
-	gtk_widget_hide(mw->getWidget("magnetDialog"));
+	gtk_widget_hide(dialog);
+}
+
+void MainWindow::onDowloadQueueToggled_gui(GtkWidget *widget, gpointer data)
+{
+	MainWindow *mw = (MainWindow *)data;
+	gtk_widget_set_sensitive(mw->getWidget("browseButton"), TRUE);
+}
+
+void MainWindow::onSearchMagnetToggled_gui(GtkWidget *widget, gpointer data)
+{
+	MainWindow *mw = (MainWindow *)data;
+	gtk_widget_set_sensitive(mw->getWidget("browseButton"), FALSE);
+}
+
+void MainWindow::onSetMagnetChoiceDialog_gui(GtkWidget *widget, gpointer data)
+{
+	MainWindow *mw = (MainWindow *)data;
+
+	// magnet choice frame
+	gtk_window_set_title(GTK_WINDOW(mw->getWidget("MagnetDialog")), _("Magnet Choice"));
+	gtk_widget_hide(mw->getWidget("setHBox"));
+	gtk_widget_hide(mw->getWidget("magnetPropertiesFrame"));
+	gtk_widget_hide(mw->getWidget("hseparator1"));
+
+	// chooser dialog
+	GtkWidget *chooser = mw->getWidget("flistDialog");
+	gtk_window_set_title(GTK_WINDOW(chooser), _("Choose a directory"));
+	gtk_file_chooser_set_action(GTK_FILE_CHOOSER(chooser), GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER);
+	gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(chooser), Text::fromUtf8(WGETS("magnet-choose-dir")).c_str());
+
+	mw->setChooseMagnetDialog_gui();
+
+	gtk_widget_show(mw->getWidget("MagnetDialog"));
+}
+
+void MainWindow::onResponseMagnetDialog_gui(GtkWidget *dialog, gint response, gpointer data)
+{
+	MainWindow *mw = (MainWindow *)data;
+
+	if (response == GTK_RESPONSE_OK)
+	{
+		string path;
+
+		// magnet choice frame
+		if (!GTK_WIDGET_VISIBLE(mw->getWidget("magnetPropertiesFrame")))
+		{
+			if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mw->getWidget("dowloadQueueRadioButton"))))
+			{
+				gchar *temp = gtk_file_chooser_get_current_folder(GTK_FILE_CHOOSER(mw->getWidget("flistDialog")));
+				if (temp)
+				{
+					path = Text::toUtf8(temp) + G_DIR_SEPARATOR_S;
+					g_free(temp);
+				}
+				if (!File::isAbsolute(path))
+					path = SETTING(DOWNLOAD_DIRECTORY);
+
+				WSET("magnet-choose-dir", path);
+				WSET("magnet-action", 1);
+			}
+			else if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mw->getWidget("searchRadioButton"))))
+				WSET("magnet-action", 0);
+			else
+				WSET("magnet-action", -1);
+
+			gtk_widget_hide(dialog);
+
+			return;
+		}
+
+		// magnet properties plus choice frame
+		string name, tth;
+		int64_t size;
+		string magnet = gtk_entry_get_text(GTK_ENTRY(mw->getWidget("magnetEntry")));
+
+		WulforUtil::splitMagnet(magnet, name, size, tth);
+		gboolean set = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mw->getWidget("choiceCheckButton")));
+
+		if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mw->getWidget("dowloadQueueRadioButton"))))
+		{
+			gchar *temp = gtk_file_chooser_get_current_folder(GTK_FILE_CHOOSER(mw->getWidget("flistDialog")));
+			if (temp)
+			{
+				path = Text::toUtf8(temp) + G_DIR_SEPARATOR_S;
+				g_free(temp);
+			}
+
+			if (!File::isAbsolute(path))
+				path = SETTING(DOWNLOAD_DIRECTORY);
+
+			if (set)
+			{
+				WSET("magnet-action", 1);
+				WSET("magnet-choose-dir", path);
+			}
+
+			// add this file to your download queue
+			typedef Func3<MainWindow, string, int64_t, string> F3;
+			F3 *func = new F3(mw, &MainWindow::addFileDownloadQueue_client, path + name, size, tth);
+			WulforManager::get()->dispatchClientFunc(func);
+		}
+		else if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mw->getWidget("searchRadioButton"))))
+		{
+			if (set)
+				WSET("magnet-action", 0);
+
+			// start a search for this file
+			Search *s = mw->addSearch_gui();
+			s->putValue_gui(tth, 0, SearchManager::SIZE_DONTCARE, SearchManager::TYPE_TTH);
+		}
+		else if (set)
+			WSET("magnet-action", -1);
+	}
+
+	gtk_widget_hide(dialog);
+}
+
+void MainWindow::addFileDownloadQueue_client(string name, int64_t size, string tth)
+{
+	try
+	{
+		if (!tth.empty())
+		{
+			QueueManager::getInstance()->add(name, size, TTHValue(tth));
+
+			// automatically search for alternative download locations
+			if (BOOLSETTING(AUTO_SEARCH))
+				SearchManager::getInstance()->search(tth, 0, SearchManager::TYPE_TTH, SearchManager::SIZE_DONTCARE,
+					Util::emptyString);
+		}
+	}
+	catch (const Exception& e)
+	{
+		// add error to main status
+		typedef Func2<MainWindow, string, time_t> F2;
+		F2 *func = new F2(this, &MainWindow::setMainStatus_gui, e.getError(), time(NULL));
+		WulforManager::get()->dispatchGuiFunc(func);
+	}
 }
 
 void MainWindow::showMessageDialog_gui(const string primaryText, const string secondaryText)
@@ -1009,6 +1253,13 @@ gboolean MainWindow::onCloseWindow_gui(GtkWidget *widget, GdkEvent *event, gpoin
 		WulforManager::get()->deleteMainWindow();
 		return FALSE;
 	}
+
+	return TRUE;
+}
+
+gboolean MainWindow::onDeleteEventMagnetDialog_gui(GtkWidget *dialog, GdkEvent *event, gpointer data)
+{
+	gtk_widget_hide(dialog);
 
 	return TRUE;
 }
@@ -1288,6 +1539,7 @@ void MainWindow::onOpenFileListClicked_gui(GtkWidget *widget, gpointer data)
 {
 	MainWindow *mw = (MainWindow *)data;
 
+	gtk_file_chooser_set_action(GTK_FILE_CHOOSER(mw->getWidget("flistDialog")), GTK_FILE_CHOOSER_ACTION_OPEN);
 	gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(mw->getWidget("flistDialog")), Text::fromUtf8(Util::getListPath()).c_str());
 
 	gint response = gtk_dialog_run(GTK_DIALOG(mw->getWidget("flistDialog")));
@@ -1490,7 +1742,7 @@ void MainWindow::autoConnect_client()
 	}
 	else if (WulforUtil::isMagnet(link) && BOOLSETTING(MAGNET_REGISTER))
 	{
-		func1 = new F1(this, &MainWindow::addSearch_gui, link);
+		func1 = new F1(this, &MainWindow::actionMagnet_gui, link);
 		WulforManager::get()->dispatchGuiFunc(func1);
 	}
 }

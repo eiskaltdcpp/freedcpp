@@ -84,6 +84,31 @@
       </widget>
     </child>
     <child>
+      <widget class="GtkMenuItem" id="downloadItem">
+        <property name="visible">True</property>
+        <property name="label" translatable="yes">_Download</property>
+        <property name="use_underline">True</property>
+      </widget>
+    </child>
+    <child>
+      <widget class="GtkMenuItem" id="downloadToItem">
+        <property name="visible">True</property>
+        <property name="label" translatable="yes">Download _to...</property>
+        <property name="use_underline">True</property>
+        <child>
+          <widget class="GtkMenu" id="downloadMenu">
+            <child>
+              <widget class="GtkMenuItem" id="downloadBrowseItem">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">Browse...</property>
+                <property name="use_underline">True</property>
+              </widget>
+            </child>
+          </widget>
+        </child>
+      </widget>
+    </child>
+    <child>
       <widget class="GtkMenuItem" id="copyMagnetItem">
         <property name="visible">True</property>
         <property name="label" translatable="yes">_Copy magnet</property>
@@ -98,7 +123,7 @@
     <child>
       <widget class="GtkMenuItem" id="magnetPropertiesItem">
         <property name="visible">True</property>
-        <property name="label" translatable="yes">_Properties</property>
+        <property name="label" translatable="yes">_Properties/Choice</property>
         <property name="use_underline">True</property>
       </widget>
     </child>

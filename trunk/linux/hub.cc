@@ -148,6 +148,8 @@ Hub::Hub(const string &address, const string &encoding):
 	g_signal_connect(getWidget("emotButton"), "button-release-event", G_CALLBACK(onEmotButtonRelease_gui), (gpointer)this);
 	g_signal_connect(getWidget("favoriteUserItem"), "activate", G_CALLBACK(onAddFavoriteUserClicked_gui), (gpointer)this);
 	g_signal_connect(getWidget("removeFavoriteUserItem"), "activate", G_CALLBACK(onRemoveFavoriteUserClicked_gui), (gpointer)this);
+	g_signal_connect(getWidget("downloadBrowseItem"), "activate", G_CALLBACK(onDownloadToClicked_gui), (gpointer)this);
+	g_signal_connect(getWidget("downloadItem"), "activate", G_CALLBACK(onDownloadClicked_gui), (gpointer)this);
 
 	gtk_widget_grab_focus(getWidget("chatEntry"));
 
@@ -729,10 +731,9 @@ void Hub::applyTags_gui(const string &line)
 
 				if (WulforUtil::splitMagnet(tagName, line))
 				{
-					gtk_text_buffer_delete(chatBuffer, &tag_start_iter, &tag_end_iter);
-
 					dcassert(tagStyle == TAG_URL);
 
+					gtk_text_buffer_delete(chatBuffer, &tag_start_iter, &tag_end_iter);
 					gtk_text_buffer_insert_with_tags(chatBuffer, &tag_start_iter,
 						line.c_str(), line.size(), tag, TagsMap[tagStyle], NULL);
 				}
@@ -1394,7 +1395,7 @@ gboolean Hub::onMagnetTagEvent_gui(GtkTextTag *tag, GObject *textView, GdkEvent 
 		{
 			case 1:
 				// Search for magnet
-				onSearchMagnetClicked_gui(NULL, data);
+				WulforManager::get()->getMainWindow()->actionMagnet_gui(hub->selectedTagStr);
 				break;
 			case 3:
 				// Popup magnet context menu
@@ -1939,11 +1940,46 @@ void Hub::onSearchMagnetClicked_gui(GtkMenuItem *item, gpointer data)
 	WulforManager::get()->getMainWindow()->addSearch_gui(hub->selectedTagStr);
 }
 
+void Hub::onDownloadClicked_gui(GtkMenuItem *item, gpointer data)
+{
+	Hub *hub = (Hub *)data;
+	WulforManager::get()->getMainWindow()->fileToDownload_gui(hub->selectedTagStr, SETTING(DOWNLOAD_DIRECTORY));
+}
+
+void Hub::onDownloadToClicked_gui(GtkMenuItem *item, gpointer data)
+{
+	Hub *hub = (Hub *)data;
+
+	GtkWidget *dialog = WulforManager::get()->getMainWindow()->getChooserDialog_gui();
+	gtk_window_set_title(GTK_WINDOW(dialog), _("Choose a directory"));
+	gtk_file_chooser_set_action(GTK_FILE_CHOOSER(dialog), GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER);
+	gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dialog), Text::fromUtf8(WGETS("magnet-choose-dir")).c_str());
+	gint response = gtk_dialog_run(GTK_DIALOG(dialog));
+
+	// if the dialog gets programmatically destroyed.
+	if (response == GTK_RESPONSE_NONE)
+		return;
+
+	if (response == GTK_RESPONSE_OK)
+	{
+		gchar *temp = gtk_file_chooser_get_current_folder(GTK_FILE_CHOOSER(dialog));
+
+		if (temp)
+		{
+			string path = Text::toUtf8(temp) + G_DIR_SEPARATOR_S;
+			g_free(temp);
+
+			WulforManager::get()->getMainWindow()->fileToDownload_gui(hub->selectedTagStr, path);
+		}
+	}
+	gtk_widget_hide(dialog);
+}
+
 void Hub::onMagnetPropertiesClicked_gui(GtkMenuItem *item, gpointer data)
 {
 	Hub *hub = (Hub *)data;
 
-	MainWindow::openMagnetDialog_gui(hub->selectedTagStr);
+	WulforManager::get()->getMainWindow()->propertiesMagnetDialog_gui(hub->selectedTagStr);
 }
 
 void Hub::onUserListToggled_gui(GtkWidget *widget, gpointer data)
