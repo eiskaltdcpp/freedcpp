@@ -563,6 +563,58 @@ string QueueManager::getListPath(const UserPtr& user) {
 	return checkTarget(Util::getListPath() + nick + user->getCID().toBase32(), -1);
 }
 
+void QueueManager::add(const string& aTarget, int64_t aSize, const TTHValue& root) throw(QueueException, FileException)
+{
+	// Check if we're not downloading something already in our share
+	if (BOOLSETTING(DONT_DL_ALREADY_SHARED))
+	{
+		if (ShareManager::getInstance()->isTTHShared(root))
+		{
+			throw QueueException(_("A file with the same hash already exists in your share"));
+		}
+	}
+	// Check that target contains at least one directory...we don't want headless files...
+	// Check that the file doesn't already exist...
+	const string target = checkTarget(aTarget, aSize);
+
+	// Check if it's a zero-byte file, if so, create and return...
+	if (aSize == 0)
+	{
+		if (!BOOLSETTING(SKIP_ZERO_BYTE))
+		{
+			File::ensureDirectory(target);
+			File f(target, File::WRITE, File::CREATE);
+		}
+		return;
+	}
+
+	Lock l(cs);
+
+	// This will be pretty slow on large queues...
+	if (BOOLSETTING(DONT_DL_ALREADY_QUEUED) && fileQueue.exists(root))
+		throw QueueException(_("This file is already queued"));
+
+	QueueItem* q = fileQueue.find(target);
+
+	if(q == NULL)
+	{
+		q = fileQueue.add(target, aSize, 0, QueueItem::DEFAULT/*QueueItem::Priority*/, Util::emptyString/*aTempTarget*/,
+			GET_TIME()/*time_t aAdded*/, root/*TTHValue& root*/);
+		fire(QueueManagerListener::Added(), q);
+	}
+	else
+	{
+		if(q->getSize() != aSize)
+		{
+			throw QueueException(_("A file with a different size already exists in the queue"));
+		}
+		if(!(root == q->getTTH()))
+		{
+			throw QueueException(_("A file with different tth root already exists in the queue"));
+		}
+	}
+}
+
 void QueueManager::add(const string& aTarget, int64_t aSize, const TTHValue& root, const UserPtr& aUser, const string& hubHint,
 	int aFlags /* = 0 */, bool addBad /* = true */) throw(QueueException, FileException)
 {

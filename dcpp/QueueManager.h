@@ -72,6 +72,8 @@ class QueueManager : public Singleton<QueueManager>, public Speaker<QueueManager
 	private SearchManagerListener, private ClientManagerListener
 {
 public:
+	void add(const string& aTarget, int64_t aSize, const TTHValue& root) throw(QueueException, FileException);
+
 	/** Add a file to the queue. */
 	void add(const string& aTarget, int64_t aSize, const TTHValue& root, const UserPtr& aUser, const string& hubHint,
 		int aFlags = 0, bool addBad = true) throw(QueueException, FileException);
