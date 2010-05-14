@@ -75,7 +75,6 @@ MainWindow::MainWindow():
 	gtk_window_set_transient_for(GTK_WINDOW(getWidget("connectDialog")), window);
 	gtk_window_set_transient_for(GTK_WINDOW(getWidget("flistDialog")), window);
 	gtk_window_set_transient_for(GTK_WINDOW(getWidget("ucLineDialog")), window);
-	gtk_window_set_transient_for(GTK_WINDOW(getWidget("magnetDialog")), window);
 
 	// magnet dialog
 	gtk_dialog_set_alternative_button_order(GTK_DIALOG(getWidget("MagnetDialog")), GTK_RESPONSE_OK, GTK_RESPONSE_CANCEL, -1);
@@ -1539,20 +1538,23 @@ void MainWindow::onOpenFileListClicked_gui(GtkWidget *widget, gpointer data)
 {
 	MainWindow *mw = (MainWindow *)data;
 
-	gtk_file_chooser_set_action(GTK_FILE_CHOOSER(mw->getWidget("flistDialog")), GTK_FILE_CHOOSER_ACTION_OPEN);
-	gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(mw->getWidget("flistDialog")), Text::fromUtf8(Util::getListPath()).c_str());
+	GtkWidget *chooser = mw->getWidget("flistDialog");
+	gtk_window_set_title(GTK_WINDOW(chooser), _("Select filelist to browse"));
+	gtk_file_chooser_set_action(GTK_FILE_CHOOSER(chooser), GTK_FILE_CHOOSER_ACTION_OPEN);
+	gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(chooser), Text::fromUtf8(Util::getListPath()).c_str());
 
-	gint response = gtk_dialog_run(GTK_DIALOG(mw->getWidget("flistDialog")));
+	gint response = gtk_dialog_run(GTK_DIALOG(chooser));
 
-	// Fix crash, if the dialog gets programmatically destroyed.
+	// if the dialog gets programmatically destroyed.
 	if (response == GTK_RESPONSE_NONE)
 		return;
 
-	gtk_widget_hide(mw->getWidget("flistDialog"));
+	gtk_widget_hide(chooser);
 
 	if (response == GTK_RESPONSE_OK)
 	{
-		gchar *temp = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(mw->getWidget("flistDialog")));
+		gchar *temp = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(chooser));
+
 		if (temp)
 		{
 			string path = Text::toUtf8(temp);
