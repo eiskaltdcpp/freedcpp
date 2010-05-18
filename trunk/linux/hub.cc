@@ -1619,7 +1619,7 @@ void Hub::onSendMessage_gui(GtkEntry *entry, gpointer data)
 		}
 		else if (command == "freedcpp")
 		{
-			hub->addStatusMessage_gui(string(GUI_PACKAGE " " GUI_VERSION_STRING "." GUI_VERSION_BUILD_STRING "/" VERSIONSTRING ", ") + _("project home: ") + "http://code.google.com/p/freedcpp", Msg::SYSTEM, Sound::NONE);
+			hub->addStatusMessage_gui(string(GUI_PACKAGE " " GUI_VERSION_STRING "." GUI_VERSION_BUILD_STRING "/" VERSIONSTRING ", ") + _("project home: ") + "http://freedcpp.googlecode.com", Msg::SYSTEM, Sound::NONE);
 		}
 		else if (command == "help")
 		{

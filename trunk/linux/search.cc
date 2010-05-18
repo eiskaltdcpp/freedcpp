@@ -1517,7 +1517,8 @@ void Search::onRemoveClicked_gui(GtkMenuItem *item, gpointer data)
 		GtkTreeIter iter;
 		GtkTreeIter filterIter;
 		GtkTreePath *path;
-		GList *list = gtk_tree_selection_get_selected_rows(s->selection, NULL);
+		vector<GtkTreeIter> remove;
+		GList *list = g_list_reverse(gtk_tree_selection_get_selected_rows(s->selection, NULL));
 
 		for (GList *i = list; i; i = i->next)
 		{
@@ -1527,11 +1528,20 @@ void Search::onRemoveClicked_gui(GtkMenuItem *item, gpointer data)
 				// Remove the top-level node and it will remove any children nodes (if applicable)
 				gtk_tree_model_sort_convert_iter_to_child_iter(GTK_TREE_MODEL_SORT(s->sortedFilterModel), &filterIter, &iter);
 				gtk_tree_model_filter_convert_iter_to_child_iter(GTK_TREE_MODEL_FILTER(s->searchFilterModel), &iter, &filterIter);
-				gtk_tree_store_remove(s->resultStore, &iter);
+
+				// обходим функцию gtk_tree_store_remove(s->resultStore, &iter), т.к пути меняются
+				remove.push_back(iter);
 			}
 			gtk_tree_path_free(path);
 		}
 		g_list_free(list);
+
+		// удаляем
+		for (vector<GtkTreeIter>::const_iterator it = remove.begin(); it != remove.end(); it++)
+		{
+			iter = *it;
+			gtk_tree_store_remove(s->resultStore, &iter);
+		}
 	}
 }
 
