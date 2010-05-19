@@ -82,10 +82,12 @@ WulforSettingsManager::WulforSettingsManager():
 	defaultInt.insert(IntMap::value_type("text-url-italic", 0));
 	defaultInt.insert(IntMap::value_type("toolbar-button-connect", 1));
 	defaultInt.insert(IntMap::value_type("toolbar-button-fav-hubs", 1));
+	defaultInt.insert(IntMap::value_type("toolbar-button-fav-users", 1));
 	defaultInt.insert(IntMap::value_type("toolbar-button-public-hubs", 1));
 	defaultInt.insert(IntMap::value_type("toolbar-button-settings", 1));
 	defaultInt.insert(IntMap::value_type("toolbar-button-hash", 1));
 	defaultInt.insert(IntMap::value_type("toolbar-button-search", 1));
+	defaultInt.insert(IntMap::value_type("toolbar-button-search-spy", 1));
 	defaultInt.insert(IntMap::value_type("toolbar-button-queue", 1));
 	defaultInt.insert(IntMap::value_type("toolbar-button-quit", 1));
 	defaultInt.insert(IntMap::value_type("toolbar-button-finished-downloads", 1));
@@ -210,6 +212,7 @@ WulforSettingsManager::WulforSettingsManager():
 	defaultString.insert(StringMap::value_type("icon-public-hubs", "freedcpp-public-hubs"));
 	defaultString.insert(StringMap::value_type("icon-queue", "freedcpp-queue"));
 	defaultString.insert(StringMap::value_type("icon-search", "freedcpp-search"));
+	defaultString.insert(StringMap::value_type("icon-search-spy", "freedcpp-search-spy"));
 	defaultString.insert(StringMap::value_type("icon-upload", "freedcpp-upload"));
 	defaultString.insert(StringMap::value_type("icon-quit", "freedcpp-quit"));
 	defaultString.insert(StringMap::value_type("icon-connect", "freedcpp-connect"));

@@ -500,6 +500,7 @@ void WulforUtil::registerIcons()
 	icons["freedcpp-public-hubs"] = wsm->getString("icon-public-hubs");
 	icons["freedcpp-queue"] = wsm->getString("icon-queue");
 	icons["freedcpp-search"] = wsm->getString("icon-search");
+	icons["freedcpp-search-spy"] = wsm->getString("icon-search-spy");
 	icons["freedcpp-upload"] = wsm->getString("icon-upload");
 	icons["freedcpp-quit"] = wsm->getString("icon-quit");
 	icons["freedcpp-connect"] = wsm->getString("icon-connect");
