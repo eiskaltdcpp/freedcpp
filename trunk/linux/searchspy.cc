@@ -227,6 +227,9 @@ void SearchSpy::addTop_gui(const string &search, const string &type)
 		topView.col(_("Search String")), search.c_str(),
 		topView.col("type"), type.c_str(),
 		-1);
+
+	if (BOOLSETTING(BOLD_SEARCH_SPY))
+		setUrgent_gui();
 }
 
 void SearchSpy::updateFrameSearch_gui(const string search, const string type)

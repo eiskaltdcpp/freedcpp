@@ -204,17 +204,8 @@
                       </widget>
                     </child>
                     <child>
-                      <widget class="GtkImageMenuItem" id="indexingProgressMenuItem">
+                      <widget class="GtkSeparatorMenuItem" id="separator_a">
                         <property name="visible">True</property>
-                        <property name="label" translatable="yes">Indexing Progress</property>
-                        <property name="use_underline">True</property>
-                        <child internal-child="image">
-                          <widget class="GtkImage" id="indexingProgressMenuImage">
-                            <property name="visible">True</property>
-                            <property name="stock">freedcpp-hash</property>
-                            <property name="icon_size">1</property>
-                          </widget>
-                        </child>
                       </widget>
                     </child>
                     <child>
@@ -230,6 +221,26 @@
                             <property name="icon_size">1</property>
                           </widget>
                         </child>
+                      </widget>
+                    </child>
+                    <child>
+                      <widget class="GtkImageMenuItem" id="searchSpyMenuItem">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">Search Spy</property>
+                        <property name="use_underline">True</property>
+                        <accelerator key="S" modifiers="GDK_CONTROL_MASK | GDK_MOD1_MASK" signal="activate"/>
+                        <child internal-child="image">
+                          <widget class="GtkImage" id="searchSpyMenuImage">
+                            <property name="visible">True</property>
+                            <property name="stock">freedcpp-search-spy</property>
+                            <property name="icon_size">1</property>
+                          </widget>
+                        </child>
+                      </widget>
+                    </child>
+                    <child>
+                      <widget class="GtkSeparatorMenuItem" id="separator_b">
+                        <property name="visible">True</property>
                       </widget>
                     </child>
                     <child>
@@ -270,6 +281,25 @@
                           <widget class="GtkImage" id="finishedUploadsMenuImage">
                             <property name="visible">True</property>
                             <property name="stock">freedcpp-finished-uploads</property>
+                            <property name="icon_size">1</property>
+                          </widget>
+                        </child>
+                      </widget>
+                    </child>
+                    <child>
+                      <widget class="GtkSeparatorMenuItem" id="separator_c">
+                        <property name="visible">True</property>
+                      </widget>
+                    </child>
+                    <child>
+                      <widget class="GtkImageMenuItem" id="indexingProgressMenuItem">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">Indexing Progress</property>
+                        <property name="use_underline">True</property>
+                        <child internal-child="image">
+                          <widget class="GtkImage" id="indexingProgressMenuImage">
+                            <property name="visible">True</property>
+                            <property name="stock">freedcpp-hash</property>
                             <property name="icon_size">1</property>
                           </widget>
                         </child>

@@ -73,6 +73,7 @@ Settings::Settings(GtkWindow* parent):
 	defaultStringTheme.insert(StringMap::value_type("icon-public-hubs", "freedcpp-public-hubs"));
 	defaultStringTheme.insert(StringMap::value_type("icon-queue", "freedcpp-queue"));
 	defaultStringTheme.insert(StringMap::value_type("icon-search", "freedcpp-search"));
+	defaultStringTheme.insert(StringMap::value_type("icon-search-spy", "freedcpp-search-spy"));
 	defaultStringTheme.insert(StringMap::value_type("icon-upload", "freedcpp-upload"));
 	defaultStringTheme.insert(StringMap::value_type("icon-quit", "freedcpp-quit"));
 	defaultStringTheme.insert(StringMap::value_type("icon-connect", "freedcpp-connect"));
@@ -921,6 +922,7 @@ void Settings::initAppearance_gui()
 		addOption_gui(tabStore, _("Hub (also sets urgency hint)"), SettingsManager::BOLD_HUB);
 		addOption_gui(tabStore, _("Private Message (also sets urgency hint)"), SettingsManager::BOLD_PM);
 		addOption_gui(tabStore, _("Search"), SettingsManager::BOLD_SEARCH);
+		addOption_gui(tabStore, _("Search Spy"), SettingsManager::BOLD_SEARCH_SPY);
 	}
 
 	{ // Sounds
@@ -1182,6 +1184,7 @@ void Settings::initAppearance_gui()
 		addOption_gui(themeIconsStore, wsm, iconTheme, _("Public Hubs"), "icon-public-hubs");
 		addOption_gui(themeIconsStore, wsm, iconTheme, _("Queue"), "icon-queue");
 		addOption_gui(themeIconsStore, wsm, iconTheme, _("Search"), "icon-search");
+		addOption_gui(themeIconsStore, wsm, iconTheme, _("Search Spy"), "icon-search-spy");
 		addOption_gui(themeIconsStore, wsm, iconTheme, _("Quit"), "icon-quit");
 		addOption_gui(themeIconsStore, wsm, iconTheme, _("Connect"), "icon-connect");
 		addOption_gui(themeIconsStore, wsm, iconTheme, _("File"), "icon-file");
@@ -1218,6 +1221,8 @@ void Settings::initAppearance_gui()
 			"icon-connect");
 		addOption_gui(toolbarStore, wsm, iconTheme, _("Favorite Hubs"), "toolbar-button-fav-hubs",
 			"icon-favorite-hubs");
+		addOption_gui(toolbarStore, wsm, iconTheme, _("Favorite Users"), "toolbar-button-fav-users",
+			"icon-favorite-users");
 		addOption_gui(toolbarStore, wsm, iconTheme, _("Public Hubs"), "toolbar-button-public-hubs",
 			"icon-public-hubs");
 		addOption_gui(toolbarStore, wsm, iconTheme, _("Preferences"), "toolbar-button-settings",
@@ -1226,6 +1231,8 @@ void Settings::initAppearance_gui()
 			"icon-hash");
 		addOption_gui(toolbarStore, wsm, iconTheme, _("Search"), "toolbar-button-search",
 			"icon-search");
+		addOption_gui(toolbarStore, wsm, iconTheme, _("Search Spy"), "toolbar-button-search-spy",
+			"icon-search-spy");
 		addOption_gui(toolbarStore, wsm, iconTheme, _("Queue"), "toolbar-button-queue",
 			"icon-queue");
 		addOption_gui(toolbarStore, wsm, iconTheme, _("Finished Downloads"), "toolbar-button-finished-downloads",
@@ -1271,8 +1278,9 @@ void Settings::initAppearance_gui()
 		addOption_gui(windowStore1, _("Download Queue"), SettingsManager::OPEN_QUEUE);
 		addOption_gui(windowStore1, _("Finished Downloads"), SettingsManager::OPEN_FINISHED_DOWNLOADS);
 		addOption_gui(windowStore1, _("Finished Uploads"), SettingsManager::OPEN_FINISHED_UPLOADS);
+		addOption_gui(windowStore1, _("Favorite Users"), SettingsManager::OPEN_FAVORITE_USERS);
+		addOption_gui(windowStore1, _("Search Spy"), SettingsManager::OPEN_SEARCH_SPY);
 		/// @todo: Uncomment when implemented
-		//addOption_gui(windowStore1, _("Favorite Users"), SettingsManager::OPEN_FAVORITE_USERS);
 
 		// Window options
 		createOptionsView_gui(windowView2, windowStore2, "windowsOptionsTreeView");

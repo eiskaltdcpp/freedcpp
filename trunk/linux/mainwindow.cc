@@ -148,6 +148,7 @@ MainWindow::MainWindow():
 	g_signal_connect(getWidget("publicHubsMenuItem"), "activate", G_CALLBACK(onPublicHubsClicked_gui), (gpointer)this);
 	g_signal_connect(getWidget("indexingProgressMenuItem"), "activate", G_CALLBACK(onHashClicked_gui), (gpointer)this);
 	g_signal_connect(getWidget("searchMenuItem"), "activate", G_CALLBACK(onSearchClicked_gui), (gpointer)this);
+	g_signal_connect(getWidget("searchSpyMenuItem"), "activate", G_CALLBACK(onSearchSpyClicked_gui), (gpointer)this);
 	g_signal_connect(getWidget("downloadQueueMenuItem"), "activate", G_CALLBACK(onDownloadQueueClicked_gui), (gpointer)this);
 	g_signal_connect(getWidget("finishedDownloadsMenuItem"), "activate", G_CALLBACK(onFinishedDownloadsClicked_gui), (gpointer)this);
 	g_signal_connect(getWidget("finishedUploadsMenuItem"), "activate", G_CALLBACK(onFinishedUploadsClicked_gui), (gpointer)this);
@@ -332,6 +333,7 @@ void MainWindow::loadIcons_gui()
 	gtk_tool_button_set_stock_id(GTK_TOOL_BUTTON(getWidget("settings")), "freedcpp-preferences");
 	gtk_tool_button_set_stock_id(GTK_TOOL_BUTTON(getWidget("hash")), "freedcpp-hash");
 	gtk_tool_button_set_stock_id(GTK_TOOL_BUTTON(getWidget("search")), "freedcpp-search");
+	gtk_tool_button_set_stock_id(GTK_TOOL_BUTTON(getWidget("searchSpy")), "freedcpp-search-spy");
 	gtk_tool_button_set_stock_id(GTK_TOOL_BUTTON(getWidget("queue")), "freedcpp-queue");
 	gtk_tool_button_set_stock_id(GTK_TOOL_BUTTON(getWidget("finishedDownloads")), "freedcpp-finished-downloads");
 	gtk_tool_button_set_stock_id(GTK_TOOL_BUTTON(getWidget("finishedUploads")), "freedcpp-finished-uploads");
@@ -838,6 +840,8 @@ void MainWindow::setToolbarButton_gui()
 		gtk_widget_hide(getWidget("connect"));
 	if (!WGETB("toolbar-button-fav-hubs"))
 		gtk_widget_hide(getWidget("favHubs"));
+	if (!WGETB("toolbar-button-fav-users"))
+		gtk_widget_hide(getWidget("favUsers"));
 	if (!WGETB("toolbar-button-public-hubs"))
 		gtk_widget_hide(getWidget("publicHubs"));
 	if (!WGETB("toolbar-button-settings"))
@@ -846,6 +850,8 @@ void MainWindow::setToolbarButton_gui()
 		gtk_widget_hide(getWidget("hash"));
 	if (!WGETB("toolbar-button-search"))
 		gtk_widget_hide(getWidget("search"));
+	if (!WGETB("toolbar-button-search-spy"))
+		gtk_widget_hide(getWidget("searchSpy"));
 	if (!WGETB("toolbar-button-queue"))
 		gtk_widget_hide(getWidget("queue"));
 	if (!WGETB("toolbar-button-quit"))
