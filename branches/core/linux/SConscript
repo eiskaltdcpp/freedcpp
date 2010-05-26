@@ -1,0 +1,53 @@
+# -*- coding: utf-8 -*-
+
+# todo: Replace this with env.Glob('*.cpp') when Scons 0.98 is widespread enough 
+# (glob.glob() doesn't work here due to the use of a variant dir).
+gui_files = [
+	'bacon-message-connection.c',
+	'bookentry.cc',
+	'dialogentry.cc',
+	'downloadqueue.cc',
+	'emoticons.cc',
+	'emoticonsdialog.cc',
+	'entry.cc',
+	'favoritehubs.cc',
+	'favoriteusers.cc',
+	'finishedtransfers.cc',
+	'hashdialog.cc',
+	'hub.cc',
+	'mainwindow.cc',
+	'notify.cc',
+	'previewmenu.cc',
+	'privatemessage.cc',
+	'publichubs.cc',
+	'search.cc',
+	'searchspy.cc',
+	'settingsdialog.cc',
+	'settingsmanager.cc',
+	'sharebrowser.cc',
+	'sound.cc',
+	'transfers.cc',
+	'treeview.cc',
+	'UserCommandMenu.cc',
+	'wulfor.cc',
+	'wulformanager.cc',
+	'WulforUtil.cc'
+]
+
+languages = ['ru']
+
+Import('env')
+
+# We don't want to add these CFLAGS globally so we copy the env
+env = env.Clone()
+env.ParseConfig('pkg-config --cflags libglade-2.0')
+env.ParseConfig('pkg-config --cflags libgnome-2.0')
+
+# Build the gui_files
+obj_files = env.Object(gui_files)
+
+# build the locale files
+for file in languages:
+	env.MoBuild(target = '../../locale/freedcpp/' + file, source = 'po/' + file + '.po')
+
+Return('obj_files')

@@ -1,0 +1,1 @@
+* Initial core branch (libdcpp 0.762 revision 2151, freedcpp 0.0.2.23 revision 124).
