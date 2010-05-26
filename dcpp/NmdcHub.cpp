@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2009 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,11 +21,13 @@
 
 #include "NmdcHub.h"
 
+#include "ChatMessage.h"
 #include "ClientManager.h"
 #include "SearchManager.h"
 #include "ShareManager.h"
 #include "CryptoManager.h"
 #include "ConnectionManager.h"
+#include "ThrottleManager.h"
 #include "version.h"
 
 #include "Socket.h"
@@ -34,8 +36,11 @@
 
 namespace dcpp {
 
-NmdcHub::NmdcHub(const string& aHubURL) : Client(aHubURL, '|', false), supportFlags(0),
-	lastUpdate(0)
+NmdcHub::NmdcHub(const string& aHubURL) :
+Client(aHubURL, '|', false),
+supportFlags(0),
+lastUpdate(0),
+lastProtectedIPsUpdate(0)
 {
 }
 
@@ -207,18 +212,19 @@ void NmdcHub::onLine(const string& aLine) throw() {
 			return;
 		}
 
-		OnlineUser* ou = findUser(nick);
-		if(ou) {
-			fire(ClientListener::Message(), this, *ou, unescape(message));
-		} else {
+		ChatMessage chatMessage = { unescape(message), findUser(nick) };
+
+		if(!chatMessage.from) {
 			OnlineUser& o = getUser(nick);
 			// Assume that messages from unknown users come from the hub
 			o.getIdentity().setHub(true);
 			o.getIdentity().setHidden(true);
 			fire(ClientListener::UserUpdated(), this, o);
 
-			fire(ClientListener::Message(), this, o, unescape(message));
+			chatMessage.from = &o;
 		}
+
+		fire(ClientListener::Message(), this, chatMessage);
 		return;
 	}
 
@@ -422,8 +428,8 @@ void NmdcHub::onLine(const string& aLine) throw() {
 		if(j == string::npos) {
 			return;
 		}
-		string server = param.substr(i, j-i);
-		if(!Util::resolveNmdc(server))
+		string server = Socket::resolve(param.substr(i, j-i));
+		if(isProtectedIP(server))
 			return;
 		if(j+1 >= param.size()) {
 			return;
@@ -511,6 +517,9 @@ void NmdcHub::onLine(const string& aLine) throw() {
 			if(j == string::npos)
 				return;
 			string name = unescape(param.substr(i, j-i));
+			// NMDC uses '\' as a separator but both ADC and our internal representation use '/'
+			Util::replace("/", "//", name);
+			Util::replace("\\", "/", name);
 			i = j+1;
 			string command = unescape(param.substr(i, param.length() - i));
 			fire(ClientListener::HubUserCommand(), this, type, ctx, name, command);
@@ -694,34 +703,30 @@ void NmdcHub::onLine(const string& aLine) throw() {
 		if(param.size() < j + 2) {
 			return;
 		}
-		string msg = param.substr(j + 2);
+		ChatMessage message = { unescape(param.substr(j + 2)), findUser(fromNick), &getUser(getMyNick()), findUser(rtNick) };
 
-		OnlineUser* replyTo = findUser(rtNick);
-		OnlineUser* from = findUser(fromNick);
-
-		if(replyTo == NULL || from == NULL) {
-			if(replyTo == 0) {
+		if(!message.replyTo || !message.from) {
+			if(!message.replyTo) {
 				// Assume it's from the hub
-				replyTo = &getUser(rtNick);
+				OnlineUser* replyTo = &getUser(rtNick);
 				replyTo->getIdentity().setHub(true);
 				replyTo->getIdentity().setHidden(true);
 				fire(ClientListener::UserUpdated(), this, *replyTo);
 			}
-			if(from == 0) {
+			if(!message.from) {
 				// Assume it's from the hub
-				from = &getUser(fromNick);
+				OnlineUser* from = &getUser(fromNick);
 				from->getIdentity().setHub(true);
 				from->getIdentity().setHidden(true);
 				fire(ClientListener::UserUpdated(), this, *from);
 			}
 
 			// Update pointers just in case they've been invalidated
-			replyTo = findUser(rtNick);
-			from = findUser(fromNick);
+			message.replyTo = findUser(rtNick);
+			message.from = findUser(fromNick);
 		}
 
-		OnlineUser& to = getUser(getMyNick());
-		fire(ClientListener::PrivateMessage(), this, *from, to, *replyTo, unescape(msg));
+		fire(ClientListener::Message(), this, message);
 	} else if(cmd == "$GetPass") {
 		OnlineUser& ou = getUser(getMyNick());
 		ou.getIdentity().set("RG", "1");
@@ -730,7 +735,11 @@ void NmdcHub::onLine(const string& aLine) throw() {
 	} else if(cmd == "$BadPass") {
 		setPassword(Util::emptyString);
 	} else if(cmd == "$ZOn") {
-		sock->setMode(BufferedSocket::MODE_ZPIPE);
+		try {
+			sock->setMode(BufferedSocket::MODE_ZPIPE);
+		} catch (const Exception& e) {
+			dcdebug("NmdcHub::onLine %s failed with error: %s\n", cmd.c_str(), e.getError().c_str());
+		}
 	} else {
 		dcassert(cmd[0] == '$');
 		dcdebug("NmdcHub::onLine Unknown command %s\n", aLine.c_str());
@@ -794,13 +803,21 @@ void NmdcHub::myInfo(bool alwaysSend) {
 	else
 		modeChar = 'P';
 
+	string uploadSpeed;
+	int upLimit = ThrottleManager::getInstance()->getUpLimit();
+	if (upLimit > 0) {
+		uploadSpeed = Util::toString(upLimit) + " KiB/s";
+	} else {
+		uploadSpeed = SETTING(UPLOAD_SPEED);
+	}
+		
 	string uMin = (SETTING(MIN_UPLOAD_SPEED) == 0) ? Util::emptyString : tmp5 + Util::toString(SETTING(MIN_UPLOAD_SPEED));
 	string myInfoA =
 		"$MyINFO $ALL " + fromUtf8(getMyNick()) + " " + fromUtf8(escape(getCurrentDescription())) +
 		tmp1 + VERSIONSTRING + tmp2 + modeChar + tmp3 + getCounts();
 	string myInfoB = tmp4 + Util::toString(SETTING(SLOTS));
 	string myInfoC = uMin +
-		">$ $" + SETTING(UPLOAD_SPEED) + "\x01$" + fromUtf8(escape(SETTING(EMAIL))) + '$';
+		">$ $" + uploadSpeed + "\x01$" + fromUtf8(escape(SETTING(EMAIL))) + '$';
 	string myInfoD = ShareManager::getInstance()->getShareSizeString() + "$|";
 	// we always send A and C; however, B (slots) and D (share size) can frequently change so we delay them if needed
  	if(lastMyInfoA != myInfoA || lastMyInfoC != myInfoC ||
@@ -881,15 +898,34 @@ string NmdcHub::validateMessage(string tmp, bool reverse) {
 	return tmp;
 }
 
+void NmdcHub::privateMessage(const string& nick, const string& message) {
+	send("$To: " + fromUtf8(nick) + " From: " + fromUtf8(getMyNick()) + " $" + fromUtf8(escape("<" + getMyNick() + "> " + message)) + "|");
+}
+
 void NmdcHub::privateMessage(const OnlineUser& aUser, const string& aMessage, bool /*thirdPerson*/) {
 	checkstate();
 
-	send("$To: " + fromUtf8(aUser.getIdentity().getNick()) + " From: " + fromUtf8(getMyNick()) + " $" + fromUtf8(escape("<" + getMyNick() + "> " + aMessage)) + "|");
+	privateMessage(aUser.getIdentity().getNick(), aMessage);
 	// Emulate a returning message...
 	Lock l(cs);
 	OnlineUser* ou = findUser(getMyNick());
 	if(ou) {
-		fire(ClientListener::PrivateMessage(), this, *ou, aUser, *ou, aMessage);
+		ChatMessage message = { aMessage, ou, &aUser, ou };
+		fire(ClientListener::Message(), this, message);
+	}
+}
+
+void NmdcHub::sendUserCmd(const UserCommand& command, const StringMap& params) {
+	checkstate();
+	string cmd = Util::formatParams(command.getCommand(), params, false);
+	if(command.isChat()) {
+		if(command.getTo().empty()) {
+			hubMessage(cmd);
+		} else {
+			privateMessage(command.getTo(), cmd);
+		}
+	} else {
+		send(fromUtf8(cmd));
 	}
 }
 
@@ -901,6 +937,14 @@ void NmdcHub::clearFlooders(uint64_t aTick) {
 	while(!flooders.empty() && flooders.front().second + (120 * 1000) < aTick) {
 		flooders.pop_front();
 	}
+}
+
+bool NmdcHub::isProtectedIP(const string& ip) {
+	if(find(protectedIPs.begin(), protectedIPs.end(), ip) != protectedIPs.end()) {
+		fire(ClientListener::StatusMessage(), this, str(F_("This hub is trying to use your client to spam %1%, please urge hub owner to fix this") % ip));
+		return true;
+	}
+	return false;
 }
 
 void NmdcHub::on(Connected) throw() {
@@ -929,6 +973,28 @@ void NmdcHub::on(Second, uint32_t aTick) throw() {
 
 	if(state == STATE_NORMAL && (aTick > (getLastActivity() + 120*1000)) ) {
 		send("|", 1);
+	}
+}
+
+void NmdcHub::on(Minute, uint32_t aTick) throw() {
+	if(aTick > (lastProtectedIPsUpdate + 24*3600*1000)) {
+		protectedIPs.clear();
+
+		protectedIPs.push_back("dcpp.net");
+		protectedIPs.push_back("hublist.org");
+		protectedIPs.push_back("openhublist.org");
+		protectedIPs.push_back("dchublist.com");
+		protectedIPs.push_back("hublista.hu");
+		protectedIPs.push_back("adcportal.com");
+		for(StringIter i = protectedIPs.begin(); i != protectedIPs.end();) {
+			*i = Socket::resolve(*i);
+			if(Util::isPrivateIp(*i))
+				i = protectedIPs.erase(i);
+			else
+				i++;
+		}
+
+		lastProtectedIPsUpdate = aTick;
 	}
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2009 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,7 +41,7 @@ public:
 
 	virtual void hubMessage(const string& aMessage, bool /*thirdPerson*/ = false);
 	virtual void privateMessage(const OnlineUser& aUser, const string& aMessage, bool /*thirdPerson*/ = false);
-	virtual void sendUserCmd(const string& aUserCmd) throw() { send(fromUtf8(aUserCmd)); }
+	virtual void sendUserCmd(const UserCommand& command, const StringMap& params);
 	virtual void search(int aSizeType, int64_t aSize, int aFileType, const string& aString, const string& aToken);
 	virtual void password(const string& aPass) { send("$MyPass " + fromUtf8(aPass) + "|"); }
 	virtual void info(bool force) { myInfo(force); }
@@ -83,6 +83,9 @@ private:
 	FloodMap seekers;
 	FloodMap flooders;
 
+	uint32_t lastProtectedIPsUpdate;
+	StringList protectedIPs;
+
 	NmdcHub(const string& aHubURL);
 	virtual ~NmdcHub() throw();
 
@@ -100,6 +103,7 @@ private:
 	string toUtf8(const string& str) const { return Text::toUtf8(str, getEncoding()); }
 	string fromUtf8(const string& str) const { return Text::fromUtf8(str, getEncoding()); }
 
+	void privateMessage(const string& nick, const string& aMessage);
 	void validateNick(const string& aNick) { send("$ValidateNick " + fromUtf8(aNick) + "|"); }
 	void key(const string& aKey) { send("$Key " + aKey + "|"); }
 	void version() { send("$Version 1,0091|"); }
@@ -109,6 +113,7 @@ private:
 	void myInfo(bool alwaysSend);
 	void supports(const StringList& feat);
 	void clearFlooders(uint64_t tick);
+	bool isProtectedIP(const string& ip);
 
 	void updateFromTag(Identity& id, const string& tag);
 
@@ -116,6 +121,7 @@ private:
 
 	// TimerManagerListener
 	virtual void on(Second, uint32_t aTick) throw();
+	virtual void on(Minute, uint32_t aTick) throw();
 
 	virtual void on(Connected) throw();
 	virtual void on(Line, const string& l) throw();

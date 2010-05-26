@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2008 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,7 +39,7 @@ public:
 
 	virtual void on(Data, HttpConnection*, const uint8_t*, size_t) throw() =0;
 	virtual void on(Failed, HttpConnection*, const string&) throw() { }
-	virtual void on(Complete, HttpConnection*, const string&) throw() { }
+	virtual void on(Complete, HttpConnection*, const string&, bool) throw() { }
 	virtual void on(Redirected, HttpConnection*, const string&) throw() { }
 	virtual void on(TypeNormal, HttpConnection*) throw() { }
 	virtual void on(TypeBZ2, HttpConnection*) throw() { }

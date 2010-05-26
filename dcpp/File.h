@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2008 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -117,6 +117,49 @@ protected:
 private:
 	File(const File&);
 	File& operator=(const File&);
+};
+
+class FileFindIter {
+public:
+	/** End iterator constructor */
+	FileFindIter();
+	/** Begin iterator constructor, path in utf-8 */
+	FileFindIter(const string& path);
+
+	~FileFindIter();
+
+	FileFindIter& operator++();
+	bool operator!=(const FileFindIter& rhs) const;
+
+	struct DirData
+#ifdef _WIN32
+		: public WIN32_FIND_DATA
+#endif
+	{
+		DirData();
+
+		string getFileName();
+		bool isDirectory();
+		bool isHidden();
+		bool isLink();
+		int64_t getSize();
+		uint32_t getLastWriteTime();
+
+		struct dirent *ent;//NOTE: freedcpp, see dcplusplus r2140: Move the impl of FileFindIter.
+		string base;//NOTE: freedcpp, see dcplusplus r2140: Move the impl of FileFindIter.
+	};
+
+	DirData& operator*() { return data; }
+	DirData* operator->() { return &data; }
+
+private:
+#ifdef _WIN32
+	HANDLE handle;
+#else
+	DIR* dir;
+#endif
+
+	DirData data;
 };
 
 } // namespace dcpp

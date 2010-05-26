@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2009 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,6 +33,7 @@
 #include "ZUtils.h"
 
 #include <limits>
+#include <cmath>
 
 // some strange mac definition
 #ifdef ff
@@ -67,6 +68,7 @@ void DownloadManager::on(TimerManagerListener::Second, uint32_t aTick) throw() {
 		Lock l(cs);
 
 		DownloadList tickList;
+
 		// Tick each ongoing download
 		for(DownloadList::iterator i = downloads.begin(); i != downloads.end(); ++i) {
 			if((*i)->getPos() > 0) {
@@ -77,7 +79,6 @@ void DownloadManager::on(TimerManagerListener::Second, uint32_t aTick) throw() {
 
 		if(tickList.size() > 0)
 			fire(DownloadManagerListener::Tick(), tickList);
-
 
 		// Automatically remove or disconnect slow sources
 		if((uint32_t)(aTick / 1000) % SETTING(AUTODROP_INTERVAL) == 0) {
@@ -325,6 +326,7 @@ void DownloadManager::endData(UserConnection* aSource) {
 		try {
 			d->getFile()->flush();
 		} catch(const FileException& e) {
+			d->resetPos();
 			failDownload(aSource, e.getError());
 			return;
 		}

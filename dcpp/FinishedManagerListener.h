@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2008 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,11 +37,11 @@ public:
 	typedef X<6> RemovedAll;
 
 	virtual void on(AddedFile, bool, const string&, const FinishedFileItemPtr&) throw() { }
-	virtual void on(AddedUser, bool, const UserPtr&, const FinishedUserItemPtr&) throw() { }
+	virtual void on(AddedUser, bool, const HintedUser&, const FinishedUserItemPtr&) throw() { }
 	virtual void on(UpdatedFile, bool, const string&, const FinishedFileItemPtr&) throw() { }
-	virtual void on(UpdatedUser, bool, const UserPtr&) throw() { }
+	virtual void on(UpdatedUser, bool, const HintedUser&) throw() { }
 	virtual void on(RemovedFile, bool, const string&) throw() { }
-	virtual void on(RemovedUser, bool, const UserPtr&) throw() { }
+	virtual void on(RemovedUser, bool, const HintedUser&) throw() { }
 	virtual void on(RemovedAll, bool) throw() { }
 };
 

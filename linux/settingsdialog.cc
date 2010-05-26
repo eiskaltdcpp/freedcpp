@@ -412,7 +412,8 @@ void Settings::saveSettings_client()
 		// Expert
 		sm->set(SettingsManager::MAX_HASH_SPEED, Util::toString(gtk_spin_button_get_value(GTK_SPIN_BUTTON(getWidget("hashSpeedSpinButton")))));
 		sm->set(SettingsManager::BUFFER_SIZE, Util::toString(gtk_spin_button_get_value(GTK_SPIN_BUTTON(getWidget("writeBufferSpinButton")))));
-		sm->set(SettingsManager::SHOW_LAST_LINES_LOG, Util::toString(gtk_spin_button_get_value(GTK_SPIN_BUTTON(getWidget("pmHistorySpinButton")))));
+		sm->set(SettingsManager::PM_LAST_LOG_LINES,
+			Util::toString(gtk_spin_button_get_value(GTK_SPIN_BUTTON(getWidget("pmHistorySpinButton")))));//NOTE: core 0.762
 		sm->set(SettingsManager::SET_MINISLOT_SIZE, Util::toString(gtk_spin_button_get_value(GTK_SPIN_BUTTON(getWidget("slotSizeSpinButton")))));
 		sm->set(SettingsManager::MAX_FILELIST_SIZE, Util::toString(gtk_spin_button_get_value(GTK_SPIN_BUTTON(getWidget("maxListSizeSpinButton")))));
 		sm->set(SettingsManager::PRIVATE_ID, string(gtk_entry_get_text(GTK_ENTRY(getWidget("CIDEntry")))));
@@ -1271,17 +1272,18 @@ void Settings::initAppearance_gui()
 
 	{ // Window
 		// Auto-open
+///[core 0.762 NOTE: удалены из libdcpp
 		createOptionsView_gui(windowView1, windowStore1, "windowsAutoOpenTreeView");
 
-		addOption_gui(windowStore1, _("Public Hubs"), SettingsManager::OPEN_PUBLIC);
-		addOption_gui(windowStore1, _("Favorite Hubs"), SettingsManager::OPEN_FAVORITE_HUBS);
-		addOption_gui(windowStore1, _("Download Queue"), SettingsManager::OPEN_QUEUE);
-		addOption_gui(windowStore1, _("Finished Downloads"), SettingsManager::OPEN_FINISHED_DOWNLOADS);
-		addOption_gui(windowStore1, _("Finished Uploads"), SettingsManager::OPEN_FINISHED_UPLOADS);
-		addOption_gui(windowStore1, _("Favorite Users"), SettingsManager::OPEN_FAVORITE_USERS);
-		addOption_gui(windowStore1, _("Search Spy"), SettingsManager::OPEN_SEARCH_SPY);
+		addOption_gui(windowStore1, _("Public Hubs"), "open-public");
+		addOption_gui(windowStore1, _("Favorite Hubs"), "open-favorite-hubs");
+		addOption_gui(windowStore1, _("Download Queue"), "open-queue");
+		addOption_gui(windowStore1, _("Finished Downloads"), "open-finished-downloads");
+		addOption_gui(windowStore1, _("Finished Uploads"), "open-finished-uploads");
+		addOption_gui(windowStore1, _("Favorite Users"), "open-favorite-users");
+		addOption_gui(windowStore1, _("Search Spy"), "open-search-spy");
 		/// @todo: Uncomment when implemented
-
+///core 0.762]
 		// Window options
 		createOptionsView_gui(windowView2, windowStore2, "windowsOptionsTreeView");
 
@@ -1395,7 +1397,7 @@ void Settings::initAdvanced_gui()
 	{ // Experts
 		gtk_spin_button_set_value(GTK_SPIN_BUTTON(getWidget("hashSpeedSpinButton")), (double)SETTING(MAX_HASH_SPEED));
 		gtk_spin_button_set_value(GTK_SPIN_BUTTON(getWidget("writeBufferSpinButton")), (double)SETTING(BUFFER_SIZE));
-		gtk_spin_button_set_value(GTK_SPIN_BUTTON(getWidget("pmHistorySpinButton")), (double)SETTING(SHOW_LAST_LINES_LOG));
+		gtk_spin_button_set_value(GTK_SPIN_BUTTON(getWidget("pmHistorySpinButton")), (double)SETTING(PM_LAST_LOG_LINES));//NOTE: core 0.762
 		gtk_spin_button_set_value(GTK_SPIN_BUTTON(getWidget("slotSizeSpinButton")), (double)SETTING(SET_MINISLOT_SIZE));
 		gtk_spin_button_set_value(GTK_SPIN_BUTTON(getWidget("maxListSizeSpinButton")), (double)SETTING(MAX_FILELIST_SIZE));
 		gtk_entry_set_text(GTK_ENTRY(getWidget("CIDEntry")), SETTING(PRIVATE_ID).c_str());
@@ -2376,7 +2378,7 @@ void Settings::saveUserCommand(UserCommand *uc)
 	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(getWidget("commandDialogHubMenu"))))
 		ctx |= UserCommand::CONTEXT_HUB;
 	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(getWidget("commandDialogUserMenu"))))
-		ctx |= UserCommand::CONTEXT_CHAT;
+		ctx |= UserCommand::CONTEXT_USER;//NOTE: core 0.762
 	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(getWidget("commandDialogSearchMenu"))))
 		ctx |= UserCommand::CONTEXT_SEARCH;
 	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(getWidget("commandDialogFilelistMenu"))))
@@ -2414,7 +2416,7 @@ void Settings::saveUserCommand(UserCommand *uc)
 
 	if (uc == NULL)
 	{
-		FavoriteManager::getInstance()->addUserCommand(type, ctx, 0, name, command, hub);
+		FavoriteManager::getInstance()->addUserCommand(type, ctx, 0, name, command, ""/*to*/, hub);//NOTE: core 0.762
 		gtk_list_store_append(userCommandStore, &iter);
 	}
 	else
@@ -2981,7 +2983,7 @@ void Settings::onUserCommandEdit_gui(GtkWidget *widget, gpointer data)
 		string command, nick;
 		FavoriteManager::getInstance()->getUserCommand(cid, uc);
 		bool hub = uc.getCtx() & UserCommand::CONTEXT_HUB;
-		bool user = uc.getCtx() & UserCommand::CONTEXT_CHAT;
+		bool user = uc.getCtx() & UserCommand::CONTEXT_USER;//NOTE: core 0.762
 		bool search = uc.getCtx() & UserCommand::CONTEXT_SEARCH;
 		bool filelist = uc.getCtx() & UserCommand::CONTEXT_FILELIST;
 

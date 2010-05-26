@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2009 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -53,12 +53,12 @@ public:
 	int getFreeExtraSlots() { return max(3 - getExtra(), 0); }
 
 	/** @param aUser Reserve an upload slot for this user and connect. */
-	void reserveSlot(const UserPtr& aUser, const string& hubHint);
+	void reserveSlot(const HintedUser& aUser);
 
 	typedef set<string> FileSet;
 	typedef unordered_map<UserPtr, FileSet, User::Hash> FilesMap;
 	void clearUserFiles(const UserPtr&);
-	UserList getWaitingUsers();
+	HintedUserList getWaitingUsers() const;
 	const FileSet& getWaitingUserFiles(const UserPtr&);
 
 	/** @internal */
@@ -67,15 +67,17 @@ public:
 	GETSET(int, running, Running);
 	GETSET(int, extra, Extra);
 	GETSET(uint64_t, lastGrant, LastGrant);
+	
 private:
+
 	UploadList uploads;
-	CriticalSection cs;
+	mutable CriticalSection cs;
 
 	typedef unordered_set<UserPtr, User::Hash> SlotSet;
 	typedef SlotSet::iterator SlotIter;
 	SlotSet reservedSlots;
 
-	typedef pair<UserPtr, uint64_t> WaitingUser;
+	typedef pair<HintedUser, uint64_t> WaitingUser;
 	typedef list<WaitingUser> WaitingUserList;
 
 	struct WaitingUserFresh {

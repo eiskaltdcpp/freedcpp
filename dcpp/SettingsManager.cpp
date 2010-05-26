@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2009 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,7 +48,7 @@ const string SettingsManager::settingTags[] =
 	"LogFilePrivateChat", "LogFileStatus", "LogFileUpload", "LogFileDownload", "LogFileSystem",
 	"LogFormatSystem", "LogFormatStatus", "DirectoryListingFrameOrder", "DirectoryListingFrameWidths",
 	"TLSPrivateKeyFile", "TLSCertificateFile", "TLSTrustedCertificatesPath",
-	"Language", "DownloadsOrder", "DownloadsWidth",
+	"Language", "DownloadsOrder", "DownloadsWidth", "Toolbar",
 	"SoundMainChat", "SoundPM", "SoundPMWindow",
 	"SENTRY",
 	// Ints
@@ -67,22 +67,26 @@ const string SettingsManager::settingTags[] =
 	"GetUserCountry", "FavShowJoins", "LogStatusMessages", "ShowStatusbar",
 	"ShowToolbar", "ShowTransferview", "PopunderPm", "PopunderFilelist", "MagnetAsk", "MagnetAction", "MagnetRegister",
 	"AddFinishedInstantly", "DontDLAlreadyShared", "UseCTRLForLineHistory",
-	"OpenNewWindow", "UDPPort", "ShowLastLinesLog",
+	"OpenNewWindow", "UDPPort", "HubLastLogLines", "PMLastLogLines",
 	"AdcDebug", "ToggleActiveWindow", "SearchHistory", "SetMinislotSize", "MaxFilelistSize",
 	"HighestPrioSize", "HighPrioSize", "NormalPrioSize", "LowPrioSize", "LowestPrio",
 	"AutoDropSpeed", "AutoDropInterval", "AutoDropElapsed", "AutoDropInactivity", "AutoDropMinSources", "AutoDropFilesize",
 	"AutoDropAll", "AutoDropFilelists", "AutoDropDisconnect",
-	"OpenPublic", "OpenFavoriteHubs", "OpenFavoriteUsers", "OpenQueue", "OpenFinishedDownloads",
-	"OpenFinishedUploads", "OpenSearchSpy", "OpenNetworkStatistics", "OpenNotepad", "OutgoingConnections",
+	"OutgoingConnections",
 	"NoIpOverride", "SearchOnlyFreeSlots", "LastSearchType", "BoldFinishedDownloads", "BoldFinishedUploads", "BoldQueue",
 	"BoldHub", "BoldPm", "BoldSearch", "BoldSearchSpy", "SocketInBuffer", "SocketOutBuffer",
-	"OpenWaitingUsers", "BoldWaitingUsers", "OpenSystemLog", "BoldSystemLog", "AutoRefreshTime",
+	"BoldWaitingUsers", "BoldSystemLog", "AutoRefreshTime",
 	"UseTLS", "AutoSearchLimit", "AltSortOrder", "AutoKickNoFavs", "PromptPassword", "SpyFrameIgnoreTthSearches",
 	"DontDlAlreadyQueued", "MaxCommandLength", "AllowUntrustedHubs", "AllowUntrustedClients",
 	"TLSPort", "FastHash", "SortFavUsersFirst", "SegmentedDL", "FollowLinks",
 	"SendBloom", "OwnerDrawnMenus", "Coral", "SearchFilterShared", "MaxTabChars", "FinishedDLOnlyFull",
 	"ConfirmExit", "ConfirmHubClosing", "ConfirmHubRemoval", "ConfirmUserRemoval", "ConfirmItemRemoval", "ConfirmADLSRemoval",
-	"SearchMerge",
+	"SearchMerge", "ToolbarSize",
+	"KeepFinishedFiles",
+	"MinMessageLines", "MaxMessageLines",
+	"BandwidthLimitStart", "BandwidthLimitEnd", "TimeDependentThrottle", "MaxDownloadSpeedRealTime",
+	"MaxUploadSpeedTime", "MaxDownloadSpeedPrimary", "MaxUploadSpeedPrimary",
+	"SlotsAlternateLimiting", "SlotsPrimaryLimiting",
 	"SENTRY",
 	// Int64
 	"TotalUpload", "TotalDownload",
@@ -149,8 +153,8 @@ SettingsManager::SettingsManager()
 	setDefault(IGNORE_BOT_PMS, false);
 	setDefault(LIST_DUPES, true);
 	setDefault(BUFFER_SIZE, 64);
-	setDefault(HUBLIST_SERVERS, "http://hublist.openhublist.org/hublist.xml.bz2;http://dchublist.com/hublist.xml.bz2;http://adchublist.com/hublist.xml.bz2;http://www.hublist.org/PublicHubList.xml.bz2;http://dclist.eu/hublist.xml.bz2;http://download.hublist.cz/hublist.xml.bz2;http://hublist.awenet.info/PublicHubList.xml.bz2");
-	setDefault(DOWNLOAD_SLOTS, 3);
+	setDefault(HUBLIST_SERVERS, "http://dchublist.com/hublist.xml.bz2;http://www.hublista.hu/hublist.xml.bz2;http://hublist.openhublist.org/hublist.xml.bz2;");
+	setDefault(DOWNLOAD_SLOTS, 6);
 	setDefault(MAX_DOWNLOAD_SPEED, 0);
 	setDefault(LOG_DIRECTORY, Util::getPath(Util::PATH_USER_LOCAL) + "Logs" PATH_SEPARATOR_STR);
 	setDefault(LOG_UPLOADS, false);
@@ -216,12 +220,13 @@ SettingsManager::SettingsManager()
 	setDefault(DONT_DL_ALREADY_SHARED, false);
 	setDefault(USE_CTRL_FOR_LINE_HISTORY, true);
 	setDefault(JOIN_OPEN_NEW_WINDOW, false);
-	setDefault(SHOW_LAST_LINES_LOG, 0);
+	setDefault(HUB_LAST_LOG_LINES, 10);
+	setDefault(PM_LAST_LOG_LINES, 10);
 	setDefault(ADC_DEBUG, false);
 	setDefault(TOGGLE_ACTIVE_WINDOW, true);
 	setDefault(SEARCH_HISTORY, 10);
 	setDefault(SET_MINISLOT_SIZE, 64);
-	setDefault(MAX_FILELIST_SIZE, 512);
+	setDefault(MAX_FILELIST_SIZE, 256);
 	setDefault(PRIO_HIGHEST_SIZE, 64);
 	setDefault(PRIO_HIGH_SIZE, 0);
 	setDefault(PRIO_NORMAL_SIZE, 0);
@@ -236,23 +241,12 @@ SettingsManager::SettingsManager()
 	setDefault(AUTODROP_ALL, false);
 	setDefault(AUTODROP_FILELISTS, false);
 	setDefault(AUTODROP_DISCONNECT, false);
-	setDefault(OPEN_PUBLIC, false);
-	setDefault(OPEN_FAVORITE_HUBS, false);
-	setDefault(OPEN_FAVORITE_USERS, false);
-	setDefault(OPEN_QUEUE, false);
-	setDefault(OPEN_FINISHED_DOWNLOADS, false);
-	setDefault(OPEN_FINISHED_UPLOADS, false);
-	setDefault(OPEN_SEARCH_SPY, false);
-	setDefault(OPEN_NETWORK_STATISTICS, false);
-	setDefault(OPEN_NOTEPAD, false);
 	setDefault(NO_IP_OVERRIDE, false);
 	setDefault(SEARCH_ONLY_FREE_SLOTS, false);
 	setDefault(SEARCH_FILTER_SHARED, true);
 	setDefault(LAST_SEARCH_TYPE, 0);
 	setDefault(SOCKET_IN_BUFFER, 64*1024);
 	setDefault(SOCKET_OUT_BUFFER, 64*1024);
-	setDefault(OPEN_WAITING_USERS, false);
-	setDefault(OPEN_SYSTEM_LOG, true);
 	setDefault(TLS_TRUSTED_CERTIFICATES_PATH, Util::getPath(Util::PATH_USER_CONFIG) + "Certificates" PATH_SEPARATOR_STR);
 	setDefault(TLS_PRIVATE_KEY_FILE, Util::getPath(Util::PATH_USER_CONFIG) + "Certificates" PATH_SEPARATOR_STR "client.key");
 	setDefault(TLS_CERTIFICATE_FILE, Util::getPath(Util::PATH_USER_CONFIG) + "Certificates" PATH_SEPARATOR_STR "client.crt");
@@ -292,9 +286,22 @@ SettingsManager::SettingsManager()
 	setDefault(CONFIRM_ITEM_REMOVAL, true);
 	setDefault(CONFIRM_ADLS_REMOVAL, true);
 	setDefault(SEARCH_MERGE, true);
+	setDefault(TOOLBAR_SIZE, 20);
 	setDefault(TRANSFERS_PANED_POS, .7);
 	setDefault(QUEUE_PANED_POS, .3);
 	setDefault(SEARCH_PANED_POS, .2);
+	setDefault(KEEP_FINISHED_FILES, false);
+	setDefault(MIN_MESSAGE_LINES, 1);
+	setDefault(MAX_MESSAGE_LINES, 10);
+	setDefault(MAX_UPLOAD_SPEED_MAIN, 0);
+	setDefault(MAX_DOWNLOAD_SPEED_MAIN, 0);
+	setDefault(TIME_DEPENDENT_THROTTLE, false);
+	setDefault(MAX_DOWNLOAD_SPEED_ALTERNATE, 0);
+	setDefault(MAX_UPLOAD_SPEED_ALTERNATE, 0);
+	setDefault(BANDWIDTH_LIMIT_START, 1);
+	setDefault(BANDWIDTH_LIMIT_END, 1);
+	setDefault(SLOTS_ALTERNATE_LIMITING, 1);
+	setDefault(SLOTS_PRIMARY, 3);
 
 #ifdef _WIN32
 	setDefault(MAIN_WINDOW_STATE, SW_SHOWNORMAL);

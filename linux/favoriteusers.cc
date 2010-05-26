@@ -95,7 +95,7 @@ void FavoriteUsers::show()
 		GtkTreeIter iter;
 		const FavoriteUser &user = it->second;
 		bool online = user.getUser()->isOnline();
-		string hub = online ? WulforUtil::getHubNames(user.getUser()) : user.getUrl();
+		string hub = online ? WulforUtil::getHubNames(user.getUser(), user.getUrl()) : user.getUrl();//NOTE: core 0.762
 		string seen = online ? _("Online") : Util::formatTime("%Y-%m-%d %H:%M", user.getLastSeen());
 		string cid = user.getUser()->getCID().toBase32();
 
@@ -481,11 +481,12 @@ void FavoriteUsers::getFileList_client(const string cid, const string hubUrl, bo
 
 		if (user)
 		{
+			const HintedUser hintedUser(user, hubUrl);//NOTE: core 0.762
 			if (match)
 
-				QueueManager::getInstance()->addList(user, hubUrl, QueueItem::FLAG_MATCH_QUEUE);
+				QueueManager::getInstance()->addList(hintedUser, QueueItem::FLAG_MATCH_QUEUE);//NOTE: core 0.762
 			else
-				QueueManager::getInstance()->addList(user, hubUrl, QueueItem::FLAG_CLIENT_VIEW);
+				QueueManager::getInstance()->addList(hintedUser, QueueItem::FLAG_CLIENT_VIEW);//NOTE: core 0.762
 		}
 	}
 	catch (const Exception& e)
@@ -501,9 +502,9 @@ void FavoriteUsers::grantSlot_client(const string cid, const string hubUrl)
 	UserPtr user = ClientManager::getInstance()->findUser(CID(cid));
 	if (user)
 	{
-		UploadManager::getInstance()->reserveSlot(user, hubUrl);
+		UploadManager::getInstance()->reserveSlot(HintedUser(user, hubUrl));//NOTE: core 0.762
 		typedef Func1<FavoriteUsers, string> F1;
-		F1 *func = new F1(this, &FavoriteUsers::setStatus_gui, _("Slot granted to ") + WulforUtil::getNicks(user));
+		F1 *func = new F1(this, &FavoriteUsers::setStatus_gui, _("Slot granted to ") + WulforUtil::getNicks(user, hubUrl));//NOTE: core 0.762
 		WulforManager::get()->dispatchGuiFunc(func);
 	}
 }
@@ -614,7 +615,7 @@ void FavoriteUsers::on(FavoriteManagerListener::UserAdded, const FavoriteUser &u
 	ParamMap params;
 	bool online = user.getUser()->isOnline();
 	params.insert(ParamMap::value_type("Nick", user.getNick()));
-	params.insert(ParamMap::value_type("Hub", online ? WulforUtil::getHubNames(user.getUser()) : user.getUrl()));
+	params.insert(ParamMap::value_type("Hub", online ? WulforUtil::getHubNames(user.getUser(), user.getUrl()) : user.getUrl()));//NOTE: core 0.762
 	params.insert(ParamMap::value_type("Time", online ? _("Online") : Util::formatTime("%Y-%m-%d %H:%M", user.getLastSeen())));
 	params.insert(ParamMap::value_type("Description", user.getDescription()));
 	params.insert(ParamMap::value_type("CID", user.getUser()->getCID().toBase32()));

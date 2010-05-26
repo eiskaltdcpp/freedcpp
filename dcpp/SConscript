@@ -8,6 +8,7 @@ dcpp_files = [
 	'ADLSearch.cpp',
 	'BufferedSocket.cpp',
 	'BZUtils.cpp',
+	'ChatMessage.cpp',
 	'Client.cpp',
 	'ClientManager.cpp',
 	'ConnectionManager.cpp',
@@ -37,6 +38,7 @@ dcpp_files = [
 	'SFVReader.cpp',
 	'ShareManager.cpp',
 	'SimpleXML.cpp',
+	'SimpleXMLReader.cpp',
 	'Socket.cpp',
 	'SSL.cpp',
 	'SSLSocket.cpp',
@@ -44,21 +46,26 @@ dcpp_files = [
 	'StringTokenizer.cpp',
 	'Text.cpp',
 	'Thread.cpp',
+	'ThrottleManager.cpp',
 	'TigerHash.cpp',
 	'TimerManager.cpp',
 	'Transfer.cpp',
 	'Upload.cpp',
 	'UploadManager.cpp',
+	'UserCommand.cpp',
 	'UserConnection.cpp',
 	'User.cpp',
 	'Util.cpp',
+	'version.cpp',
+	'WindowInfo.cpp',
+	'WindowManager.cpp',
 	'ZUtils.cpp']
 
-languages = ['ar', 'bg', 'bs', 'ca', 'cs', 'da', 'de', 'el', 'en_GB', 'es',
-             'et', 'fi', 'fr', 'gl', 'he', 'hr', 'hu', 'id', 'is', 'it',
-             'ja', 'km', 'ko', 'lt', 'lv', 'mk', 'ml', 'ms', 'nb', 'nl',
-             'pl', 'pt_BR', 'pt', 'ro', 'ru', 'sk', 'sl', 'sq', 'sr', 'sv',
-             'tr', 'uk', 'zh_CN', 'zh_TW', 'en_CA']
+languages = ['ar', 'be', 'bg', 'bs', 'ca', 'cs', 'da', 'de', 'el', 'en_CA',
+             'en_GB', 'es', 'et', 'fi', 'fr', 'gl', 'gu', 'he', 'hr', 'hu',
+             'id', 'is', 'it', 'ja', 'km', 'ko', 'lt', 'lv', 'mk', 'ml',
+             'ms', 'nb', 'nl', 'oc', 'pl', 'pt_BR', 'pt', 'ro', 'ru', 'sk',
+             'sl', 'sq', 'sr', 'sv', 'tr', 'uk', 'zh_CN', 'zh_TW']
 
 Import('env')
 
@@ -74,4 +81,3 @@ for file in languages:
 	env.MoBuild(target = '../../locale/libdcpp/' + file, source = 'po/' + file + '.po')
 
 Return('libdcpp')
-

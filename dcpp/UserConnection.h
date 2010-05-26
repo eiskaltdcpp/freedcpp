@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2008 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -124,7 +124,7 @@ public:
 	void setDataMode(int64_t aBytes = -1) { dcassert(socket); socket->setDataMode(aBytes); }
 	void setLineMode(size_t rollback) { dcassert(socket); socket->setLineMode(rollback); }
 
-	void connect(const string& aServer, uint16_t aPort) throw(SocketException, ThreadException);
+	void connect(const string& aServer, uint16_t aPort, uint16_t localPort, const BufferedSocket::NatRoles natRole) throw(SocketException, ThreadException);
 	void accept(const Socket& aServer) throw(SocketException, ThreadException);
 
 	void updated() { if(socket) socket->updated(); }
@@ -139,6 +139,8 @@ public:
 
 	const UserPtr& getUser() const { return user; }
 	UserPtr& getUser() { return user; }
+	const HintedUser getHintedUser() const { return HintedUser(user, hubUrl); }
+
 	bool isSecure() const { return socket && socket->isSecure(); }
 	bool isTrusted() const { return socket && socket->isTrusted(); }
 	std::string getCipherName() const { return socket ? socket->getCipherName() : Util::emptyString; }

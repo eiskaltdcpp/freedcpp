@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2009 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -69,26 +69,26 @@ void ConnectionManager::listen() throw(SocketException){
  * for downloading.
  * @param aUser The user to connect to.
  */
-void ConnectionManager::getDownloadConnection(const UserPtr& aUser, const string& hubHint) {
-	dcassert((bool)aUser);
+void ConnectionManager::getDownloadConnection(const HintedUser& aUser) {
+	dcassert((bool)aUser.user);
 	{
 		Lock l(cs);
-		ConnectionQueueItem::Iter i = find(downloads.begin(), downloads.end(), aUser);
+		ConnectionQueueItem::Iter i = find(downloads.begin(), downloads.end(), aUser.user);
 		if(i == downloads.end()) {
-			getCQI(aUser, true, hubHint);
+			getCQI(aUser, true);
 		} else {
-			DownloadManager::getInstance()->checkIdle(aUser);
+			DownloadManager::getInstance()->checkIdle(aUser.user);
 		}
 	}
 }
 
-ConnectionQueueItem* ConnectionManager::getCQI(const UserPtr& aUser, bool download, const string& hubHint) {
-	ConnectionQueueItem* cqi = new ConnectionQueueItem(aUser, download, hubHint);
+ConnectionQueueItem* ConnectionManager::getCQI(const HintedUser& aUser, bool download) {
+	ConnectionQueueItem* cqi = new ConnectionQueueItem(aUser, download);
 	if(download) {
-		dcassert(find(downloads.begin(), downloads.end(), aUser) == downloads.end());
+		dcassert(find(downloads.begin(), downloads.end(), aUser.user) == downloads.end());
 		downloads.push_back(cqi);
 	} else {
-		dcassert(find(uploads.begin(), uploads.end(), aUser) == uploads.end());
+		dcassert(find(uploads.begin(), uploads.end(), aUser.user) == uploads.end());
 		uploads.push_back(cqi);
 	}
 
@@ -141,13 +141,13 @@ void ConnectionManager::on(TimerManagerListener::Second, uint32_t aTick) throw()
 			ConnectionQueueItem* cqi = *i;
 
 			if(cqi->getState() != ConnectionQueueItem::ACTIVE) {
-				if(!cqi->getUser()->isOnline()) {
+				if(!cqi->getUser().user->isOnline()) {
 					// Not online anymore...remove it from the pending...
 					removed.push_back(cqi);
 					continue;
 				}
 
-				if(cqi->getUser()->isSet(User::PASSIVE) && !ClientManager::getInstance()->isActive()) {
+				if(cqi->getUser().user->isSet(User::PASSIVE) && !ClientManager::getInstance()->isActive()) {
 					passiveUsers.push_back(cqi->getUser());
 					removed.push_back(cqi);
 					continue;
@@ -168,7 +168,7 @@ void ConnectionManager::on(TimerManagerListener::Second, uint32_t aTick) throw()
 					if(cqi->getState() == ConnectionQueueItem::WAITING) {
 						if(startDown) {
 							cqi->setState(ConnectionQueueItem::CONNECTING);
-							ClientManager::getInstance()->connect(cqi->getUser(), cqi->getToken(), cqi->getHubHint());
+							ClientManager::getInstance()->connect(cqi->getUser(), cqi->getToken());
 							fire(ConnectionManagerListener::StatusChanged(), cqi);
 							attemptDone = true;
 						} else {
@@ -307,7 +307,7 @@ void ConnectionManager::nmdcConnect(const string& aServer, uint16_t aPort, const
 	uc->setState(UserConnection::STATE_CONNECT);
 	uc->setFlag(UserConnection::FLAG_NMDC);
 	try {
-		uc->connect(aServer, aPort);
+		uc->connect(aServer, aPort, 0, BufferedSocket::NAT_NONE);
 	} catch(const Exception&) {
 		putConnection(uc);
 		delete uc;
@@ -315,6 +315,10 @@ void ConnectionManager::nmdcConnect(const string& aServer, uint16_t aPort, const
 }
 
 void ConnectionManager::adcConnect(const OnlineUser& aUser, uint16_t aPort, const string& aToken, bool secure) {
+	adcConnect(aUser, aPort, 0, BufferedSocket::NAT_NONE, aToken, secure);
+}
+
+void ConnectionManager::adcConnect(const OnlineUser& aUser, uint16_t aPort, uint16_t localPort, BufferedSocket::NatRoles natRole, const string& aToken, bool secure) {
 	if(shuttingDown)
 		return;
 
@@ -327,7 +331,7 @@ void ConnectionManager::adcConnect(const OnlineUser& aUser, uint16_t aPort, cons
 		uc->setFlag(UserConnection::FLAG_OP);
 	}
 	try {
-		uc->connect(aUser.getIdentity().getIp(), aPort);
+		uc->connect(aUser.getIdentity().getIp(), aPort, localPort, natRole);
 	} catch(const Exception&) {
 		putConnection(uc);
 		delete uc;
@@ -455,7 +459,9 @@ void ConnectionManager::on(UserConnectionListener::MyNick, UserConnection* aSour
 		Lock l(cs);
 		for(ConnectionQueueItem::Iter i = downloads.begin(); i != downloads.end(); ++i) {
 			ConnectionQueueItem* cqi = *i;
-			if((cqi->getState() == ConnectionQueueItem::CONNECTING || cqi->getState() == ConnectionQueueItem::WAITING) && cqi->getUser()->getCID() == cid) {
+			if((cqi->getState() == ConnectionQueueItem::CONNECTING || cqi->getState() == ConnectionQueueItem::WAITING) &&
+				cqi->getUser().user->getCID() == cid)
+			{
 				aSource->setUser(cqi->getUser());
 				// Indicate that we're interested in this file...
 				aSource->setFlag(UserConnection::FLAG_DOWNLOAD);
@@ -583,7 +589,7 @@ void ConnectionManager::addUploadConnection(UserConnection* uc) {
 
 		ConnectionQueueItem::Iter i = find(uploads.begin(), uploads.end(), uc->getUser());
 		if(i == uploads.end()) {
-			ConnectionQueueItem* cqi = getCQI(uc->getUser(), false, Util::emptyString);
+			ConnectionQueueItem* cqi = getCQI(uc->getHintedUser(), false);
 
 			cqi->setState(ConnectionQueueItem::ACTIVE);
 			uc->setFlag(UserConnection::FLAG_ASSOCIATED);

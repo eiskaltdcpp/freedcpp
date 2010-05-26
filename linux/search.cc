@@ -1631,7 +1631,8 @@ void Search::parseSearchResult_gui(SearchResultPtr result, StringMap &resultMap)
 		}
 	}
 
-	resultMap[_("Nick")] = WulforUtil::getNicks(result->getUser());
+// 	resultMap[_("Nick")] = WulforUtil::getNicks(result->getUser());
+	resultMap[_("Nick")] = WulforUtil::getNicks(result->getUser(), result->getHubURL());//NOTE: core 0.762
 	resultMap["CID"] = result->getUser()->getCID().toBase32();
 	resultMap["Slots"] = result->getSlotString();
 	resultMap[_("Connection")] = ClientManager::getInstance()->getConnection(result->getUser()->getCID());
@@ -1659,12 +1660,14 @@ void Search::download_client(string target, string cid, string filename, int64_t
 		if (!tth.empty())
 		{
 			string subdir = Util::getFileName(filename);
-			QueueManager::getInstance()->add(target + subdir, size, TTHValue(tth), user, hubUrl);
+// 			QueueManager::getInstance()->add(target + subdir, size, TTHValue(tth), user, hubUrl);
+			QueueManager::getInstance()->add(target + subdir, size, TTHValue(tth), HintedUser(user, hubUrl));//NOTE: core 0.762
 		}
 		else
 		{
 			string dir = WulforUtil::windowsSeparator(filename);
-			QueueManager::getInstance()->addDirectory(dir, user, hubUrl, target);
+// 			QueueManager::getInstance()->addDirectory(dir, user, hubUrl, target);
+			QueueManager::getInstance()->addDirectory(dir, HintedUser(user, hubUrl), target);//NOTE: core 0.762
 		}
 	}
 	catch (const Exception&)
@@ -1691,7 +1694,8 @@ void Search::downloadDir_client(string target, string cid, string filename, stri
 		UserPtr user = ClientManager::getInstance()->findUser(CID(cid));
 		if (user != NULL)
 		{
-			QueueManager::getInstance()->addDirectory(dir, user, hubUrl, target);
+// 			QueueManager::getInstance()->addDirectory(dir, user, hubUrl, target);
+			QueueManager::getInstance()->addDirectory(dir, HintedUser(user, hubUrl), target);//NOTE: core 0.762
 		}
 	}
 	catch (const Exception&)
@@ -1706,7 +1710,8 @@ void Search::addSource_client(string source, string cid, int64_t size, string tt
 		UserPtr user = ClientManager::getInstance()->findUser(CID(cid));
 		if (!tth.empty() && user != NULL)
 		{
-			QueueManager::getInstance()->add(source, size, TTHValue(tth), user, hubUrl);
+// 			QueueManager::getInstance()->add(source, size, TTHValue(tth), user, hubUrl);
+			QueueManager::getInstance()->add(source, size, TTHValue(tth), HintedUser(user, hubUrl));//NOTE: core 0.762
 		}
 	}
 	catch (const Exception&)
@@ -1729,7 +1734,8 @@ void Search::getFileList_client(string cid, string dir, bool match, string hubUr
 				else
 					flags = QueueItem::FLAG_CLIENT_VIEW;
 
-				QueueManager::getInstance()->addList(user, hubUrl, flags, dir);
+// 				QueueManager::getInstance()->addList(user, hubUrl, flags, dir);
+				QueueManager::getInstance()->addList(HintedUser(user, hubUrl), flags, dir);//NOTE: core 0.762
 			}
 		}
 		catch (const Exception&)
@@ -1744,7 +1750,10 @@ void Search::grantSlot_client(string cid, string hubUrl)
 	{
 		UserPtr user = ClientManager::getInstance()->findUser(CID(cid));
 		if (user)
-			UploadManager::getInstance()->reserveSlot(user, hubUrl);
+		{
+// 			UploadManager::getInstance()->reserveSlot(user, hubUrl);
+			UploadManager::getInstance()->reserveSlot(HintedUser(user, hubUrl));//NOTE: core 0.762
+		}
 	}
 }
 

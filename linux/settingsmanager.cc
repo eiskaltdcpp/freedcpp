@@ -109,6 +109,15 @@ WulforSettingsManager::WulforSettingsManager():
 	defaultInt.insert(IntMap::value_type("search-spy-waiting", 40));
 	defaultInt.insert(IntMap::value_type("search-spy-top", 4));
 	defaultInt.insert(IntMap::value_type("magnet-action", -1));//default show magnet dialog
+///[core 0.762 NOTE: удалены из libdcpp
+	defaultInt.insert(IntMap::value_type("open-public", 0));
+	defaultInt.insert(IntMap::value_type("open-favorite-hubs", 0));
+	defaultInt.insert(IntMap::value_type("open-queue", 0));
+	defaultInt.insert(IntMap::value_type("open-finished-downloads", 0));
+	defaultInt.insert(IntMap::value_type("open-finished-uploads", 0));
+	defaultInt.insert(IntMap::value_type("open-favorite-users", 0));
+	defaultInt.insert(IntMap::value_type("open-search-spy", 0));
+///core 0.762]
 	defaultString.insert(StringMap::value_type("magnet-choose-dir", SETTING(DOWNLOAD_DIRECTORY)));
 	defaultString.insert(StringMap::value_type("downloadqueue-order", ""));
 	defaultString.insert(StringMap::value_type("downloadqueue-width", ""));

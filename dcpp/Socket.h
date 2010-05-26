@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2008 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -163,6 +163,7 @@ public:
 #endif
 
 	string getLocalIp() throw();
+	uint16_t getLocalPort() throw();
 
 	// Low level interface
 	virtual void create(int aType = TYPE_TCP) throw(SocketException);

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2009 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -133,12 +133,12 @@ void UserConnection::on(BufferedSocketListener::Line, const string& aLine) throw
 	}
 }
 
-void UserConnection::connect(const string& aServer, uint16_t aPort) throw(SocketException, ThreadException) {
+void UserConnection::connect(const string& aServer, uint16_t aPort, uint16_t localPort, BufferedSocket::NatRoles natRole) throw(SocketException, ThreadException) {
 	dcassert(!socket);
 
 	socket = BufferedSocket::getSocket(0);
 	socket->addListener(this);
-	socket->connect(aServer, aPort, secure, BOOLSETTING(ALLOW_UNTRUSTED_CLIENTS), true);
+	socket->connect(aServer, aPort, localPort, natRole, secure, BOOLSETTING(ALLOW_UNTRUSTED_CLIENTS), true);
 }
 
 void UserConnection::accept(const Socket& aServer) throw(SocketException, ThreadException) {

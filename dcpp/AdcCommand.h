@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2009 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -105,9 +105,14 @@ public:
 	C(SID, 'S','I','D');
 	// Extensions
 	C(CMD, 'C','M','D');
+	C(NAT, 'N','A','T');
+	C(RNT, 'R','N','T');
 #undef C
 
 	static const uint32_t HUB_SID = 0xffffffff;		// No client will have this sid
+
+	static uint32_t toFourCC(const char* x) { return *reinterpret_cast<const uint32_t*>(x); }
+	static std::string fromFourCC(uint32_t x) { return std::string(reinterpret_cast<const char*>(&x), sizeof(x)); }
 
 	explicit AdcCommand(uint32_t aCmd, char aType = TYPE_CLIENT);
 	explicit AdcCommand(uint32_t aCmd, const uint32_t aTarget, char aType);
@@ -118,6 +123,7 @@ public:
 	uint32_t getCommand() const { return cmdInt; }
 	char getType() const { return type; }
 	void setType(char t) { type = t; }
+	string getFourCC() const { string tmp(4, 0); tmp[0] = type; tmp[1] = cmd[0]; tmp[2] = cmd[1]; tmp[3] = cmd[2]; return tmp; }
 
 	AdcCommand& setFeatures(const string& feat) { features = feat; return *this; }
 
@@ -195,6 +201,10 @@ public:
 				C(SND);
 				C(SID);
 				C(CMD);
+#ifndef DISABLE_NAT_TRAVERSAL
+				C(NAT);
+				C(RNT);
+#endif
 			default:
 				dcdebug("Unknown ADC command: %.50s\n", aLine.c_str());
 				break;

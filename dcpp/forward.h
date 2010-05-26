@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2009 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,6 +31,8 @@ class AdcCommand;
 
 class BufferedSocket;
 
+struct ChatMessage;
+
 class CID;
 
 class Client;
@@ -58,6 +60,9 @@ class FinishedUserItem;
 typedef boost::intrusive_ptr<FinishedUserItem> FinishedUserItemPtr;
 
 class FinishedManager;
+
+struct HintedUser;
+typedef std::vector<HintedUser> HintedUserList;
 
 class HubEntry;
 typedef std::vector<HubEntry> HubEntryList;
@@ -102,6 +107,8 @@ class UserCommand;
 class UserConnection;
 typedef UserConnection* UserConnectionPtr;
 typedef std::vector<UserConnectionPtr> UserConnectionList;
+
+class WindowInfo;
 
 } // namespace dcpp
 

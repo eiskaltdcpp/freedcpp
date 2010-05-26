@@ -346,20 +346,22 @@ void MainWindow::loadIcons_gui()
 
 void MainWindow::autoOpen_gui()
 {
-	if (BOOLSETTING(OPEN_PUBLIC))
+//NOTE: core 0.762
+	if (WGETB("open-public"))
 		showPublicHubs_gui();
-	if (BOOLSETTING(OPEN_QUEUE))
+	if (WGETB("open-queue"))
 		showDownloadQueue_gui();
-	if (BOOLSETTING(OPEN_FAVORITE_HUBS))
+	if (WGETB("open-favorite-hubs"))
 		showFavoriteHubs_gui();
-	if (BOOLSETTING(OPEN_FAVORITE_USERS))
+	if (WGETB("open-favorite-users"))
 		showFavoriteUsers_gui();
-	if (BOOLSETTING(OPEN_FINISHED_DOWNLOADS))
+	if (WGETB("open-finished-downloads"))
 		showFinishedDownloads_gui();
-	if (BOOLSETTING(OPEN_FINISHED_UPLOADS))
+	if (WGETB("open-finished-uploads"))
 		showFinishedUploads_gui();
-	if (BOOLSETTING(OPEN_SEARCH_SPY))
+	if (WGETB("open-search-spy"))
 		showSearchSpy_gui();
+//NOTE: core 0.762
 }
 
 void MainWindow::addBookEntry_gui(BookEntry *entry)
@@ -1720,21 +1722,23 @@ void MainWindow::onLinkClicked_gui(GtkWidget *widget, gpointer data)
 
 void MainWindow::autoConnect_client()
 {
-	FavoriteHubEntry *hub;
-	FavoriteHubEntryList &l = FavoriteManager::getInstance()->getFavoriteHubs();
-	typedef Func2<MainWindow, string, string> F2;
-	F2 *func;
-
-	for (FavoriteHubEntryList::const_iterator it = l.begin(); it != l.end(); ++it)
-	{
-		hub = *it;
-
-		if (hub->getConnect())
-		{
-			func = new F2(this, &MainWindow::showHub_gui, hub->getServer(), hub->getEncoding());
-			WulforManager::get()->dispatchGuiFunc(func);
-		}
-	}
+// TODO: add auto connect for core 0.762
+//
+// 	FavoriteHubEntry *hub;
+// 	FavoriteHubEntryList &l = FavoriteManager::getInstance()->getFavoriteHubs();
+// 	typedef Func2<MainWindow, string, string> F2;
+// 	F2 *func;
+// 
+// 	for (FavoriteHubEntryList::const_iterator it = l.begin(); it != l.end(); ++it)
+// 	{
+// 		hub = *it;
+// 
+// 		if (hub->getConnect())
+// 		{
+// 			func = new F2(this, &MainWindow::showHub_gui, hub->getServer(), hub->getEncoding());
+// 			WulforManager::get()->dispatchGuiFunc(func);
+// 		}
+// 	}
 
 	string link = WulforManager::get()->getURL();
 
@@ -1745,7 +1749,8 @@ void MainWindow::autoConnect_client()
 
 	if (WulforUtil::isHubURL(link) && BOOLSETTING(URL_HANDLER))
 	{
-		func = new F2(this, &MainWindow::showHub_gui, link, "");
+		typedef Func2<MainWindow, string, string> F2;//TODO: core 0.762
+		F2 *func = new F2(this, &MainWindow::showHub_gui, link, "");//TODO: core 0.762
 		WulforManager::get()->dispatchGuiFunc(func);
 	}
 	else if (WulforUtil::isMagnet(link) && BOOLSETTING(MAGNET_REGISTER))
@@ -1828,15 +1833,18 @@ void MainWindow::on(QueueManagerListener::Finished, QueueItem *item, const strin
 
 	if (item->isSet(QueueItem::FLAG_CLIENT_VIEW | QueueItem::FLAG_USER_LIST))
 	{
-		UserPtr user = item->getDownloads()[0]->getUser();
+// 		UserPtr user = item->getDownloads()[0]->getUser();
+		const HintedUser user = item->getDownloads()[0]->getHintedUser();//NOTE: core 0.762
 		string listName = item->getListName();
 
 		F3 *f3 = new F3(this, &MainWindow::showNotification_gui, _("file list from "), WulforUtil::getNicks(user),
 			Notify::DOWNLOAD_FINISHED_USER_LIST);
+
 		WulforManager::get()->dispatchGuiFunc(f3);
 
 		typedef Func4<MainWindow, UserPtr, string, string, bool> F4;
-		F4 *func = new F4(this, &MainWindow::showShareBrowser_gui, user, listName, dir, TRUE);
+// 		F4 *func = new F4(this, &MainWindow::showShareBrowser_gui, user, listName, dir, TRUE);
+		F4 *func = new F4(this, &MainWindow::showShareBrowser_gui, user.user, listName, dir, TRUE);//NOTE: core 0.762
 		WulforManager::get()->dispatchGuiFunc(func);
 	}
 	else if (!item->isSet(QueueItem::FLAG_XML_BZLIST))

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2008 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@ class FinishedManager : public Singleton<FinishedManager>,
 {
 public:
 	typedef unordered_map<string, FinishedFileItemPtr> MapByFile;
-	typedef unordered_map<UserPtr, FinishedUserItemPtr, User::Hash> MapByUser;
+	typedef unordered_map<HintedUser, FinishedUserItemPtr, User::Hash> MapByUser;
 
 	void lockLists();
 	const MapByFile& getMapByFile(bool upload) const;
@@ -44,7 +44,7 @@ public:
 	void unLockLists();
 
 	void remove(bool upload, const string& file);
-	void remove(bool upload, const UserPtr& user);
+	void remove(bool upload, const HintedUser& user);
 	void removeAll(bool upload);
 
 private:
