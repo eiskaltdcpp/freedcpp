@@ -1,1 +1,7 @@
+		--- freedcpp core branch ---
+
+r126: 0.2
+* Остановка хеширования.
+
+r125: 0.1
 * Initial core branch (libdcpp 0.762 revision 2151, freedcpp 0.0.2.23 revision 124).
