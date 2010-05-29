@@ -128,6 +128,7 @@ Settings::Settings(GtkWindow* parent):
 	initAppearance_gui();
 	initLog_gui();
 	initAdvanced_gui();
+	initBandwidthLimiting_gui();//NOTE: core 0.762
 }
 
 Settings::~Settings()
@@ -432,6 +433,34 @@ void Settings::saveSettings_client()
 
 		saveOptionsView_gui(certificatesView, sm);
 	}
+	//NOTE: core 0.762
+	{
+		// Transfer Rate Limiting
+		sm->set(SettingsManager::MAX_UPLOAD_SPEED_MAIN,
+			(int)gtk_spin_button_get_value(GTK_SPIN_BUTTON(getWidget("transferMaxUpload"))));
+		sm->set(SettingsManager::MAX_DOWNLOAD_SPEED_MAIN,
+			(int)gtk_spin_button_get_value(GTK_SPIN_BUTTON(getWidget("transferMaxDownload"))));
+
+		// Secondary Transfer Rate Limiting
+		bool secondary = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(getWidget("useLimitSecondCheckButton")));
+		sm->set(SettingsManager::TIME_DEPENDENT_THROTTLE, secondary);
+
+		if (secondary)
+		{
+			// Secondary Transfer Rate Settings
+			sm->set(SettingsManager::MAX_UPLOAD_SPEED_ALTERNATE,
+				(int)gtk_spin_button_get_value(GTK_SPIN_BUTTON(getWidget("secondaryMaxUpload"))));
+			sm->set(SettingsManager::MAX_DOWNLOAD_SPEED_ALTERNATE,
+				(int)gtk_spin_button_get_value(GTK_SPIN_BUTTON(getWidget("secondaryMaxDownload"))));
+			sm->set(SettingsManager::SLOTS_ALTERNATE_LIMITING,
+				(int)gtk_spin_button_get_value(GTK_SPIN_BUTTON(getWidget("secondaryUploadSlots"))));
+			sm->set(SettingsManager::BANDWIDTH_LIMIT_START,
+				gtk_combo_box_get_active(GTK_COMBO_BOX(getWidget("limitsFromCombobox"))));
+			sm->set(SettingsManager::BANDWIDTH_LIMIT_END,
+				gtk_combo_box_get_active(GTK_COMBO_BOX(getWidget("limitsToCombobox"))));
+		}
+	}
+	//NOTE: core 0.762
 
 	sm->save();
 }
@@ -1425,7 +1454,28 @@ void Settings::initAdvanced_gui()
 		g_signal_connect(getWidget("generateCertificatesButton"), "clicked", G_CALLBACK(onGenerateCertificatesClicked_gui), (gpointer)this);
 	}
 }
+//NOTE: core 0.762
+void Settings::initBandwidthLimiting_gui()
+{
+	// Transfer Rate Limiting
+	gtk_spin_button_set_value(GTK_SPIN_BUTTON(getWidget("transferMaxUpload")), (double)SETTING(MAX_UPLOAD_SPEED_MAIN));
+	gtk_spin_button_set_value(GTK_SPIN_BUTTON(getWidget("transferMaxDownload")), (double)SETTING(MAX_DOWNLOAD_SPEED_MAIN));
 
+	// Secondary Transfer Rate Settings
+	gtk_spin_button_set_value(GTK_SPIN_BUTTON(getWidget("secondaryMaxUpload")), (double)SETTING(MAX_UPLOAD_SPEED_ALTERNATE));
+	gtk_spin_button_set_value(GTK_SPIN_BUTTON(getWidget("secondaryMaxDownload")), (double)SETTING(MAX_DOWNLOAD_SPEED_ALTERNATE));
+	gtk_spin_button_set_value(GTK_SPIN_BUTTON(getWidget("secondaryUploadSlots")), (double)SETTING(SLOTS_ALTERNATE_LIMITING));
+
+	// Secondary Transfer Rate Limiting
+	gtk_combo_box_set_active(GTK_COMBO_BOX(getWidget("limitsFromCombobox")), SETTING(BANDWIDTH_LIMIT_START));
+	gtk_combo_box_set_active(GTK_COMBO_BOX(getWidget("limitsToCombobox")), SETTING(BANDWIDTH_LIMIT_END));
+
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(getWidget("useLimitSecondCheckButton")), BOOLSETTING(TIME_DEPENDENT_THROTTLE));
+
+	onLimitSecondToggled_gui(NULL, (gpointer)this);
+	g_signal_connect(getWidget("useLimitSecondCheckButton"), "toggled", G_CALLBACK(onLimitSecondToggled_gui), (gpointer)this);
+}
+//NOTE: core 0.762
 void Settings::onNotifyTestButton_gui(GtkWidget *widget, gpointer data)
 {
 	Settings *s = (Settings *)data;
@@ -1725,7 +1775,25 @@ void Settings::onDefaultFrameSPButton_gui(GtkWidget *widget, gpointer data)
 	gtk_spin_button_set_value(GTK_SPIN_BUTTON(s->getWidget("waitingSPSpinButton")), double(wsm->getInt("search-spy-waiting", TRUE)));
 	gtk_spin_button_set_value(GTK_SPIN_BUTTON(s->getWidget("topSPSpinButton")), double(wsm->getInt("search-spy-top", TRUE)));
 }
+//NOTE: core 0.762
+void Settings::onLimitSecondToggled_gui(GtkWidget *widget, gpointer data)
+{
+	Settings *s = (Settings *)data;
 
+	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(s->getWidget("useLimitSecondCheckButton"))))
+	{
+		gtk_widget_set_sensitive(s->getWidget("secondaryTransferSettingsFrame"), TRUE);
+		gtk_widget_set_sensitive(s->getWidget("limitsFromCombobox"), TRUE);
+		gtk_widget_set_sensitive(s->getWidget("limitsToCombobox"), TRUE);
+	}
+	else
+	{
+		gtk_widget_set_sensitive(s->getWidget("secondaryTransferSettingsFrame"), FALSE);
+		gtk_widget_set_sensitive(s->getWidget("limitsFromCombobox"), FALSE);
+		gtk_widget_set_sensitive(s->getWidget("limitsToCombobox"), FALSE);
+	}
+}
+//NOTE: core 0.762
 void Settings::applyIconsTheme(bool useDefault)
 {
 	GtkTreeIter iter;
