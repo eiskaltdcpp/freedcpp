@@ -1,7 +1,15 @@
 		--- freedcpp core branch ---
 
+r127: 0.3
+* Ограничение скорости (Настройки).
+
 r126: 0.2
 * Остановка хеширования.
 
 r125: 0.1
 * Initial core branch (libdcpp 0.762 revision 2151, freedcpp 0.0.2.23 revision 124).
+* Added char '+' to SimpleXMLReader.
+* Added initialization.
+* Fixed locale path libdcpp.
+* Fixed compilation error, see dcplusplus revision 2140 (move the impl of FileFindIter).
+* Fixed compilation error, save user cids and nicks to Users.xml see dcplusplus revision 1771.
