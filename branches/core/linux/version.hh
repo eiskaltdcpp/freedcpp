@@ -21,4 +21,4 @@
 
 #define GUI_PACKAGE "freedcpp"
 #define GUI_VERSION_STRING "0"
-#define GUI_VERSION_BUILD_STRING "5 core branch"
+#define GUI_VERSION_BUILD_STRING "6 core branch"

@@ -1,5 +1,9 @@
 		--- freedcpp core branch ---
 
+r130: 0.6
+* Сборка под OpenSolaris.
+* Ревизия 366 (linuxdcpp, compilation fixes for OpenSolaris).
+
 r129: 0.5
 * Исправлена ошибка, поиск файлов (see revision 2126 compilation fixes for OpenSolaris).
 

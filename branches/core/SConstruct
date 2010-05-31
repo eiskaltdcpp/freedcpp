@@ -211,6 +211,10 @@ if not 'install' in COMMAND_LINE_TARGETS:
 	if os.name == 'mac' or os.sys.platform == 'darwin':
 		env['ICONV_CONST'] = ''
 
+	if os.sys.platform == 'sunos5':
+		env['ICONV_CONST'] = 'const'
+		env.Append(LINKFLAGS = ['-lsocket', '-lnsl'])
+
 	if env.has_key('ICONV_CONST') and env['ICONV_CONST']:
 		env.Append(CXXFLAGS = '-DICONV_CONST=' + env['ICONV_CONST'])
 
