@@ -116,9 +116,9 @@ string ShareManager::findRealRoot(const string& virtualRoot, const string& virtu
 		if(Util::stricmp(i->second, virtualRoot) == 0) {
 			std::string name = i->first + virtualPath;
 			dcdebug("Matching %s\n", name.c_str());
-			if(FileFindIter(name) != FileFindIter()) {
+//			if(FileFindIter(name) != FileFindIter())
+			if (File::getSize(name) != -1)//NOTE: see core 0.750
 				return name;
-			}
 		}
 	}
 
@@ -665,6 +665,8 @@ ShareManager::Directory::Ptr ShareManager::buildTree(const string& aName, const 
 	return dir;
 }
 
+//NOTE: freedcpp [+
+#ifdef _WIN32
 bool ShareManager::checkHidden(const string& aName) const {
 	FileFindIter ff = FileFindIter(aName.substr(0, aName.size() - 1));
 
@@ -674,6 +676,31 @@ bool ShareManager::checkHidden(const string& aName) const {
 
 	return true;
 }
+
+#else // !_WIN32
+
+bool ShareManager::checkHidden(const string& aName) const
+{
+	// check open a directory
+	if (!(FileFindIter(aName) != FileFindIter()))
+		return true;
+
+	// check hidden directory
+	bool hidden = false;
+	string path = aName.substr(0, aName.size() - 1);
+	string::size_type i = path.rfind(PATH_SEPARATOR);
+
+	if (i != string::npos)
+	{
+		string dir = path.substr(i + 1);
+		if (dir[0] == '.')
+			hidden = true;
+	}
+
+	return (BOOLSETTING(SHARE_HIDDEN) || !hidden);
+}
+#endif // !_WIN32
+//NOTE: freedcpp +]
 
 void ShareManager::updateIndices(Directory& dir) {
 	bloom.add(Text::toLower(dir.getName()));
