@@ -1,5 +1,8 @@
 		--- freedcpp core branch ---
 
+r129: 0.5
+* Исправлена ошибка, поиск файлов (see revision 2126 compilation fixes for OpenSolaris).
+
 r128: 0.4
 * Share Manager.
 * Исправлена ошибка, недоступность файла при отдаче (file not available).
