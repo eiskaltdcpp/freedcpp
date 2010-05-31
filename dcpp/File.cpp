@@ -512,11 +512,15 @@ FileFindIter::FileFindIter() {
 }
 
 FileFindIter::FileFindIter(const string& path) {
-	string filename = Text::fromUtf8(path);
-	dir = opendir(filename.c_str());
+
+// 	string filename = Text::fromUtf8(path);
+// 	dir = opendir(filename.c_str());
+	string base = Text::fromUtf8(path);//NOTE: freedcpp
+	dir = opendir(base.c_str());//NOTE: freedcpp
 	if (!dir)
 		return;
-	data.base = filename;
+// 	data.base = filename;
+	data.base = base;//NOTE: freedcpp
 	data.ent = readdir(dir);
 	if (!data.ent) {
 		closedir(dir);
@@ -561,9 +565,7 @@ bool FileFindIter::DirData::isDirectory() {
 
 bool FileFindIter::DirData::isHidden() {
 	if (!ent) return false;
-	// Check if the parent directory is hidden for '.'
-	if (strcmp(ent->d_name, ".") == 0 && base[0] == '.') return true;
-	return ent->d_name[0] == '.' && strlen(ent->d_name) > 1;
+	return (ent->d_name[0] == '.');//NOTE: freedcpp, see core 0.750
 }
 
 bool FileFindIter::DirData::isLink() {

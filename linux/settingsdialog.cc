@@ -891,20 +891,8 @@ void Settings::initSharing_gui()
 	g_signal_connect(shareView.get(), "button-release-event", G_CALLBACK(onShareButtonReleased_gui), (gpointer)this);
 	gtk_widget_set_sensitive(getWidget("sharedRemoveButton"), FALSE);
 
-	GtkTreeIter iter;
-	StringPairList directories = ShareManager::getInstance()->getDirectories();
-	for (StringPairList::iterator it = directories.begin(); it != directories.end(); ++it)
-	{
-		gtk_list_store_append(shareStore, &iter);
-		gtk_list_store_set(shareStore, &iter,
-			shareView.col("Virtual Name"), it->first.c_str(),
-			shareView.col("Directory"), it->second.c_str(),
-			shareView.col("Size"), Util::formatBytes(ShareManager::getInstance()->getShareSize(it->second)).c_str(),
-			shareView.col("Real Size"), ShareManager::getInstance()->getShareSize(it->second),
-			-1);
-	}
+	updateShares_gui();//NOTE: core 0.762
 
-	gtk_label_set_text(GTK_LABEL(getWidget("sharedSizeLabel")), string("Total size: " + Util::formatBytes(ShareManager::getInstance()->getShareSize())).c_str());
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(getWidget("shareHiddenCheckButton")), BOOLSETTING(SHARE_HIDDEN));
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(getWidget("followLinksCheckButton")), BOOLSETTING(FOLLOW_LINKS));
 	gtk_spin_button_set_value(GTK_SPIN_BUTTON(getWidget("sharedExtraSlotSpinButton")), (double)SETTING(MIN_UPLOAD_SPEED));
@@ -2918,35 +2906,47 @@ gboolean Settings::onShareButtonReleased_gui(GtkWidget *widget, GdkEventButton *
 gboolean Settings::onShareHiddenPressed_gui(GtkToggleButton *togglebutton, gpointer data)
 {
 	Settings *s = (Settings *)data;
-	GtkTreeIter iter;
-	bool show;
-	int64_t size;
 
-	show = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(s->getWidget("shareHiddenCheckButton")));
+	bool show = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(s->getWidget("shareHiddenCheckButton")));
 
 	Func1<Settings, bool> *func = new Func1<Settings, bool>(s, &Settings::shareHidden_client, show);
 	WulforManager::get()->dispatchClientFunc(func);
 
-	gtk_list_store_clear(s->shareStore);
+	return FALSE;
+}
+//NOTE: core 0.762
+void Settings::updateShares_gui()
+{
+	GtkTreeIter iter;
+	int64_t size = 0;
+	string vname;
+
+	gtk_list_store_clear(shareStore);
 	StringPairList directories = ShareManager::getInstance()->getDirectories();
 	for (StringPairList::iterator it = directories.begin(); it != directories.end(); ++it)
 	{
 		size = ShareManager::getInstance()->getShareSize(it->second);
-		gtk_list_store_append(s->shareStore, &iter);
-		gtk_list_store_set(s->shareStore, &iter,
-			s->shareView.col("Virtual Name"), it->first.c_str(),
-			s->shareView.col("Directory"), it->second.c_str(),
-			s->shareView.col("Size"), Util::formatBytes(size).c_str(),
-			s->shareView.col("Real Size"), size,
+
+		if (size == -1 && !BOOLSETTING(SHARE_HIDDEN))
+		{
+			vname = _("[HIDDEN SHARE] ") + it->first;
+			size = 0;
+		} else
+			vname = it->first;
+
+		gtk_list_store_append(shareStore, &iter);
+		gtk_list_store_set(shareStore, &iter,
+			shareView.col("Virtual Name"), vname.c_str(),
+			shareView.col("Directory"), it->second.c_str(),
+			shareView.col("Size"), Util::formatBytes(size).c_str(),
+			shareView.col("Real Size"), size,
 			-1);
 	}
 
 	string text = _("Total size: ") + Util::formatBytes(ShareManager::getInstance()->getShareSize());
-	gtk_label_set_text(GTK_LABEL(s->getWidget("sharedSizeLabel")), text.c_str());
-
-	return FALSE;
+	gtk_label_set_text(GTK_LABEL(getWidget("sharedSizeLabel")), text.c_str());
 }
-
+//NOTE: core 0.762
 void Settings::onLogBrowseClicked_gui(GtkWidget *widget, gpointer data)
 {
 	Settings *s = (Settings *)data;
@@ -3326,6 +3326,10 @@ void Settings::shareHidden_client(bool show)
 	SettingsManager::getInstance()->set(SettingsManager::SHARE_HIDDEN, show);
 	ShareManager::getInstance()->setDirty();
 	ShareManager::getInstance()->refresh(TRUE, FALSE, TRUE);
+
+	//NOTE: updated share ui core 0.762
+	Func0<Settings> *func = new Func0<Settings>(this, &Settings::updateShares_gui);
+	WulforManager::get()->dispatchGuiFunc(func);
 }
 
 void Settings::addShare_client(string path, string name)
