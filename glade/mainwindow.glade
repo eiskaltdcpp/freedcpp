@@ -474,9 +474,9 @@
             <child>
               <widget class="GtkToolButton" id="favHubs">
                 <property name="visible">True</property>
-                <property name="tooltip" translatable="yes">View the saved hubs</property>
+                <property name="tooltip" translatable="yes">Favorite Hubs</property>
                 <property name="is_important">True</property>
-                <property name="label" translatable="yes">Favorite Hubs</property>
+                <property name="label" translatable="yes">Hubs</property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">freedcpp-favorite-hubs</property>
               </widget>
