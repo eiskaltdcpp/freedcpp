@@ -35,6 +35,22 @@ msgid ""
 "In addition, as a special exception, compiling, linking, and/or using "
 "OpenSSL with this program is allowed.\n"
 msgstr ""
+"\n"
+"FreeDC++ является свободным программным обеспечением. Вы можете распространять или "
+"изменять его при условиях соответствия GNU General Public License опубликованной "
+"Free Software Foundation; либо версии 2 лицензии, либо (на ваше усмотрение) любой "
+"более поздней версии.\n"
+"\n"
+"FreeDC++ распространяется в надежде на то, что приложение будет полезно, но БЕЗ "
+"ВСЯКИХ ГАРАНТИЙ; не гарантируется даже ПРИГОДНОСТЬ или СООТВЕТСТВИЕ КАКИМ-ЛИБО ТРЕБОВАНИЯМ. "
+"Для получения дополнительной информации ознакомьтесь с GNU General Public License."
+"\n"
+"Вы должны получить копию GNU General Public License вместе с этой программой. "
+"Если этого не произошло, то напишите в Free Software Foundation, Inc., 51 "
+"Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.\n"
+"\n"
+"In addition, as a special exception, compiling, linking, and/or using "
+"OpenSSL with this program is allowed.\n"
 
 #: hub.cc:744 hub.cc:823 privatemessage.cc:489 privatemessage.cc:568
 msgid " *** Emoticons limit"
@@ -1086,7 +1102,7 @@ msgstr "Свойства избранного хаба"
 #: mainwindow.glade:148 mainwindow.glade:426 favoritehubs.cc:31
 #: settingsdialog.cc:1136 settingsdialog.cc:1178 settingsdialog.cc:1203
 msgid "Favorite Hubs"
-msgstr "Избранные"
+msgstr "Избранные Хабы"
 
 #: settingsdialog.cc:973
 msgid "Favorite User"
@@ -2272,7 +2288,7 @@ msgstr "Кому"
 
 #: settingsdialog.glade:3570
 msgid "Toolbar"
-msgstr "Панель инсрументов"
+msgstr "Панель инструментов"
 
 #: settingsdialog.glade:2253
 msgid ""
