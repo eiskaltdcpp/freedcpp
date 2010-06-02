@@ -687,6 +687,14 @@ void Transfers::initTransfer_gui(StringMap params)
 			}
 			else
 			{
+				//NOTE: set update parent status if removed download
+				if (transferView.getValue<int>(&newParent, "Failed"))
+				{
+					gtk_tree_store_set(transferStore, &newParent,
+						transferView.col("Failed"), FALSE,
+						-1);
+				}
+
 				oldParentValid = FALSE;	// Don't update the parentRow twice, since old and new are the same (and definately don't remove twice)
 			}
 		}
