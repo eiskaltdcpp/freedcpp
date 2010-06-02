@@ -50,7 +50,7 @@ public:
 
 	int64_t getStartPos() const { return getSegment().getStart(); }
 
-	void resetPos() { pos = getStartPos(); }
+	void resetPos() { pos = 0; }
 
 	void addPos(int64_t aBytes, int64_t aActual) { pos += aBytes; actual+= aActual; }
 
