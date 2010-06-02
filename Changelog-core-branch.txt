@@ -1,5 +1,8 @@
 		--- freedcpp core branch ---
 
+r133: 0.7
+* Ревизия 2153 (dcplusplus, fix the file corruption fix).
+
 r130: 0.6
 * Сборка под OpenSolaris.
 * Ревизия 366 (linuxdcpp, compilation fixes for OpenSolaris).
