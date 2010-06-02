@@ -325,7 +325,7 @@ void DownloadManager::endData(UserConnection* aSource) {
 		// First, finish writing the file (flushing the buffers and closing the file...)
 		try {
 			d->getFile()->flush();
-		} catch(const FileException& e) {
+		} catch(const Exception& e) {
 			d->resetPos();
 			failDownload(aSource, e.getError());
 			return;
