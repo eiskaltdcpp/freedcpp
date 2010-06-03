@@ -89,6 +89,7 @@ int main(int argc, char *argv[])
 	}
 
 	// Start the DC++ client core
+	dcpp::Util::initialize();//NOTE: core 0.762
 	dcpp::startup(callBack, NULL);
 
 	dcpp::TimerManager::getInstance()->start();
