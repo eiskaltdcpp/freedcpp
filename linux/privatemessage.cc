@@ -136,17 +136,17 @@ void PrivateMessage::addMessage_gui(string message, Msg::TypeMsg typemsg)
 {
 	addLine_gui(typemsg, message);
 
-// 	if (BOOLSETTING(LOG_PRIVATE_CHAT))
-// 	{
-// 		StringMap params;
-// 		params["message"] = message;
-// 		params["hubNI"] = WulforUtil::getHubNames(cid);
-// 		params["hubURL"] = Util::toString(ClientManager::getInstance()->getHubs(CID(cid)));
-// 		params["userCID"] = cid;
-// 		params["userNI"] = ClientManager::getInstance()->getNicks(CID(cid))[0];
-// 		params["myCID"] = ClientManager::getInstance()->getMe()->getCID().toBase32();
-// 		LOG(LogManager::PM, params);
-// 	}
+	if (BOOLSETTING(LOG_PRIVATE_CHAT))
+	{
+		StringMap params;
+		params["message"] = message;
+		params["hubNI"] = WulforUtil::getHubNames(cid, hubUrl);//NOTE: core 0.762
+		params["hubURL"] = hubUrl;//NOTE: core 0.762
+		params["userCID"] = cid;
+		params["userNI"] = ClientManager::getInstance()->getNicks(CID(cid), hubUrl)[0];//NOTE: core 0.762
+		params["myCID"] = ClientManager::getInstance()->getMe()->getCID().toBase32();
+		LOG(LogManager::PM, params);
+	}
 
 	if (BOOLSETTING(BOLD_PM))
 		setUrgent_gui();
