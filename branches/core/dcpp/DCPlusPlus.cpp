@@ -60,7 +60,6 @@ void startup(void (*f)(void*, const string&), void* p) {
 	WSADATA wsaData;
 	WSAStartup(MAKEWORD(2, 2), &wsaData);
 #endif
-	Util::initialize();//NOTE: freedcpp
 
 	bindtextdomain(PACKAGE, LOCALEDIR);
 
