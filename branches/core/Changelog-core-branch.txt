@@ -1,5 +1,8 @@
 		--- freedcpp core branch ---
 
+r135: 0.9
+* Лог ЛС.
+
 r134: 0.8
 * Ревизия 2154 (dcplusplus, catch all flush exceptions).
 
