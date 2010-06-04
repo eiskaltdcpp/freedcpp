@@ -858,6 +858,91 @@
                 <property name="padding">5</property>
               </packing>
             </child>
+            <child>
+              <widget class="GtkVSeparator" id="separatorRate">
+                <property name="visible">True</property>
+              </widget>
+              <packing>
+                <property name="expand">False</property>
+                <property name="position">12</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkHBox" id="hboxDownloadRate">
+                <property name="visible">True</property>
+                <property name="tooltip" translatable="yes">Maximum Download Rate</property>
+                <property name="spacing">5</property>
+                <child>
+                  <widget class="GtkImage" id="imageDownloadRate">
+                    <property name="visible">True</property>
+                    <property name="stock">freedcpp-download</property>
+                    <property name="icon_size">1</property>
+                  </widget>
+                </child>
+                <child>
+                  <widget class="GtkLabel" id="labelDownloadRate">
+                    <property name="visible">True</property>
+                    <property name="xalign">0</property>
+                    <property name="label">0 KiB/s</property>
+                    <property name="single_line_mode">True</property>
+                  </widget>
+                  <packing>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </widget>
+              <packing>
+                <property name="expand">False</property>
+                <property name="position">13</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkVSeparator" id="separatorDownloadRate">
+                <property name="visible">True</property>
+              </widget>
+              <packing>
+                <property name="expand">False</property>
+                <property name="position">14</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkHBox" id="hboxUploadRate">
+                <property name="visible">True</property>
+                <property name="tooltip" translatable="yes">Maximum Upload Rate</property>
+                <property name="spacing">5</property>
+                <child>
+                  <widget class="GtkImage" id="imageUploadRate">
+                    <property name="visible">True</property>
+                    <property name="stock">freedcpp-upload</property>
+                    <property name="icon_size">1</property>
+                  </widget>
+                </child>
+                <child>
+                  <widget class="GtkLabel" id="labelUploadRate">
+                    <property name="visible">True</property>
+                    <property name="xalign">0</property>
+                    <property name="label">0 KiB/s</property>
+                    <property name="single_line_mode">True</property>
+                  </widget>
+                  <packing>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </widget>
+              <packing>
+                <property name="expand">False</property>
+                <property name="position">15</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkVSeparator" id="separatorUploadRate">
+                <property name="visible">True</property>
+              </widget>
+              <packing>
+                <property name="expand">False</property>
+                <property name="position">16</property>
+              </packing>
+            </child>
           </widget>
           <packing>
             <property name="fill">False</property>

@@ -76,6 +76,8 @@ MainWindow::MainWindow():
 	gtk_window_set_transient_for(GTK_WINDOW(getWidget("flistDialog")), window);
 	gtk_window_set_transient_for(GTK_WINDOW(getWidget("ucLineDialog")), window);
 
+	setStatRate_gui();//NOTE: core 0.762
+
 	// magnet dialog
 	gtk_dialog_set_alternative_button_order(GTK_DIALOG(getWidget("MagnetDialog")), GTK_RESPONSE_OK, GTK_RESPONSE_CANCEL, -1);
 	gtk_window_set_transient_for(GTK_WINDOW(getWidget("MagnetDialog")), window);
@@ -342,6 +344,9 @@ void MainWindow::loadIcons_gui()
 	gtk_image_set_from_stock(GTK_IMAGE(getWidget("imageHubs")), "freedcpp-public-hubs", GTK_ICON_SIZE_SMALL_TOOLBAR);
 	gtk_image_set_from_stock(GTK_IMAGE(getWidget("imageDownloadSpeed")), "freedcpp-download", GTK_ICON_SIZE_SMALL_TOOLBAR);
 	gtk_image_set_from_stock(GTK_IMAGE(getWidget("imageUploadSpeed")), "freedcpp-upload", GTK_ICON_SIZE_SMALL_TOOLBAR);
+//NOTE: core 0.762
+	gtk_image_set_from_stock(GTK_IMAGE(getWidget("imageDownloadRate")), "freedcpp-download", GTK_ICON_SIZE_SMALL_TOOLBAR);
+	gtk_image_set_from_stock(GTK_IMAGE(getWidget("imageUploadRate")), "freedcpp-upload", GTK_ICON_SIZE_SMALL_TOOLBAR);
 }
 
 void MainWindow::autoOpen_gui()
@@ -549,6 +554,16 @@ void MainWindow::setStats_gui(string hubs, string downloadSpeed,
 	gtk_label_set_text(GTK_LABEL(getWidget("labelDownloaded")), downloaded.c_str());
 	gtk_label_set_text(GTK_LABEL(getWidget("labelUploadSpeed")), uploadSpeed.c_str());
 	gtk_label_set_text(GTK_LABEL(getWidget("labelUploaded")), uploaded.c_str());
+}
+
+void MainWindow::setStatRate_gui()//NOTE: core 0.762
+{
+	int uploadSpeed = SETTING(MAX_UPLOAD_SPEED_MAIN);
+	int downloadSpeed = SETTING(MAX_DOWNLOAD_SPEED_MAIN);
+	string uploadRate = uploadSpeed ? Util::formatBytes(uploadSpeed*1024) + "/" + _("s") : "max";
+	string downloadRate = downloadSpeed ? Util::formatBytes(downloadSpeed*1024) + "/" + _("s") : "max";
+	gtk_label_set_text(GTK_LABEL(getWidget("labelDownloadRate")), downloadRate.c_str());
+	gtk_label_set_text(GTK_LABEL(getWidget("labelUploadRate")), uploadRate.c_str());
 }
 
 BookEntry* MainWindow::findBookEntry(const EntryType type, const string &id)
@@ -1480,6 +1495,9 @@ void MainWindow::onPreferencesClicked_gui(GtkWidget *widget, gpointer data)
 		// Toolbar
 		gtk_widget_show_all(mw->getWidget("toolbar1"));
 		mw->setToolbarButton_gui();
+
+		// Rate
+		mw->setStatRate_gui();//NOTE: core 0.762
 	}
 }
 
