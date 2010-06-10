@@ -406,7 +406,7 @@ void FavoriteUsers::onRemoveItemClicked_gui(GtkMenuItem *item, gpointer data)
 
 	if (gtk_tree_selection_count_selected_rows(fu->favoriteUserSelection) > 0)
 	{
-		ParamMap params;
+		vector<string> remove;
 		GtkTreeIter iter;
 		GtkTreePath *path;
 		typedef Func1<FavoriteUsers, string> F1;
@@ -418,8 +418,8 @@ void FavoriteUsers::onRemoveItemClicked_gui(GtkMenuItem *item, gpointer data)
 
 			if (gtk_tree_model_get_iter(GTK_TREE_MODEL(fu->favoriteUserStore), &iter, path))
 			{
-				params.insert(ParamMap::value_type(fu->favoriteUserView.getString(&iter, "CID"),
-					fu->favoriteUserView.getString(&iter, _("Nick"))));
+				string cid = fu->favoriteUserView.getString(&iter, "CID");
+				remove.push_back(cid);
 			}
 			gtk_tree_path_free(path);
 		}
@@ -447,9 +447,9 @@ void FavoriteUsers::onRemoveItemClicked_gui(GtkMenuItem *item, gpointer data)
 				return;
 		}
 
-		for (ParamMap::const_iterator it = params.begin(); it != params.end(); ++it)
+		for (vector<string>::const_iterator it = remove.begin(); it != remove.end(); it++)
 		{
-			F1 *func = new F1(fu, &FavoriteUsers::removeFavoriteUser_client, it->first);
+			F1 *func = new F1(fu, &FavoriteUsers::removeFavoriteUser_client, *it);
 			WulforManager::get()->dispatchClientFunc(func);
 		}
 	}
