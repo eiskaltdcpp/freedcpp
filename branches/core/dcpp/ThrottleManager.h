@@ -59,6 +59,12 @@ namespace dcpp
 		CriticalSection waitCS[2];
 		long activeWaiter;
 
+#ifndef _WIN32 //*nix
+
+		// shutdown wait
+		CriticalSection shutdownCS;
+		long n_lock, halt;
+#endif
 		// download limiter
 		CriticalSection	downCS;
 		int64_t			downTokens;
@@ -71,6 +77,9 @@ namespace dcpp
 
 		ThrottleManager(void) : activeWaiter(-1), downTokens(0), upTokens(0)
 		{
+#ifndef _WIN32 //*nix
+			n_lock = halt = 0;
+#endif
 			TimerManager::getInstance()->addListener(this);
 		}
 

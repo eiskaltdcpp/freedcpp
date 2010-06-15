@@ -117,9 +117,16 @@ void startup(void (*f)(void*, const string&), void* p) {
 }
 
 void shutdown() {
+
+#ifndef _WIN32 //*nix system
+
+	ThrottleManager::getInstance()->shutdown();
+#endif
 	TimerManager::getInstance()->shutdown();
 	HashManager::getInstance()->shutdown();
+#ifdef _WIN32
 	ThrottleManager::getInstance()->shutdown();
+#endif
 	ConnectionManager::getInstance()->shutdown();
 
 	BufferedSocket::waitShutdown();
