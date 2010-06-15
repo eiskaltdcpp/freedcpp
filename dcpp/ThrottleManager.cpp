@@ -175,6 +175,8 @@ ThrottleManager::~ThrottleManager(void)
 	TimerManager::getInstance()->removeListener(this);
 }
 
+#ifdef _WIN32
+
 void ThrottleManager::shutdown() {
 	Lock l(stateCS);
 	if (activeWaiter != -1) {
@@ -182,6 +184,29 @@ void ThrottleManager::shutdown() {
 		activeWaiter = -1;
 	}
 }
+#else //*nix
+
+void ThrottleManager::shutdown()
+{
+	bool wait = false;
+	{
+		Lock l(stateCS);
+		if (activeWaiter != -1)
+		{
+			n_lock = activeWaiter;
+			activeWaiter = -1;
+			halt = 1;
+			wait = true;
+		}
+	}
+
+	// wait shutdown...
+	if (wait)
+	{
+		Lock l(shutdownCS);
+	}
+}
+#endif //*nix
 
 // TimerManagerListener
 void ThrottleManager::on(TimerManagerListener::Second, uint32_t /* aTick */) throw()
@@ -194,10 +219,37 @@ void ThrottleManager::on(TimerManagerListener::Second, uint32_t /* aTick */) thr
 
 	{
 		Lock l(stateCS);
+
+#ifndef _WIN32 //*nix
+
+		if (halt == 1)
+		{
+			halt = -1;
+
+			// unlock shutdown and token wait
+			dcassert(n_lock == 0 || n_lock == 1);
+			waitCS[n_lock].leave();
+			shutdownCS.leave();
+
+			return;
+		}
+		else if (halt == -1)
+		{
+			return;
+		}
+#endif
 		if (activeWaiter == -1)
+		{
 			// This will create slight weirdness for the read/write calls between
 			// here and the first activeWaiter-toggle below.
 			waitCS[activeWaiter = 0].enter();
+
+#ifndef _WIN32 //*nix
+
+			// lock shutdown
+			shutdownCS.enter();
+#endif
+		}
 	}
 
 	int downLimit = getDownLimit();
