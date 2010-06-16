@@ -1,5 +1,8 @@
 		--- freedcpp core branch ---
 
+r140: 0.13
+* Ревизия 374 (linuxdcpp, fix Socket::resolve in *nix systems).
+
 r139: 0.12
 * Deadlock.
 * Воспроизведение ошибки:
