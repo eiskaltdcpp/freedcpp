@@ -530,6 +530,7 @@ bool Socket::waitAccepted(uint32_t millis) {
 }
 
 string Socket::resolve(const string& aDns) {
+#ifdef _WIN32
 	sockaddr_in sock_addr;
 
 	memset(&sock_addr, 0, sizeof(sock_addr));
@@ -548,6 +549,22 @@ string Socket::resolve(const string& aDns) {
 	} else {
 		return aDns;
 	}
+#else
+	// POSIX doesn't guarantee the gethostbyname to be thread safe. And it may (will) return a pointer to static data.
+	string address = Util::emptyString;
+	addrinfo hints = { 0 };
+	addrinfo *result;
+	hints.ai_family = AF_INET;
+
+	if (getaddrinfo(aDns.c_str(), NULL, &hints, &result) == 0) {
+		if (result->ai_addr != NULL)
+			address = inet_ntoa(((sockaddr_in*)(result->ai_addr))->sin_addr);
+
+		freeaddrinfo(result);
+	}
+
+	return address;		
+#endif
 }
 
 string Socket::getLocalIp() throw() {
