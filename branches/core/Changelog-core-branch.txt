@@ -1,5 +1,8 @@
 		--- freedcpp core branch ---
 
+r144: 0.17
+* Ревизия 2161 (dcplusplus, fix DL reco interval).
+
 r143: 0.16
 * Ревизия 2160 (dcplusplus, untested; enable rather optimistic NAT-T searching).
 

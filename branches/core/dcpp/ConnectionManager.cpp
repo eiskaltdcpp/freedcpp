@@ -715,7 +715,7 @@ void ConnectionManager::failed(UserConnection* aSource, const string& aError, bo
 			ConnectionQueueItem* cqi = *i;
 			cqi->setState(ConnectionQueueItem::WAITING);
 			cqi->setLastAttempt(GET_TICK());
-			cqi->setErrors(protocolError ? (cqi->getErrors() + 1) : -1);
+			cqi->setErrors(protocolError ? -1 : (cqi->getErrors() + 1));
 			fire(ConnectionManagerListener::Failed(), cqi, aError);
 		} else if(aSource->isSet(UserConnection::FLAG_UPLOAD)) {
 			ConnectionQueueItem::Iter i = find(uploads.begin(), uploads.end(), aSource->getUser());
