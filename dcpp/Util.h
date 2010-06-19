@@ -342,7 +342,20 @@ public:
 		return buf;
 	}
 
-	static string toString(const string& sep, const StringList& lst);
+	template<typename string_t>
+	static string_t toString(const string_t& sep, const vector<string_t>& lst) {
+		string_t ret;
+		for(typename vector<string_t>::const_iterator i = lst.begin(), iend = lst.end(); i != iend; ++i) {
+			ret += *i;
+			if(i + 1 != iend)
+				ret += sep;
+		}
+		return ret;
+	}
+	template<typename string_t>
+	static inline string_t toString(const typename string_t::value_type* sep, const vector<string_t>& lst) {
+		return toString(string_t(sep), lst);
+	}
 	static string toString(const StringList& lst);
 
 	static string toHexEscape(char val) {
