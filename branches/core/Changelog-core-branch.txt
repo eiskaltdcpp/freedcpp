@@ -1,5 +1,8 @@
 		--- freedcpp core branch ---
 
+r143: 0.16
+* Ревизия 2160 (dcplusplus, untested; enable rather optimistic NAT-T searching).
+
 r142: 0.15
 * Ревизия 2159 (dcplusplus, c-c error handling: increase reconnect intervals after timeouts; no reconnect after a protocol error).
 
