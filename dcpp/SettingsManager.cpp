@@ -74,7 +74,7 @@ const string SettingsManager::settingTags[] =
 	"AutoDropAll", "AutoDropFilelists", "AutoDropDisconnect",
 	"OutgoingConnections",
 	"NoIpOverride", "SearchOnlyFreeSlots", "LastSearchType", "BoldFinishedDownloads", "BoldFinishedUploads", "BoldQueue",
-	"BoldHub", "BoldPm", "BoldSearch", "BoldSearchSpy", "SocketInBuffer", "SocketOutBuffer",
+	"BoldHub", "BoldPm", "BoldFL", "BoldSearch", "BoldSearchSpy", "SocketInBuffer", "SocketOutBuffer",
 	"BoldWaitingUsers", "BoldSystemLog", "AutoRefreshTime",
 	"UseTLS", "AutoSearchLimit", "AltSortOrder", "AutoKickNoFavs", "PromptPassword", "SpyFrameIgnoreTthSearches",
 	"DontDlAlreadyQueued", "MaxCommandLength", "AllowUntrustedHubs", "AllowUntrustedClients",
@@ -255,6 +255,7 @@ SettingsManager::SettingsManager()
 	setDefault(BOLD_QUEUE, true);
 	setDefault(BOLD_HUB, true);
 	setDefault(BOLD_PM, true);
+	setDefault(BOLD_FL, true);
 	setDefault(BOLD_SEARCH, true);
 	setDefault(BOLD_SEARCH_SPY, true);
 	setDefault(BOLD_WAITING_USERS, true);
