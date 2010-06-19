@@ -739,7 +739,13 @@ void AdcHub::search(int aSizeMode, int64_t aSize, int aFileType, const string& a
 		send(c);
 	} else {
 		c.setType(AdcCommand::TYPE_FEATURE);
+#ifndef DISABLE_NAT_TRAVERSAL
+		c.setFeatures("+TCP4-NAT0");
+		send(c);		
+		c.setFeatures("+NAT0");
+#else
 		c.setFeatures("+TCP4");
+#endif
 		send(c);
 	}
 }
