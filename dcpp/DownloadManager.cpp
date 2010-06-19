@@ -429,7 +429,7 @@ void DownloadManager::noSlots(UserConnection* aSource) {
 	failDownload(aSource, _("No slots available"));
 }
 
-void DownloadManager::on(UserConnectionListener::Failed, UserConnection* aSource, const string& aError) throw() {
+void DownloadManager::onFailed(UserConnection* aSource, const string& aError) {
 	{
 		Lock l(cs);
  		idlers.erase(remove(idlers.begin(), idlers.end(), aSource), idlers.end());

@@ -46,12 +46,14 @@ const string UserConnection::DOWNLOAD = "Download";
 
 void UserConnection::on(BufferedSocketListener::Line, const string& aLine) throw () {
 
-	if(aLine.length() < 2)
+	if(aLine.length() < 2) {
+		fire(UserConnectionListener::ProtocolError(), this, _("Invalid data"));
 		return;
+	}
 
 	if(aLine[0] == 'C' && !isSet(FLAG_NMDC)) {
 		if(!Text::validateUtf8(aLine)) {
-			// @todo Report to user?
+			fire(UserConnectionListener::ProtocolError(), this, _("Non-UTF-8 data in an ADC connection"));
 			return;
 		}
 		dispatch(aLine);
@@ -59,10 +61,10 @@ void UserConnection::on(BufferedSocketListener::Line, const string& aLine) throw
 	} else if(aLine[0] == '$') {
 		setFlag(FLAG_NMDC);
 	} else {
-		// We shouldn't be here?
-		dcdebug("Unknown UserConnection command: %.50s\n", aLine.c_str());
+		fire(UserConnectionListener::ProtocolError(), this, _("Invalid data"));
 		return;
 	}
+
 	string cmd;
 	string param;
 
@@ -88,9 +90,7 @@ void UserConnection::on(BufferedSocketListener::Line, const string& aLine) throw
 			param.rfind(/*path/file*/" no more exists") != string::npos) {
 			fire(UserConnectionListener::FileNotAvailable(), this);
 		} else {
-			dcdebug("Unknown $Error %s\n", param.c_str());
-			fire(UserConnectionListener::Failed(), this, param);
-			disconnect(true);
+			fire(UserConnectionListener::ProtocolError(), this, param);
 		}
 	} else if(cmd == "$GetListLen") {
 		fire(UserConnectionListener::GetListLength(), this);
@@ -129,7 +129,7 @@ void UserConnection::on(BufferedSocketListener::Line, const string& aLine) throw
 	} else if(cmd.compare(0, 4, "$ADC") == 0) {
 		dispatch(aLine, true);
 	} else {
-		dcdebug("Unknown NMDC command: %.50s\n", aLine.c_str());
+		fire(UserConnectionListener::ProtocolError(), this, _("Invalid data"));
 	}
 }
 
@@ -170,6 +170,18 @@ void UserConnection::supports(const StringList& feat) {
 		x+= *i + ' ';
 	}
 	send("$Supports " + x + '|');
+}
+
+void UserConnection::handle(AdcCommand::STA t, const AdcCommand& c) {
+	if(c.getParameters().size() >= 2) {
+		const string& code = c.getParam(0);
+		if(!code.empty() && code[0] - '0' == AdcCommand::SEV_FATAL) {
+			fire(UserConnectionListener::ProtocolError(), this, c.getParam(1));
+			return;
+		}
+	}
+
+	fire(t, this, c);
 }
 
 void UserConnection::on(Connected) throw() {
