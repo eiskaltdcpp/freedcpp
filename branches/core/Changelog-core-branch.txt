@@ -1,5 +1,8 @@
 		--- freedcpp core branch ---
 
+r141: 0.14
+* Ревизия 2158 (dcplusplus, add a generic StringListDlg based on the public hub list config dialog).
+
 r140: 0.13
 * Ревизия 374 (linuxdcpp, fix Socket::resolve in *nix systems).
 
