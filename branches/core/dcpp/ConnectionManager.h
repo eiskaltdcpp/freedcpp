@@ -47,10 +47,11 @@ public:
 	};
 
 	ConnectionQueueItem(const HintedUser& aUser, bool aDownload) : token(Util::toString(Util::rand())),
-		lastAttempt(0), state(WAITING), download(aDownload), user(aUser) { }
+		lastAttempt(0), errors(0), state(WAITING), download(aDownload), user(aUser) { }
 
 	GETSET(string, token, Token);
 	GETSET(uint64_t, lastAttempt, LastAttempt);
+	GETSET(int, errors, Errors); // Number of connection errors, or -1 after a protocol error
 	GETSET(State, state, State);
 	GETSET(bool, download, Download);
 
@@ -174,9 +175,12 @@ private:
 
 	void accept(const Socket& sock, bool secure) throw();
 
+	void failed(UserConnection* aSource, const string& aError, bool protocolError);
+
 	// UserConnectionListener
 	virtual void on(Connected, UserConnection*) throw();
 	virtual void on(Failed, UserConnection*, const string&) throw();
+	virtual void on(ProtocolError, UserConnection*, const string&) throw();
 	virtual void on(CLock, UserConnection*, const string&, const string&) throw();
 	virtual void on(Key, UserConnection*, const string&) throw();
 	virtual void on(Direction, UserConnection*, const string&, const string&) throw();

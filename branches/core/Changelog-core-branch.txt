@@ -1,5 +1,8 @@
 		--- freedcpp core branch ---
 
+r142: 0.15
+* Ревизия 2159 (dcplusplus, c-c error handling: increase reconnect intervals after timeouts; no reconnect after a protocol error).
+
 r141: 0.14
 * Ревизия 2158 (dcplusplus, add a generic StringListDlg based on the public hub list config dialog).
 

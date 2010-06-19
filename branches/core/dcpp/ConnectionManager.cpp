@@ -153,7 +153,14 @@ void ConnectionManager::on(TimerManagerListener::Second, uint32_t aTick) throw()
 					continue;
 				}
 
-				if(cqi->getLastAttempt() == 0 || (((cqi->getLastAttempt() + 60*1000) < aTick) && !attemptDone)) {
+				if(cqi->getErrors() == -1 && cqi->getLastAttempt() != 0) {
+					// protocol error, don't reconnect except after a forced attempt
+					continue;
+				}
+
+				if(cqi->getLastAttempt() == 0 || (!attemptDone &&
+					cqi->getLastAttempt() + 60 * 1000 * max(1, cqi->getErrors()) < aTick))
+				{
 					cqi->setLastAttempt(aTick);
 
 					QueueItem::Priority prio = QueueManager::getInstance()->hasDownload(cqi->getUser());
@@ -178,7 +185,8 @@ void ConnectionManager::on(TimerManagerListener::Second, uint32_t aTick) throw()
 					} else if(cqi->getState() == ConnectionQueueItem::NO_DOWNLOAD_SLOTS && startDown) {
 						cqi->setState(ConnectionQueueItem::WAITING);
 					}
-				} else if(((cqi->getLastAttempt() + 50*1000) < aTick) && (cqi->getState() == ConnectionQueueItem::CONNECTING)) {
+				} else if(cqi->getState() == ConnectionQueueItem::CONNECTING && cqi->getLastAttempt() + 50 * 1000 < aTick) {
+					cqi->setErrors(cqi->getErrors() + 1);
 					fire(ConnectionManagerListener::Failed(), cqi, _("Connection timeout"));
 					cqi->setState(ConnectionQueueItem::WAITING);
 				}
@@ -459,6 +467,7 @@ void ConnectionManager::on(UserConnectionListener::MyNick, UserConnection* aSour
 		Lock l(cs);
 		for(ConnectionQueueItem::Iter i = downloads.begin(); i != downloads.end(); ++i) {
 			ConnectionQueueItem* cqi = *i;
+			cqi->setErrors(0);
 			if((cqi->getState() == ConnectionQueueItem::CONNECTING || cqi->getState() == ConnectionQueueItem::WAITING) &&
 				cqi->getUser().user->getCID() == cid)
 			{
@@ -664,6 +673,8 @@ void ConnectionManager::on(AdcCommand::INF, UserConnection* aSource, const AdcCo
 		ConnectionQueueItem::Iter i = find(downloads.begin(), downloads.end(), aSource->getUser());
 
 		if(i != downloads.end()) {
+			(*i)->setErrors(0);
+
 			const string& to = (*i)->getToken();
 
 			// 0.698 would send an empty token in some cases...remove this bugfix at some point
@@ -694,7 +705,7 @@ void ConnectionManager::force(const UserPtr& aUser) {
 	(*i)->setLastAttempt(0);
 }
 
-void ConnectionManager::on(UserConnectionListener::Failed, UserConnection* aSource, const string& aError) throw() {
+void ConnectionManager::failed(UserConnection* aSource, const string& aError, bool protocolError) {
 	Lock l(cs);
 
 	if(aSource->isSet(UserConnection::FLAG_ASSOCIATED)) {
@@ -704,6 +715,7 @@ void ConnectionManager::on(UserConnectionListener::Failed, UserConnection* aSour
 			ConnectionQueueItem* cqi = *i;
 			cqi->setState(ConnectionQueueItem::WAITING);
 			cqi->setLastAttempt(GET_TICK());
+			cqi->setErrors(protocolError ? (cqi->getErrors() + 1) : -1);
 			fire(ConnectionManagerListener::Failed(), cqi, aError);
 		} else if(aSource->isSet(UserConnection::FLAG_UPLOAD)) {
 			ConnectionQueueItem::Iter i = find(uploads.begin(), uploads.end(), aSource->getUser());
@@ -713,6 +725,14 @@ void ConnectionManager::on(UserConnectionListener::Failed, UserConnection* aSour
 		}
 	}
 	putConnection(aSource);
+}
+
+void ConnectionManager::on(UserConnectionListener::Failed, UserConnection* aSource, const string& aError) throw() {
+	failed(aSource, aError, false);
+}
+
+void ConnectionManager::on(UserConnectionListener::ProtocolError, UserConnection* aSource, const string& aError) throw() {
+	failed(aSource, aError, true);
 }
 
 void ConnectionManager::disconnect(const UserPtr& aUser) {

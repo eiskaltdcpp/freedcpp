@@ -155,7 +155,7 @@ public:
 	void handle(AdcCommand::INF t, const AdcCommand& c) { fire(t, this, c); }
 	void handle(AdcCommand::GET t, const AdcCommand& c) { fire(t, this, c); }
 	void handle(AdcCommand::SND t, const AdcCommand& c) { fire(t, this, c);	}
-	void handle(AdcCommand::STA t, const AdcCommand& c) { fire(t, this, c);	}
+	void handle(AdcCommand::STA t, const AdcCommand& c);
 	void handle(AdcCommand::RES t, const AdcCommand& c) { fire(t, this, c); }
 	void handle(AdcCommand::GFI t, const AdcCommand& c) { fire(t, this, c);	}
 
