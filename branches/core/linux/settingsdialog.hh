@@ -80,7 +80,7 @@ class Settings:
 		static void onOptionsViewToggled_gui(GtkCellRendererToggle *cell, gchar *path, gpointer data);
 		static void onInDirect_gui(GtkToggleButton *button, gpointer data);
 		///@todo Uncomment when implemented
-		//static void onInFW_UPnP_gui(GtkToggleButton *button, gpointer data);
+		static void onInFW_UPnP_gui(GtkToggleButton *button, gpointer data);//NOTE: core 0.762
 		static void onInPassive_gui(GtkToggleButton *button, gpointer data);
 		static void onInFW_NAT_gui(GtkToggleButton *button, gpointer data);
 		static void onOutDirect_gui(GtkToggleButton *button, gpointer data);

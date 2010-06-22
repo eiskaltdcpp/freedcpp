@@ -1,5 +1,5 @@
 /*
- * Copyright © 2009-2010 freedcpp, http://code.google.com/p/freedcpp
+ * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,8 +17,32 @@
  *
  * In addition, as a special exception, compiling, linking, and/or
  * using OpenSSL with this program is allowed.
+ *
+ * This program uses the MiniUPnP client library by Thomas Bernard
+ * http://miniupnp.free.fr http://miniupnp.tuxfamily.org
  */
 
-#define GUI_PACKAGE "freedcpp"
-#define GUI_VERSION_STRING "0"
-#define GUI_VERSION_BUILD_STRING "19 core branch"
+#ifndef UPNPC_HH
+#define UPNPC_HH
+
+#include <dcpp/stdinc.h>
+#include <dcpp/DCPlusPlus.h>
+#include <dcpp/UPnP.h>
+
+class UPnPc :
+	public dcpp::UPnP
+{
+	public:
+		UPnPc() {}
+	private:
+		bool init();
+
+		bool add(const unsigned short port, const dcpp::UPnP::Protocol protocol, const std::string& description);
+		bool remove(const unsigned short port, const dcpp::UPnP::Protocol protocol);
+
+		std::string getExternalIP();
+};
+
+#else
+class UPnPc;
+#endif

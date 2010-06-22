@@ -195,6 +195,12 @@ if not 'install' in COMMAND_LINE_TARGETS:
 	if conf.CheckHeader(['sys/types.h', 'sys/socket.h', 'ifaddrs.h', 'net/if.h']):
 		conf.env['HAVE_IFADDRS_H'] = True
 
+	# MiniUPnPc for UPnP
+	if not conf.CheckLib('libminiupnpc'):
+		print '\tminiupnpc library not found'
+		print '\tNote: See website: http://miniupnp.free.fr/ http://miniupnp.tuxfamily.org/'
+		Exit(1)
+
 	env = conf.Finish()
 
 

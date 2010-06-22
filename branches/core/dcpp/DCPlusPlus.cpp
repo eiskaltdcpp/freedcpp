@@ -34,6 +34,7 @@
 #include "FinishedManager.h"
 #include "ResourceManager.h"
 #include "ADLSearch.h"
+#include "UPnPManager.h"
 #include "WindowManager.h"
 #include "ThrottleManager.h"
 
@@ -81,6 +82,7 @@ void startup(void (*f)(void*, const string&), void* p) {
 	FavoriteManager::newInstance();
 	FinishedManager::newInstance();
 	ADLSearchManager::newInstance();
+	UPnPManager::newInstance();
 	WindowManager::newInstance();
 
 	SettingsManager::getInstance()->load();
@@ -128,7 +130,7 @@ void shutdown() {
 	ThrottleManager::getInstance()->shutdown();
 #endif
 	ConnectionManager::getInstance()->shutdown();
-
+	UPnPManager::getInstance()->close();
 	BufferedSocket::waitShutdown();
 
 	WindowManager::getInstance()->prepareSave();
@@ -137,6 +139,7 @@ void shutdown() {
 	SettingsManager::getInstance()->save();
 
 	WindowManager::deleteInstance();
+	UPnPManager::deleteInstance();
 	ADLSearchManager::deleteInstance();
 	FinishedManager::deleteInstance();
 	ShareManager::deleteInstance();
