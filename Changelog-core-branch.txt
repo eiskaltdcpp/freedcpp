@@ -1,5 +1,9 @@
 		--- freedcpp core branch ---
 
+r146: 0.19
+* UPnP
+* Ревизия 2163 (dcplusplus, add MiniUPnPc for UPnP mappings and make it threaded).
+
 r145: 0.18
 * Ревизия 2162 (dcplusplus, fix crashes related to file lists).
 

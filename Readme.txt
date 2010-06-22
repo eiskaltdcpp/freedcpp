@@ -18,6 +18,7 @@ libssl
 libgnome
 libnotify >= 0.4.1
 libboost
+libminiupnpc
 
 Compiling:
 ----------
