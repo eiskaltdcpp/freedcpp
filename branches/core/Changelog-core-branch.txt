@@ -1,5 +1,9 @@
 		--- freedcpp core branch ---
 
+r147: 0.20
+* Update version libdcpp -> 0.770.
+* Ревизия 2164 (dcplusplus, version -> 0.770).
+
 r146: 0.19
 * UPnP
 * Ревизия 2163 (dcplusplus, add MiniUPnPc for UPnP mappings and make it threaded).
