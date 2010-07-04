@@ -1,5 +1,9 @@
 		--- freedcpp 0.0.x ---
 
+r148: 0.0.2.27
+* Меню команд (чат, ЛС).
+* Добавил пункт в смайл-меню - использовать смайлы (чат, ЛС).
+
 r138: 0.0.2.26
 * Ревизия 355 (linuxdcpp, search by TTH now opens in a new search tab).
 * Убрал ParamMap (favoriteusers).

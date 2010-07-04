@@ -132,6 +132,9 @@ class Hub:
 		static void onPasswordDialog(GtkWidget *dialog, gint response, gpointer data);
 		static void onDownloadToClicked_gui(GtkMenuItem *item, gpointer data);
 		static void onDownloadClicked_gui(GtkMenuItem *item, gpointer data);
+		static void onCommandClicked_gui(GtkWidget *widget, gpointer data);
+		static gboolean onChatCommandButtonRelease_gui(GtkWidget *widget, GdkEventButton *event, gpointer data);
+		static void onUseEmoticons_gui(GtkWidget *widget, gpointer data);
 
 		// Client functions
 		void addFavoriteUser_client(const std::string cid);

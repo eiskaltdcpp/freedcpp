@@ -41,20 +41,25 @@ EmoticonsDialog::EmoticonsDialog(GtkWidget *chat, GtkWidget *button, GtkWidget *
 	Menu(menu),
 	dialog(NULL)
 {
+#if !GTK_CHECK_VERSION(2, 12, 0)
 	tooltips = gtk_tooltips_new();
-	g_object_ref(tooltips);
-	gtk_object_sink(GTK_OBJECT(tooltips));
+	g_object_ref_sink(tooltips);
+#endif
+	g_object_ref_sink(Menu);
 }
 
 EmoticonsDialog::~EmoticonsDialog()
 {
+#if !GTK_CHECK_VERSION(2, 12, 0)
 	g_object_unref(tooltips);
+#endif
+	g_object_unref(Menu);
 
 	if (dialog != NULL)
 		gtk_widget_destroy(dialog);
 }
 
-void EmoticonsDialog::showEmotMenu_gui()
+void EmoticonsDialog::buildEmotMenu_gui()
 {
 	gtk_container_foreach(GTK_CONTAINER(Menu), (GtkCallback) gtk_widget_destroy, NULL);
 
@@ -69,9 +74,6 @@ void EmoticonsDialog::showEmotMenu_gui()
 	item = gtk_menu_item_new_with_label(_("Icon size"));
 	gtk_menu_shell_append(GTK_MENU_SHELL(Menu), item);
 	addIconSizeMenu(item);
-
-	gtk_widget_show_all(Menu);
-	gtk_menu_popup(GTK_MENU(Menu), NULL, NULL, NULL, NULL, 0, gtk_get_current_event_time());
 }
 
 void EmoticonsDialog::addPacksMenu(GtkWidget *item)
@@ -278,8 +280,12 @@ void EmoticonsDialog::build()
 			gtk_widget_show(icon);
 
 			gtk_table_attach_defaults(GTK_TABLE(table), icon, left_attach, right_attach, top_attach, bottom_attach);
-			gtk_tooltips_set_tip(tooltips, icon, name, NULL);
 
+#if GTK_CHECK_VERSION(2, 12, 0)
+			gtk_widget_set_tooltip_text(icon, name);
+#else
+			gtk_tooltips_set_tip(tooltips, icon, name, NULL);
+#endif
 			g_object_set_data_full(G_OBJECT(icon), "text", g_strdup(name), g_free);
 			g_signal_connect(G_OBJECT(icon), "clicked", G_CALLBACK(onChat), (gpointer) this);
 

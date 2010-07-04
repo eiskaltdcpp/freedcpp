@@ -89,6 +89,9 @@ class PrivateMessage:
 		static void onMagnetPropertiesClicked_gui(GtkMenuItem *item, gpointer data);
 		static void onDownloadToClicked_gui(GtkMenuItem *item, gpointer data);
 		static void onDownloadClicked_gui(GtkMenuItem *item, gpointer data);
+		static void onCommandClicked_gui(GtkWidget *widget, gpointer data);
+		static void onUseEmoticons_gui(GtkWidget *widget, gpointer data);
+		static gboolean onChatCommandButtonRelease_gui(GtkWidget *widget, GdkEventButton *event, gpointer data);
 
 		// Client functions
 		void sendMessage_client(std::string message);

@@ -42,6 +42,10 @@ DownloadQueue::DownloadQueue():
 	gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(getWidget("dirChooserDialog")), Text::fromUtf8(SETTING(DOWNLOAD_DIRECTORY)).c_str());
 	gtk_dialog_set_alternative_button_order(GTK_DIALOG(getWidget("dirChooserDialog")), GTK_RESPONSE_OK, GTK_RESPONSE_CANCEL, -1);
 
+	// menu
+	g_object_ref_sink(getWidget("dirMenu"));
+	g_object_ref_sink(getWidget("fileMenu"));
+
 	// Initialize directory treeview
 	dirView.setView(GTK_TREE_VIEW(getWidget("dirView")));
 	dirView.insertColumn("Dir", G_TYPE_STRING, TreeView::ICON_STRING, -1, "Icon");
@@ -128,6 +132,8 @@ DownloadQueue::~DownloadQueue()
 		WSET("downloadqueue-pane-position", panePosition);
 
 	gtk_widget_destroy(getWidget("dirChooserDialog"));
+	g_object_unref(getWidget("dirMenu"));
+	g_object_unref(getWidget("fileMenu"));
 }
 
 void DownloadQueue::show()
