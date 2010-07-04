@@ -36,6 +36,9 @@ FavoriteUsers::FavoriteUsers():
 	// Configure the dialog
 	gtk_dialog_set_alternative_button_order(GTK_DIALOG(getWidget("DescriptionDialog")), GTK_RESPONSE_OK, GTK_RESPONSE_CANCEL, -1);
 
+	// menu
+	g_object_ref_sink(getWidget("menu"));
+
 	// Initialize favorite users list treeview
 	favoriteUserView.setView(GTK_TREE_VIEW(getWidget("favoriteUserView")), TRUE, "favoriteusers");
 	favoriteUserView.insertColumn(_("Auto grant slot"), G_TYPE_BOOLEAN, TreeView::BOOL, 100);
@@ -82,6 +85,7 @@ FavoriteUsers::~FavoriteUsers()
 	FavoriteManager::getInstance()->removeListener(this);
 
 	gtk_widget_destroy(getWidget("DescriptionDialog"));
+	g_object_unref(getWidget("menu"));
 }
 
 void FavoriteUsers::show()

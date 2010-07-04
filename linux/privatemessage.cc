@@ -68,11 +68,48 @@ PrivateMessage::PrivateMessage(const string &cid, const string &hubUrl):
 
 	GtkAdjustment *adjustment = gtk_scrolled_window_get_vadjustment(GTK_SCROLLED_WINDOW(getWidget("scroll")));
 
+	// menu
+	g_object_ref_sink(getWidget("magnetMenu"));
+	g_object_ref_sink(getWidget("linkMenu"));
+	g_object_ref_sink(getWidget("hubMenu"));
+	g_object_ref_sink(getWidget("chatCommandsMenu"));
+
 	// Emoticons dialog
 	emotdialog = new EmoticonsDialog(getWidget("entry"), getWidget("emotButton"), getWidget("emotMenu"));
 	if (!WGETB("emoticons-use"))
 		gtk_widget_set_sensitive(getWidget("emotButton"), FALSE);
 	useEmoticons = TRUE;
+
+	// PM commands
+	g_object_set_data_full(G_OBJECT(getWidget("awayCommandItem")), "command", g_strdup("/away"), g_free);
+	g_signal_connect(getWidget("awayCommandItem"), "activate", G_CALLBACK(onCommandClicked_gui), (gpointer)this);
+
+	g_object_set_data_full(G_OBJECT(getWidget("backCommandItem")), "command", g_strdup("/back"), g_free);
+	g_signal_connect(getWidget("backCommandItem"), "activate", G_CALLBACK(onCommandClicked_gui), (gpointer)this);
+
+	g_object_set_data_full(G_OBJECT(getWidget("clearCommandItem")), "command", g_strdup("/clear"), g_free);
+	g_signal_connect(getWidget("clearCommandItem"), "activate", G_CALLBACK(onCommandClicked_gui), (gpointer)this);
+
+	g_object_set_data_full(G_OBJECT(getWidget("closeCommandItem")), "command", g_strdup("/close"), g_free);
+	g_signal_connect(getWidget("closeCommandItem"), "activate", G_CALLBACK(onCommandClicked_gui), (gpointer)this);
+
+	g_object_set_data_full(G_OBJECT(getWidget("fuserCommandItem")), "command", g_strdup("/fuser"), g_free);
+	g_signal_connect(getWidget("fuserCommandItem"), "activate", G_CALLBACK(onCommandClicked_gui), (gpointer)this);
+
+	g_object_set_data_full(G_OBJECT(getWidget("rmfuCommandItem")), "command", g_strdup("/rmfu"), g_free);
+	g_signal_connect(getWidget("rmfuCommandItem"), "activate", G_CALLBACK(onCommandClicked_gui), (gpointer)this);
+
+	g_object_set_data_full(G_OBJECT(getWidget("helpCommandItem")), "command", g_strdup("/help"), g_free);
+	g_signal_connect(getWidget("helpCommandItem"), "activate", G_CALLBACK(onCommandClicked_gui), (gpointer)this);
+
+	g_object_set_data_full(G_OBJECT(getWidget("getlistCommandItem")), "command", g_strdup("/getlist"), g_free);
+	g_signal_connect(getWidget("getlistCommandItem"), "activate", G_CALLBACK(onCommandClicked_gui), (gpointer)this);
+
+	g_object_set_data_full(G_OBJECT(getWidget("grantCommandItem")), "command", g_strdup("/grant"), g_free);
+	g_signal_connect(getWidget("grantCommandItem"), "activate", G_CALLBACK(onCommandClicked_gui), (gpointer)this);
+
+	// chat commands button
+	g_signal_connect(getWidget("chatCommandsButton"), "button-release-event", G_CALLBACK(onChatCommandButtonRelease_gui), (gpointer)this);
 
 	// Connect the signals to their callback functions.
 	g_signal_connect(getContainer(), "focus-in-event", G_CALLBACK(onFocusIn_gui), (gpointer)this);
@@ -124,6 +161,11 @@ PrivateMessage::~PrivateMessage()
 		gdk_cursor_unref(handCursor);
 		handCursor = NULL;
 	}
+
+	g_object_unref(getWidget("magnetMenu"));
+	g_object_unref(getWidget("linkMenu"));
+	g_object_unref(getWidget("hubMenu"));
+	g_object_unref(getWidget("chatCommandsMenu"));
 
 	delete emotdialog;
 }
@@ -1043,7 +1085,25 @@ gboolean PrivateMessage::onEmotButtonRelease_gui(GtkWidget *widget, GdkEventButt
 
 		case 3: //show emoticons menu
 
-			pm->emotdialog->showEmotMenu_gui();
+			pm->emotdialog->buildEmotMenu_gui();
+
+			GtkWidget *check_item = NULL;
+			GtkWidget *emot_menu = pm->getWidget("emotMenu");
+
+			check_item = gtk_separator_menu_item_new();
+			gtk_menu_shell_append(GTK_MENU_SHELL(emot_menu), check_item);
+			gtk_widget_show(check_item);
+
+			check_item = gtk_check_menu_item_new_with_label(_("Use Emoticons"));
+			gtk_menu_shell_append(GTK_MENU_SHELL(emot_menu), check_item);
+
+			if (pm->useEmoticons)
+				gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(check_item), TRUE);
+
+			g_signal_connect(check_item, "activate", G_CALLBACK(onUseEmoticons_gui), data);
+
+			gtk_widget_show_all(emot_menu);
+			gtk_menu_popup(GTK_MENU(emot_menu), NULL, NULL, NULL, NULL, 0, gtk_get_current_event_time());
 		break;
 	}
 
@@ -1140,6 +1200,40 @@ void PrivateMessage::onMagnetPropertiesClicked_gui(GtkMenuItem *item, gpointer d
 	PrivateMessage *pm = (PrivateMessage *)data;
 
 	WulforManager::get()->getMainWindow()->propertiesMagnetDialog_gui(pm->selectedTagStr);
+}
+
+void PrivateMessage::onCommandClicked_gui(GtkWidget *widget, gpointer data)
+{
+	PrivateMessage *pm = (PrivateMessage *)data;
+
+	string command = (gchar*) g_object_get_data(G_OBJECT(widget), "command");
+
+	gint pos = 0;
+	GtkWidget *entry = pm->getWidget("entry");
+	if (!gtk_widget_is_focus(entry))
+		gtk_widget_grab_focus(entry);
+	gtk_editable_delete_text(GTK_EDITABLE(entry), pos, -1);
+	gtk_editable_insert_text(GTK_EDITABLE(entry), command.c_str(), -1, &pos);
+	gtk_editable_set_position(GTK_EDITABLE(entry), pos);
+}
+
+gboolean PrivateMessage::onChatCommandButtonRelease_gui(GtkWidget *widget, GdkEventButton *event, gpointer data)
+{
+	PrivateMessage *pm = (PrivateMessage *)data;
+ 
+	if (event->button == 1)
+	{
+		gtk_menu_popup(GTK_MENU(pm->getWidget("chatCommandsMenu")), NULL, NULL, NULL, NULL, 0, gtk_get_current_event_time());
+	}
+
+	return FALSE;
+}
+
+void PrivateMessage::onUseEmoticons_gui(GtkWidget *widget, gpointer data)
+{
+	PrivateMessage *pm = (PrivateMessage *)data;
+
+	pm->useEmoticons = !pm->useEmoticons;
 }
 
 void PrivateMessage::sendMessage_client(string message)

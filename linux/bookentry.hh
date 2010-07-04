@@ -29,7 +29,12 @@ class BookEntry : public Entry
 	public:
 		BookEntry() {}
 		BookEntry(const EntryType type, const std::string &text, const std::string &glade, const std::string &id = "");
-		virtual ~BookEntry() {}
+		virtual ~BookEntry()
+		{
+#if !GTK_CHECK_VERSION(2, 12, 0)
+			g_object_unref(tips);
+#endif
+		}
 
 		GtkWidget *getContainer();
 		GtkWidget *getLabelBox() { return labelBox; }
@@ -53,7 +58,10 @@ class BookEntry : public Entry
 		GtkWidget *tabMenuItem;
 		GtkWidget *closeButton;
 		GtkLabel *label;
+
+#if !GTK_CHECK_VERSION(2, 12, 0)
 		GtkTooltips *tips;
+#endif
 		static GSList *group;
 		bool bold;
 		bool urgent;

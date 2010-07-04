@@ -76,6 +76,9 @@ MainWindow::MainWindow():
 	gtk_window_set_transient_for(GTK_WINDOW(getWidget("flistDialog")), window);
 	gtk_window_set_transient_for(GTK_WINDOW(getWidget("ucLineDialog")), window);
 
+	// menu
+	g_object_ref_sink(getWidget("statusIconMenu"));
+
 	// magnet dialog
 	gtk_dialog_set_alternative_button_order(GTK_DIALOG(getWidget("MagnetDialog")), GTK_RESPONSE_OK, GTK_RESPONSE_CANCEL, -1);
 	gtk_window_set_transient_for(GTK_WINDOW(getWidget("MagnetDialog")), window);
@@ -257,6 +260,7 @@ MainWindow::~MainWindow()
 
 	gtk_widget_destroy(GTK_WIDGET(window));
 	g_object_unref(statusIcon);
+	g_object_unref(getWidget("statusIconMenu"));
 
 	Sound::stop();
 	Emoticons::stop();

@@ -47,6 +47,9 @@ FinishedTransfers::FinishedTransfers(const EntryType type, const string &title, 
 	totalBytes(0),
 	totalTime(0)
 {
+	// menu
+	g_object_ref_sink(getWidget("menu"));
+
 	// Initialize transfer treeview
 	fileView.setView(GTK_TREE_VIEW(getWidget("fileView")), true, "finished");
 	fileView.insertColumn(_("Time"), G_TYPE_STRING, TreeView::STRING, 150);
@@ -108,6 +111,7 @@ FinishedTransfers::FinishedTransfers(const EntryType type, const string &title, 
 FinishedTransfers::~FinishedTransfers()
 {
 	FinishedManager::getInstance()->removeListener(this);
+	g_object_unref(getWidget("menu"));
 	delete appsPreviewMenu;
 }
 

@@ -36,6 +36,9 @@ FavoriteHubs::FavoriteHubs():
 	gtk_widget_set_sensitive(getWidget("entryNick"), FALSE);
 	gtk_widget_set_sensitive(getWidget("entryUserDescription"), FALSE);
 
+	// menu
+	g_object_ref_sink(getWidget("menu"));
+
 	gtk_window_set_transient_for(GTK_WINDOW(getWidget("favoriteHubsDialog")), GTK_WINDOW(WulforManager::get()->getMainWindow()->getContainer()));
 	gtk_window_set_destroy_with_parent(GTK_WINDOW(getWidget("favoriteHubsDialog")), TRUE);
 
@@ -93,6 +96,7 @@ FavoriteHubs::~FavoriteHubs()
 	FavoriteManager::getInstance()->removeListener(this);
 
 	gtk_widget_destroy(getWidget("favoriteHubsDialog"));
+	g_object_unref(getWidget("menu"));
 }
 
 void FavoriteHubs::show()

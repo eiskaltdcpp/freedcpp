@@ -42,6 +42,9 @@ using namespace dcpp;
 Transfers::Transfers() :
 	Entry(Entry::TRANSFERS, "transfers.glade")
 {
+	// menu
+	g_object_ref_sink(getWidget("transferMenu"));
+
 	// Initialize the user command menu
 	userCommandMenu = new UserCommandMenu(getWidget("userCommandMenu"), ::UserCommand::CONTEXT_CHAT);
 	addChild(userCommandMenu);
@@ -101,6 +104,7 @@ Transfers::~Transfers()
 	UploadManager::getInstance()->removeListener(this);
 	ConnectionManager::getInstance()->removeListener(this);
 
+	g_object_unref(getWidget("transferMenu"));
 	delete appsPreviewMenu;
 }	
 
