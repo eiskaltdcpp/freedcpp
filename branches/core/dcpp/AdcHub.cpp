@@ -709,7 +709,7 @@ void AdcHub::sendUserCmd(const UserCommand& command, const StringMap& params) {
 	}
 }
 
-void AdcHub::search(int aSizeMode, int64_t aSize, int aFileType, const string& aString, const string& aToken) {
+void AdcHub::search(int aSizeMode, int64_t aSize, int aFileType, const string& aString, const string& aToken, const StringList& aExtList) {
 	if(state != STATE_NORMAL)
 		return;
 
@@ -729,6 +729,11 @@ void AdcHub::search(int aSizeMode, int64_t aSize, int aFileType, const string& a
 		}
 		if(aFileType == SearchManager::TYPE_DIRECTORY) {
 			c.addParam("TY", "2");
+		}
+		if (!aExtList.empty()) {
+			for(StringIterC i = aExtList.begin(); i != aExtList.end(); ++i) {
+				c.addParam("EX", *i);
+			}
 		}
 	}
 

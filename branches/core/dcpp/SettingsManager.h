@@ -22,8 +22,11 @@
 #include "Util.h"
 #include "Speaker.h"
 #include "Singleton.h"
+#include "Exception.h"
 
 namespace dcpp {
+
+STANDARD_EXCEPTION(SearchTypeException);
 
 class SimpleXML;
 
@@ -34,14 +37,20 @@ public:
 
 	typedef X<0> Load;
 	typedef X<1> Save;
+	typedef X<2> SearchTypesChanged;
 
 	virtual void on(Load, SimpleXML&) throw() { }
 	virtual void on(Save, SimpleXML&) throw() { }
+	virtual void on(SearchTypesChanged) throw() { }
 };
 
 class SettingsManager : public Singleton<SettingsManager>, public Speaker<SettingsManagerListener>
 {
 public:
+
+	typedef std::tr1::unordered_map<string, StringList> SearchTypes;
+	typedef SearchTypes::iterator SearchTypesIter;
+	typedef SearchTypes::const_iterator SearchTypesIterC;
 
 	static StringList connectionSpeeds;
 
@@ -60,7 +69,7 @@ public:
 		LOG_FILE_PRIVATE_CHAT, LOG_FILE_STATUS, LOG_FILE_UPLOAD, LOG_FILE_DOWNLOAD, LOG_FILE_SYSTEM,
 		LOG_FORMAT_SYSTEM, LOG_FORMAT_STATUS, DIRECTORYLISTINGFRAME_ORDER, DIRECTORYLISTINGFRAME_WIDTHS,
 		TLS_PRIVATE_KEY_FILE, TLS_CERTIFICATE_FILE, TLS_TRUSTED_CERTIFICATES_PATH,
-		LANGUAGE, DOWNLOADS_ORDER, DOWNLOADS_WIDTHS, TOOLBAR,
+		LANGUAGE, DOWNLOADS_ORDER, DOWNLOADS_WIDTHS, TOOLBAR, LAST_SEARCH_TYPE,
 		SOUND_MAIN_CHAT, SOUND_PM, SOUND_PM_WINDOW,
 		STR_LAST };
 
@@ -86,7 +95,7 @@ public:
 		AUTODROP_SPEED, AUTODROP_INTERVAL, AUTODROP_ELAPSED, AUTODROP_INACTIVITY, AUTODROP_MINSOURCES, AUTODROP_FILESIZE,
 		AUTODROP_ALL, AUTODROP_FILELISTS, AUTODROP_DISCONNECT,
 		OUTGOING_CONNECTIONS,
-		NO_IP_OVERRIDE, SEARCH_ONLY_FREE_SLOTS, LAST_SEARCH_TYPE, BOLD_FINISHED_DOWNLOADS, BOLD_FINISHED_UPLOADS, BOLD_QUEUE,
+		NO_IP_OVERRIDE, SEARCH_ONLY_FREE_SLOTS, BOLD_FINISHED_DOWNLOADS, BOLD_FINISHED_UPLOADS, BOLD_QUEUE,
 		BOLD_HUB, BOLD_PM, BOLD_FL, BOLD_SEARCH, BOLD_SEARCH_SPY, SOCKET_IN_BUFFER, SOCKET_OUT_BUFFER,
 		BOLD_WAITING_USERS, BOLD_SYSTEM_LOG, AUTO_REFRESH_TIME,
 		USE_TLS, AUTO_SEARCH_LIMIT, ALT_SORT_ORDER, AUTO_KICK_NO_FAVS, PROMPT_PASSWORD, SPY_FRAME_IGNORE_TTH_SEARCHES,
@@ -211,6 +220,19 @@ public:
 	void load(const string& aFileName);
 	void save(const string& aFileName);
 
+	// Search types
+	void validateSearchTypeName(const string& name) const;
+	void setSearchTypeDefaults();
+	void addSearchType(const string& name, const StringList& extensions, bool validated = false);
+	void delSearchType(const string& name);
+	void renameSearchType(const string& oldName, const string& newName);
+	void modSearchType(const string& name, const StringList& extensions);
+
+	const SearchTypes& getSearchTypes() const {
+		return searchTypes;
+	}
+	const StringList& getExtensions(const string& name);
+
 private:
 	friend class Singleton<SettingsManager>;
 	SettingsManager();
@@ -231,6 +253,11 @@ private:
 	bool isSet[SETTINGS_LAST];
 
 	string getConfigFile() { return Util::getPath(Util::PATH_USER_CONFIG) + "DCPlusPlus.xml"; }
+
+	// Search types
+	SearchTypes searchTypes; // name, extlist
+
+	SearchTypesIter getSearchType(const string& name);
 };
 
 // Shorthand accessor macros

@@ -26,6 +26,8 @@
 #include "File.h"
 #include "version.h"
 #include "CID.h"
+#include "SearchManager.h"
+#include "StringTokenizer.h"
 
 namespace dcpp {
 
@@ -48,7 +50,7 @@ const string SettingsManager::settingTags[] =
 	"LogFilePrivateChat", "LogFileStatus", "LogFileUpload", "LogFileDownload", "LogFileSystem",
 	"LogFormatSystem", "LogFormatStatus", "DirectoryListingFrameOrder", "DirectoryListingFrameWidths",
 	"TLSPrivateKeyFile", "TLSCertificateFile", "TLSTrustedCertificatesPath",
-	"Language", "DownloadsOrder", "DownloadsWidth", "Toolbar",
+	"Language", "DownloadsOrder", "DownloadsWidth", "Toolbar", "LastSearchType",
 	"SoundMainChat", "SoundPM", "SoundPMWindow",
 	"SENTRY",
 	// Ints
@@ -73,7 +75,7 @@ const string SettingsManager::settingTags[] =
 	"AutoDropSpeed", "AutoDropInterval", "AutoDropElapsed", "AutoDropInactivity", "AutoDropMinSources", "AutoDropFilesize",
 	"AutoDropAll", "AutoDropFilelists", "AutoDropDisconnect",
 	"OutgoingConnections",
-	"NoIpOverride", "SearchOnlyFreeSlots", "LastSearchType", "BoldFinishedDownloads", "BoldFinishedUploads", "BoldQueue",
+	"NoIpOverride", "SearchOnlyFreeSlots", "BoldFinishedDownloads", "BoldFinishedUploads", "BoldQueue",
 	"BoldHub", "BoldPm", "BoldFL", "BoldSearch", "BoldSearchSpy", "SocketInBuffer", "SocketOutBuffer",
 	"BoldWaitingUsers", "BoldSystemLog", "AutoRefreshTime",
 	"UseTLS", "AutoSearchLimit", "AltSortOrder", "AutoKickNoFavs", "PromptPassword", "SpyFrameIgnoreTthSearches",
@@ -244,7 +246,6 @@ SettingsManager::SettingsManager()
 	setDefault(NO_IP_OVERRIDE, false);
 	setDefault(SEARCH_ONLY_FREE_SLOTS, false);
 	setDefault(SEARCH_FILTER_SHARED, true);
-	setDefault(LAST_SEARCH_TYPE, 0);
 	setDefault(SOCKET_IN_BUFFER, 64*1024);
 	setDefault(SOCKET_OUT_BUFFER, 64*1024);
 	setDefault(TLS_TRUSTED_CERTIFICATES_PATH, Util::getPath(Util::PATH_USER_CONFIG) + "Certificates" PATH_SEPARATOR_STR);
@@ -303,6 +304,8 @@ SettingsManager::SettingsManager()
 	setDefault(BANDWIDTH_LIMIT_END, 1);
 	setDefault(SLOTS_ALTERNATE_LIMITING, 1);
 	setDefault(SLOTS_PRIMARY, 3);
+
+	setSearchTypeDefaults();
 
 #ifdef _WIN32
 	setDefault(MAIN_WINDOW_STATE, SW_SHOWNORMAL);
@@ -371,6 +374,28 @@ void SettingsManager::load(string const& aFileName)
 			}
 
 			xml.stepOut();
+		}
+
+		xml.resetCurrentChild();
+		if(xml.findChild("SearchTypes")) {
+			try {
+				searchTypes.clear();
+				xml.stepIn();
+				while(xml.findChild("SearchType")) {
+					const string& extensions = xml.getChildData();
+					if(extensions.empty()) {
+						continue;
+					}
+					const string& name = xml.getChildAttrib("Id");
+					if(name.empty()) {
+						continue;
+					}
+					searchTypes[name] = StringTokenizer<string>(extensions, ';').getTokens();
+				}
+				xml.stepOut();
+			} catch(const SimpleXMLException&) {
+				setSearchTypeDefaults();
+			}
 		}
 
 		if(SETTING(PRIVATE_ID).length() != 39 || CID(SETTING(PRIVATE_ID)).isZero()) {
@@ -472,6 +497,14 @@ void SettingsManager::save(string const& aFileName) {
 		}
 	}
 	xml.stepOut();
+	
+	xml.addTag("SearchTypes");
+	xml.stepIn();
+	for(SearchTypesIterC i = searchTypes.begin(); i != searchTypes.end(); ++i) {
+		xml.addTag("SearchType", Util::toString(";", i->second));
+		xml.addChildAttrib("Id", i->first);
+	}
+	xml.stepOut();
 
 	fire(SettingsManagerListener::Save(), xml);
 
@@ -487,6 +520,119 @@ void SettingsManager::save(string const& aFileName) {
 	} catch(const FileException&) {
 		// ...
 	}
+}
+
+void SettingsManager::validateSearchTypeName(const string& name) const {
+	if(name.empty() || (name.size() == 1 && name[0] >= '1' && name[0] <= '6')) {
+		throw SearchTypeException(_("Invalid search type name"));
+	}
+	for(int type = SearchManager::TYPE_ANY; type != SearchManager::TYPE_LAST; ++type) {
+		if(SearchManager::getTypeStr(type) == name) {
+			throw SearchTypeException(_("This search type already exists"));
+		}
+	}
+}
+
+void SettingsManager::setSearchTypeDefaults() {
+	searchTypes.clear();
+
+	// @todo simplify this as searchTypes['0' + SearchManager::TYPE_AUDIO] = { "mp3", "etc" } when we'll have C++0x
+
+	// @todo the default extension list contains some depreciated formats they kept to get all the NMDC-built subset of results for both type 
+	// of hubs. Some of these may worth to be dropped along with NMDC support...
+
+	{
+		StringList& l = searchTypes.insert(make_pair(string(1, '0' + SearchManager::TYPE_AUDIO), StringList())).first->second;
+		l.push_back("mp3"); l.push_back("flac"); l.push_back("ogg"); l.push_back("mpc");
+		l.push_back("ape"); l.push_back("wma");l.push_back("wav"); l.push_back("m4a");
+		l.push_back("mp2"); l.push_back("mid"); l.push_back("au"); l.push_back("aiff");
+		l.push_back("ra");
+	}
+
+	{
+		StringList& l = searchTypes.insert(make_pair(string(1, '0' + SearchManager::TYPE_COMPRESSED), StringList())).first->second;
+		l.push_back("rar"); l.push_back("7z"); l.push_back("zip"); l.push_back("tar");
+		l.push_back("gz"); l.push_back("bz2"); l.push_back("z"); l.push_back("ace");
+		l.push_back("lha"); l.push_back("lzh"); l.push_back("arj");
+	}
+
+	{
+		StringList& l = searchTypes.insert(make_pair(string(1, '0' + SearchManager::TYPE_DOCUMENT), StringList())).first->second;
+		l.push_back("doc"); l.push_back("xls"); l.push_back("ppt"); l.push_back("docx");
+		l.push_back("xlsx"); l.push_back("pptx"); l.push_back("odf"); l.push_back("odt");
+		l.push_back("ods"); l.push_back("odp"); l.push_back("pdf"); l.push_back("xps");
+		l.push_back("htm"); l.push_back("html"); l.push_back("xml"); l.push_back("txt");
+		l.push_back("nfo");
+	}
+
+	{
+		StringList& l = searchTypes.insert(make_pair(string(1, '0' + SearchManager::TYPE_EXECUTABLE), StringList())).first->second;
+		l.push_back("exe"); l.push_back("com"); l.push_back("bat"); l.push_back("cmd");
+		l.push_back("dll"); l.push_back("vbs"); l.push_back("ps1");
+	}
+
+	{
+		StringList& l = searchTypes.insert(make_pair(string(1, '0' + SearchManager::TYPE_PICTURE), StringList())).first->second;
+		l.push_back("bmp"); l.push_back("ico"); l.push_back("jpg"); l.push_back("jpeg");
+		l.push_back("png"); l.push_back("gif"); l.push_back("tga"); l.push_back("ai");
+		l.push_back("ps"); l.push_back("pict"); l.push_back("eps"); l.push_back("img");
+		l.push_back("pct"); l.push_back("psp"); l.push_back("tif"); l.push_back("rle");
+		l.push_back("pcx"); l.push_back("sfw"); l.push_back("psd"); l.push_back("cdr");
+	}
+
+	{
+		StringList& l = searchTypes.insert(make_pair(string(1, '0' + SearchManager::TYPE_VIDEO), StringList())).first->second;
+		l.push_back("mpg"); l.push_back("avi"); l.push_back("mkv"); l.push_back("wmv");
+		l.push_back("mov"); l.push_back("mp4"); l.push_back("3gp"); l.push_back("qt");
+		l.push_back("asx"); l.push_back("divx"); l.push_back("asf"); l.push_back("pxp");
+		l.push_back("ogm"); l.push_back("flv"); l.push_back("rm"); l.push_back("rmvb");
+		l.push_back("webm");
+	}
+
+	fire(SettingsManagerListener::SearchTypesChanged());
+}
+
+void SettingsManager::addSearchType(const string& name, const StringList& extensions, bool validated) {
+	if(!validated) {
+		validateSearchTypeName(name);
+	}
+
+	if(searchTypes.find(name) != searchTypes.end()) {
+		throw SearchTypeException(_("This search type already exists"));
+	}
+
+	searchTypes[name] = extensions;
+	fire(SettingsManagerListener::SearchTypesChanged());
+}
+
+void SettingsManager::delSearchType(const string& name) {
+	validateSearchTypeName(name);
+	searchTypes.erase(name);
+	fire(SettingsManagerListener::SearchTypesChanged());
+}
+
+void SettingsManager::renameSearchType(const string& oldName, const string& newName) {
+	validateSearchTypeName(newName);
+	StringList exts = getSearchType(oldName)->second;
+	addSearchType(newName, exts, true);
+	searchTypes.erase(oldName);
+}
+
+void SettingsManager::modSearchType(const string& name, const StringList& extensions) {
+	getSearchType(name)->second = extensions;
+	fire(SettingsManagerListener::SearchTypesChanged());
+}
+
+const StringList& SettingsManager::getExtensions(const string& name) {
+	return getSearchType(name)->second;
+}
+
+SettingsManager::SearchTypesIter SettingsManager::getSearchType(const string& name) {
+	SearchTypesIter ret = searchTypes.find(name);
+	if(ret == searchTypes.end()) {
+		throw SearchTypeException(_("No such search type"));
+	}
+	return ret;
 }
 
 } // namespace dcpp
