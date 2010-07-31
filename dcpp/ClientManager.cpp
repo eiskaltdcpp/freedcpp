@@ -498,12 +498,12 @@ void ClientManager::search(int aSizeMode, int64_t aSize, int aFileType, const st
 
 	for(Client::Iter i = clients.begin(); i != clients.end(); ++i) {
 		if((*i)->isConnected()) {
-			(*i)->search(aSizeMode, aSize, aFileType, aString, aToken);
+			(*i)->search(aSizeMode, aSize, aFileType, aString, aToken, StringList() /*ExtList*/);
 		}
 	}
 }
 
-void ClientManager::search(StringList& who, int aSizeMode, int64_t aSize, int aFileType, const string& aString, const string& aToken) {
+void ClientManager::search(StringList& who, int aSizeMode, int64_t aSize, int aFileType, const string& aString, const string& aToken, const StringList& aExtList) {
 	Lock l(cs);
 
 	for(StringIter it = who.begin(); it != who.end(); ++it) {
@@ -511,7 +511,7 @@ void ClientManager::search(StringList& who, int aSizeMode, int64_t aSize, int aF
 		for(Client::Iter j = clients.begin(); j != clients.end(); ++j) {
 			Client* c = *j;
 			if(c->isConnected() && c->getHubUrl() == client) {
-				c->search(aSizeMode, aSize, aFileType, aString, aToken);
+				c->search(aSizeMode, aSize, aFileType, aString, aToken, aExtList);
 			}
 		}
 	}

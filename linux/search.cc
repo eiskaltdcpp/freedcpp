@@ -120,6 +120,32 @@ Search::Search():
 	userCommandMenu = new UserCommandMenu(getWidget("usercommandMenu"), ::UserCommand::CONTEXT_SEARCH);
 	addChild(userCommandMenu);
 
+	// Initialize search types
+	GtkTreeIter iter;
+	GtkComboBox *combo_box = GTK_COMBO_BOX(getWidget("comboboxFile"));
+	GtkTreeModel *model = gtk_combo_box_get_model(combo_box);
+	GtkListStore *store = GTK_LIST_STORE(model);
+	const SettingsManager::SearchTypes &searchTypes = SettingsManager::getInstance()->getSearchTypes();
+
+	// Predefined
+	for (int i = SearchManager::TYPE_ANY; i < SearchManager::TYPE_LAST; i++)
+	{
+		gtk_list_store_append(store, &iter);
+		gtk_list_store_set(store, &iter, 0, SearchManager::getTypeStr(i), -1);
+	}
+
+	// Customs
+	for (SettingsManager::SearchTypesIterC i = searchTypes.begin(), iend = searchTypes.end(); i != iend; ++i)
+	{
+		string type = i->first;
+		if (!(type.size() == 1 && type[0] >= '0' && type[0] <= '6'))
+		{
+			gtk_list_store_append(store, &iter);
+			gtk_list_store_set(store, &iter, 0, type.c_str(), -1);
+		}
+	}
+	gtk_combo_box_set_active(combo_box, 0);
+
 	// Connect the signals to their callback functions.
 	g_signal_connect(getContainer(), "focus-in-event", G_CALLBACK(onFocusIn_gui), (gpointer)this);
 	g_signal_connect(getWidget("checkbuttonFilter"), "toggled", G_CALLBACK(onFilterButtonToggled_gui), (gpointer)this);
@@ -435,6 +461,41 @@ void Search::search_gui()
 		mode = SearchManager::SIZE_DONTCARE;
 
 	int ftype = gtk_combo_box_get_active(GTK_COMBO_BOX(getWidget("comboboxFile")));
+
+//NOTE: core 0.770
+	string ftypeStr;
+	if (ftype > SearchManager::TYPE_ANY && ftype < SearchManager::TYPE_LAST)
+	{
+		ftypeStr = SearchManager::getInstance()->getTypeStr(ftype);
+	}
+	else
+	{
+		gchar *tmp = gtk_combo_box_get_active_text(GTK_COMBO_BOX(getWidget("comboboxFile")));
+		ftypeStr = tmp;
+		g_free(tmp);
+		ftype = SearchManager::TYPE_ANY;
+	}
+
+	// Get ADC searchtype extensions if any is selected
+	StringList exts;
+	try
+	{
+		if (ftype == SearchManager::TYPE_ANY)
+		{
+			// Custom searchtype
+			exts = SettingsManager::getInstance()->getExtensions(ftypeStr);
+		}
+		else if (ftype > SearchManager::TYPE_ANY && ftype < SearchManager::TYPE_DIRECTORY)
+		{
+			// Predefined searchtype
+			exts = SettingsManager::getInstance()->getExtensions(string(1, '0' + ftype));
+		}
+	}
+	catch (const SearchTypeException&)
+	{
+		ftype = SearchManager::TYPE_ANY;
+	}
+
 	isHash = (ftype == SearchManager::TYPE_TTH);
 
 	// Add new searches to the dropdown list
@@ -466,7 +527,8 @@ void Search::search_gui()
 
 	if (SearchManager::getInstance()->okToSearch())
 	{
-		SearchManager::getInstance()->search(clients, text, llsize, (SearchManager::TypeModes)ftype, mode, "manual");
+		dcdebug("Sent ADC extensions : %s\n",Util::toString(";", exts).c_str());//NOTE: core 0.770
+		SearchManager::getInstance()->search(clients, text, llsize, (SearchManager::TypeModes)ftype, mode, "manual", exts);//NOTE: core 0.770
 
 		if (BOOLSETTING(CLEAR_SEARCH)) // Only clear if the search was sent.
 			gtk_entry_set_text(GTK_ENTRY(searchEntry), "");

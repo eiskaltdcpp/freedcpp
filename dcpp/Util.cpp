@@ -367,6 +367,18 @@ string Util::validateFileName(string tmp) {
 	return tmp;
 }
 
+bool Util::checkExtension(const string& tmp) {
+	for(int i = 0; i < tmp.length(); i++) {
+		if (tmp[i] < 0 || tmp[i] == 32 || tmp[i] == ':') {
+			return false;
+		}
+	}
+	if(tmp.find_first_of(badChars, 0) != string::npos) {
+		return false;
+	}
+	return true;
+}
+
 string Util::cleanPathChars(string aNick) {
 	string::size_type i = 0;
 

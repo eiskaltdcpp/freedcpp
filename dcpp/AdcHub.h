@@ -38,7 +38,7 @@ public:
 	virtual void hubMessage(const string& aMessage, bool thirdPerson = false);
 	virtual void privateMessage(const OnlineUser& user, const string& aMessage, bool thirdPerson = false);
 	virtual void sendUserCmd(const UserCommand& command, const StringMap& params);
-	virtual void search(int aSizeMode, int64_t aSize, int aFileType, const string& aString, const string& aToken);
+	virtual void search(int aSizeMode, int64_t aSize, int aFileType, const string& aString, const string& aToken, const StringList& aExtList);
 	virtual void password(const string& pwd);
 	virtual void info(bool alwaysSend);
 

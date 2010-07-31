@@ -1,5 +1,9 @@
 		--- freedcpp core branch ---
 
+r149: 0.21
+* Search Types.
+* Ревизия 2170 (dcplusplus, customizable search type extensions).
+
 r147: 0.20
 * Update version libdcpp -> 0.770.
 * Ревизия 2164 (dcplusplus, version -> 0.770).

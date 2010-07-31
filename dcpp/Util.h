@@ -201,6 +201,7 @@ public:
 
 	static void decodeUrl(const string& aUrl, string& aServer, uint16_t& aPort, string& aFile);
 	static string validateFileName(string aFile);
+	static bool checkExtension(const string& tmp);
 	static string cleanPathChars(string aNick);
 	static string addBrackets(const string& s);
 

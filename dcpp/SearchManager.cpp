@@ -29,6 +29,21 @@
 
 namespace dcpp {
 
+const char* SearchManager::types[TYPE_LAST] = {
+	N_("Any"),
+	N_("Audio"),
+	N_("Compressed"),
+	N_("Document"),
+	N_("Executable"),
+	N_("Picture"),
+	N_("Video"),
+	N_("Directory"),
+	N_("TTH")
+};
+const char* SearchManager::getTypeStr(int type) {
+	return _(types[type]);
+}
+
 SearchManager::SearchManager() :
 	port(0),
 	stop(false),
@@ -64,9 +79,9 @@ void SearchManager::search(const string& aName, int64_t aSize, TypeModes aTypeMo
 	}
 }
 
-void SearchManager::search(StringList& who, const string& aName, int64_t aSize /* = 0 */, TypeModes aTypeMode /* = TYPE_ANY */, SizeModes aSizeMode /* = SIZE_ATLEAST */, const string& aToken /* = Util::emptyString */) {
+void SearchManager::search(StringList& who, const string& aName, int64_t aSize /* = 0 */, TypeModes aTypeMode /* = TYPE_ANY */, SizeModes aSizeMode /* = SIZE_ATLEAST */, const string& aToken /* = Util::emptyString */, const StringList& aExtList) {
 	if(okToSearch()) {
-		ClientManager::getInstance()->search(who, aSizeMode, aSize, aTypeMode, normalizeWhitespace(aName), aToken);
+		ClientManager::getInstance()->search(who, aSizeMode, aSize, aTypeMode, normalizeWhitespace(aName), aToken, aExtList);
 		lastSearch = GET_TICK();
 	}
 }
