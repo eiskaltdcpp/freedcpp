@@ -7,42 +7,57 @@ msgid ""
 msgstr ""
 "Project-Id-Version: dcplusplus\n"
 "Report-Msgid-Bugs-To: dcplusplus-devel@lists.sourceforge.net\n"
-"POT-Creation-Date: 2010-05-16 19:33+0200\n"
-"PO-Revision-Date: 2009-11-27 19:04+0000\n"
-"Last-Translator: Tor Syversen <sol-moe@online.no>\n"
+"POT-Creation-Date: 2010-07-05 22:22+0200\n"
+"PO-Revision-Date: 2010-07-03 18:19+0000\n"
+"Last-Translator: Mathias Bøhn Grytemark <Unknown>\n"
 "Language-Team: Norwegian Bokmal <nb@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2010-05-16 16:32+0000\n"
+"X-Launchpad-Export-Date: 2010-07-05 15:21+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
-#: dcpp\Util.cpp:491
+#: dcpp\UPnPManager.cpp:71
+#, boost-format
+msgid " Encrypted Transfer Port (%1% TCP)"
+msgstr " Kryptert overføringsport (%1% TCP)"
+
+#: dcpp\UPnPManager.cpp:74
+#, boost-format
+msgid " Search Port (%1% UDP)"
+msgstr " Søkeport  (%1% UDP)"
+
+#: dcpp\UPnPManager.cpp:68
+#, boost-format
+msgid " Transfer Port (%1% TCP)"
+msgstr " Overføringsport (%1% TCP)"
+
+#: dcpp\Util.cpp:503
 #, c-format, boost-format
 msgid "%'lld B"
 msgstr "%'lld B"
 
-#: dcpp\Util.cpp:453
+#: dcpp\Util.cpp:465
 #, c-format, boost-format
 msgid "%.02f GiB"
 msgstr "%.02f GiB"
 
-#: dcpp\Util.cpp:449
+#: dcpp\Util.cpp:461
 #, c-format, boost-format
 msgid "%.02f KiB"
 msgstr "%.02f KiB"
 
-#: dcpp\Util.cpp:451
+#: dcpp\Util.cpp:463
 #, c-format, boost-format
 msgid "%.02f MiB"
 msgstr "%.02f MiB"
 
-#: dcpp\Util.cpp:457
+#: dcpp\Util.cpp:469
 #, c-format, boost-format
 msgid "%.02f PiB"
 msgstr "%.02f PiB"
 
-#: dcpp\Util.cpp:455
+#: dcpp\Util.cpp:467
 #, c-format, boost-format
 msgid "%.02f TiB"
 msgstr "%.02f TiB"
@@ -84,12 +99,12 @@ msgstr "%1%/s"
 msgid "%1%: File not available"
 msgstr "%1%: Filen er utilgjengelig"
 
-#: dcpp\Util.cpp:447
+#: dcpp\Util.cpp:459
 #, c-format, boost-format
 msgid "%d B"
 msgstr "%d B"
 
-#: dcpp\Util.cpp:487
+#: dcpp\Util.cpp:499
 #, c-format, boost-format
 msgid "%s B"
 msgstr "%s B"
@@ -111,9 +126,17 @@ msgstr "En fil med en annen størrelse eksisterer allerede i køen"
 msgid "A file with the same hash already exists in your share"
 msgstr "En fil med samme hash eksisterer allerede i din share"
 
-#: dcpp\ConnectionManager.cpp:176
+#: dcpp\ConnectionManager.cpp:183
 msgid "All download slots taken"
 msgstr "Alle nedlastningsposisjoner er opptatt"
+
+#: dcpp\SearchManager.cpp:33
+msgid "Any"
+msgstr ""
+
+#: dcpp\SearchManager.cpp:34
+msgid "Audio"
+msgstr "Audio"
 
 #: dcpp\FavoriteManager.cpp:478
 msgid "Auto-connect group (converted)"
@@ -123,21 +146,25 @@ msgstr ""
 msgid "CRC32 inconsistency (SFV-Check)"
 msgstr "Inkonsistent CRC32 (SFV-Sjekk)"
 
+#: dcpp\SearchManager.cpp:35
+msgid "Compressed"
+msgstr "Komprimert"
+
 #: dcpp\BufferedSocket.cpp:185 dcpp\SSLSocket.cpp:154
 msgid "Connection closed"
 msgstr "Tilkobling lukket"
 
 #: dcpp\BufferedSocket.cpp:154 dcpp\BufferedSocket.cpp:170
-#: dcpp\ConnectionManager.cpp:182 dcpp\Socket.cpp:154
+#: dcpp\ConnectionManager.cpp:190 dcpp\Socket.cpp:154
 msgid "Connection timeout"
 msgstr "Tidsavbrudd på forbindelsen"
 
-#: dcpp\ConnectionManager.cpp:250
+#: dcpp\ConnectionManager.cpp:258
 #, boost-format
 msgid "Connectivity error: %1%"
 msgstr "Tilkoblingsfeil: %1%"
 
-#: dcpp\ConnectionManager.cpp:243
+#: dcpp\ConnectionManager.cpp:251
 msgid "Connectivity restored"
 msgstr "Tilkobling gjenopprettet"
 
@@ -146,14 +173,17 @@ msgstr "Tilkobling gjenopprettet"
 msgid "Could not open target file: %1%"
 msgstr "Kunne ikke åpne måfil: %1%"
 
+#: dcpp\SearchManager.cpp:40
+msgid "Directory"
+msgstr "Katalog"
+
 #: dcpp\ShareManager.cpp:462
 msgid "Directory already shared"
 msgstr "Mappen er allerede delt"
 
 #: dcpp\ShareManager.cpp:449
-#, fuzzy
 msgid "Directory is hidden"
-msgstr "Mappen er allerede delt"
+msgstr "Katalogen er skjult"
 
 #: dcpp\DirectoryListing.cpp:163
 msgid "Directory missing name attribute"
@@ -172,7 +202,11 @@ msgstr "Frakoblet"
 msgid "Disconnected user leaving the hub: %1%"
 msgstr "Frakoblet bruker forlater hubben: %1%"
 
-#: dcpp\DCPlusPlus.cpp:111
+#: dcpp\SearchManager.cpp:36
+msgid "Document"
+msgstr "Dokument"
+
+#: dcpp\DCPlusPlus.cpp:113
 msgid "Download Queue"
 msgstr "Nedlastingskø"
 
@@ -219,6 +253,19 @@ msgstr "Feil ved beregning av filnøkkel %1%: %2%"
 msgid "Error saving hash data: %1%"
 msgstr "Feil ved lagring av filnøkkel data: %1%"
 
+#: dcpp\SearchManager.cpp:37
+msgid "Executable"
+msgstr "Kjørbar fil"
+
+#: dcpp\UPnPManager.cpp:97
+#, fuzzy
+msgid "Failed to create port mappings"
+msgstr "Kan ikke opprette tråd"
+
+#: dcpp\UPnPManager.cpp:89
+msgid "Failed to get external IP"
+msgstr ""
+
 #: dcpp\CryptoManager.cpp:228 dcpp\CryptoManager.cpp:232
 #: dcpp\CryptoManager.cpp:237 dcpp\CryptoManager.cpp:241
 msgid "Failed to load certificate file"
@@ -232,6 +279,10 @@ msgstr "Klarte ikke å laste privat nøkkel"
 #: dcpp\AdcHub.cpp:216
 msgid "Failed to negotiate base protocol"
 msgstr "Klarte ikke å forhandle grunnprotokoll"
+
+#: dcpp\UPnPManager.cpp:105
+msgid "Failed to remove port mappings"
+msgstr "Klarte ikke å fjerne portforbindelse"
 
 #: dcpp\Socket.cpp:402
 msgid ""
@@ -296,7 +347,7 @@ msgstr "Filtreet samsvarer ikke med TTH-roten"
 msgid "Generated new TLS certificate"
 msgstr "Et nytt TLS-sertifikat ble generert"
 
-#: dcpp\DCPlusPlus.cpp:103
+#: dcpp\DCPlusPlus.cpp:105
 msgid "Hash database"
 msgstr "Filnøkkel database"
 
@@ -316,6 +367,15 @@ msgid ""
 msgstr ""
 "Hubben bruker antagelig en eldre versjon av ADC, vennligst oppfordre eieren "
 "om å oppgradere"
+
+#: dcpp\UserConnection.cpp:50 dcpp\UserConnection.cpp:64
+#: dcpp\UserConnection.cpp:132
+msgid "Invalid data"
+msgstr "Ugyldig data"
+
+#: dcpp\SettingsManager.cpp:527
+msgid "Invalid search type name"
+msgstr ""
 
 #: dcpp\DownloadManager.cpp:223
 msgid "Invalid size"
@@ -341,6 +401,11 @@ msgstr "Maksimal kommandolengde overskredet"
 msgid "More bytes written than requested"
 msgstr "Flere byte skrevet enn forespørsel"
 
+#: dcpp\UPnPManager.cpp:40
+#, fuzzy
+msgid "No UPnP implementation available"
+msgstr "Ingen plasser ledige"
+
 #: dcpp\CryptoManager.cpp:143
 msgid "No certificate file chosen"
 msgstr "Ingen sertifikatfil valgt"
@@ -357,16 +422,28 @@ msgstr "Ingen privat nøkkelfil valgt"
 msgid "No slots available"
 msgstr "Ingen plasser ledige"
 
+#: dcpp\SettingsManager.cpp:633
+msgid "No such search type"
+msgstr ""
+
+#: dcpp\UserConnection.cpp:56
+msgid "Non-UTF-8 data in an ADC connection"
+msgstr ""
+
 #: dcpp\AdcHub.cpp:660
 #, boost-format
 msgid "Not listening for connections - please restart %1%"
 msgstr "Lytter ikke etter tilkoblinger - vennligst koble til på nytt %1%"
 
-#: dcpp\ClientManager.cpp:153 dcpp\SearchManager.cpp:237
-#: dcpp\SearchManager.cpp:300 dcpp\SearchManager.cpp:302 dcpp\Transfer.cpp:82
+#: dcpp\ClientManager.cpp:153 dcpp\SearchManager.cpp:252
+#: dcpp\SearchManager.cpp:315 dcpp\SearchManager.cpp:317 dcpp\Transfer.cpp:82
 #: dcpp\Transfer.cpp:86
 msgid "Offline"
 msgstr "Frakoblet"
+
+#: dcpp\SearchManager.cpp:38
+msgid "Picture"
+msgstr "Bilde"
 
 #: dcpp\FavoriteManager.cpp:430
 msgid "Redirect user(s)"
@@ -389,26 +466,30 @@ msgstr "Respondanse tilsvarer ikke forespørsel"
 msgid "SSL Error: %1% (%2%, %3%)"
 msgstr "SSL Feil %1% (%2%, %3%)"
 
-#: dcpp\SearchManager.cpp:135
+#: dcpp\SearchManager.cpp:150
 #, boost-format
 msgid "Search disabled: %1%"
 msgstr "Søk avslått: %1%"
 
-#: dcpp\SearchManager.cpp:128
+#: dcpp\SearchManager.cpp:143
 msgid "Search enabled again"
 msgstr "Søk påslått igjen"
 
 #: dcpp\ChatMessage.cpp:34
 msgid "Sent "
-msgstr ""
+msgstr "Sendt "
 
-#: dcpp\DCPlusPlus.cpp:107
+#: dcpp\DCPlusPlus.cpp:109
 msgid "Shared Files"
 msgstr "Delte Filer"
 
 #: dcpp\Socket.cpp:263 dcpp\Socket.cpp:267
 msgid "Socks server authentication failed (bad login / password?)"
 msgstr "Autensering mot Socks-server feilet (feil brukerkode / passord?)"
+
+#: dcpp\UPnPManager.cpp:78
+msgid "Successfully created port mappings"
+msgstr ""
 
 #: dcpp\CryptoManager.cpp:223
 #, boost-format
@@ -418,6 +499,10 @@ msgstr "TLS deaktivert, klarte ikke å generere sertifikat: %1%"
 #: dcpp\CryptoManager.cpp:213
 msgid "TLS disabled, no certificate file set"
 msgstr "TLS deaktivert, inget sertifikat valgt"
+
+#: dcpp\SearchManager.cpp:41
+msgid "TTH"
+msgstr "TTH"
 
 #: dcpp\MerkleCheckOutputStream.h:53 dcpp\MerkleCheckOutputStream.h:113
 msgid "TTH inconsistency"
@@ -468,6 +553,15 @@ msgid ""
 "fix this"
 msgstr ""
 
+#: dcpp\SettingsManager.cpp:531 dcpp\SettingsManager.cpp:601
+msgid "This search type already exists"
+msgstr ""
+
+#: dcpp\UPnPManager.cpp:110
+#, boost-format
+msgid "UPnP: %1%"
+msgstr "UPnP: %1%"
+
 #: dcpp\Thread.cpp:34 dcpp\Thread.cpp:42
 msgid "Unable to create thread"
 msgstr "Kan ikke opprette tråd"
@@ -501,18 +595,22 @@ msgstr "Klarte ikke å sende fil %1%: %2%"
 msgid "Unknown error: 0x%1$x"
 msgstr "Ukjent feil: 0x%1$x"
 
-#: dcpp\DCPlusPlus.cpp:115
+#: dcpp\DCPlusPlus.cpp:117
 msgid "Users"
-msgstr ""
+msgstr "Brukere"
+
+#: dcpp\SearchManager.cpp:39
+msgid "Video"
+msgstr "Video"
 
 #: dcpp\QueueManager.cpp:568
 msgid "You're trying to download from yourself!"
 msgstr "Du prøver å laste ned fra deg selv!"
 
-#: dcpp\SettingsManager.cpp:171
+#: dcpp\SettingsManager.cpp:173
 msgid "downloaded from"
 msgstr "Nedlastet fra"
 
-#: dcpp\SettingsManager.cpp:172
+#: dcpp\SettingsManager.cpp:174
 msgid "uploaded to"
 msgstr "Opplastet til"

@@ -7,43 +7,58 @@ msgid ""
 msgstr ""
 "Project-Id-Version: dcpp\n"
 "Report-Msgid-Bugs-To: dcplusplus-devel@lists.sourceforge.net\n"
-"POT-Creation-Date: 2010-05-10 19:47+0200\n"
+"POT-Creation-Date: 2010-07-05 22:22+0200\n"
 "PO-Revision-Date: 2010-04-04 05:41+0000\n"
 "Last-Translator: gutfeast <Unknown>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2010-05-16 16:32+0000\n"
+"X-Launchpad-Export-Date: 2010-07-05 15:21+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
-#: dcpp\Util.cpp:491
-#, boost-format, c-format
+#: dcpp\UPnPManager.cpp:71
+#, boost-format
+msgid " Encrypted Transfer Port (%1% TCP)"
+msgstr ""
+
+#: dcpp\UPnPManager.cpp:74
+#, boost-format
+msgid " Search Port (%1% UDP)"
+msgstr ""
+
+#: dcpp\UPnPManager.cpp:68
+#, boost-format
+msgid " Transfer Port (%1% TCP)"
+msgstr ""
+
+#: dcpp\Util.cpp:503
+#, c-format, boost-format
 msgid "%'lld B"
 msgstr "%'lld B"
 
-#: dcpp\Util.cpp:453
-#, boost-format, c-format
+#: dcpp\Util.cpp:465
+#, c-format, boost-format
 msgid "%.02f GiB"
 msgstr "%.02f GiB"
 
-#: dcpp\Util.cpp:449
-#, boost-format, c-format
+#: dcpp\Util.cpp:461
+#, c-format, boost-format
 msgid "%.02f KiB"
 msgstr "%.02f KiB"
 
-#: dcpp\Util.cpp:451
-#, boost-format, c-format
+#: dcpp\Util.cpp:463
+#, c-format, boost-format
 msgid "%.02f MiB"
 msgstr "%.02f MiB"
 
-#: dcpp\Util.cpp:457
-#, boost-format, c-format
+#: dcpp\Util.cpp:469
+#, c-format, boost-format
 msgid "%.02f PiB"
 msgstr "%.02f PiB"
 
-#: dcpp\Util.cpp:455
-#, boost-format, c-format
+#: dcpp\Util.cpp:467
+#, c-format, boost-format
 msgid "%.02f TiB"
 msgstr "%.02f TiB"
 
@@ -61,7 +76,9 @@ msgstr "%1% (알 수 없는 닉네임)"
 #, boost-format
 msgid ""
 "%1% not shared; calculated CRC32 does not match the one found in SFV file."
-msgstr "%1%는 공유되지 않음; 계산된 32-bit CRC 코드값이 sfv-파일에 있는 값과 일치하지 않음"
+msgstr ""
+"%1%는 공유되지 않음; 계산된 32-bit CRC 코드값이 sfv-파일에 있는 값과 일치하"
+"지 않음"
 
 #: dcpp\AdcHub.cpp:293
 #, boost-format
@@ -83,13 +100,13 @@ msgstr "%1%/s"
 msgid "%1%: File not available"
 msgstr "%1%: 파일이 유효하지 않음"
 
-#: dcpp\Util.cpp:447
-#, boost-format, c-format
+#: dcpp\Util.cpp:459
+#, c-format, boost-format
 msgid "%d B"
 msgstr "%d B"
 
-#: dcpp\Util.cpp:487
-#, boost-format, c-format
+#: dcpp\Util.cpp:499
+#, c-format, boost-format
 msgid "%s B"
 msgstr "%s B"
 
@@ -99,7 +116,8 @@ msgstr "<키워드를 입력하세요>"
 
 #: dcpp\QueueManager.cpp:631
 msgid "A file with a different TTH root already exists in the queue"
-msgstr "다른 TTH(Tiger Tree Hash) 파일 ID값을 갖는 파일이 이미 다운로드-큐에 있음"
+msgstr ""
+"다른 TTH(Tiger Tree Hash) 파일 ID값을 갖는 파일이 이미 다운로드-큐에 있음"
 
 #: dcpp\QueueManager.cpp:628
 msgid "A file with a different size already exists in the queue"
@@ -107,11 +125,20 @@ msgstr "다른 크기의 파일이 이미 다운로드-큐에 있음"
 
 #: dcpp\QueueManager.cpp:574
 msgid "A file with the same hash already exists in your share"
-msgstr "동일한 TTH(Tiger Tree Hash) 파일 ID값을 갖는 파일이 이미 공유 디렉토리에 있음"
+msgstr ""
+"동일한 TTH(Tiger Tree Hash) 파일 ID값을 갖는 파일이 이미 공유 디렉토리에 있음"
 
-#: dcpp\ConnectionManager.cpp:176
+#: dcpp\ConnectionManager.cpp:183
 msgid "All download slots taken"
 msgstr "모든 다운로드 슬롯이 꽉 참"
+
+#: dcpp\SearchManager.cpp:33
+msgid "Any"
+msgstr ""
+
+#: dcpp\SearchManager.cpp:34
+msgid "Audio"
+msgstr ""
 
 #: dcpp\FavoriteManager.cpp:478
 msgid "Auto-connect group (converted)"
@@ -121,21 +148,25 @@ msgstr "자동-연결 그룹 (이전 버전에서 변환)"
 msgid "CRC32 inconsistency (SFV-Check)"
 msgstr "32-bit CRC 코드 불일치 (SFV-검사)"
 
+#: dcpp\SearchManager.cpp:35
+msgid "Compressed"
+msgstr ""
+
 #: dcpp\BufferedSocket.cpp:185 dcpp\SSLSocket.cpp:154
 msgid "Connection closed"
 msgstr "끊어짐"
 
 #: dcpp\BufferedSocket.cpp:154 dcpp\BufferedSocket.cpp:170
-#: dcpp\ConnectionManager.cpp:182 dcpp\Socket.cpp:154
+#: dcpp\ConnectionManager.cpp:190 dcpp\Socket.cpp:154
 msgid "Connection timeout"
 msgstr "연결 시간 초과"
 
-#: dcpp\ConnectionManager.cpp:250
+#: dcpp\ConnectionManager.cpp:258
 #, boost-format
 msgid "Connectivity error: %1%"
 msgstr "네트워크 연결 에러: %1%"
 
-#: dcpp\ConnectionManager.cpp:243
+#: dcpp\ConnectionManager.cpp:251
 msgid "Connectivity restored"
 msgstr "네트워크 연결이 복구됨"
 
@@ -143,6 +174,11 @@ msgstr "네트워크 연결이 복구됨"
 #, boost-format
 msgid "Could not open target file: %1%"
 msgstr "대상 파일을 열 수 없음: %1%"
+
+#: dcpp\SearchManager.cpp:40
+#, fuzzy
+msgid "Directory"
+msgstr "디렉토리가 숨겨졌습니다"
 
 #: dcpp\ShareManager.cpp:462
 msgid "Directory already shared"
@@ -169,15 +205,19 @@ msgstr "끊어짐"
 msgid "Disconnected user leaving the hub: %1%"
 msgstr "허브를 떠난 사용자와 연결을 끊었음: %1%"
 
-#: dcpp\DCPlusPlus.cpp:111
+#: dcpp\SearchManager.cpp:36
+msgid "Document"
+msgstr ""
+
+#: dcpp\DCPlusPlus.cpp:113
 msgid "Download Queue"
 msgstr "다운로드-큐"
 
 #: dcpp\ShareManager.cpp:710
 #, boost-format
 msgid ""
-"Duplicate file will not be shared: %1% (Size: %2% B) Dupe matched against: "
-"%3%"
+"Duplicate file will not be shared: %1% (Size: %2% B) Dupe matched against: %"
+"3%"
 msgstr "중복된 파일은 공유되지 않게 됨: %1% (%2% B)이 %3%와 중복됨"
 
 #: dcpp\QueueManager.cpp:706 dcpp\QueueManager.cpp:710
@@ -215,6 +255,19 @@ msgstr "%1% Hash(파일 ID) 작성 오류: %2%"
 msgid "Error saving hash data: %1%"
 msgstr "Hash(파일 ID) 데이터 저장 오류: %1%"
 
+#: dcpp\SearchManager.cpp:37
+msgid "Executable"
+msgstr ""
+
+#: dcpp\UPnPManager.cpp:97
+#, fuzzy
+msgid "Failed to create port mappings"
+msgstr "Thread를 생성할 수 없음"
+
+#: dcpp\UPnPManager.cpp:89
+msgid "Failed to get external IP"
+msgstr ""
+
 #: dcpp\CryptoManager.cpp:228 dcpp\CryptoManager.cpp:232
 #: dcpp\CryptoManager.cpp:237 dcpp\CryptoManager.cpp:241
 msgid "Failed to load certificate file"
@@ -229,11 +282,16 @@ msgstr "비밀(Private) 키를 불러오는데 실패함"
 msgid "Failed to negotiate base protocol"
 msgstr "기본 프로토콜로 중재하는데 실패함"
 
+#: dcpp\UPnPManager.cpp:105
+msgid "Failed to remove port mappings"
+msgstr ""
+
 #: dcpp\Socket.cpp:402
 msgid ""
 "Failed to set up the socks server for UDP relay (check socks address and "
 "port)"
-msgstr "UDP 중계를 위한 소켓 서버 설정에 실패함 (소켓 주소 및 포트를 확인하세요)"
+msgstr ""
+"UDP 중계를 위한 소켓 서버 설정에 실패함 (소켓 주소 및 포트를 확인하세요)"
 
 #: dcpp\QueueManager.cpp:693
 msgid "File already exists at the target location"
@@ -286,7 +344,7 @@ msgstr "받은 파일의 TTH(Tiger Tree Hash) 파일 ID값이 일치하지 않�
 msgid "Generated new TLS certificate"
 msgstr "새 TLS 인증서를 생성함"
 
-#: dcpp\DCPlusPlus.cpp:103
+#: dcpp\DCPlusPlus.cpp:105
 msgid "Hash database"
 msgstr "Hash 데이터베이스"
 
@@ -303,7 +361,19 @@ msgstr "Hash(파일 ID) 작성이 실패함: %1%"
 msgid ""
 "Hub probably uses an old version of ADC, please encourage the owner to "
 "upgrade"
-msgstr "허브가 오래된 버전의 ADC를 사용하는 것으로 보이므로, 허브 운영자에게 프로그램을 업그레이드하도록 권유하세요"
+msgstr ""
+"허브가 오래된 버전의 ADC를 사용하는 것으로 보이므로, 허브 운영자에게 프로그램"
+"을 업그레이드하도록 권유하세요"
+
+#: dcpp\UserConnection.cpp:50 dcpp\UserConnection.cpp:64
+#: dcpp\UserConnection.cpp:132
+#, fuzzy
+msgid "Invalid data"
+msgstr "크기가 잘못됨"
+
+#: dcpp\SettingsManager.cpp:527
+msgid "Invalid search type name"
+msgstr ""
 
 #: dcpp\DownloadManager.cpp:223
 msgid "Invalid size"
@@ -313,7 +383,9 @@ msgstr "크기가 잘못됨"
 msgid ""
 "Invalid target file (missing directory, check default download directory "
 "setting)"
-msgstr "대상 파일이 유효하지 않음 (저장하려는 디렉토리가 없음, '기본 다운로드 디렉토리' 설정을 확인하세요)"
+msgstr ""
+"대상 파일이 유효하지 않음 (저장하려는 디렉토리가 없음, '기본 다운로드 디렉토"
+"리' 설정을 확인하세요)"
 
 #: dcpp\FavoriteManager.cpp:426
 msgid "Kick user(s)"
@@ -326,6 +398,11 @@ msgstr "최대 명령어 길이를 초과함"
 #: dcpp\Streams.h:140
 msgid "More bytes written than requested"
 msgstr "요청된 크기 이상의 바이트(byte)가 쓰여짐"
+
+#: dcpp\UPnPManager.cpp:40
+#, fuzzy
+msgid "No UPnP implementation available"
+msgstr "남은 슬롯이 없음"
 
 #: dcpp\CryptoManager.cpp:143
 msgid "No certificate file chosen"
@@ -343,16 +420,28 @@ msgstr "아무런 개인 키 파일도 선택되지 않았음"
 msgid "No slots available"
 msgstr "남은 슬롯이 없음"
 
+#: dcpp\SettingsManager.cpp:633
+msgid "No such search type"
+msgstr ""
+
+#: dcpp\UserConnection.cpp:56
+msgid "Non-UTF-8 data in an ADC connection"
+msgstr ""
+
 #: dcpp\AdcHub.cpp:660
 #, boost-format
 msgid "Not listening for connections - please restart %1%"
 msgstr "연결을 위한 소켓 청취를 하지 않음 - %1%를 재시작하세요"
 
-#: dcpp\ClientManager.cpp:153 dcpp\SearchManager.cpp:237
-#: dcpp\SearchManager.cpp:300 dcpp\SearchManager.cpp:302 dcpp\Transfer.cpp:82
+#: dcpp\ClientManager.cpp:153 dcpp\SearchManager.cpp:252
+#: dcpp\SearchManager.cpp:315 dcpp\SearchManager.cpp:317 dcpp\Transfer.cpp:82
 #: dcpp\Transfer.cpp:86
 msgid "Offline"
 msgstr "오프라인"
+
+#: dcpp\SearchManager.cpp:38
+msgid "Picture"
+msgstr ""
 
 #: dcpp\FavoriteManager.cpp:430
 msgid "Redirect user(s)"
@@ -375,12 +464,12 @@ msgstr "응답이 요청한 것과 일치하지 않음"
 msgid "SSL Error: %1% (%2%, %3%)"
 msgstr "SSL 오류: %1% (%2%, %3%)"
 
-#: dcpp\SearchManager.cpp:135
+#: dcpp\SearchManager.cpp:150
 #, boost-format
 msgid "Search disabled: %1%"
 msgstr "검색이 불가능하게 됨: %1%"
 
-#: dcpp\SearchManager.cpp:128
+#: dcpp\SearchManager.cpp:143
 msgid "Search enabled again"
 msgstr "검색이 다시 가능하게 됨"
 
@@ -388,13 +477,17 @@ msgstr "검색이 다시 가능하게 됨"
 msgid "Sent "
 msgstr "보내짐 "
 
-#: dcpp\DCPlusPlus.cpp:107
+#: dcpp\DCPlusPlus.cpp:109
 msgid "Shared Files"
 msgstr "공유 파일"
 
 #: dcpp\Socket.cpp:263 dcpp\Socket.cpp:267
 msgid "Socks server authentication failed (bad login / password?)"
 msgstr "소켓 서버 인증이 실패함 (잘못된 로그인이름/비밀번호?)"
+
+#: dcpp\UPnPManager.cpp:78
+msgid "Successfully created port mappings"
+msgstr ""
 
 #: dcpp\CryptoManager.cpp:223
 #, boost-format
@@ -404,6 +497,10 @@ msgstr "TLS를 사용할 수 없음, 보안 인증서 생성에 실패: %1%"
 #: dcpp\CryptoManager.cpp:213
 msgid "TLS disabled, no certificate file set"
 msgstr "TLS를 사용할 수 없음, 인증서 파일 셋이 없음"
+
+#: dcpp\SearchManager.cpp:41
+msgid "TTH"
+msgstr ""
 
 #: dcpp\MerkleCheckOutputStream.h:53 dcpp\MerkleCheckOutputStream.h:113
 msgid "TTH inconsistency"
@@ -451,7 +548,18 @@ msgstr "이 파일은 이미 다운로드-큐에 추가되었음"
 msgid ""
 "This hub is trying to use your client to spam %1%, please urge hub owner to "
 "fix this"
-msgstr "이 허브가 %1%을 스팸하도록 당신의 클라이언트 이용하려고 시도합니다, 허브 주인에게 이를 시정하도록 요구하세요"
+msgstr ""
+"이 허브가 %1%을 스팸하도록 당신의 클라이언트 이용하려고 시도합니다, 허브 주인"
+"에게 이를 시정하도록 요구하세요"
+
+#: dcpp\SettingsManager.cpp:531 dcpp\SettingsManager.cpp:601
+msgid "This search type already exists"
+msgstr ""
+
+#: dcpp\UPnPManager.cpp:110
+#, boost-format
+msgid "UPnP: %1%"
+msgstr ""
 
 #: dcpp\Thread.cpp:34 dcpp\Thread.cpp:42
 msgid "Unable to create thread"
@@ -460,7 +568,8 @@ msgstr "Thread를 생성할 수 없음"
 #: dcpp\QueueManager.cpp:1038
 #, boost-format
 msgid "Unable to move %1% to %2% (%3%) nor to rename to %4% (%5%)"
-msgstr "%1%에서 %2%로 이동할 수도 없고 (%3%) %4%로 이름이 변경될 수도 없음 (%5%)"
+msgstr ""
+"%1%에서 %2%로 이동할 수도 없고 (%3%) %4%로 이름이 변경될 수도 없음 (%5%)"
 
 #: dcpp\QueueManager.cpp:1035
 #, boost-format
@@ -482,23 +591,27 @@ msgid "Unable to send file %1%: %2%"
 msgstr "파일 %1%를 보낼 수 없음: %2%"
 
 #: dcpp\Socket.cpp:54
-#, boost-format, c-format
+#, c-format, boost-format
 msgid "Unknown error: 0x%1$x"
 msgstr "알 수 없는 오류: 0x%1$x"
 
-#: dcpp\DCPlusPlus.cpp:115
+#: dcpp\DCPlusPlus.cpp:117
 msgid "Users"
 msgstr "사용자"
+
+#: dcpp\SearchManager.cpp:39
+msgid "Video"
+msgstr ""
 
 #: dcpp\QueueManager.cpp:568
 msgid "You're trying to download from yourself!"
 msgstr "자신의 파일을 다운로드할 수 없음"
 
-#: dcpp\SettingsManager.cpp:171
+#: dcpp\SettingsManager.cpp:173
 msgid "downloaded from"
 msgstr "downloaded from"
 
-#: dcpp\SettingsManager.cpp:172
+#: dcpp\SettingsManager.cpp:174
 msgid "uploaded to"
 msgstr "uploaded to"
 

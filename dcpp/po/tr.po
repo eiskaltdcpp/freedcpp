@@ -7,42 +7,57 @@ msgid ""
 msgstr ""
 "Project-Id-Version: dcpp\n"
 "Report-Msgid-Bugs-To: dcplusplus-devel@lists.sourceforge.net\n"
-"POT-Creation-Date: 2010-05-16 19:33+0200\n"
+"POT-Creation-Date: 2010-07-05 22:22+0200\n"
 "PO-Revision-Date: 2010-04-23 10:16+0000\n"
 "Last-Translator: Yalçın Can <Unknown>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2010-05-16 16:32+0000\n"
+"X-Launchpad-Export-Date: 2010-07-05 15:21+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
-#: dcpp\Util.cpp:491
+#: dcpp\UPnPManager.cpp:71
+#, boost-format
+msgid " Encrypted Transfer Port (%1% TCP)"
+msgstr ""
+
+#: dcpp\UPnPManager.cpp:74
+#, boost-format
+msgid " Search Port (%1% UDP)"
+msgstr ""
+
+#: dcpp\UPnPManager.cpp:68
+#, boost-format
+msgid " Transfer Port (%1% TCP)"
+msgstr ""
+
+#: dcpp\Util.cpp:503
 #, c-format, boost-format
 msgid "%'lld B"
 msgstr "%'lld B"
 
-#: dcpp\Util.cpp:453
+#: dcpp\Util.cpp:465
 #, c-format, boost-format
 msgid "%.02f GiB"
 msgstr "%.02f GiB"
 
-#: dcpp\Util.cpp:449
+#: dcpp\Util.cpp:461
 #, c-format, boost-format
 msgid "%.02f KiB"
 msgstr "%.02f KiB"
 
-#: dcpp\Util.cpp:451
+#: dcpp\Util.cpp:463
 #, c-format, boost-format
 msgid "%.02f MiB"
 msgstr "%.02f MiB"
 
-#: dcpp\Util.cpp:457
+#: dcpp\Util.cpp:469
 #, c-format, boost-format
 msgid "%.02f PiB"
 msgstr "%.02f PiB"
 
-#: dcpp\Util.cpp:455
+#: dcpp\Util.cpp:467
 #, c-format, boost-format
 msgid "%.02f TiB"
 msgstr "%.02f TiB"
@@ -84,12 +99,12 @@ msgstr "%1%/s"
 msgid "%1%: File not available"
 msgstr "%1%: Dosya kullanılabilir değil"
 
-#: dcpp\Util.cpp:447
+#: dcpp\Util.cpp:459
 #, c-format, boost-format
 msgid "%d B"
 msgstr "%d B"
 
-#: dcpp\Util.cpp:487
+#: dcpp\Util.cpp:499
 #, c-format, boost-format
 msgid "%s B"
 msgstr "%s B"
@@ -110,9 +125,17 @@ msgstr "Farklı boyuta sahip bir dosya zaten listenizde mevcut"
 msgid "A file with the same hash already exists in your share"
 msgstr "Aynı TTH'a sahip bir dosya zaten paylaşımda"
 
-#: dcpp\ConnectionManager.cpp:176
+#: dcpp\ConnectionManager.cpp:183
 msgid "All download slots taken"
 msgstr "Tüm slotlarınız kullanımda, lütfen daha fazla açınız"
+
+#: dcpp\SearchManager.cpp:33
+msgid "Any"
+msgstr ""
+
+#: dcpp\SearchManager.cpp:34
+msgid "Audio"
+msgstr ""
 
 #: dcpp\FavoriteManager.cpp:478
 msgid "Auto-connect group (converted)"
@@ -122,21 +145,25 @@ msgstr "Gruba otomatik bağlan (dönüştürülmüş)"
 msgid "CRC32 inconsistency (SFV-Check)"
 msgstr "CRC32 uyumsuzluğu (SFV-Kontrol)"
 
+#: dcpp\SearchManager.cpp:35
+msgid "Compressed"
+msgstr ""
+
 #: dcpp\BufferedSocket.cpp:185 dcpp\SSLSocket.cpp:154
 msgid "Connection closed"
 msgstr "Bağlantı kapandı."
 
 #: dcpp\BufferedSocket.cpp:154 dcpp\BufferedSocket.cpp:170
-#: dcpp\ConnectionManager.cpp:182 dcpp\Socket.cpp:154
+#: dcpp\ConnectionManager.cpp:190 dcpp\Socket.cpp:154
 msgid "Connection timeout"
 msgstr "Bağlantı yeterli sürede sağlanamadı"
 
-#: dcpp\ConnectionManager.cpp:250
+#: dcpp\ConnectionManager.cpp:258
 #, boost-format
 msgid "Connectivity error: %1%"
 msgstr "Bağlantı hatası: %1%"
 
-#: dcpp\ConnectionManager.cpp:243
+#: dcpp\ConnectionManager.cpp:251
 msgid "Connectivity restored"
 msgstr "Bağlantı sağlandı"
 
@@ -144,6 +171,11 @@ msgstr "Bağlantı sağlandı"
 #, boost-format
 msgid "Could not open target file: %1%"
 msgstr "Hedef dosya açılamadı: %1%"
+
+#: dcpp\SearchManager.cpp:40
+#, fuzzy
+msgid "Directory"
+msgstr "Dizin gizlenmiş"
 
 #: dcpp\ShareManager.cpp:462
 msgid "Directory already shared"
@@ -170,7 +202,11 @@ msgstr "Bağlantı kesildi"
 msgid "Disconnected user leaving the hub: %1%"
 msgstr "Bağlantısı kesilen kullanıcı hub'dan ayrılıyor: %1%"
 
-#: dcpp\DCPlusPlus.cpp:111
+#: dcpp\SearchManager.cpp:36
+msgid "Document"
+msgstr ""
+
+#: dcpp\DCPlusPlus.cpp:113
 msgid "Download Queue"
 msgstr "İndirilecekler"
 
@@ -216,6 +252,19 @@ msgstr "İndeksleme işleminde hata %1%: %2%"
 msgid "Error saving hash data: %1%"
 msgstr "İndeks verisini kaydederken hata oluştu: %1%"
 
+#: dcpp\SearchManager.cpp:37
+msgid "Executable"
+msgstr ""
+
+#: dcpp\UPnPManager.cpp:97
+#, fuzzy
+msgid "Failed to create port mappings"
+msgstr "İşlem yaratılamadı"
+
+#: dcpp\UPnPManager.cpp:89
+msgid "Failed to get external IP"
+msgstr ""
+
 #: dcpp\CryptoManager.cpp:228 dcpp\CryptoManager.cpp:232
 #: dcpp\CryptoManager.cpp:237 dcpp\CryptoManager.cpp:241
 msgid "Failed to load certificate file"
@@ -229,6 +278,10 @@ msgstr "Hata! Özel şifre yüklenemedi"
 #: dcpp\AdcHub.cpp:216
 msgid "Failed to negotiate base protocol"
 msgstr "Temel protokol anlaşması sağlanamadı"
+
+#: dcpp\UPnPManager.cpp:105
+msgid "Failed to remove port mappings"
+msgstr ""
 
 #: dcpp\Socket.cpp:402
 msgid ""
@@ -291,7 +344,7 @@ msgstr "İndirme listesindeki TTH ile uyuşmuyor"
 msgid "Generated new TLS certificate"
 msgstr "Yeni TLS sertifikası oluşturuldu"
 
-#: dcpp\DCPlusPlus.cpp:103
+#: dcpp\DCPlusPlus.cpp:105
 msgid "Hash database"
 msgstr "Dosya veritabanı"
 
@@ -311,6 +364,16 @@ msgid ""
 msgstr ""
 "Hub ADC'nin eski bir versiyonunu kullanıyor, lütfen hub sahibini "
 "güncellemesi yönünde destekleyin"
+
+#: dcpp\UserConnection.cpp:50 dcpp\UserConnection.cpp:64
+#: dcpp\UserConnection.cpp:132
+#, fuzzy
+msgid "Invalid data"
+msgstr "Geçersiz boyut"
+
+#: dcpp\SettingsManager.cpp:527
+msgid "Invalid search type name"
+msgstr ""
 
 #: dcpp\DownloadManager.cpp:223
 msgid "Invalid size"
@@ -336,6 +399,11 @@ msgstr "Maksimum komut limiti'ni aştınız"
 msgid "More bytes written than requested"
 msgstr "İstenenden daha fazla byte yazıldı"
 
+#: dcpp\UPnPManager.cpp:40
+#, fuzzy
+msgid "No UPnP implementation available"
+msgstr "Boş slot bekleniyor"
+
 #: dcpp\CryptoManager.cpp:143
 msgid "No certificate file chosen"
 msgstr "Sertifika dosyası seçilmemiş"
@@ -352,16 +420,28 @@ msgstr "Özel şifre dosyası şeçilmemiş"
 msgid "No slots available"
 msgstr "Boş slot bekleniyor"
 
+#: dcpp\SettingsManager.cpp:633
+msgid "No such search type"
+msgstr ""
+
+#: dcpp\UserConnection.cpp:56
+msgid "Non-UTF-8 data in an ADC connection"
+msgstr ""
+
 #: dcpp\AdcHub.cpp:660
 #, boost-format
 msgid "Not listening for connections - please restart %1%"
 msgstr "Bağlantılar için dinleme yapmıyor - lütfen yeniden başlatın %1%"
 
-#: dcpp\ClientManager.cpp:153 dcpp\SearchManager.cpp:237
-#: dcpp\SearchManager.cpp:300 dcpp\SearchManager.cpp:302 dcpp\Transfer.cpp:82
+#: dcpp\ClientManager.cpp:153 dcpp\SearchManager.cpp:252
+#: dcpp\SearchManager.cpp:315 dcpp\SearchManager.cpp:317 dcpp\Transfer.cpp:82
 #: dcpp\Transfer.cpp:86
 msgid "Offline"
 msgstr "Çevrimdışı"
+
+#: dcpp\SearchManager.cpp:38
+msgid "Picture"
+msgstr ""
 
 #: dcpp\FavoriteManager.cpp:430
 msgid "Redirect user(s)"
@@ -384,12 +464,12 @@ msgstr "Yanıt ile istek birbirini tutmuyor"
 msgid "SSL Error: %1% (%2%, %3%)"
 msgstr "SSL hatası: %1% (%2%, %3%)"
 
-#: dcpp\SearchManager.cpp:135
+#: dcpp\SearchManager.cpp:150
 #, boost-format
 msgid "Search disabled: %1%"
 msgstr "Arama engellendi: %1%"
 
-#: dcpp\SearchManager.cpp:128
+#: dcpp\SearchManager.cpp:143
 msgid "Search enabled again"
 msgstr "Arama tekrar aktif edildi"
 
@@ -397,13 +477,17 @@ msgstr "Arama tekrar aktif edildi"
 msgid "Sent "
 msgstr "Gönderildi "
 
-#: dcpp\DCPlusPlus.cpp:107
+#: dcpp\DCPlusPlus.cpp:109
 msgid "Shared Files"
 msgstr "Paylaşılan Dosyalar"
 
 #: dcpp\Socket.cpp:263 dcpp\Socket.cpp:267
 msgid "Socks server authentication failed (bad login / password?)"
 msgstr "SOCKS sunucusunda kimlik doğrulanamadı (kullanıcı adı / şifre yanlış)"
+
+#: dcpp\UPnPManager.cpp:78
+msgid "Successfully created port mappings"
+msgstr ""
 
 #: dcpp\CryptoManager.cpp:223
 #, boost-format
@@ -413,6 +497,10 @@ msgstr "TLS aktif değil, sertifika oluşturulamadı: %1%"
 #: dcpp\CryptoManager.cpp:213
 msgid "TLS disabled, no certificate file set"
 msgstr "TLS aktif değil, sertifika dosyası tanımlanmamış"
+
+#: dcpp\SearchManager.cpp:41
+msgid "TTH"
+msgstr ""
 
 #: dcpp\MerkleCheckOutputStream.h:53 dcpp\MerkleCheckOutputStream.h:113
 msgid "TTH inconsistency"
@@ -464,6 +552,15 @@ msgstr ""
 "Bu hub sizi %1% spam yapmak için kullanıyor, lütfen hub sahibini bunu "
 "düzeltmesi için teşvik edin"
 
+#: dcpp\SettingsManager.cpp:531 dcpp\SettingsManager.cpp:601
+msgid "This search type already exists"
+msgstr ""
+
+#: dcpp\UPnPManager.cpp:110
+#, boost-format
+msgid "UPnP: %1%"
+msgstr ""
+
 #: dcpp\Thread.cpp:34 dcpp\Thread.cpp:42
 msgid "Unable to create thread"
 msgstr "İşlem yaratılamadı"
@@ -497,19 +594,23 @@ msgstr "Dosya gönderilemedi %1%: %2%"
 msgid "Unknown error: 0x%1$x"
 msgstr "Bilinmeyen hata: 0x%1$x"
 
-#: dcpp\DCPlusPlus.cpp:115
+#: dcpp\DCPlusPlus.cpp:117
 msgid "Users"
 msgstr "Kullanıcılar"
+
+#: dcpp\SearchManager.cpp:39
+msgid "Video"
+msgstr ""
 
 #: dcpp\QueueManager.cpp:568
 msgid "You're trying to download from yourself!"
 msgstr "Kendinizden dosya indirmeye calışıyorsunuz!"
 
-#: dcpp\SettingsManager.cpp:171
+#: dcpp\SettingsManager.cpp:173
 msgid "downloaded from"
 msgstr "indirildi:"
 
-#: dcpp\SettingsManager.cpp:172
+#: dcpp\SettingsManager.cpp:174
 msgid "uploaded to"
 msgstr "yüklendi:"
 
