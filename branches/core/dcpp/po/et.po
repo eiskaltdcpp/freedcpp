@@ -7,42 +7,57 @@ msgid ""
 msgstr ""
 "Project-Id-Version: dcplusplus\n"
 "Report-Msgid-Bugs-To: dcplusplus-devel@lists.sourceforge.net\n"
-"POT-Creation-Date: 2010-05-16 19:33+0200\n"
+"POT-Creation-Date: 2010-07-05 22:22+0200\n"
 "PO-Revision-Date: 2009-11-07 11:40+0000\n"
 "Last-Translator: René Pärts <Unknown>\n"
 "Language-Team: Estonian <et@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2010-05-16 16:32+0000\n"
+"X-Launchpad-Export-Date: 2010-07-05 15:21+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
-#: dcpp\Util.cpp:491
+#: dcpp\UPnPManager.cpp:71
+#, boost-format
+msgid " Encrypted Transfer Port (%1% TCP)"
+msgstr ""
+
+#: dcpp\UPnPManager.cpp:74
+#, boost-format
+msgid " Search Port (%1% UDP)"
+msgstr ""
+
+#: dcpp\UPnPManager.cpp:68
+#, boost-format
+msgid " Transfer Port (%1% TCP)"
+msgstr ""
+
+#: dcpp\Util.cpp:503
 #, c-format, boost-format
 msgid "%'lld B"
 msgstr "%'lld B"
 
-#: dcpp\Util.cpp:453
+#: dcpp\Util.cpp:465
 #, c-format, boost-format
 msgid "%.02f GiB"
 msgstr "%.02f GiB"
 
-#: dcpp\Util.cpp:449
+#: dcpp\Util.cpp:461
 #, c-format, boost-format
 msgid "%.02f KiB"
 msgstr "%.02f KiB"
 
-#: dcpp\Util.cpp:451
+#: dcpp\Util.cpp:463
 #, c-format, boost-format
 msgid "%.02f MiB"
 msgstr "%.02f MiB"
 
-#: dcpp\Util.cpp:457
+#: dcpp\Util.cpp:469
 #, c-format, boost-format
 msgid "%.02f PiB"
 msgstr "%.02f PiB"
 
-#: dcpp\Util.cpp:455
+#: dcpp\Util.cpp:467
 #, c-format, boost-format
 msgid "%.02f TiB"
 msgstr "%.02f TiB"
@@ -83,12 +98,12 @@ msgstr "%1%/s"
 msgid "%1%: File not available"
 msgstr "%1%: Fail pole kättesaadav"
 
-#: dcpp\Util.cpp:447
+#: dcpp\Util.cpp:459
 #, c-format, boost-format
 msgid "%d B"
 msgstr "%d B"
 
-#: dcpp\Util.cpp:487
+#: dcpp\Util.cpp:499
 #, c-format, boost-format
 msgid "%s B"
 msgstr "%s B"
@@ -110,9 +125,17 @@ msgstr "Erineva suurusega fail on juba järjekorras"
 msgid "A file with the same hash already exists in your share"
 msgstr "Sama hashiga fail on juba jagatud"
 
-#: dcpp\ConnectionManager.cpp:176
+#: dcpp\ConnectionManager.cpp:183
 msgid "All download slots taken"
 msgstr "Kõik allalaadimis slotid on võetud"
+
+#: dcpp\SearchManager.cpp:33
+msgid "Any"
+msgstr ""
+
+#: dcpp\SearchManager.cpp:34
+msgid "Audio"
+msgstr ""
 
 #: dcpp\FavoriteManager.cpp:478
 msgid "Auto-connect group (converted)"
@@ -122,21 +145,25 @@ msgstr ""
 msgid "CRC32 inconsistency (SFV-Check)"
 msgstr "CRC32 ebakõla (SFV-kontroll)"
 
+#: dcpp\SearchManager.cpp:35
+msgid "Compressed"
+msgstr ""
+
 #: dcpp\BufferedSocket.cpp:185 dcpp\SSLSocket.cpp:154
 msgid "Connection closed"
 msgstr "Ühendus suletud"
 
 #: dcpp\BufferedSocket.cpp:154 dcpp\BufferedSocket.cpp:170
-#: dcpp\ConnectionManager.cpp:182 dcpp\Socket.cpp:154
+#: dcpp\ConnectionManager.cpp:190 dcpp\Socket.cpp:154
 msgid "Connection timeout"
 msgstr "Ühendus aegus"
 
-#: dcpp\ConnectionManager.cpp:250
+#: dcpp\ConnectionManager.cpp:258
 #, boost-format
 msgid "Connectivity error: %1%"
 msgstr "Ühenduse viga: %1%"
 
-#: dcpp\ConnectionManager.cpp:243
+#: dcpp\ConnectionManager.cpp:251
 msgid "Connectivity restored"
 msgstr "Ühendus taastatud"
 
@@ -144,6 +171,11 @@ msgstr "Ühendus taastatud"
 #, boost-format
 msgid "Could not open target file: %1%"
 msgstr "Sihtfaili pole võimalik avada: %1%"
+
+#: dcpp\SearchManager.cpp:40
+#, fuzzy
+msgid "Directory"
+msgstr "Kataloog on juba jagatud"
 
 #: dcpp\ShareManager.cpp:462
 msgid "Directory already shared"
@@ -171,7 +203,11 @@ msgstr "Ühendus katkestatud"
 msgid "Disconnected user leaving the hub: %1%"
 msgstr "Katkestatud lahkunud kasutaja: %1%"
 
-#: dcpp\DCPlusPlus.cpp:111
+#: dcpp\SearchManager.cpp:36
+msgid "Document"
+msgstr ""
+
+#: dcpp\DCPlusPlus.cpp:113
 msgid "Download Queue"
 msgstr "Allalaadimiste järjekord"
 
@@ -217,6 +253,19 @@ msgstr "Viga hashimisel %1%: %2%"
 msgid "Error saving hash data: %1%"
 msgstr "Viga hashi andmete salvestamisel: %1%"
 
+#: dcpp\SearchManager.cpp:37
+msgid "Executable"
+msgstr ""
+
+#: dcpp\UPnPManager.cpp:97
+#, fuzzy
+msgid "Failed to create port mappings"
+msgstr "Ei saa luua lõime"
+
+#: dcpp\UPnPManager.cpp:89
+msgid "Failed to get external IP"
+msgstr ""
+
 #: dcpp\CryptoManager.cpp:228 dcpp\CryptoManager.cpp:232
 #: dcpp\CryptoManager.cpp:237 dcpp\CryptoManager.cpp:241
 msgid "Failed to load certificate file"
@@ -230,6 +279,10 @@ msgstr "Privaatvõtme laadimine ebaõnnestus"
 #: dcpp\AdcHub.cpp:216
 msgid "Failed to negotiate base protocol"
 msgstr "Baasprotokolli suhtlus ebaõnnestus"
+
+#: dcpp\UPnPManager.cpp:105
+msgid "Failed to remove port mappings"
+msgstr ""
 
 #: dcpp\Socket.cpp:402
 msgid ""
@@ -291,7 +344,7 @@ msgstr "Kogu puu ei ühildu TTH juurega"
 msgid "Generated new TLS certificate"
 msgstr "Loodud uus TLS sertifikaat"
 
-#: dcpp\DCPlusPlus.cpp:103
+#: dcpp\DCPlusPlus.cpp:105
 msgid "Hash database"
 msgstr "Hashi andmebaas"
 
@@ -309,6 +362,16 @@ msgid ""
 "Hub probably uses an old version of ADC, please encourage the owner to "
 "upgrade"
 msgstr "Hub kasutab ilmselt vanemat ADC versiooni, palu hubi omanikul uuendada"
+
+#: dcpp\UserConnection.cpp:50 dcpp\UserConnection.cpp:64
+#: dcpp\UserConnection.cpp:132
+#, fuzzy
+msgid "Invalid data"
+msgstr "Vigane suurus"
+
+#: dcpp\SettingsManager.cpp:527
+msgid "Invalid search type name"
+msgstr ""
 
 #: dcpp\DownloadManager.cpp:223
 msgid "Invalid size"
@@ -332,6 +395,11 @@ msgstr "Maksimaalne käsu pikkus ületatud"
 msgid "More bytes written than requested"
 msgstr "Rohkem baite kirjutatud kui küsitud"
 
+#: dcpp\UPnPManager.cpp:40
+#, fuzzy
+msgid "No UPnP implementation available"
+msgstr "Kõik slotid on hõivatud"
+
 #: dcpp\CryptoManager.cpp:143
 msgid "No certificate file chosen"
 msgstr "Sertifikaadi fail valimata"
@@ -348,16 +416,28 @@ msgstr "Privaatvõtme fail valimata"
 msgid "No slots available"
 msgstr "Kõik slotid on hõivatud"
 
+#: dcpp\SettingsManager.cpp:633
+msgid "No such search type"
+msgstr ""
+
+#: dcpp\UserConnection.cpp:56
+msgid "Non-UTF-8 data in an ADC connection"
+msgstr ""
+
 #: dcpp\AdcHub.cpp:660
 #, boost-format
 msgid "Not listening for connections - please restart %1%"
 msgstr "Ühendusi ei kuulata - palun taaskäivita %1%"
 
-#: dcpp\ClientManager.cpp:153 dcpp\SearchManager.cpp:237
-#: dcpp\SearchManager.cpp:300 dcpp\SearchManager.cpp:302 dcpp\Transfer.cpp:82
+#: dcpp\ClientManager.cpp:153 dcpp\SearchManager.cpp:252
+#: dcpp\SearchManager.cpp:315 dcpp\SearchManager.cpp:317 dcpp\Transfer.cpp:82
 #: dcpp\Transfer.cpp:86
 msgid "Offline"
 msgstr "Ühenduseta"
+
+#: dcpp\SearchManager.cpp:38
+msgid "Picture"
+msgstr ""
 
 #: dcpp\FavoriteManager.cpp:430
 msgid "Redirect user(s)"
@@ -380,12 +460,12 @@ msgstr "Vastus ei vasta küsitule"
 msgid "SSL Error: %1% (%2%, %3%)"
 msgstr "SSL viga: %1% (%2%, %3%)"
 
-#: dcpp\SearchManager.cpp:135
+#: dcpp\SearchManager.cpp:150
 #, boost-format
 msgid "Search disabled: %1%"
 msgstr "Otsing keelatud: %1%"
 
-#: dcpp\SearchManager.cpp:128
+#: dcpp\SearchManager.cpp:143
 msgid "Search enabled again"
 msgstr "Otsing uuesti lubatud"
 
@@ -393,13 +473,17 @@ msgstr "Otsing uuesti lubatud"
 msgid "Sent "
 msgstr ""
 
-#: dcpp\DCPlusPlus.cpp:107
+#: dcpp\DCPlusPlus.cpp:109
 msgid "Shared Files"
 msgstr "Jagatud failid"
 
 #: dcpp\Socket.cpp:263 dcpp\Socket.cpp:267
 msgid "Socks server authentication failed (bad login / password?)"
 msgstr "Socks serveri autentimine ebaõnnestus (vale nimi/parool?)"
+
+#: dcpp\UPnPManager.cpp:78
+msgid "Successfully created port mappings"
+msgstr ""
 
 #: dcpp\CryptoManager.cpp:223
 #, boost-format
@@ -409,6 +493,10 @@ msgstr "TLS keelatus, sertifikaadi loomine ebaõnnestus: %1%"
 #: dcpp\CryptoManager.cpp:213
 msgid "TLS disabled, no certificate file set"
 msgstr "TLS keelatud, sertifikaadi fail seadmata"
+
+#: dcpp\SearchManager.cpp:41
+msgid "TTH"
+msgstr ""
 
 #: dcpp\MerkleCheckOutputStream.h:53 dcpp\MerkleCheckOutputStream.h:113
 msgid "TTH inconsistency"
@@ -459,6 +547,15 @@ msgid ""
 "fix this"
 msgstr ""
 
+#: dcpp\SettingsManager.cpp:531 dcpp\SettingsManager.cpp:601
+msgid "This search type already exists"
+msgstr ""
+
+#: dcpp\UPnPManager.cpp:110
+#, boost-format
+msgid "UPnP: %1%"
+msgstr ""
+
 #: dcpp\Thread.cpp:34 dcpp\Thread.cpp:42
 msgid "Unable to create thread"
 msgstr "Ei saa luua lõime"
@@ -492,18 +589,22 @@ msgstr "Faili %1% ei saa saata: %2%"
 msgid "Unknown error: 0x%1$x"
 msgstr "Tundmatu viga: 0x%1$x"
 
-#: dcpp\DCPlusPlus.cpp:115
+#: dcpp\DCPlusPlus.cpp:117
 msgid "Users"
+msgstr ""
+
+#: dcpp\SearchManager.cpp:39
+msgid "Video"
 msgstr ""
 
 #: dcpp\QueueManager.cpp:568
 msgid "You're trying to download from yourself!"
 msgstr "Proovid alla laadida iseendalt!"
 
-#: dcpp\SettingsManager.cpp:171
+#: dcpp\SettingsManager.cpp:173
 msgid "downloaded from"
 msgstr "alla laetud:"
 
-#: dcpp\SettingsManager.cpp:172
+#: dcpp\SettingsManager.cpp:174
 msgid "uploaded to"
 msgstr "üles laetud:"

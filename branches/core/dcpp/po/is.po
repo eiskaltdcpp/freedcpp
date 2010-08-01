@@ -7,42 +7,57 @@ msgid ""
 msgstr ""
 "Project-Id-Version: dcpp\n"
 "Report-Msgid-Bugs-To: dcplusplus-devel@lists.sourceforge.net\n"
-"POT-Creation-Date: 2010-05-16 19:33+0200\n"
+"POT-Creation-Date: 2010-07-05 22:22+0200\n"
 "PO-Revision-Date: 2008-03-13 23:09+0000\n"
 "Last-Translator: Jacek Sieka <Unknown>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2010-05-16 16:32+0000\n"
+"X-Launchpad-Export-Date: 2010-07-05 15:21+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
-#: dcpp\Util.cpp:491
+#: dcpp\UPnPManager.cpp:71
+#, boost-format
+msgid " Encrypted Transfer Port (%1% TCP)"
+msgstr ""
+
+#: dcpp\UPnPManager.cpp:74
+#, boost-format
+msgid " Search Port (%1% UDP)"
+msgstr ""
+
+#: dcpp\UPnPManager.cpp:68
+#, boost-format
+msgid " Transfer Port (%1% TCP)"
+msgstr ""
+
+#: dcpp\Util.cpp:503
 #, c-format, boost-format
 msgid "%'lld B"
 msgstr ""
 
-#: dcpp\Util.cpp:453
+#: dcpp\Util.cpp:465
 #, c-format, boost-format
 msgid "%.02f GiB"
 msgstr ""
 
-#: dcpp\Util.cpp:449
+#: dcpp\Util.cpp:461
 #, c-format, boost-format
 msgid "%.02f KiB"
 msgstr ""
 
-#: dcpp\Util.cpp:451
+#: dcpp\Util.cpp:463
 #, c-format, boost-format
 msgid "%.02f MiB"
 msgstr ""
 
-#: dcpp\Util.cpp:457
+#: dcpp\Util.cpp:469
 #, c-format, boost-format
 msgid "%.02f PiB"
 msgstr ""
 
-#: dcpp\Util.cpp:455
+#: dcpp\Util.cpp:467
 #, c-format, boost-format
 msgid "%.02f TiB"
 msgstr ""
@@ -83,12 +98,12 @@ msgstr ""
 msgid "%1%: File not available"
 msgstr "Skrá ekki til"
 
-#: dcpp\Util.cpp:447
+#: dcpp\Util.cpp:459
 #, c-format, boost-format
 msgid "%d B"
 msgstr ""
 
-#: dcpp\Util.cpp:487
+#: dcpp\Util.cpp:499
 #, c-format, boost-format
 msgid "%s B"
 msgstr ""
@@ -110,9 +125,17 @@ msgstr "Eins skrá með annari stærð er þegar til í biðlista"
 msgid "A file with the same hash already exists in your share"
 msgstr "Skrá með sama auðkenni er þegar í deilingu"
 
-#: dcpp\ConnectionManager.cpp:176
+#: dcpp\ConnectionManager.cpp:183
 msgid "All download slots taken"
 msgstr "Engin niðurhleðsluhólf laus"
+
+#: dcpp\SearchManager.cpp:33
+msgid "Any"
+msgstr ""
+
+#: dcpp\SearchManager.cpp:34
+msgid "Audio"
+msgstr ""
 
 #: dcpp\FavoriteManager.cpp:478
 msgid "Auto-connect group (converted)"
@@ -124,22 +147,26 @@ msgstr ""
 "SFV/CRC32 segir skránna sótta viltaust. Ef sfv/crc32 skráin í sömu möppu "
 "gildir ekki skaltu slökkva á þessum möguleika, en annars sækja hana aftur"
 
+#: dcpp\SearchManager.cpp:35
+msgid "Compressed"
+msgstr ""
+
 #: dcpp\BufferedSocket.cpp:185 dcpp\SSLSocket.cpp:154
 #, fuzzy
 msgid "Connection closed"
 msgstr "Tenging rann út"
 
 #: dcpp\BufferedSocket.cpp:154 dcpp\BufferedSocket.cpp:170
-#: dcpp\ConnectionManager.cpp:182 dcpp\Socket.cpp:154
+#: dcpp\ConnectionManager.cpp:190 dcpp\Socket.cpp:154
 msgid "Connection timeout"
 msgstr "Tenging rann út"
 
-#: dcpp\ConnectionManager.cpp:250
+#: dcpp\ConnectionManager.cpp:258
 #, boost-format
 msgid "Connectivity error: %1%"
 msgstr ""
 
-#: dcpp\ConnectionManager.cpp:243
+#: dcpp\ConnectionManager.cpp:251
 #, fuzzy
 msgid "Connectivity restored"
 msgstr "Tenging rann út"
@@ -148,6 +175,11 @@ msgstr "Tenging rann út"
 #, boost-format
 msgid "Could not open target file: %1%"
 msgstr ""
+
+#: dcpp\SearchManager.cpp:40
+#, fuzzy
+msgid "Directory"
+msgstr "Mappa þegar deild"
 
 #: dcpp\ShareManager.cpp:462
 msgid "Directory already shared"
@@ -175,7 +207,11 @@ msgstr "Aftengd/ur"
 msgid "Disconnected user leaving the hub: %1%"
 msgstr ""
 
-#: dcpp\DCPlusPlus.cpp:111
+#: dcpp\SearchManager.cpp:36
+msgid "Document"
+msgstr ""
+
+#: dcpp\DCPlusPlus.cpp:113
 msgid "Download Queue"
 msgstr "Bið niðurhleðslu"
 
@@ -221,6 +257,19 @@ msgstr ""
 msgid "Error saving hash data: %1%"
 msgstr ""
 
+#: dcpp\SearchManager.cpp:37
+msgid "Executable"
+msgstr ""
+
+#: dcpp\UPnPManager.cpp:97
+#, fuzzy
+msgid "Failed to create port mappings"
+msgstr "Get ekki sett inn þráð"
+
+#: dcpp\UPnPManager.cpp:89
+msgid "Failed to get external IP"
+msgstr ""
+
 #: dcpp\CryptoManager.cpp:228 dcpp\CryptoManager.cpp:232
 #: dcpp\CryptoManager.cpp:237 dcpp\CryptoManager.cpp:241
 msgid "Failed to load certificate file"
@@ -233,6 +282,10 @@ msgstr ""
 
 #: dcpp\AdcHub.cpp:216
 msgid "Failed to negotiate base protocol"
+msgstr ""
+
+#: dcpp\UPnPManager.cpp:105
+msgid "Failed to remove port mappings"
 msgstr ""
 
 #: dcpp\Socket.cpp:402
@@ -295,7 +348,7 @@ msgstr "Sótt auðkenni passar ekki við TTH auðkenningu"
 msgid "Generated new TLS certificate"
 msgstr ""
 
-#: dcpp\DCPlusPlus.cpp:103
+#: dcpp\DCPlusPlus.cpp:105
 msgid "Hash database"
 msgstr "Geri TTH auðkenni fyrir skrár í deilingu..."
 
@@ -312,6 +365,15 @@ msgstr ""
 msgid ""
 "Hub probably uses an old version of ADC, please encourage the owner to "
 "upgrade"
+msgstr ""
+
+#: dcpp\UserConnection.cpp:50 dcpp\UserConnection.cpp:64
+#: dcpp\UserConnection.cpp:132
+msgid "Invalid data"
+msgstr ""
+
+#: dcpp\SettingsManager.cpp:527
+msgid "Invalid search type name"
 msgstr ""
 
 #: dcpp\DownloadManager.cpp:223
@@ -339,6 +401,11 @@ msgstr ""
 msgid "More bytes written than requested"
 msgstr "Meira af gögnum var sent en bjóst var við"
 
+#: dcpp\UPnPManager.cpp:40
+#, fuzzy
+msgid "No UPnP implementation available"
+msgstr "Engin hleðsluhólf laus"
+
 #: dcpp\CryptoManager.cpp:143
 msgid "No certificate file chosen"
 msgstr ""
@@ -355,16 +422,28 @@ msgstr ""
 msgid "No slots available"
 msgstr "Engin hleðsluhólf laus"
 
+#: dcpp\SettingsManager.cpp:633
+msgid "No such search type"
+msgstr ""
+
+#: dcpp\UserConnection.cpp:56
+msgid "Non-UTF-8 data in an ADC connection"
+msgstr ""
+
 #: dcpp\AdcHub.cpp:660
 #, boost-format
 msgid "Not listening for connections - please restart %1%"
 msgstr ""
 
-#: dcpp\ClientManager.cpp:153 dcpp\SearchManager.cpp:237
-#: dcpp\SearchManager.cpp:300 dcpp\SearchManager.cpp:302 dcpp\Transfer.cpp:82
+#: dcpp\ClientManager.cpp:153 dcpp\SearchManager.cpp:252
+#: dcpp\SearchManager.cpp:315 dcpp\SearchManager.cpp:317 dcpp\Transfer.cpp:82
 #: dcpp\Transfer.cpp:86
 msgid "Offline"
 msgstr "Aftengdur"
+
+#: dcpp\SearchManager.cpp:38
+msgid "Picture"
+msgstr ""
 
 #: dcpp\FavoriteManager.cpp:430
 msgid "Redirect user(s)"
@@ -388,12 +467,12 @@ msgstr "Sótt auðkenni passar ekki við TTH auðkenningu"
 msgid "SSL Error: %1% (%2%, %3%)"
 msgstr ""
 
-#: dcpp\SearchManager.cpp:135
+#: dcpp\SearchManager.cpp:150
 #, boost-format
 msgid "Search disabled: %1%"
 msgstr ""
 
-#: dcpp\SearchManager.cpp:128
+#: dcpp\SearchManager.cpp:143
 msgid "Search enabled again"
 msgstr ""
 
@@ -401,13 +480,17 @@ msgstr ""
 msgid "Sent "
 msgstr ""
 
-#: dcpp\DCPlusPlus.cpp:107
+#: dcpp\DCPlusPlus.cpp:109
 msgid "Shared Files"
 msgstr "Deildar skrár"
 
 #: dcpp\Socket.cpp:263 dcpp\Socket.cpp:267
 msgid "Socks server authentication failed (bad login / password?)"
 msgstr "Auðkenning á Socks þjóni mistókst (vitlaust notendanafn / lykilorð?)"
+
+#: dcpp\UPnPManager.cpp:78
+msgid "Successfully created port mappings"
+msgstr ""
 
 #: dcpp\CryptoManager.cpp:223
 #, boost-format
@@ -416,6 +499,10 @@ msgstr ""
 
 #: dcpp\CryptoManager.cpp:213
 msgid "TLS disabled, no certificate file set"
+msgstr ""
+
+#: dcpp\SearchManager.cpp:41
+msgid "TTH"
 msgstr ""
 
 #: dcpp\MerkleCheckOutputStream.h:53 dcpp\MerkleCheckOutputStream.h:113
@@ -467,6 +554,15 @@ msgid ""
 "fix this"
 msgstr ""
 
+#: dcpp\SettingsManager.cpp:531 dcpp\SettingsManager.cpp:601
+msgid "This search type already exists"
+msgstr ""
+
+#: dcpp\UPnPManager.cpp:110
+#, boost-format
+msgid "UPnP: %1%"
+msgstr ""
+
 #: dcpp\Thread.cpp:34 dcpp\Thread.cpp:42
 msgid "Unable to create thread"
 msgstr "Get ekki sett inn þráð"
@@ -501,19 +597,23 @@ msgstr ""
 msgid "Unknown error: 0x%1$x"
 msgstr ""
 
-#: dcpp\DCPlusPlus.cpp:115
+#: dcpp\DCPlusPlus.cpp:117
 msgid "Users"
+msgstr ""
+
+#: dcpp\SearchManager.cpp:39
+msgid "Video"
 msgstr ""
 
 #: dcpp\QueueManager.cpp:568
 msgid "You're trying to download from yourself!"
 msgstr "Það er ekki hægt að sækja frá sjálfum sér!"
 
-#: dcpp\SettingsManager.cpp:171
+#: dcpp\SettingsManager.cpp:173
 msgid "downloaded from"
 msgstr ""
 
-#: dcpp\SettingsManager.cpp:172
+#: dcpp\SettingsManager.cpp:174
 msgid "uploaded to"
 msgstr ""
 

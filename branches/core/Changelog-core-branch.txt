@@ -1,5 +1,9 @@
 		--- freedcpp core branch ---
 
+r152: 0.24
+* Update translations.
+* Ревизия 2176 (dcplusplus, update translations & zlib).
+
 r151: 0.23
 * Ревизия 2174 (dcplusplus, add a few more predefined extensions).
 
