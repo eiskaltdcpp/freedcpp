@@ -562,13 +562,13 @@ void SettingsManager::setSearchTypeDefaults() {
 		l.push_back("xlsx"); l.push_back("pptx"); l.push_back("odf"); l.push_back("odt");
 		l.push_back("ods"); l.push_back("odp"); l.push_back("pdf"); l.push_back("xps");
 		l.push_back("htm"); l.push_back("html"); l.push_back("xml"); l.push_back("txt");
-		l.push_back("nfo");
+		l.push_back("nfo"); l.push_back("rtf");
 	}
 
 	{
 		StringList& l = searchTypes.insert(make_pair(string(1, '0' + SearchManager::TYPE_EXECUTABLE), StringList())).first->second;
 		l.push_back("exe"); l.push_back("com"); l.push_back("bat"); l.push_back("cmd");
-		l.push_back("dll"); l.push_back("vbs"); l.push_back("ps1");
+		l.push_back("dll"); l.push_back("vbs"); l.push_back("ps1"); l.push_back("msi");
 	}
 
 	{
@@ -586,7 +586,7 @@ void SettingsManager::setSearchTypeDefaults() {
 		l.push_back("mov"); l.push_back("mp4"); l.push_back("3gp"); l.push_back("qt");
 		l.push_back("asx"); l.push_back("divx"); l.push_back("asf"); l.push_back("pxp");
 		l.push_back("ogm"); l.push_back("flv"); l.push_back("rm"); l.push_back("rmvb");
-		l.push_back("webm");
+		l.push_back("webm"); l.push_back("mpeg");
 	}
 
 	fire(SettingsManagerListener::SearchTypesChanged());

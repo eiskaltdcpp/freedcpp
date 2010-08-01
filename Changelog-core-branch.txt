@@ -1,5 +1,8 @@
 		--- freedcpp core branch ---
 
+r151: 0.23
+* Ревизия 2174 (dcplusplus, add a few more predefined extensions).
+
 r150: 0.22
 * Ревизия 2171 (dcplusplus, update translation templates).
 
