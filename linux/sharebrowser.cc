@@ -24,6 +24,7 @@
 #include <dcpp/FavoriteManager.h>
 #include <dcpp/ShareManager.h>
 #include <dcpp/Text.h>
+#include <dcpp/ADLSearch.h>
 #include "search.hh"
 #include "settingsmanager.hh"
 #include "UserCommandMenu.hh"
@@ -157,6 +158,9 @@ void ShareBrowser::buildList_gui()
 
 		// Set name of root entry to user nick.
 		listing.getRoot()->setName(nick);
+
+		// Search ADL
+		ADLSearchManager::getInstance()->matchListing(listing);
 
 		// Add entries to dir tree view starting with the root entry.
 		buildDirs_gui(listing.getRoot(), NULL);
