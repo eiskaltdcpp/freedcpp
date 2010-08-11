@@ -41,6 +41,7 @@
 #include "privatemessage.hh"
 #include "publichubs.hh"
 #include "search.hh"
+#include "adlsearch.hh"
 #include "searchspy.hh"
 #include "settingsmanager.hh"
 #include "sharebrowser.hh"
@@ -133,6 +134,7 @@ MainWindow::MainWindow():
 	g_signal_connect(getWidget("settings"), "clicked", G_CALLBACK(onPreferencesClicked_gui), (gpointer)this);
 	g_signal_connect(getWidget("hash"), "clicked", G_CALLBACK(onHashClicked_gui), (gpointer)this);
 	g_signal_connect(getWidget("search"), "clicked", G_CALLBACK(onSearchClicked_gui), (gpointer)this);
+	g_signal_connect(getWidget("searchADL"), "clicked", G_CALLBACK(onSearchADLClicked_gui), (gpointer)this);
 	g_signal_connect(getWidget("searchSpy"), "clicked", G_CALLBACK(onSearchSpyClicked_gui), (gpointer)this);
 	g_signal_connect(getWidget("queue"), "clicked", G_CALLBACK(onDownloadQueueClicked_gui), (gpointer)this);
 	g_signal_connect(getWidget("quit"), "clicked", G_CALLBACK(onQuitClicked_gui), (gpointer)this);
@@ -151,6 +153,7 @@ MainWindow::MainWindow():
 	g_signal_connect(getWidget("publicHubsMenuItem"), "activate", G_CALLBACK(onPublicHubsClicked_gui), (gpointer)this);
 	g_signal_connect(getWidget("indexingProgressMenuItem"), "activate", G_CALLBACK(onHashClicked_gui), (gpointer)this);
 	g_signal_connect(getWidget("searchMenuItem"), "activate", G_CALLBACK(onSearchClicked_gui), (gpointer)this);
+	g_signal_connect(getWidget("searchADLMenuItem"), "activate", G_CALLBACK(onSearchADLClicked_gui), (gpointer)this);
 	g_signal_connect(getWidget("searchSpyMenuItem"), "activate", G_CALLBACK(onSearchSpyClicked_gui), (gpointer)this);
 	g_signal_connect(getWidget("downloadQueueMenuItem"), "activate", G_CALLBACK(onDownloadQueueClicked_gui), (gpointer)this);
 	g_signal_connect(getWidget("finishedDownloadsMenuItem"), "activate", G_CALLBACK(onFinishedDownloadsClicked_gui), (gpointer)this);
@@ -646,6 +649,19 @@ void MainWindow::showSearchSpy_gui()
 	if (entry == NULL)
 	{
 		entry = new SearchSpy();
+		addBookEntry_gui(entry);
+	}
+
+	raisePage_gui(entry->getContainer());
+}
+
+void MainWindow::showSearchADL_gui()
+{
+	BookEntry *entry = findBookEntry(Entry::SEARCH_ADL);
+
+	if (entry == NULL)
+	{
+		entry = new SearchADL();
 		addBookEntry_gui(entry);
 	}
 
@@ -1511,6 +1527,12 @@ void MainWindow::onSearchSpyClicked_gui(GtkWidget *widget, gpointer data)
 {
 	MainWindow *mw = (MainWindow *)data;
 	mw->showSearchSpy_gui();
+}
+
+void MainWindow::onSearchADLClicked_gui(GtkWidget *widget, gpointer data)
+{
+	MainWindow *mw = (MainWindow *)data;
+	mw->showSearchADL_gui();
 }
 
 void MainWindow::onDownloadQueueClicked_gui(GtkWidget *widget, gpointer data)

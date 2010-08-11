@@ -134,6 +134,9 @@ WulforSettingsManager::WulforSettingsManager():
 	defaultString.insert(StringMap::value_type("search-order", ""));
 	defaultString.insert(StringMap::value_type("search-width", ""));
 	defaultString.insert(StringMap::value_type("search-visibility", ""));
+	defaultString.insert(StringMap::value_type("searchadl-order", ""));
+	defaultString.insert(StringMap::value_type("searchadl-width", ""));
+	defaultString.insert(StringMap::value_type("searchadl-visibility", ""));
 	defaultString.insert(StringMap::value_type("searchspy-order", ""));
 	defaultString.insert(StringMap::value_type("searchspy-width", ""));
 	defaultString.insert(StringMap::value_type("searchspy-visibility", ""));
