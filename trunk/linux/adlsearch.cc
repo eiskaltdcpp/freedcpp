@@ -32,6 +32,7 @@ SearchADL::SearchADL():
 {
 	// Configure the dialog
 	gtk_dialog_set_alternative_button_order(GTK_DIALOG(getWidget("ADLSearchDialog")), GTK_RESPONSE_OK, GTK_RESPONSE_CANCEL, -1);
+	g_object_ref_sink(getWidget("menu"));
 
 	// Initialize search list treeview
 	searchADLView.setView(GTK_TREE_VIEW(getWidget("searchADLView")), TRUE, "searchadl");
@@ -87,6 +88,7 @@ SearchADL::~SearchADL()
 {
 	ADLSearchManager::getInstance()->Save();
 	gtk_widget_destroy(getWidget("ADLSearchDialog"));
+	g_object_unref(getWidget("menu"));
 }
 
 void SearchADL::show()
