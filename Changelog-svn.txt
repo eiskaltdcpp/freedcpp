@@ -1,5 +1,8 @@
 		--- freedcpp 0.0.x ---
 
+r154: 0.0.2.29
+* Иконка (adl search).
+
 r153: 0.0.2.28
 * ADL Search.
 

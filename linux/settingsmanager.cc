@@ -215,6 +215,7 @@ WulforSettingsManager::WulforSettingsManager():
 	defaultString.insert(StringMap::value_type("icon-public-hubs", "freedcpp-public-hubs"));
 	defaultString.insert(StringMap::value_type("icon-queue", "freedcpp-queue"));
 	defaultString.insert(StringMap::value_type("icon-search", "freedcpp-search"));
+	defaultString.insert(StringMap::value_type("icon-search-adl", "freedcpp-search-adl"));
 	defaultString.insert(StringMap::value_type("icon-search-spy", "freedcpp-search-spy"));
 	defaultString.insert(StringMap::value_type("icon-upload", "freedcpp-upload"));
 	defaultString.insert(StringMap::value_type("icon-quit", "freedcpp-quit"));
