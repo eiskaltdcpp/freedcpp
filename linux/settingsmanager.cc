@@ -222,6 +222,10 @@ WulforSettingsManager::WulforSettingsManager():
 	defaultString.insert(StringMap::value_type("icon-connect", "freedcpp-connect"));
 	defaultString.insert(StringMap::value_type("icon-file", GTK_STOCK_FILE));
 	defaultString.insert(StringMap::value_type("icon-directory", GTK_STOCK_DIRECTORY));
+	defaultString.insert(StringMap::value_type("icon-pm-online", "freedcpp-pm-online"));
+	defaultString.insert(StringMap::value_type("icon-pm-offline", "freedcpp-pm-offline"));
+	defaultString.insert(StringMap::value_type("icon-hub-online", "freedcpp-hub-online"));
+	defaultString.insert(StringMap::value_type("icon-hub-offline", "freedcpp-hub-offline"));
 
 	load();
 }
