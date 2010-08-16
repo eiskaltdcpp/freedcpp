@@ -40,6 +40,8 @@ class BookEntry : public Entry
 		GtkWidget *getLabelBox() { return labelBox; }
 		GtkWidget *getCloseButton() { return closeButton; }
 		GtkWidget *getTabMenuItem() { return tabMenuItem; }
+		void setIcon_gui(const EntryType type);
+		void setIcon_gui(const std::string stock);
 		void setLabel_gui(std::string text);
 		const std::string& getLabelText();
 		void setBold_gui();
@@ -66,6 +68,7 @@ class BookEntry : public Entry
 		bool bold;
 		bool urgent;
 		static const glong labelSize = 20; ///@todo: make a preference?
+		GtkWidget *icon;
 };
 
 #else

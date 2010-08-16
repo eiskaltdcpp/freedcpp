@@ -21,4 +21,4 @@
 
 #define GUI_PACKAGE "freedcpp"
 #define GUI_VERSION_STRING "0.0.2"
-#define GUI_VERSION_BUILD_STRING "30"
+#define GUI_VERSION_BUILD_STRING "31"
