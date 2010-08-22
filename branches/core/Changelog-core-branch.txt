@@ -1,5 +1,8 @@
 		--- freedcpp core branch ---
 
+r157: 0.25
+* Ревизия 2177 (dcplusplus, prevent hub-provided cmds from 'open own list' from going to the wrong hub).
+
 r152: 0.24
 * Update translations.
 * Ревизия 2176 (dcplusplus, update translations & zlib).
