@@ -446,6 +446,41 @@
                       </widget>
                     </child>
                     <child>
+                      <widget class="GtkImageMenuItem" id="downloadItem">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">Downloads</property>
+                        <property name="use_underline">True</property>
+                        <child internal-child="image">
+                          <widget class="GtkImage" id="downloadMenuImage">
+                            <property name="visible">True</property>
+                            <property name="stock">gtk-file</property>
+                            <property name="icon_size">1</property>
+                          </widget>
+                        </child>
+                        <child>
+                          <widget class="GtkMenu" id="downloadMenu">
+                            <child>
+                              <widget class="GtkMenuItem" id="dowloadMenuItem1">
+                                <property name="visible">True</property>
+                                <property name="label" translatable="yes">Official</property>
+                              </widget>
+                            </child>
+                            <child>
+                              <widget class="GtkMenuItem" id="dowloadMenuItem2">
+                                <property name="visible">True</property>
+                                <property name="label" translatable="yes">Packages in PPA</property>
+                              </widget>
+                            </child>
+                          </widget>
+                        </child>
+                      </widget>
+                    </child>
+                    <child>
+                      <widget class="GtkSeparatorMenuItem" id="separator2">
+                        <property name="visible">True</property>
+                      </widget>
+                    </child>
+                    <child>
                       <widget class="GtkImageMenuItem" id="aboutMenuItem">
                         <property name="visible">True</property>
                         <property name="label" translatable="yes">About FreeDC++</property>

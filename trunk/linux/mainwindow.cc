@@ -189,6 +189,14 @@ MainWindow::MainWindow():
 		g_strdup((string(_DATADIR) + "/doc/freedcpp/Changelog-svn.txt").c_str()), g_free);
 	g_signal_connect(getWidget("changeLogItem"), "activate", G_CALLBACK(onLinkClicked_gui), NULL);
 
+	g_object_set_data_full(G_OBJECT(getWidget("dowloadMenuItem1")), "link",
+		g_strdup("http://code.google.com/p/freedcpp/downloads/list"), g_free);
+	g_signal_connect(getWidget("dowloadMenuItem1"), "activate", G_CALLBACK(onLinkClicked_gui), NULL);
+
+	g_object_set_data_full(G_OBJECT(getWidget("dowloadMenuItem2")), "link",
+		g_strdup("https://launchpad.net/~tehnick/+archive/tehnick/+packages"), g_free);
+	g_signal_connect(getWidget("dowloadMenuItem2"), "activate", G_CALLBACK(onLinkClicked_gui), NULL);
+
 	onQuit = FALSE;
 
 	// Load window state and position from settings manager
