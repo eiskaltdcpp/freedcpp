@@ -603,7 +603,7 @@
                 <property name="visible">True</property>
                 <property name="tooltip" translatable="yes">ADL Search</property>
                 <property name="is_important">True</property>
-                <property name="label" translatable="yes">ADL</property>
+                <property name="label">ADL</property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">freedcpp-search-adl</property>
               </widget>
@@ -1497,7 +1497,7 @@ Contributors:
                           <widget class="GtkRadioButton" id="dowloadQueueRadioButton">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="tooltip" translatable="yes">Для начала закачки файла включите автоматический поиск альтернативных источников закачки (Настроки/Закачки/Очередь)</property>
+                            <property name="tooltip" translatable="yes">Use automatically search for alternative download locations (Preferences/Downloads/Queue)</property>
                             <property name="label" translatable="yes">Add this file to your download queue</property>
                             <property name="response_id">0</property>
                             <property name="draw_indicator">True</property>

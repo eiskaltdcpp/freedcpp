@@ -386,7 +386,7 @@ bool SearchSpy::updateFrameStatus_gui(GtkTreeIter *iter, uint64_t tick)
 void SearchSpy::updateFrameStatus_gui()
 {
 	updateFrameStatus_gui(NULL, uint64_t(0));
-	setStatus_gui(_("Update frame search"));
+	setStatus_gui(_("Updated frame search"));
 }
 
 void SearchSpy::setStatus_gui(const string text)
@@ -497,7 +497,7 @@ void SearchSpy::onClearFrameClicked_gui(GtkWidget *widget, gpointer data)
 
 	gtk_list_store_clear(s->searchStore);
 	s->searchIters.clear();
-	s->setStatus_gui(_("Clear frame search"));
+	s->setStatus_gui(_("Cleaned frame search"));
 }
 
 void SearchSpy::onUpdateFrameClicked_gui(GtkWidget *widget, gpointer data)

@@ -1233,6 +1233,8 @@ void Settings::initAppearance_gui()
 			"icon-search");
 		addOption_gui(toolbarStore, wsm, iconTheme, _("Search Spy"), "toolbar-button-search-spy",
 			"icon-search-spy");
+		addOption_gui(toolbarStore, wsm, iconTheme, _("ADL Search"), "toolbar-button-search-adl",
+			"icon-search-adl");
 		addOption_gui(toolbarStore, wsm, iconTheme, _("Queue"), "toolbar-button-queue",
 			"icon-queue");
 		addOption_gui(toolbarStore, wsm, iconTheme, _("Finished Downloads"), "toolbar-button-finished-downloads",

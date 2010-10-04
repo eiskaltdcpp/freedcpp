@@ -88,6 +88,7 @@ WulforSettingsManager::WulforSettingsManager():
 	defaultInt.insert(IntMap::value_type("toolbar-button-hash", 1));
 	defaultInt.insert(IntMap::value_type("toolbar-button-search", 1));
 	defaultInt.insert(IntMap::value_type("toolbar-button-search-spy", 1));
+	defaultInt.insert(IntMap::value_type("toolbar-button-search-adl", 1));
 	defaultInt.insert(IntMap::value_type("toolbar-button-queue", 1));
 	defaultInt.insert(IntMap::value_type("toolbar-button-quit", 1));
 	defaultInt.insert(IntMap::value_type("toolbar-button-finished-downloads", 1));

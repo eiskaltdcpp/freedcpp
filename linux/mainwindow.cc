@@ -881,6 +881,8 @@ void MainWindow::setToolbarButton_gui()
 		gtk_widget_hide(getWidget("search"));
 	if (!WGETB("toolbar-button-search-spy"))
 		gtk_widget_hide(getWidget("searchSpy"));
+	if (!WGETB("toolbar-button-search-adl"))
+		gtk_widget_hide(getWidget("searchADL"));
 	if (!WGETB("toolbar-button-queue"))
 		gtk_widget_hide(getWidget("queue"));
 	if (!WGETB("toolbar-button-quit"))
