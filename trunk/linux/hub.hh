@@ -202,7 +202,7 @@ class Hub:
 		gint oldType;
 		std::vector<std::string> history;
 		int historyIndex;
-		static const int maxLines = 20;//1000;
+		static const int maxLines = 1000;
 		static const int maxHistory = 20;
 		int64_t totalShared;
 		GdkCursor *handCursor;
