@@ -804,6 +804,7 @@ void Hub::applyTags_gui(const string cid, const string &line)
 				gtk_text_view_add_child_at_anchor(GTK_TEXT_VIEW(getWidget("chatText")), event_box, anchor);
 				g_object_set_data_full(G_OBJECT(event_box), "magnet", g_strdup(image_magnet.c_str()), g_free);
 				g_object_set_data_full(G_OBJECT(event_box), "cid", g_strdup(cid.c_str()), g_free);
+				g_signal_connect(G_OBJECT(image), "expose-event", G_CALLBACK(expose), NULL);
 				g_signal_connect(G_OBJECT(event_box), "event", G_CALLBACK(onImageEvent_gui), (gpointer)this);
 				gtk_widget_show_all(event_box);
 
@@ -2761,6 +2762,12 @@ void Hub::onRemoveImageClicked_gui(GtkMenuItem *item, gpointer data)
 
 	hub->imageLoad.first = "";
 	hub->imageLoad.second = NULL;
+}
+
+gboolean Hub::expose(GtkWidget *widget, GdkEventExpose *event, gpointer data)
+{
+	GTK_WIDGET_CLASS(GTK_WIDGET_GET_CLASS(widget))->expose_event(widget, event);
+	return true;
 }
 
 void Hub::on(FavoriteManagerListener::UserAdded, const FavoriteUser &user) throw()
