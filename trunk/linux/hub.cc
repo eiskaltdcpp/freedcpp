@@ -799,7 +799,11 @@ void Hub::applyTags_gui(const string cid, const string &line)
 
 				GtkTextChildAnchor *anchor = gtk_text_buffer_create_child_anchor(chatBuffer, &tag_start_iter);
 				GtkWidget *event_box = gtk_event_box_new();
-				GtkWidget *image = gtk_image_new_from_stock("gtk-file", GTK_ICON_SIZE_BUTTON);
+#if GTK_CHECK_VERSION(2, 4, 0)
+				// Creating a visible window may cause artifacts that are visible to the user.
+				gtk_event_box_set_visible_window(GTK_EVENT_BOX(event_box), FALSE);
+#endif
+				GtkWidget *image = gtk_image_new_from_stock(GTK_STOCK_FILE, GTK_ICON_SIZE_BUTTON);
 				gtk_container_add(GTK_CONTAINER(event_box), image);
 				gtk_text_view_add_child_at_anchor(GTK_TEXT_VIEW(getWidget("chatText")), event_box, anchor);
 				g_object_set_data_full(G_OBJECT(event_box), "magnet", g_strdup(image_magnet.c_str()), g_free);
@@ -807,7 +811,6 @@ void Hub::applyTags_gui(const string cid, const string &line)
 				g_signal_connect(G_OBJECT(image), "expose-event", G_CALLBACK(expose), NULL);
 				g_signal_connect(G_OBJECT(event_box), "event", G_CALLBACK(onImageEvent_gui), (gpointer)this);
 				gtk_widget_show_all(event_box);
-
 				imageList.insert(ImageList::value_type(image, tth));
 				string text = "name: " + name + "\n" + "size: " + Util::formatBytes(size);
 #if GTK_CHECK_VERSION(2, 12, 0)
@@ -2758,7 +2761,7 @@ void Hub::onRemoveImageClicked_gui(GtkMenuItem *item, gpointer data)
 	GList *childs = gtk_container_get_children(GTK_CONTAINER(container));
 	GtkWidget *image = (GtkWidget*)childs->data;
 	g_list_free(childs);
-	gtk_image_set_from_stock(GTK_IMAGE(image), "gtk-file", GTK_ICON_SIZE_BUTTON);
+	gtk_image_set_from_stock(GTK_IMAGE(image), GTK_STOCK_FILE, GTK_ICON_SIZE_BUTTON);
 
 	hub->imageLoad.first = "";
 	hub->imageLoad.second = NULL;
