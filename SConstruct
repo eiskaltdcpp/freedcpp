@@ -6,7 +6,7 @@ import commands
 import string
 import glob
 
-EnsureSConsVersion(0, 96)
+EnsureSConsVersion(2, 0)
 
 APP_NAME = 'freedcpp'
 LIB_NAME = 'libdcpp'
@@ -51,15 +51,15 @@ def CheckCXXVersion(context, name, major, minor):
 
 # Parameters are only sticky from scons -> scons install, otherwise they're cleared.
 if 'install' in COMMAND_LINE_TARGETS:
-	opts = Options('build/sconf/scache.conf')
+	vars = Variables('build/sconf/scache.conf')
 else:
-	opts = Options()
+	vars = Variables()
 
-opts.AddOptions(
-	BoolOption('debug', 'Compile the program with debug information', 0),
-	BoolOption('release', 'Compile the program with optimizations', 0),
-	BoolOption('profile', 'Compile the program with profiling information', 0),
-	PathOption('PREFIX', 'Compile the program with PREFIX as the root for installation', '/usr/local'),
+vars.AddVariables(
+	BoolVariable('debug', 'Compile the program with debug information', 0),
+	BoolVariable('release', 'Compile the program with optimizations', 0),
+	BoolVariable('profile', 'Compile the program with profiling information', 0),
+	PathVariable('PREFIX', 'Compile the program with PREFIX as the root for installation', '/usr/local'),
 	('FAKE_ROOT', 'Make scons install the program under a fake root (for gentoo ebuilds)', '')
 )
 
@@ -68,7 +68,7 @@ opts.AddOptions(
 # Initialization
 # ----------------------------------------------------------------------
 
-env = Environment(ENV = os.environ, options = opts)
+env = Environment(ENV = os.environ, options = vars)
 
 conf = Configure(env,
 	custom_tests =
@@ -96,8 +96,8 @@ if os.environ.has_key('CFLAGS'):
 	conf.env['CFLAGS'] = os.environ['CFLAGS'].split()
 
 env.SConsignFile('build/sconf/.sconsign')
-opts.Save('build/sconf/scache.conf', env)
-Help(opts.GenerateHelpText(env))
+vars.Save('build/sconf/scache.conf', env)
+Help(vars.GenerateHelpText(env))
 
 # ----------------------------------------------------------------------
 # Dependencies
@@ -254,14 +254,11 @@ if not 'install' in COMMAND_LINE_TARGETS:
 
 	Export('env')
 
-	# @todo: Change build_dir to variant_dir when required SCons version is >=1.0.0
-	# 	(variant_dir doesn't seem to work with 0.97 and everything is built in ./dcpp/ and ./linux/
-	#	 -> libdcpp.a is not found when linking, as it is in ./dcpp/libdcpp.a instead of build/dcpp..)
 	# Build the dcpp library
-	libdcpp = SConscript(dirs = 'dcpp', build_dir = BUILD_PATH + LIB_NAME, duplicate = 0)
+	libdcpp = SConscript(dirs = 'dcpp', variant_dir = BUILD_PATH + LIB_NAME, duplicate = 0)
 
 	# Build the GUI
-	obj_files = SConscript(dirs = 'linux', build_dir = BUILD_PATH + APP_NAME, duplicate = 0)
+	obj_files = SConscript(dirs = 'linux', variant_dir = BUILD_PATH + APP_NAME, duplicate = 0)
 
 	# Create the executable
 	env.Program(target = APP_NAME, source = [libdcpp, obj_files])
