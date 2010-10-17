@@ -40,6 +40,7 @@ TreeView::~TreeView()
 		saveSettings();
 	if (gtypes)
 		delete [] gtypes;
+	g_object_unref(menu);
 }
 
 void TreeView::setView(GtkTreeView *view)
@@ -128,6 +129,7 @@ void TreeView::finalize()
 	dcassert(count > 0);
 
 	menu = GTK_MENU(gtk_menu_new());
+	g_object_ref_sink(menu);
 	visibleColumns = columns.size();
 
 	if (!name.empty())

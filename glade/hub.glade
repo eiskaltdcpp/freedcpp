@@ -58,36 +58,51 @@
       <widget class="GtkHBox" id="chatHBox">
         <property name="visible">True</property>
         <property name="spacing">4</property>
-          <child>
-            <widget class="GtkEntry" id="chatEntry">
-              <property name="visible">True</property>
-              <property name="can_focus">True</property>
-              <property name="invisible_char">*</property>
-            </widget>
-            <packing>
-              <property name="expand">True</property>
-              <property name="fill">True</property>
-              <property name="position">1</property>
-            </packing>
-          </child>
-          <child>
-              <widget class="GtkButton" id="emotButton">
+        <child>
+          <widget class="GtkButton" id="chatCommandsButton">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="tooltip" translatable="yes">Chat Commands</property>
+            <property name="label">/</property>
+            <property name="focus_on_click">False</property>
+            <property name="response_id">0</property>
+          </widget>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+          </packing>
+        </child>
+        <child>
+          <widget class="GtkEntry" id="chatEntry">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="invisible_char">*</property>
+          </widget>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <widget class="GtkButton" id="emotButton">
+            <property name="visible">True</property>
+            <property name="focus_on_click">False</property>
+            <property name="tooltip" translatable="yes">Emoticons</property>
+            <child>
+              <widget class="GtkImage" id="emotButtonImage">
                 <property name="visible">True</property>
-                <property name="focus_on_click">False</property>
-                <property name="tooltip" translatable="yes">Emoticons</property>
-                <child>
-                  <widget class="GtkImage" id="emotButtonImage">
-                    <property name="visible">True</property>
-                    <property name="stock">freedcpp-smile</property>
-                    <property name="icon_size">1</property>
-                  </widget>
-                </child>
+                <property name="stock">freedcpp-smile</property>
+                <property name="icon_size">1</property>
               </widget>
-              <packing>
-                <property name="position">2</property>
-                <property name="expand">False</property>
-              </packing>
-          </child>
+            </child>
+          </widget>
+          <packing>
+            <property name="position">2</property>
+            <property name="expand">False</property>
+          </packing>
+        </child>
       </widget>
       <packing>
         <property name="expand">False</property>
@@ -316,6 +331,79 @@
         <property name="visible">True</property>
         <property name="label" translatable="yes">_Open hub</property>
         <property name="use_underline">True</property>
+      </widget>
+    </child>
+  </widget>
+  <widget class="GtkMenu" id="chatCommandsMenu">
+    <property name="visible">True</property>
+    <child>
+      <widget class="GtkMenuItem" id="awayCommandItem">
+        <property name="visible">True</property>
+        <property name="tooltip" translatable="yes">Away mode message on/off</property>
+        <property name="label">/away &lt;message&gt;</property>
+      </widget>
+    </child>
+    <child>
+      <widget class="GtkMenuItem" id="backCommandItem">
+        <property name="visible">True</property>
+        <property name="tooltip" translatable="yes">Away mode off</property>
+        <property name="label">/back</property>
+      </widget>
+    </child>
+    <child>
+      <widget class="GtkMenuItem" id="clearCommandItem">
+        <property name="visible">True</property>
+        <property name="tooltip" translatable="yes">Clear chat</property>
+        <property name="label">/clear</property>
+      </widget>
+    </child>
+    <child>
+      <widget class="GtkMenuItem" id="favCommandItem">
+        <property name="visible">True</property>
+        <property name="tooltip" translatable="yes">Add a hub to favorites</property>
+        <property name="label">/favorite</property>
+      </widget>
+    </child>
+    <child>
+      <widget class="GtkMenuItem" id="lsfuCommandItem">
+        <property name="visible">True</property>
+        <property name="tooltip" translatable="yes">Show favorites list</property>
+        <property name="label">/listfu</property>
+      </widget>
+    </child>
+    <child>
+      <widget class="GtkMenuItem" id="helpCommandItem">
+        <property name="visible">True</property>
+        <property name="tooltip" translatable="yes">Show help</property>
+        <property name="label">/help</property>
+      </widget>
+    </child>
+    <child>
+      <widget class="GtkMenuItem" id="joinCommandItem">
+        <property name="visible">True</property>
+        <property name="tooltip" translatable="yes">Connect to the hub</property>
+        <property name="label">/join &lt;address&gt;</property>
+      </widget>
+    </child>
+    <child>
+      <widget class="GtkMenuItem" id="meCommandItem">
+        <property name="visible">True</property>
+        <property name="tooltip" translatable="yes">Say a third person</property>
+        <property name="label">/me &lt;message&gt;</property>
+      </widget>
+    </child>
+    <child>
+      <widget class="GtkMenuItem" id="rebuildCommandItem">
+        <property name="visible">True</property>
+        <property name="tooltip" translatable="yes">Rebuild hash</property>
+        <property name="label">/rebuild</property>
+      </widget>
+    </child>
+    <child>
+      <widget class="GtkMenuItem" id="versionCommandItem">
+        <property name="visible">True</property>
+        <property name="tooltip" translatable="yes">Show version</property>
+        <property name="label">/freedcpp</property>
       </widget>
     </child>
   </widget>

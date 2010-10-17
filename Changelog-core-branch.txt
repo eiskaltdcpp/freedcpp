@@ -1,5 +1,8 @@
 		--- freedcpp core branch ---
 
+r168: 0.26
+* merging trunk r125 through r161 into core branch.
+
 r157: 0.25
 * Ревизия 2177 (dcplusplus, prevent hub-provided cmds from 'open own list' from going to the wrong hub).
 

@@ -46,6 +46,9 @@ SearchSpy::SearchSpy():
 	gtk_spin_button_set_value(GTK_SPIN_BUTTON(getWidget("waitingSpinButton")), (double)Waiting);
 	gtk_spin_button_set_value(GTK_SPIN_BUTTON(getWidget("topSpinButton")), (double)Top);
 
+	// menu
+	g_object_ref_sink(getWidget("menu"));
+
 	// Initialize search list treeview
 	searchView.setView(GTK_TREE_VIEW(getWidget("searchSpyView")), TRUE, "searchspy");
 	searchView.insertColumn(_("Search String"), G_TYPE_STRING, TreeView::ICON_STRING_TEXT_COLOR, 305, "icon", "color");
@@ -108,6 +111,7 @@ SearchSpy::~SearchSpy()
 	WSET("search-spy-top", (int)gtk_spin_button_get_value(GTK_SPIN_BUTTON(getWidget("topSpinButton"))));
 
 	gtk_widget_destroy(getWidget("TopSearchDialog"));
+	g_object_unref(getWidget("menu"));
 
 	TimerManager::getInstance()->removeListener(this);
 	ClientManager::getInstance()->removeListener(this);
@@ -382,7 +386,7 @@ bool SearchSpy::updateFrameStatus_gui(GtkTreeIter *iter, uint64_t tick)
 void SearchSpy::updateFrameStatus_gui()
 {
 	updateFrameStatus_gui(NULL, uint64_t(0));
-	setStatus_gui(_("Update frame search"));
+	setStatus_gui(_("Updated frame search"));
 }
 
 void SearchSpy::setStatus_gui(const string text)
@@ -493,7 +497,7 @@ void SearchSpy::onClearFrameClicked_gui(GtkWidget *widget, gpointer data)
 
 	gtk_list_store_clear(s->searchStore);
 	s->searchIters.clear();
-	s->setStatus_gui(_("Clear frame search"));
+	s->setStatus_gui(_("Cleaned frame search"));
 }
 
 void SearchSpy::onUpdateFrameClicked_gui(GtkWidget *widget, gpointer data)

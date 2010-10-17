@@ -24,6 +24,7 @@
 #include <dcpp/FavoriteManager.h>
 #include <dcpp/ShareManager.h>
 #include <dcpp/Text.h>
+#include <dcpp/ADLSearch.h>
 #include "search.hh"
 #include "settingsmanager.hh"
 #include "UserCommandMenu.hh"
@@ -64,6 +65,10 @@ ShareBrowser::ShareBrowser(UserPtr user, const string &file, const string &initi
 	gtk_dialog_set_alternative_button_order(GTK_DIALOG(getWidget("findDialog")), GTK_RESPONSE_OK, GTK_RESPONSE_CANCEL, -1);
 	gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(getWidget("dirChooserDialog")), Text::fromUtf8(SETTING(DOWNLOAD_DIRECTORY)).c_str());
 	gtk_dialog_set_alternative_button_order(GTK_DIALOG(getWidget("dirChooserDialog")), GTK_RESPONSE_OK, GTK_RESPONSE_CANCEL, -1);
+
+	// menu
+	g_object_ref_sink(getWidget("dirMenu"));
+	g_object_ref_sink(getWidget("fileMenu"));
 
 	// Set the pane position
 	gtk_paned_set_position(GTK_PANED(getWidget("pane")), WGETI("sharebrowser-pane-position"));
@@ -134,6 +139,9 @@ ShareBrowser::~ShareBrowser()
 
 	gtk_widget_destroy(getWidget("findDialog"));
 	gtk_widget_destroy(getWidget("dirChooserDialog"));
+
+	g_object_unref(getWidget("dirMenu"));
+	g_object_unref(getWidget("fileMenu"));
 }
 
 void ShareBrowser::show()
@@ -153,6 +161,9 @@ void ShareBrowser::buildList_gui()
 
 		// Set name of root entry to user nick.
 		listing.getRoot()->setName(nick);
+
+		// Search ADL
+		ADLSearchManager::getInstance()->matchListing(listing);
 
 		// Add entries to dir tree view starting with the root entry.
 		buildDirs_gui(listing.getRoot(), NULL);

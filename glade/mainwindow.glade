@@ -224,6 +224,20 @@
                       </widget>
                     </child>
                     <child>
+                      <widget class="GtkImageMenuItem" id="searchADLMenuItem">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">Search ADL</property>
+                        <property name="use_underline">True</property>
+                        <child internal-child="image">
+                          <widget class="GtkImage" id="searchADLMenuImage">
+                            <property name="visible">True</property>
+                            <property name="stock">freedcpp-search-adl</property>
+                            <property name="icon_size">1</property>
+                          </widget>
+                        </child>
+                      </widget>
+                    </child>
+                    <child>
                       <widget class="GtkImageMenuItem" id="searchSpyMenuItem">
                         <property name="visible">True</property>
                         <property name="label" translatable="yes">Search Spy</property>
@@ -432,6 +446,41 @@
                       </widget>
                     </child>
                     <child>
+                      <widget class="GtkImageMenuItem" id="downloadItem">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">Downloads</property>
+                        <property name="use_underline">True</property>
+                        <child internal-child="image">
+                          <widget class="GtkImage" id="downloadMenuImage">
+                            <property name="visible">True</property>
+                            <property name="stock">gtk-file</property>
+                            <property name="icon_size">1</property>
+                          </widget>
+                        </child>
+                        <child>
+                          <widget class="GtkMenu" id="downloadMenu">
+                            <child>
+                              <widget class="GtkMenuItem" id="dowloadMenuItem1">
+                                <property name="visible">True</property>
+                                <property name="label" translatable="yes">Official</property>
+                              </widget>
+                            </child>
+                            <child>
+                              <widget class="GtkMenuItem" id="dowloadMenuItem2">
+                                <property name="visible">True</property>
+                                <property name="label" translatable="yes">Packages in PPA</property>
+                              </widget>
+                            </child>
+                          </widget>
+                        </child>
+                      </widget>
+                    </child>
+                    <child>
+                      <widget class="GtkSeparatorMenuItem" id="separator2">
+                        <property name="visible">True</property>
+                      </widget>
+                    </child>
+                    <child>
                       <widget class="GtkImageMenuItem" id="aboutMenuItem">
                         <property name="visible">True</property>
                         <property name="label" translatable="yes">About FreeDC++</property>
@@ -474,9 +523,9 @@
             <child>
               <widget class="GtkToolButton" id="favHubs">
                 <property name="visible">True</property>
-                <property name="tooltip" translatable="yes">View the saved hubs</property>
+                <property name="tooltip" translatable="yes">Favorite Hubs</property>
                 <property name="is_important">True</property>
-                <property name="label" translatable="yes">Favorite Hubs</property>
+                <property name="label" translatable="yes">Hubs</property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">freedcpp-favorite-hubs</property>
               </widget>
@@ -544,6 +593,19 @@
                 <property name="label" translatable="yes">Search</property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">freedcpp-search</property>
+              </widget>
+              <packing>
+                <property name="expand">False</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkToolButton" id="searchADL">
+                <property name="visible">True</property>
+                <property name="tooltip" translatable="yes">ADL Search</property>
+                <property name="is_important">True</property>
+                <property name="label">ADL</property>
+                <property name="use_underline">True</property>
+                <property name="stock_id">freedcpp-search-adl</property>
               </widget>
               <packing>
                 <property name="expand">False</property>
@@ -1522,7 +1584,7 @@ Contributors:
                           <widget class="GtkRadioButton" id="dowloadQueueRadioButton">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="tooltip" translatable="yes">Для начала закачки файла включите автоматический поиск альтернативных источников закачки (Настроки/Закачки/Очередь)</property>
+                            <property name="tooltip" translatable="yes">Use automatically search for alternative download locations (Preferences/Downloads/Queue)</property>
                             <property name="label" translatable="yes">Add this file to your download queue</property>
                             <property name="response_id">0</property>
                             <property name="draw_indicator">True</property>

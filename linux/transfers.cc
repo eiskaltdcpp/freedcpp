@@ -42,6 +42,9 @@ using namespace dcpp;
 Transfers::Transfers() :
 	Entry(Entry::TRANSFERS, "transfers.glade")
 {
+	// menu
+	g_object_ref_sink(getWidget("transferMenu"));
+
 	// Initialize the user command menu
 	userCommandMenu = new UserCommandMenu(getWidget("userCommandMenu"), ::UserCommand::CONTEXT_USER);//NOTE: core 0.762
 	addChild(userCommandMenu);
@@ -101,6 +104,7 @@ Transfers::~Transfers()
 	UploadManager::getInstance()->removeListener(this);
 	ConnectionManager::getInstance()->removeListener(this);
 
+	g_object_unref(getWidget("transferMenu"));
 	delete appsPreviewMenu;
 }	
 
@@ -689,6 +693,14 @@ void Transfers::initTransfer_gui(StringMap params)
 			}
 			else
 			{
+				//NOTE: set update parent status if removed download
+				if (transferView.getValue<int>(&newParent, "Failed"))
+				{
+					gtk_tree_store_set(transferStore, &newParent,
+						transferView.col("Failed"), FALSE,
+						-1);
+				}
+
 				oldParentValid = FALSE;	// Don't update the parentRow twice, since old and new are the same (and definately don't remove twice)
 			}
 		}

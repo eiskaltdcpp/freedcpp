@@ -108,6 +108,13 @@ Hub::Hub(const string &address, const string &encoding):
 
 	handCursor = gdk_cursor_new(GDK_HAND2);
 
+	// menu
+	g_object_ref_sink(getWidget("nickMenu"));
+	g_object_ref_sink(getWidget("magnetMenu"));
+	g_object_ref_sink(getWidget("linkMenu"));
+	g_object_ref_sink(getWidget("hubMenu"));
+	g_object_ref_sink(getWidget("chatCommandsMenu"));
+
 	// Initialize the user command menu
 	userCommandMenu = new UserCommandMenu(getWidget("usercommandMenu"), ::UserCommand::CONTEXT_USER);//NOTE: core 0.762
 	addChild(userCommandMenu);
@@ -117,6 +124,40 @@ Hub::Hub(const string &address, const string &encoding):
 	if (!WGETB("emoticons-use"))
 		gtk_widget_set_sensitive(getWidget("emotButton"), FALSE);
 	useEmoticons = TRUE;
+
+	// Chat commands
+	g_object_set_data_full(G_OBJECT(getWidget("awayCommandItem")), "command", g_strdup("/away"), g_free);
+	g_signal_connect(getWidget("awayCommandItem"), "activate", G_CALLBACK(onCommandClicked_gui), (gpointer)this);
+
+	g_object_set_data_full(G_OBJECT(getWidget("backCommandItem")), "command", g_strdup("/back"), g_free);
+	g_signal_connect(getWidget("backCommandItem"), "activate", G_CALLBACK(onCommandClicked_gui), (gpointer)this);
+
+	g_object_set_data_full(G_OBJECT(getWidget("clearCommandItem")), "command", g_strdup("/clear"), g_free);
+	g_signal_connect(getWidget("clearCommandItem"), "activate", G_CALLBACK(onCommandClicked_gui), (gpointer)this);
+
+	g_object_set_data_full(G_OBJECT(getWidget("favCommandItem")), "command", g_strdup("/fav"), g_free);
+	g_signal_connect(getWidget("favCommandItem"), "activate", G_CALLBACK(onCommandClicked_gui), (gpointer)this);
+
+	g_object_set_data_full(G_OBJECT(getWidget("lsfuCommandItem")), "command", g_strdup("/lsfu"), g_free);
+	g_signal_connect(getWidget("lsfuCommandItem"), "activate", G_CALLBACK(onCommandClicked_gui), (gpointer)this);
+
+	g_object_set_data_full(G_OBJECT(getWidget("helpCommandItem")), "command", g_strdup("/help"), g_free);
+	g_signal_connect(getWidget("helpCommandItem"), "activate", G_CALLBACK(onCommandClicked_gui), (gpointer)this);
+
+	g_object_set_data_full(G_OBJECT(getWidget("joinCommandItem")), "command", g_strdup("/join"), g_free);
+	g_signal_connect(getWidget("joinCommandItem"), "activate", G_CALLBACK(onCommandClicked_gui), (gpointer)this);
+
+	g_object_set_data_full(G_OBJECT(getWidget("meCommandItem")), "command", g_strdup("/me"), g_free);
+	g_signal_connect(getWidget("meCommandItem"), "activate", G_CALLBACK(onCommandClicked_gui), (gpointer)this);
+
+	g_object_set_data_full(G_OBJECT(getWidget("rebuildCommandItem")), "command", g_strdup("/rebuild"), g_free);
+	g_signal_connect(getWidget("rebuildCommandItem"), "activate", G_CALLBACK(onCommandClicked_gui), (gpointer)this);
+
+	g_object_set_data_full(G_OBJECT(getWidget("versionCommandItem")), "command", g_strdup("/freedcpp"), g_free);
+	g_signal_connect(getWidget("versionCommandItem"), "activate", G_CALLBACK(onCommandClicked_gui), (gpointer)this);
+
+	// chat commands button
+	g_signal_connect(getWidget("chatCommandsButton"), "button-release-event", G_CALLBACK(onChatCommandButtonRelease_gui), (gpointer)this);
 
 	GtkAdjustment *adjustment = gtk_scrolled_window_get_vadjustment(GTK_SCROLLED_WINDOW(getWidget("chatScroll")));
 
@@ -214,6 +255,12 @@ Hub::~Hub()
 	}
 
 	delete emotdialog;
+
+	g_object_unref(getWidget("nickMenu"));
+	g_object_unref(getWidget("magnetMenu"));
+	g_object_unref(getWidget("linkMenu"));
+	g_object_unref(getWidget("hubMenu"));
+	g_object_unref(getWidget("chatCommandsMenu"));
 }
 
 void Hub::show()
@@ -1122,6 +1169,10 @@ GtkTextTag* Hub::createTag_gui(const string &tagname, TypeTag type)
 
 void Hub::addStatusMessage_gui(string message, Msg::TypeMsg typemsg, Sound::TypeSound sound, Notify::TypeNotify notify)
 {
+	if (notify == Notify::HUB_CONNECT)
+		setIcon_gui(WGETS("icon-hub-online"));
+	else if (notify == Notify::HUB_DISCONNECT)
+		setIcon_gui(WGETS("icon-hub-offline"));
 	addStatusMessage_gui(message, typemsg, sound);
 	Notify::get()->showNotify("<b>" + client->getHubUrl() + ":</b> ", message, notify);
 }
@@ -1440,7 +1491,25 @@ gboolean Hub::onEmotButtonRelease_gui(GtkWidget *widget, GdkEventButton *event, 
 
 		case 3: //show emoticons menu
 
-			hub->emotdialog->showEmotMenu_gui();
+			hub->emotdialog->buildEmotMenu_gui();
+
+			GtkWidget *check_item = NULL;
+			GtkWidget *emot_menu = hub->getWidget("emotPacksMenu");
+
+			check_item = gtk_separator_menu_item_new();
+			gtk_menu_shell_append(GTK_MENU_SHELL(emot_menu), check_item);
+			gtk_widget_show(check_item);
+
+			check_item = gtk_check_menu_item_new_with_label(_("Use Emoticons"));
+			gtk_menu_shell_append(GTK_MENU_SHELL(emot_menu), check_item);
+
+			if (hub->useEmoticons)
+				gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(check_item), TRUE);
+
+			g_signal_connect(check_item, "activate", G_CALLBACK(onUseEmoticons_gui), data);
+
+			gtk_widget_show_all(emot_menu);
+			gtk_menu_popup(GTK_MENU(emot_menu), NULL, NULL, NULL, NULL, 0, gtk_get_current_event_time());
 		break;
 	}
 
@@ -1945,6 +2014,40 @@ void Hub::onDownloadClicked_gui(GtkMenuItem *item, gpointer data)
 {
 	Hub *hub = (Hub *)data;
 	WulforManager::get()->getMainWindow()->fileToDownload_gui(hub->selectedTagStr, SETTING(DOWNLOAD_DIRECTORY));
+}
+
+gboolean Hub::onChatCommandButtonRelease_gui(GtkWidget *widget, GdkEventButton *event, gpointer data)
+{
+	Hub *hub = (Hub *)data;
+
+	if (event->button == 1)
+	{
+		gtk_menu_popup(GTK_MENU(hub->getWidget("chatCommandsMenu")), NULL, NULL, NULL, NULL, 0, gtk_get_current_event_time());
+	}
+
+	return FALSE;
+}
+
+void Hub::onCommandClicked_gui(GtkWidget *widget, gpointer data)
+{
+	Hub *hub = (Hub *)data;
+
+	string command = (gchar*) g_object_get_data(G_OBJECT(widget), "command");
+
+	gint pos = 0;
+	GtkWidget *chatEntry = hub->getWidget("chatEntry");
+	if (!gtk_widget_is_focus(chatEntry))
+		gtk_widget_grab_focus(chatEntry);
+	gtk_editable_delete_text(GTK_EDITABLE(chatEntry), pos, -1);
+	gtk_editable_insert_text(GTK_EDITABLE(chatEntry), command.c_str(), -1, &pos);
+	gtk_editable_set_position(GTK_EDITABLE(chatEntry), pos);
+}
+
+void Hub::onUseEmoticons_gui(GtkWidget *widget, gpointer data)
+{
+	Hub *hub = (Hub *)data;
+
+	hub->useEmoticons = !hub->useEmoticons;
 }
 
 void Hub::onDownloadToClicked_gui(GtkMenuItem *item, gpointer data)

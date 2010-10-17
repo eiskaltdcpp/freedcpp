@@ -52,6 +52,9 @@ Search::Search():
 	gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(getWidget("dirChooserDialog")), Text::fromUtf8(SETTING(DOWNLOAD_DIRECTORY)).c_str());
 	gtk_dialog_set_alternative_button_order(GTK_DIALOG(getWidget("dirChooserDialog")), GTK_RESPONSE_OK, GTK_RESPONSE_CANCEL, -1);
 
+	// menu
+	g_object_ref_sink(getWidget("mainMenu"));
+
 	// Initialize check button options.
 	onlyFree = BOOLSETTING(SEARCH_ONLY_FREE_SLOTS);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(getWidget("checkbuttonSlots")), onlyFree);
@@ -183,6 +186,7 @@ Search::~Search()
 	SearchManager::getInstance()->removeListener(this);
 
 	gtk_widget_destroy(getWidget("dirChooserDialog"));
+	g_object_unref(getWidget("mainMenu"));
 }
 
 void Search::show()
@@ -1360,7 +1364,10 @@ void Search::onSearchByTTHClicked_gui(GtkMenuItem *item, gpointer data)
 			{
 				string tth = s->resultView.getString(&iter, "TTH");
 				if (!tth.empty())
-					s->putValue_gui(tth, 0, SearchManager::SIZE_DONTCARE, SearchManager::TYPE_TTH);
+				{
+					Search *ns = WulforManager::get()->getMainWindow()->addSearch_gui();
+					ns->putValue_gui(tth, 0, SearchManager::SIZE_DONTCARE, SearchManager::TYPE_TTH);
+				}
 			}
 			gtk_tree_path_free(path);
 		}
