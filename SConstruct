@@ -6,7 +6,7 @@ import commands
 import string
 import glob
 
-EnsureSConsVersion(2, 0)
+EnsureSConsVersion(1, 2)
 
 APP_NAME = 'freedcpp'
 LIB_NAME = 'libdcpp'
