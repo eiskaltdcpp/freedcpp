@@ -88,6 +88,7 @@ WulforSettingsManager::WulforSettingsManager():
 	defaultInt.insert(IntMap::value_type("toolbar-button-hash", 1));
 	defaultInt.insert(IntMap::value_type("toolbar-button-search", 1));
 	defaultInt.insert(IntMap::value_type("toolbar-button-search-spy", 1));
+	defaultInt.insert(IntMap::value_type("toolbar-button-search-adl", 1));
 	defaultInt.insert(IntMap::value_type("toolbar-button-queue", 1));
 	defaultInt.insert(IntMap::value_type("toolbar-button-quit", 1));
 	defaultInt.insert(IntMap::value_type("toolbar-button-finished-downloads", 1));
@@ -143,6 +144,9 @@ WulforSettingsManager::WulforSettingsManager():
 	defaultString.insert(StringMap::value_type("search-order", ""));
 	defaultString.insert(StringMap::value_type("search-width", ""));
 	defaultString.insert(StringMap::value_type("search-visibility", ""));
+	defaultString.insert(StringMap::value_type("searchadl-order", ""));
+	defaultString.insert(StringMap::value_type("searchadl-width", ""));
+	defaultString.insert(StringMap::value_type("searchadl-visibility", ""));
 	defaultString.insert(StringMap::value_type("searchspy-order", ""));
 	defaultString.insert(StringMap::value_type("searchspy-width", ""));
 	defaultString.insert(StringMap::value_type("searchspy-visibility", ""));
@@ -221,12 +225,17 @@ WulforSettingsManager::WulforSettingsManager():
 	defaultString.insert(StringMap::value_type("icon-public-hubs", "freedcpp-public-hubs"));
 	defaultString.insert(StringMap::value_type("icon-queue", "freedcpp-queue"));
 	defaultString.insert(StringMap::value_type("icon-search", "freedcpp-search"));
+	defaultString.insert(StringMap::value_type("icon-search-adl", "freedcpp-search-adl"));
 	defaultString.insert(StringMap::value_type("icon-search-spy", "freedcpp-search-spy"));
 	defaultString.insert(StringMap::value_type("icon-upload", "freedcpp-upload"));
 	defaultString.insert(StringMap::value_type("icon-quit", "freedcpp-quit"));
 	defaultString.insert(StringMap::value_type("icon-connect", "freedcpp-connect"));
 	defaultString.insert(StringMap::value_type("icon-file", GTK_STOCK_FILE));
 	defaultString.insert(StringMap::value_type("icon-directory", GTK_STOCK_DIRECTORY));
+	defaultString.insert(StringMap::value_type("icon-pm-online", "freedcpp-pm-online"));
+	defaultString.insert(StringMap::value_type("icon-pm-offline", "freedcpp-pm-offline"));
+	defaultString.insert(StringMap::value_type("icon-hub-online", "freedcpp-hub-online"));
+	defaultString.insert(StringMap::value_type("icon-hub-offline", "freedcpp-hub-offline"));
 
 	load();
 }

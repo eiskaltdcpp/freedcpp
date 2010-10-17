@@ -36,6 +36,9 @@ FavoriteUsers::FavoriteUsers():
 	// Configure the dialog
 	gtk_dialog_set_alternative_button_order(GTK_DIALOG(getWidget("DescriptionDialog")), GTK_RESPONSE_OK, GTK_RESPONSE_CANCEL, -1);
 
+	// menu
+	g_object_ref_sink(getWidget("menu"));
+
 	// Initialize favorite users list treeview
 	favoriteUserView.setView(GTK_TREE_VIEW(getWidget("favoriteUserView")), TRUE, "favoriteusers");
 	favoriteUserView.insertColumn(_("Auto grant slot"), G_TYPE_BOOLEAN, TreeView::BOOL, 100);
@@ -82,6 +85,7 @@ FavoriteUsers::~FavoriteUsers()
 	FavoriteManager::getInstance()->removeListener(this);
 
 	gtk_widget_destroy(getWidget("DescriptionDialog"));
+	g_object_unref(getWidget("menu"));
 }
 
 void FavoriteUsers::show()
@@ -406,7 +410,7 @@ void FavoriteUsers::onRemoveItemClicked_gui(GtkMenuItem *item, gpointer data)
 
 	if (gtk_tree_selection_count_selected_rows(fu->favoriteUserSelection) > 0)
 	{
-		ParamMap params;
+		vector<string> remove;
 		GtkTreeIter iter;
 		GtkTreePath *path;
 		typedef Func1<FavoriteUsers, string> F1;
@@ -418,8 +422,8 @@ void FavoriteUsers::onRemoveItemClicked_gui(GtkMenuItem *item, gpointer data)
 
 			if (gtk_tree_model_get_iter(GTK_TREE_MODEL(fu->favoriteUserStore), &iter, path))
 			{
-				params.insert(ParamMap::value_type(fu->favoriteUserView.getString(&iter, "CID"),
-					fu->favoriteUserView.getString(&iter, _("Nick"))));
+				string cid = fu->favoriteUserView.getString(&iter, "CID");
+				remove.push_back(cid);
 			}
 			gtk_tree_path_free(path);
 		}
@@ -447,9 +451,9 @@ void FavoriteUsers::onRemoveItemClicked_gui(GtkMenuItem *item, gpointer data)
 				return;
 		}
 
-		for (ParamMap::const_iterator it = params.begin(); it != params.end(); ++it)
+		for (vector<string>::const_iterator it = remove.begin(); it != remove.end(); it++)
 		{
-			F1 *func = new F1(fu, &FavoriteUsers::removeFavoriteUser_client, it->first);
+			F1 *func = new F1(fu, &FavoriteUsers::removeFavoriteUser_client, *it);
 			WulforManager::get()->dispatchClientFunc(func);
 		}
 	}

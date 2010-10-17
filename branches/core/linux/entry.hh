@@ -49,7 +49,8 @@ class Entry
 			SHARE_BROWSER,
 			TRANSFERS,
 			USER_COMMAND_MENU,
-			SEARCH_SPY
+			SEARCH_SPY,
+			SEARCH_ADL
 		} EntryType;
 
 		Entry() : xml(NULL) {}

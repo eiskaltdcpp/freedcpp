@@ -30,7 +30,7 @@ class EmoticonsDialog
 
 		// GUI functions
 		void showEmotDialog_gui();
-		void showEmotMenu_gui();
+		void buildEmotMenu_gui();
 
 	private:
 		enum {FIRST, x16 = FIRST, x22, x24, x32, x36, x48, x64, DEFAULT, LAST};
@@ -39,8 +39,10 @@ class EmoticonsDialog
 		GtkWidget *Button;     // chat emoticons button
 		GtkWidget *Menu;       // packs menu
 		GtkWidget *dialog;     // emoticons dialog
-		GtkTooltips *tooltips; // tooltips for all icon widgets
 
+#if !GTK_CHECK_VERSION(2, 12, 0)
+		GtkTooltips *tooltips; // tooltips for all icon widgets
+#endif
 		int icon_width;
 		int icon_height;
 		std::string currIconSize;

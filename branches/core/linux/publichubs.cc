@@ -33,6 +33,9 @@ PublicHubs::PublicHubs():
 	// Configure the dialog
 	gtk_dialog_set_alternative_button_order(GTK_DIALOG(getWidget("configureDialog")), GTK_RESPONSE_OK, GTK_RESPONSE_CANCEL, -1);
 
+	// menu
+	g_object_ref_sink(getWidget("menu"));
+
 	// Initialize public hub list treeview
 	hubView.setView(GTK_TREE_VIEW(getWidget("hubView")), true, "publichubs");
 	hubView.insertColumn(_("Name"), G_TYPE_STRING, TreeView::STRING, 200);
@@ -98,6 +101,7 @@ PublicHubs::~PublicHubs()
 {
 	FavoriteManager::getInstance()->removeListener(this);
 	gtk_widget_destroy(getWidget("configureDialog"));
+	g_object_unref(getWidget("menu"));
 }
 
 void PublicHubs::show()

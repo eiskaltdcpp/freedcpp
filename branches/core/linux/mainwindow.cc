@@ -42,6 +42,7 @@
 #include "privatemessage.hh"
 #include "publichubs.hh"
 #include "search.hh"
+#include "adlsearch.hh"
 #include "searchspy.hh"
 #include "settingsmanager.hh"
 #include "sharebrowser.hh"
@@ -78,6 +79,9 @@ MainWindow::MainWindow():
 	gtk_window_set_transient_for(GTK_WINDOW(getWidget("ucLineDialog")), window);
 
 	setStatRate_gui();//NOTE: core 0.762
+
+	// menu
+	g_object_ref_sink(getWidget("statusIconMenu"));
 
 	// magnet dialog
 	gtk_dialog_set_alternative_button_order(GTK_DIALOG(getWidget("MagnetDialog")), GTK_RESPONSE_OK, GTK_RESPONSE_CANCEL, -1);
@@ -133,6 +137,7 @@ MainWindow::MainWindow():
 	g_signal_connect(getWidget("settings"), "clicked", G_CALLBACK(onPreferencesClicked_gui), (gpointer)this);
 	g_signal_connect(getWidget("hash"), "clicked", G_CALLBACK(onHashClicked_gui), (gpointer)this);
 	g_signal_connect(getWidget("search"), "clicked", G_CALLBACK(onSearchClicked_gui), (gpointer)this);
+	g_signal_connect(getWidget("searchADL"), "clicked", G_CALLBACK(onSearchADLClicked_gui), (gpointer)this);
 	g_signal_connect(getWidget("searchSpy"), "clicked", G_CALLBACK(onSearchSpyClicked_gui), (gpointer)this);
 	g_signal_connect(getWidget("queue"), "clicked", G_CALLBACK(onDownloadQueueClicked_gui), (gpointer)this);
 	g_signal_connect(getWidget("quit"), "clicked", G_CALLBACK(onQuitClicked_gui), (gpointer)this);
@@ -151,6 +156,7 @@ MainWindow::MainWindow():
 	g_signal_connect(getWidget("publicHubsMenuItem"), "activate", G_CALLBACK(onPublicHubsClicked_gui), (gpointer)this);
 	g_signal_connect(getWidget("indexingProgressMenuItem"), "activate", G_CALLBACK(onHashClicked_gui), (gpointer)this);
 	g_signal_connect(getWidget("searchMenuItem"), "activate", G_CALLBACK(onSearchClicked_gui), (gpointer)this);
+	g_signal_connect(getWidget("searchADLMenuItem"), "activate", G_CALLBACK(onSearchADLClicked_gui), (gpointer)this);
 	g_signal_connect(getWidget("searchSpyMenuItem"), "activate", G_CALLBACK(onSearchSpyClicked_gui), (gpointer)this);
 	g_signal_connect(getWidget("downloadQueueMenuItem"), "activate", G_CALLBACK(onDownloadQueueClicked_gui), (gpointer)this);
 	g_signal_connect(getWidget("finishedDownloadsMenuItem"), "activate", G_CALLBACK(onFinishedDownloadsClicked_gui), (gpointer)this);
@@ -185,6 +191,14 @@ MainWindow::MainWindow():
 	g_object_set_data_full(G_OBJECT(getWidget("changeLogItem")), "link",
 		g_strdup((string(_DATADIR) + "/doc/freedcpp/Changelog-svn.txt").c_str()), g_free);
 	g_signal_connect(getWidget("changeLogItem"), "activate", G_CALLBACK(onLinkClicked_gui), NULL);
+
+	g_object_set_data_full(G_OBJECT(getWidget("dowloadMenuItem1")), "link",
+		g_strdup("http://code.google.com/p/freedcpp/downloads/list"), g_free);
+	g_signal_connect(getWidget("dowloadMenuItem1"), "activate", G_CALLBACK(onLinkClicked_gui), NULL);
+
+	g_object_set_data_full(G_OBJECT(getWidget("dowloadMenuItem2")), "link",
+		g_strdup("https://launchpad.net/~tehnick/+archive/tehnick/+packages"), g_free);
+	g_signal_connect(getWidget("dowloadMenuItem2"), "activate", G_CALLBACK(onLinkClicked_gui), NULL);
 
 	onQuit = FALSE;
 
@@ -260,6 +274,7 @@ MainWindow::~MainWindow()
 
 	gtk_widget_destroy(GTK_WIDGET(window));
 	g_object_unref(statusIcon);
+	g_object_unref(getWidget("statusIconMenu"));
 
 	Sound::stop();
 	Emoticons::stop();
@@ -336,6 +351,7 @@ void MainWindow::loadIcons_gui()
 	gtk_tool_button_set_stock_id(GTK_TOOL_BUTTON(getWidget("settings")), "freedcpp-preferences");
 	gtk_tool_button_set_stock_id(GTK_TOOL_BUTTON(getWidget("hash")), "freedcpp-hash");
 	gtk_tool_button_set_stock_id(GTK_TOOL_BUTTON(getWidget("search")), "freedcpp-search");
+	gtk_tool_button_set_stock_id(GTK_TOOL_BUTTON(getWidget("searchADL")), "freedcpp-search-adl");
 	gtk_tool_button_set_stock_id(GTK_TOOL_BUTTON(getWidget("searchSpy")), "freedcpp-search-spy");
 	gtk_tool_button_set_stock_id(GTK_TOOL_BUTTON(getWidget("queue")), "freedcpp-queue");
 	gtk_tool_button_set_stock_id(GTK_TOOL_BUTTON(getWidget("finishedDownloads")), "freedcpp-finished-downloads");
@@ -666,6 +682,19 @@ void MainWindow::showSearchSpy_gui()
 	raisePage_gui(entry->getContainer());
 }
 
+void MainWindow::showSearchADL_gui()
+{
+	BookEntry *entry = findBookEntry(Entry::SEARCH_ADL);
+
+	if (entry == NULL)
+	{
+		entry = new SearchADL();
+		addBookEntry_gui(entry);
+	}
+
+	raisePage_gui(entry->getContainer());
+}
+
 void MainWindow::addPrivateMessage_gui(Msg::TypeMsg typemsg, string cid, string hubUrl, string message, bool useSetting)
 {
 	BookEntry *entry = findBookEntry(Entry::PRIVATE_MESSAGE, cid);
@@ -870,6 +899,8 @@ void MainWindow::setToolbarButton_gui()
 		gtk_widget_hide(getWidget("search"));
 	if (!WGETB("toolbar-button-search-spy"))
 		gtk_widget_hide(getWidget("searchSpy"));
+	if (!WGETB("toolbar-button-search-adl"))
+		gtk_widget_hide(getWidget("searchADL"));
 	if (!WGETB("toolbar-button-queue"))
 		gtk_widget_hide(getWidget("queue"));
 	if (!WGETB("toolbar-button-quit"))
@@ -1540,6 +1571,12 @@ void MainWindow::onSearchSpyClicked_gui(GtkWidget *widget, gpointer data)
 {
 	MainWindow *mw = (MainWindow *)data;
 	mw->showSearchSpy_gui();
+}
+
+void MainWindow::onSearchADLClicked_gui(GtkWidget *widget, gpointer data)
+{
+	MainWindow *mw = (MainWindow *)data;
+	mw->showSearchADL_gui();
 }
 
 void MainWindow::onDownloadQueueClicked_gui(GtkWidget *widget, gpointer data)

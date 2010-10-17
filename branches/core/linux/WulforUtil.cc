@@ -501,12 +501,17 @@ void WulforUtil::registerIcons()
 	icons["freedcpp-public-hubs"] = wsm->getString("icon-public-hubs");
 	icons["freedcpp-queue"] = wsm->getString("icon-queue");
 	icons["freedcpp-search"] = wsm->getString("icon-search");
+	icons["freedcpp-search-adl"] = wsm->getString("icon-search-adl");
 	icons["freedcpp-search-spy"] = wsm->getString("icon-search-spy");
 	icons["freedcpp-upload"] = wsm->getString("icon-upload");
 	icons["freedcpp-quit"] = wsm->getString("icon-quit");
 	icons["freedcpp-connect"] = wsm->getString("icon-connect");
 	icons["freedcpp-file"] = wsm->getString("icon-file");
 	icons["freedcpp-directory"] = wsm->getString("icon-directory");
+	icons["freedcpp-pm-online"] = wsm->getString("icon-pm-online");
+	icons["freedcpp-pm-offline"] = wsm->getString("icon-pm-offline");
+	icons["freedcpp-hub-online"] = wsm->getString("icon-hub-online");
+	icons["freedcpp-hub-offline"] = wsm->getString("icon-hub-offline");
 
 	if (iconFactory)
 	{
