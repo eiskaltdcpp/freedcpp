@@ -1,0 +1,19 @@
+# -*- coding: utf-8 -*-
+
+files = [
+	'connecthostport.c',
+	'igd_desc_parse.c',
+	'minisoap.c',
+	'minissdpc.c',
+	'miniupnpc.c',
+	'miniwget.c',
+	'minixml.c',
+	'upnpcommands.c',
+	'upnperrors.c',
+	'upnpreplyparse.c']
+
+Import('env')
+env = env.Clone()
+ret = env.StaticLibrary(target = 'miniupnpc', source = files)
+
+Return('ret')

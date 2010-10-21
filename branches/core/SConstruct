@@ -6,12 +6,14 @@ import commands
 import string
 import glob
 
-EnsureSConsVersion(0, 96)
+EnsureSConsVersion(1, 2)
 
 APP_NAME = 'freedcpp'
-LIB_NAME = 'libdcpp'
+LIB_DCPP = 'libdcpp'
+LIB_UPNP = 'libminiupnpc'
 BUILD_PATH = '#/build/'
 BUILD_LOCALE_PATH = 'build/locale/'
+LIB_IS_UPNP = True
 
 # ----------------------------------------------------------------------
 # Function definitions
@@ -51,15 +53,15 @@ def CheckCXXVersion(context, name, major, minor):
 
 # Parameters are only sticky from scons -> scons install, otherwise they're cleared.
 if 'install' in COMMAND_LINE_TARGETS:
-	opts = Options('build/sconf/scache.conf')
+	vars = Variables('build/sconf/scache.conf')
 else:
-	opts = Options()
+	vars = Variables()
 
-opts.AddOptions(
-	BoolOption('debug', 'Compile the program with debug information', 0),
-	BoolOption('release', 'Compile the program with optimizations', 0),
-	BoolOption('profile', 'Compile the program with profiling information', 0),
-	PathOption('PREFIX', 'Compile the program with PREFIX as the root for installation', '/usr/local'),
+vars.AddVariables(
+	BoolVariable('debug', 'Compile the program with debug information', 0),
+	BoolVariable('release', 'Compile the program with optimizations', 0),
+	BoolVariable('profile', 'Compile the program with profiling information', 0),
+	PathVariable('PREFIX', 'Compile the program with PREFIX as the root for installation', '/usr/local'),
 	('FAKE_ROOT', 'Make scons install the program under a fake root (for gentoo ebuilds)', '')
 )
 
@@ -68,7 +70,7 @@ opts.AddOptions(
 # Initialization
 # ----------------------------------------------------------------------
 
-env = Environment(ENV = os.environ, options = opts)
+env = Environment(ENV = os.environ, options = vars)
 
 conf = Configure(env,
 	custom_tests =
@@ -96,8 +98,8 @@ if os.environ.has_key('CFLAGS'):
 	conf.env['CFLAGS'] = os.environ['CFLAGS'].split()
 
 env.SConsignFile('build/sconf/.sconsign')
-opts.Save('build/sconf/scache.conf', env)
-Help(opts.GenerateHelpText(env))
+vars.Save('build/sconf/scache.conf', env)
+Help(vars.GenerateHelpText(env))
 
 # ----------------------------------------------------------------------
 # Dependencies
@@ -197,9 +199,7 @@ if not 'install' in COMMAND_LINE_TARGETS:
 
 	# MiniUPnPc for UPnP
 	if not conf.CheckLib('libminiupnpc'):
-		print '\tminiupnpc library not found'
-		print '\tNote: See website: http://miniupnp.free.fr/ http://miniupnp.tuxfamily.org/'
-		Exit(1)
+		LIB_IS_UPNP = False
 
 	env = conf.Finish()
 
@@ -250,8 +250,12 @@ if not 'install' in COMMAND_LINE_TARGETS:
 	env.ParseConfig('pkg-config --libs libnotify')
 	env.ParseConfig('pkg-config --libs gthread-2.0')
 
-	env.Append(LIBPATH = BUILD_PATH + LIB_NAME)
-	env.Prepend(LIBS = LIB_NAME)
+	env.Append(LIBPATH = BUILD_PATH + LIB_DCPP)
+	env.Prepend(LIBS = LIB_DCPP)
+
+	if not LIB_IS_UPNP:
+		env.Append(LIBPATH = BUILD_PATH + LIB_UPNP)
+		env.Prepend(LIBS = LIB_UPNP)
 
 	mo_args = ['msgfmt', '-c', '-o', '$TARGET', '$SOURCE']
 	mo_bld = Builder(action = Action([mo_args], 'Create $TARGET from $SOURCE'))
@@ -267,14 +271,22 @@ if not 'install' in COMMAND_LINE_TARGETS:
 	# @todo: Change build_dir to variant_dir when required SCons version is >=1.0.0
 	# 	(variant_dir doesn't seem to work with 0.97 and everything is built in ./dcpp/ and ./linux/
 	#	 -> libdcpp.a is not found when linking, as it is in ./dcpp/libdcpp.a instead of build/dcpp..)
+
+	# Build the miniupnpc library
+	if not LIB_IS_UPNP:
+		upnp = SConscript(dirs = 'miniupnpc', variant_dir = BUILD_PATH + LIB_UPNP, duplicate = 0)
+
 	# Build the dcpp library
-	libdcpp = SConscript(dirs = 'dcpp', build_dir = BUILD_PATH + LIB_NAME, duplicate = 0)
+	dcpp = SConscript(dirs = 'dcpp', variant_dir = BUILD_PATH + LIB_DCPP, duplicate = 0)
 
 	# Build the GUI
-	obj_files = SConscript(dirs = 'linux', build_dir = BUILD_PATH + APP_NAME, duplicate = 0)
+	gui = SConscript(dirs = 'linux', variant_dir = BUILD_PATH + APP_NAME, duplicate = 0)
 
 	# Create the executable
-	env.Program(target = APP_NAME, source = [libdcpp, obj_files])
+	if not LIB_IS_UPNP:
+		env.Program(target = APP_NAME, source = [dcpp, upnp, gui])
+	else:
+		env.Program(target = APP_NAME, source = [dcpp, gui])
 
 # ----------------------------------------------------------------------
 # Install
@@ -298,11 +310,11 @@ else:
 		mo_files.append(path + lang)
 
 	# dcpp library
-	path = BUILD_LOCALE_PATH + LIB_NAME + '/'
+	path = BUILD_LOCALE_PATH + LIB_DCPP + '/'
 	languages = os.listdir(path)
 	
 	for lang in languages:
-		locale.append(os.path.join(prefix, 'locale', lang, 'LC_MESSAGES', LIB_NAME + '.mo'))
+		locale.append(os.path.join(prefix, 'locale', lang, 'LC_MESSAGES', LIB_DCPP + '.mo'))
 		mo_files.append(path + lang)
 
 	target_icons = []
