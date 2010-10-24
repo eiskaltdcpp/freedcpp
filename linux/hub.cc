@@ -51,7 +51,8 @@ Hub::Hub(const string &address, const string &encoding):
 	encoding(encoding),
 	scrollToBottom(TRUE),
 	PasswordDialog(FALSE),
-	WaitingPassword(FALSE)
+	WaitingPassword(FALSE),
+	ImgLimit(0)
 {
 	// Configure the dialog
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(getWidget("userListCheckButton")), TRUE);
@@ -162,6 +163,9 @@ Hub::Hub(const string &address, const string &encoding):
 
 	g_object_set_data_full(G_OBJECT(getWidget("rebuildCommandItem")), "command", g_strdup("/rebuild"), g_free);
 	g_signal_connect(getWidget("rebuildCommandItem"), "activate", G_CALLBACK(onCommandClicked_gui), (gpointer)this);
+
+	g_object_set_data_full(G_OBJECT(getWidget("limitimgCommandItem")), "command", g_strdup("/limg"), g_free);
+	g_signal_connect(getWidget("limitimgCommandItem"), "activate", G_CALLBACK(onCommandClicked_gui), (gpointer)this);
 
 	g_object_set_data_full(G_OBJECT(getWidget("versionCommandItem")), "command", g_strdup("/freedcpp"), g_free);
 	g_signal_connect(getWidget("versionCommandItem"), "activate", G_CALLBACK(onCommandClicked_gui), (gpointer)this);
@@ -823,6 +827,17 @@ void Hub::applyTags_gui(const string cid, const string &line)
 				gtk_tooltips_set_tip(tips, event_box, text.c_str(), text.c_str());
 #endif
 				g_signal_connect(G_OBJECT(image), "destroy", G_CALLBACK(onImageDestroy_gui), (gpointer)this);
+
+				if (ImgLimit)
+				{
+					if (ImgLimit > 0)
+						ImgLimit--;
+
+					typedef Func4<Hub, string, int64_t, string, string> F4;
+					target = Util::getPath(Util::PATH_USER_CONFIG) + "Images/" + name;
+					F4 *func = new F4(this, &Hub::download_client, target, size, tth, cid);
+					WulforManager::get()->dispatchClientFunc(func);
+				}
 			}
 
 			applyEmoticons_gui();
@@ -1769,6 +1784,27 @@ void Hub::onSendMessage_gui(GtkEntry *entry, gpointer data)
 				hub->addStatusMessage_gui(_("Emoticons mode on"), Msg::SYSTEM, Sound::NONE);
 			}
 		}
+		else if (command == "limitimg" || command == "limg")
+		{
+			int n;
+			string text;
+			if (param.empty())
+			{
+				n = hub->ImgLimit;
+				if (n == 0)
+					text = _("Download image: disable");
+				else if (n < 0)
+					text = _("Download image: unlimit");
+				else
+					text = _("Download limit image: ") + Util::toString(n);
+				hub->addMessage_gui("", text.c_str(), Msg::SYSTEM);
+				return;
+			}
+			n = Util::toInt(param);
+			hub->ImgLimit = n;
+			text = _("Set download limit image: ") + Util::toString(n);
+			hub->addStatusMessage_gui(text, Msg::SYSTEM, Sound::NONE);
+		}
 		else if (command == "freedcpp")
 		{
 			hub->addStatusMessage_gui(string(GUI_PACKAGE " " GUI_VERSION_STRING "." GUI_VERSION_BUILD_STRING "/" VERSIONSTRING ", ") + _("project home: ") + "http://freedcpp.googlecode.com", Msg::SYSTEM, Sound::NONE);
@@ -1793,6 +1829,7 @@ void Hub::onSendMessage_gui(GtkEntry *entry, gpointer data)
 			"/rebuild\t\t\t\t - " + _("Rebuild hash") + "\n" +
 			"/refresh\t\t\t\t - " + _("Update own file list") + "\n" +
 			"/userlist\t\t\t\t - " + _("User list show/hide") + "\n" +
+			"/limitimg <n>, limg <n>\t - " + _("Download limit image: 0 - disable, n < 0 - unlimit, empty - info") + "\n" +
 			"/freedcpp\t\t\t\t - " + _("Show version") + "\n" +
 			"/emoticons, /emot\t\t - " + _("Emoticons on/off") + "\n", Msg::SYSTEM);
 		}
