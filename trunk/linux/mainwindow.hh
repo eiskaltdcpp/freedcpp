@@ -83,6 +83,7 @@ class MainWindow:
 		void showNotification_gui(std::string head, std::string body, Notify::TypeNotify notify);
 		GtkWidget* getChooserDialog_gui();
 		void fileToDownload_gui(std::string magnet, std::string path);
+		void checkToolbarMenu_gui();
 
 		// Client functions
 		void openOwnList_client(bool useSetting);
@@ -109,6 +110,7 @@ class MainWindow:
 		void setChooseMagnetDialog_gui();
 		void showMagnetDialog_gui(const std::string &magnet, const std::string &name, const int64_t size,
 			const std::string &tth);
+		void setToolbarMenu_gui(const std::string &item_key, const std::string &button_key, const std::string &key);
 
 		// GUI Callbacks
 		static gboolean onWindowState_gui(GtkWidget *widget, GdkEventWindowState *event, gpointer data);
@@ -155,6 +157,10 @@ class MainWindow:
 		static void onSetMagnetChoiceDialog_gui(GtkWidget *widget, gpointer data);
 		static void onResponseMagnetDialog_gui(GtkWidget *dialog, gint response, gpointer data);
 		static gboolean onDeleteEventMagnetDialog_gui(GtkWidget *dialog, GdkEvent *event, gpointer data);
+		static gboolean onMenuButtonClicked_gui(GtkWidget *widget, gpointer data);
+		static gboolean onAddButtonClicked_gui(GtkWidget *widget, gpointer data);
+		static void menuPosition_gui(GtkMenu *menu, gint *x, gint *y, gboolean *push, gpointer data);
+		static void onToolToggled_gui(GtkWidget *widget, gpointer data);
 
 		// Client functions
 		void autoConnect_client();
