@@ -77,8 +77,27 @@ MainWindow::MainWindow():
 	gtk_window_set_transient_for(GTK_WINDOW(getWidget("flistDialog")), window);
 	gtk_window_set_transient_for(GTK_WINDOW(getWidget("ucLineDialog")), window);
 
+	// toolbar
+	setToolbarMenu_gui("connectMenuItemBar", "connect", "toolbar-button-connect");
+	setToolbarMenu_gui("favHubsMenuItemBar", "favHubs", "toolbar-button-fav-hubs");
+	setToolbarMenu_gui("favUsersMenuItemBar", "favUsers", "toolbar-button-fav-users");
+	setToolbarMenu_gui("publicHubsMenuItemBar", "publicHubs", "toolbar-button-public-hubs");
+	setToolbarMenu_gui("settingsMenuItemBar", "settings", "toolbar-button-settings");
+	setToolbarMenu_gui("hashMenuItemBar", "hash", "toolbar-button-hash");
+	setToolbarMenu_gui("searchMenuItemBar", "search", "toolbar-button-search");
+	setToolbarMenu_gui("searchADLMenuItemBar", "searchADL", "toolbar-button-search-adl");
+	setToolbarMenu_gui("searchSpyMenuItemBar", "searchSpy", "toolbar-button-search-spy");
+	setToolbarMenu_gui("queueMenuItemBar", "queue", "toolbar-button-queue");
+	setToolbarMenu_gui("finishedDownloadsMenuItemBar", "finishedDownloads", "toolbar-button-finished-downloads");
+	setToolbarMenu_gui("finishedUploadsMenuItemBar", "finishedUploads", "toolbar-button-finished-uploads");
+	setToolbarMenu_gui("quitMenuItemBar", "quit", "toolbar-button-quit");
+	g_signal_connect(G_OBJECT(getWidget("menu")), "clicked", G_CALLBACK(onMenuButtonClicked_gui), (gpointer)this);
+	g_signal_connect(G_OBJECT(getWidget("add")), "clicked", G_CALLBACK(onAddButtonClicked_gui), (gpointer)this);
+
 	// menu
 	g_object_ref_sink(getWidget("statusIconMenu"));
+	g_object_ref_sink(getWidget("mainMenu"));
+	g_object_ref_sink(getWidget("toolbarMenu"));
 
 	// magnet dialog
 	gtk_dialog_set_alternative_button_order(GTK_DIALOG(getWidget("MagnetDialog")), GTK_RESPONSE_OK, GTK_RESPONSE_CANCEL, -1);
@@ -270,8 +289,12 @@ MainWindow::~MainWindow()
 	WSET("status-icon-blink-use", useStatusIconBlink);
 
 	gtk_widget_destroy(GTK_WIDGET(window));
+	GtkWidget *main_menu = getWidget("mainMenu");
+	gtk_widget_destroy(main_menu);
+	g_object_unref(main_menu);
 	g_object_unref(statusIcon);
 	g_object_unref(getWidget("statusIconMenu"));
+	g_object_unref(getWidget("toolbarMenu"));
 
 	Sound::stop();
 	Emoticons::stop();
@@ -376,6 +399,15 @@ void MainWindow::autoOpen_gui()
 		showFinishedUploads_gui();
 	if (BOOLSETTING(OPEN_SEARCH_SPY))
 		showSearchSpy_gui();
+}
+
+void MainWindow::setToolbarMenu_gui(const string &item_key, const string &button_key, const string &key)
+{
+	GtkWidget *item = getWidget(item_key);
+	GtkWidget *button = getWidget(button_key);
+	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(item), WGETB(key));
+	g_object_set_data_full(G_OBJECT(item), "key", g_strdup(key.c_str()), g_free);
+	g_signal_connect(G_OBJECT(item), "toggled", G_CALLBACK(onToolToggled_gui), (gpointer)button);
 }
 
 void MainWindow::addBookEntry_gui(BookEntry *entry)
@@ -1300,6 +1332,65 @@ gboolean MainWindow::onDeleteEventMagnetDialog_gui(GtkWidget *dialog, GdkEvent *
 	return TRUE;
 }
 
+gboolean MainWindow::onMenuButtonClicked_gui(GtkWidget *widget, gpointer data)
+{
+	MainWindow *mw = (MainWindow *)data;
+
+	gtk_menu_popup(GTK_MENU(mw->getWidget("mainMenu")), NULL, NULL, menuPosition_gui, data, 0,
+		gtk_get_current_event_time());
+	return FALSE;
+}
+
+gboolean MainWindow::onAddButtonClicked_gui(GtkWidget *widget, gpointer data)
+{
+	MainWindow *mw = (MainWindow *)data;
+
+	gtk_menu_popup(GTK_MENU(mw->getWidget("toolbarMenu")), NULL, NULL, NULL, NULL, 0, gtk_get_current_event_time());
+	return FALSE;
+}
+
+void MainWindow::onToolToggled_gui(GtkWidget *widget, gpointer data)
+{
+	string key = (gchar*) g_object_get_data(G_OBJECT(widget), "key");
+	GtkWidget *button = (GtkWidget*) data;
+	bool active = gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget));
+	active ? gtk_widget_show(button) : gtk_widget_hide(button);
+	WSET(key, active);
+}
+
+void MainWindow::menuPosition_gui(GtkMenu *menu, gint *x, gint *y, gboolean *push, gpointer data)
+{
+	MainWindow *mw = (MainWindow *)data;
+
+	gint tx, ty, tw;
+	GtkRequisition requisition;
+	GtkWidget *toolbar = mw->getWidget("toolbar1");
+	gtk_widget_size_request(toolbar, &requisition);
+	gdk_window_get_origin(toolbar->window, &tx, &ty);
+	tw = requisition.width;
+	tx += toolbar->allocation.x;
+	ty += toolbar->allocation.y;
+	*x = tx + tw;
+	*y = ty;
+}
+
+void MainWindow::checkToolbarMenu_gui()
+{
+	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(getWidget("connectMenuItemBar")), WGETB("toolbar-button-connect"));
+	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(getWidget("favHubsMenuItemBar")), WGETB("toolbar-button-fav-hubs"));
+	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(getWidget("favUsersMenuItemBar")), WGETB("toolbar-button-fav-users"));
+	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(getWidget("publicHubsMenuItemBar")), WGETB("toolbar-button-public-hubs"));
+	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(getWidget("settingsMenuItemBar")), WGETB("toolbar-button-settings"));
+	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(getWidget("hashMenuItemBar")), WGETB("toolbar-button-hash"));
+	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(getWidget("searchMenuItemBar")), WGETB("toolbar-button-search"));
+	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(getWidget("searchSpyMenuItemBar")), WGETB("toolbar-button-search-spy"));
+	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(getWidget("searchADLMenuItemBar")), WGETB("toolbar-button-search-adl"));
+	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(getWidget("queueMenuItemBar")), WGETB("toolbar-button-queue"));
+	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(getWidget("finishedDownloadsMenuItemBar")), WGETB("toolbar-button-finished-downloads"));
+	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(getWidget("finishedUploadsMenuItemBar")), WGETB("toolbar-button-finished-uploads"));
+	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(getWidget("quitMenuItemBar")), WGETB("toolbar-button-quit"));
+}
+
 gboolean MainWindow::onKeyPressed_gui(GtkWidget *widget, GdkEventKey *event, gpointer data)
 {
 	MainWindow *mw = (MainWindow *)data;
@@ -1507,8 +1598,7 @@ void MainWindow::onPreferencesClicked_gui(GtkWidget *widget, gpointer data)
 			Emoticons::get()->reloadPack_gui();
 
 		// Toolbar
-		gtk_widget_show_all(mw->getWidget("toolbar1"));
-		mw->setToolbarButton_gui();
+		mw->checkToolbarMenu_gui();
 	}
 }
 
