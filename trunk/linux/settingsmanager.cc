@@ -112,6 +112,7 @@ WulforSettingsManager::WulforSettingsManager():
 	defaultInt.insert(IntMap::value_type("search-spy-top", 4));
 	defaultInt.insert(IntMap::value_type("magnet-action", -1));//default show magnet dialog
 	defaultInt.insert(IntMap::value_type("toolbar-position", 1));
+	defaultInt.insert(IntMap::value_type("toolbar-small", 0));
 	defaultString.insert(StringMap::value_type("magnet-choose-dir", SETTING(DOWNLOAD_DIRECTORY)));
 	defaultString.insert(StringMap::value_type("downloadqueue-order", ""));
 	defaultString.insert(StringMap::value_type("downloadqueue-width", ""));
