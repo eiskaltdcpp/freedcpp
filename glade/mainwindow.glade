@@ -384,6 +384,18 @@
                       </widget>
                     </child>
                     <child>
+                      <widget class="GtkCheckMenuItem" id="sizeToolbarItem">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">Small toolbar</property>
+                        <property name="use_underline">True</property>
+                      </widget>
+                    </child>
+                    <child>
+                      <widget class="GtkSeparatorMenuItem" id="separatorHide">
+                        <property name="visible">True</property>
+                      </widget>
+                    </child>
+                    <child>
                       <widget class="GtkCheckMenuItem" id="hideToolbarItem">
                         <property name="visible">True</property>
                         <property name="label" translatable="yes">Hide tools</property>

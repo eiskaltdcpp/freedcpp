@@ -164,6 +164,7 @@ class MainWindow:
 		static void onTopToolbarToggled_gui(GtkWidget *widget, gpointer data);
 		static void onLeftToolbarToggled_gui(GtkWidget *widget, gpointer data);
 		static void onHideToolbarToggled_gui(GtkWidget *widget, gpointer data);
+		static void onSizeToolbarToggled_gui(GtkWidget *widget, gpointer data);
 
 		// Client functions
 		void autoConnect_client();

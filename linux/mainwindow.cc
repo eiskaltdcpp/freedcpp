@@ -98,6 +98,9 @@ MainWindow::MainWindow():
 	GtkWidget *child = getWidget("toolbar1");
 	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(getWidget("leftToolbarItem")), TRUE);
 	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(getWidget("hideToolbarItem")), (WGETI("toolbar-style") == 4) ? TRUE : FALSE);
+	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(getWidget("sizeToolbarItem")), WGETB("toolbar-small"));
+	if (WGETB("toolbar-small"))
+		g_object_set(G_OBJECT(child), "icon-size", GTK_ICON_SIZE_SMALL_TOOLBAR, NULL);
 
 	if (WGETI("toolbar-position") == 0)
 	{
@@ -110,6 +113,7 @@ MainWindow::MainWindow():
 	gtk_box_reorder_child(box, child, pos);
 	g_object_unref(child);
 
+	g_signal_connect(G_OBJECT(getWidget("sizeToolbarItem")), "toggled", G_CALLBACK(onSizeToolbarToggled_gui), (gpointer)this);
 	g_signal_connect(G_OBJECT(getWidget("hideToolbarItem")), "toggled", G_CALLBACK(onHideToolbarToggled_gui), (gpointer)this);
 	g_signal_connect(G_OBJECT(getWidget("topToolbarItem")), "toggled", G_CALLBACK(onTopToolbarToggled_gui), (gpointer)this);
 	g_signal_connect(G_OBJECT(getWidget("leftToolbarItem")), "toggled", G_CALLBACK(onLeftToolbarToggled_gui), (gpointer)this);
@@ -1396,6 +1400,26 @@ void MainWindow::onHideToolbarToggled_gui(GtkWidget *widget, gpointer data)
 		gtk_widget_show(mw->getWidget("toolbar1"));
 		WSET("toolbar-style", mw->ToolbarStyle);
 	}
+}
+
+void MainWindow::onSizeToolbarToggled_gui(GtkWidget *widget, gpointer data)
+{
+	MainWindow *mw = (MainWindow *)data;
+
+	gboolean active = gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(mw->getWidget("sizeToolbarItem")));
+	GtkWidget *toolbar = mw->getWidget("toolbar1");
+	GtkIconSize size;
+	if (active)
+	{
+		WSET("toolbar-small", TRUE);
+		size = GTK_ICON_SIZE_SMALL_TOOLBAR;
+	}
+	else
+	{
+		WSET("toolbar-small", FALSE);
+		size = GTK_ICON_SIZE_LARGE_TOOLBAR;
+	}
+	g_object_set(G_OBJECT(toolbar), "icon-size", size, NULL);
 }
 
 gboolean MainWindow::onAddButtonClicked_gui(GtkWidget *widget, gpointer data)
