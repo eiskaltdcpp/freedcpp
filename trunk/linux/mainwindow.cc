@@ -91,12 +91,32 @@ MainWindow::MainWindow():
 	setToolbarMenu_gui("finishedDownloadsMenuItemBar", "finishedDownloads", "toolbar-button-finished-downloads");
 	setToolbarMenu_gui("finishedUploadsMenuItemBar", "finishedUploads", "toolbar-button-finished-uploads");
 	setToolbarMenu_gui("quitMenuItemBar", "quit", "toolbar-button-quit");
-	g_signal_connect(G_OBJECT(getWidget("menu")), "clicked", G_CALLBACK(onMenuButtonClicked_gui), (gpointer)this);
+
+	gint pos = 0;
+	ToolbarStyle = 0;
+	GtkBox *box = GTK_BOX(getWidget("hbox4"));
+	GtkWidget *child = getWidget("toolbar1");
+	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(getWidget("leftToolbarItem")), TRUE);
+	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(getWidget("hideToolbarItem")), (WGETI("toolbar-style") == 4) ? TRUE : FALSE);
+
+	if (WGETI("toolbar-position") == 0)
+	{
+		box = GTK_BOX(getWidget("vbox1"));
+		gtk_toolbar_set_orientation(GTK_TOOLBAR(child), GTK_ORIENTATION_HORIZONTAL);
+		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(getWidget("topToolbarItem")), TRUE);
+		pos = 1;
+	}
+	gtk_box_pack_start(box, child, FALSE, FALSE, 2);
+	gtk_box_reorder_child(box, child, pos);
+	g_object_unref(child);
+
+	g_signal_connect(G_OBJECT(getWidget("hideToolbarItem")), "toggled", G_CALLBACK(onHideToolbarToggled_gui), (gpointer)this);
+	g_signal_connect(G_OBJECT(getWidget("topToolbarItem")), "toggled", G_CALLBACK(onTopToolbarToggled_gui), (gpointer)this);
+	g_signal_connect(G_OBJECT(getWidget("leftToolbarItem")), "toggled", G_CALLBACK(onLeftToolbarToggled_gui), (gpointer)this);
 	g_signal_connect(G_OBJECT(getWidget("add")), "clicked", G_CALLBACK(onAddButtonClicked_gui), (gpointer)this);
 
 	// menu
 	g_object_ref_sink(getWidget("statusIconMenu"));
-	g_object_ref_sink(getWidget("mainMenu"));
 	g_object_ref_sink(getWidget("toolbarMenu"));
 
 	// magnet dialog
@@ -287,11 +307,7 @@ MainWindow::~MainWindow()
 		g_source_remove(timer);
 
 	WSET("status-icon-blink-use", useStatusIconBlink);
-
 	gtk_widget_destroy(GTK_WIDGET(window));
-	GtkWidget *main_menu = getWidget("mainMenu");
-	gtk_widget_destroy(main_menu);
-	g_object_unref(main_menu);
 	g_object_unref(statusIcon);
 	g_object_unref(getWidget("statusIconMenu"));
 	g_object_unref(getWidget("toolbarMenu"));
@@ -956,9 +972,6 @@ void MainWindow::setToolbarStyle_gui(int style)
 
 	switch (style)
 	{
-		case 0:
-			toolbarStyle = GTK_TOOLBAR_ICONS;
-			break;
 		case 1:
 			toolbarStyle = GTK_TOOLBAR_TEXT;
 			break;
@@ -970,11 +983,10 @@ void MainWindow::setToolbarStyle_gui(int style)
 			break;
 		case 4:
 			gtk_widget_hide(getWidget("toolbar1"));
-			break;
-		case 5:
 			return;
+		case 0:
 		default:
-			toolbarStyle = GTK_TOOLBAR_BOTH;
+			toolbarStyle = GTK_TOOLBAR_ICONS;
 	}
 
 	if (style != 4)
@@ -1332,13 +1344,58 @@ gboolean MainWindow::onDeleteEventMagnetDialog_gui(GtkWidget *dialog, GdkEvent *
 	return TRUE;
 }
 
-gboolean MainWindow::onMenuButtonClicked_gui(GtkWidget *widget, gpointer data)
+void MainWindow::onTopToolbarToggled_gui(GtkWidget *widget, gpointer data)
 {
 	MainWindow *mw = (MainWindow *)data;
 
-	gtk_menu_popup(GTK_MENU(mw->getWidget("mainMenu")), NULL, NULL, menuPosition_gui, data, 0,
-		gtk_get_current_event_time());
-	return FALSE;
+	GtkWidget *parent = mw->getWidget("hbox4");
+	GtkWidget *child = mw->getWidget("toolbar1");
+	if (child->parent != GTK_WIDGET(parent))
+		return;
+	g_object_ref(child);
+	gtk_container_remove(GTK_CONTAINER(parent), child);
+	parent = mw->getWidget("vbox1");
+	gtk_toolbar_set_orientation(GTK_TOOLBAR(child), GTK_ORIENTATION_HORIZONTAL);
+	gtk_box_pack_start(GTK_BOX(parent), child, FALSE, FALSE, 2);
+	gtk_box_reorder_child(GTK_BOX(parent), child, 1);
+	g_object_unref(child);
+	WSET("toolbar-position", 0);
+}
+
+void MainWindow::onLeftToolbarToggled_gui(GtkWidget *widget, gpointer data)
+{
+	MainWindow *mw = (MainWindow *)data;
+
+	GtkWidget *parent = mw->getWidget("vbox1");
+	GtkWidget *child = mw->getWidget("toolbar1");
+	if (child->parent != GTK_WIDGET(parent))
+		return;
+	g_object_ref(child);
+	gtk_container_remove(GTK_CONTAINER(parent), child);
+	parent = mw->getWidget("hbox4");
+	gtk_toolbar_set_orientation(GTK_TOOLBAR(child), GTK_ORIENTATION_VERTICAL);
+	gtk_box_pack_start(GTK_BOX(parent), child, FALSE, FALSE, 2);
+	gtk_box_reorder_child(GTK_BOX(parent), child, 0);
+	g_object_unref(child);
+	WSET("toolbar-position", 1);
+}
+
+void MainWindow::onHideToolbarToggled_gui(GtkWidget *widget, gpointer data)
+{
+	MainWindow *mw = (MainWindow *)data;
+
+	gboolean active = gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(mw->getWidget("hideToolbarItem")));
+	if (active)
+	{
+		gtk_widget_hide(mw->getWidget("toolbar1"));
+		mw->ToolbarStyle = WGETI("toolbar-style");
+		WSET("toolbar-style", 4);
+	}
+	else
+	{
+		gtk_widget_show(mw->getWidget("toolbar1"));
+		WSET("toolbar-style", mw->ToolbarStyle);
+	}
 }
 
 gboolean MainWindow::onAddButtonClicked_gui(GtkWidget *widget, gpointer data)
@@ -1358,22 +1415,6 @@ void MainWindow::onToolToggled_gui(GtkWidget *widget, gpointer data)
 	WSET(key, active);
 }
 
-void MainWindow::menuPosition_gui(GtkMenu *menu, gint *x, gint *y, gboolean *push, gpointer data)
-{
-	MainWindow *mw = (MainWindow *)data;
-
-	gint tx, ty, tw;
-	GtkRequisition requisition;
-	GtkWidget *toolbar = mw->getWidget("toolbar1");
-	gtk_widget_size_request(toolbar, &requisition);
-	gdk_window_get_origin(toolbar->window, &tx, &ty);
-	tw = requisition.width;
-	tx += toolbar->allocation.x;
-	ty += toolbar->allocation.y;
-	*x = tx + tw;
-	*y = ty;
-}
-
 void MainWindow::checkToolbarMenu_gui()
 {
 	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(getWidget("connectMenuItemBar")), WGETB("toolbar-button-connect"));
@@ -1389,6 +1430,7 @@ void MainWindow::checkToolbarMenu_gui()
 	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(getWidget("finishedDownloadsMenuItemBar")), WGETB("toolbar-button-finished-downloads"));
 	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(getWidget("finishedUploadsMenuItemBar")), WGETB("toolbar-button-finished-uploads"));
 	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(getWidget("quitMenuItemBar")), WGETB("toolbar-button-quit"));
+	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(getWidget("hideToolbarItem")), ((ToolbarStyle = WGETI("toolbar-style")) == 4) ? TRUE : FALSE);
 }
 
 gboolean MainWindow::onKeyPressed_gui(GtkWidget *widget, GdkEventKey *event, gpointer data)

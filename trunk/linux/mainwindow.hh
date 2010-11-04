@@ -161,6 +161,9 @@ class MainWindow:
 		static gboolean onAddButtonClicked_gui(GtkWidget *widget, gpointer data);
 		static void menuPosition_gui(GtkMenu *menu, gint *x, gint *y, gboolean *push, gpointer data);
 		static void onToolToggled_gui(GtkWidget *widget, gpointer data);
+		static void onTopToolbarToggled_gui(GtkWidget *widget, gpointer data);
+		static void onLeftToolbarToggled_gui(GtkWidget *widget, gpointer data);
+		static void onHideToolbarToggled_gui(GtkWidget *widget, gpointer data);
 
 		// Client functions
 		void autoConnect_client();
@@ -183,6 +186,7 @@ class MainWindow:
 		int statusFrame;
 		bool useStatusIconBlink;
 		bool onQuit;
+		int ToolbarStyle;
 };
 
 #else
