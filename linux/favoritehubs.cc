@@ -512,6 +512,9 @@ void FavoriteHubs::addEntry_client(StringMap params)
 	entry.setUserDescription(params["User Description"]);
 	entry.setEncoding(params["Encoding"]);
 	FavoriteManager::getInstance()->addFavorite(entry);
+
+	const FavoriteHubEntryList &fh = FavoriteManager::getInstance()->getFavoriteHubs();
+	WulforManager::get()->getMainWindow()->updateFavoriteHubMenu_client(fh);
 }
 
 void FavoriteHubs::editEntry_client(string address, StringMap params)
@@ -529,6 +532,9 @@ void FavoriteHubs::editEntry_client(string address, StringMap params)
 		entry->setUserDescription(params["User Description"]);
 		entry->setEncoding(params["Encoding"]);
 		FavoriteManager::getInstance()->save();
+
+		const FavoriteHubEntryList &fh = FavoriteManager::getInstance()->getFavoriteHubs();
+		WulforManager::get()->getMainWindow()->updateFavoriteHubMenu_client(fh);
 	}
 }
 
@@ -537,7 +543,12 @@ void FavoriteHubs::removeEntry_client(string address)
 	FavoriteHubEntry *entry = FavoriteManager::getInstance()->getFavoriteHubEntry(address);
 
 	if (entry)
+	{
 		FavoriteManager::getInstance()->removeFavorite(entry);
+
+		const FavoriteHubEntryList &fh = FavoriteManager::getInstance()->getFavoriteHubs();
+		WulforManager::get()->getMainWindow()->updateFavoriteHubMenu_client(fh);
+	}
 }
 
 void FavoriteHubs::setConnect_client(string address, bool active)
