@@ -972,6 +972,20 @@ msgstr "Описание"
 msgid "Destination Directory"
 msgstr "Имя папки"
 
+#: mainwindow.glade:953
+msgid ""
+"Developers:\n"
+"  troll\n"
+"\n"
+"Contributors:\n"
+"  Leliksan Floyd\n"
+msgstr ""
+"Разработчики:\n"
+"  troll\n"
+"\n"
+"Соавторы:\n"
+"  Leliksan Floyd\n"
+
 #: settingsdialog.glade:695
 msgid "Direct connection"
 msgstr "Прямое соединение (активный режим)"

@@ -922,6 +922,15 @@ msgstr ""
 msgid "Description"
 msgstr ""
 
+#: mainwindow.glade:953
+msgid ""
+"Developers:\n"
+"  troll\n"
+"\n"
+"Contributors:\n"
+"  Leliksan Floyd\n"
+msgstr ""
+
 #: adlsearch.cc:42 adlsearch.cc:62 adlsearch.cc:113 adlsearch.cc:213
 #: adlsearch.cc:238
 msgid "Destination Directory"

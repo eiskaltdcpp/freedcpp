@@ -950,7 +950,7 @@ You should have received a copy of the GNU General Public License along with thi
 
 In addition, as a special exception, compiling, linking, and/or using OpenSSL with this program is allowed.
 </property>
-    <property name="authors">Developers:
+    <property name="authors" translatable="yes">Developers:
   troll
 
 Contributors:
