@@ -27,6 +27,7 @@
 #include "WulforUtil.hh"
 
 #include <glib/gi18n.h>
+#include <glib/gstdio.h>
 
 using namespace std;
 using namespace dcpp;
@@ -40,8 +41,8 @@ WulforSettingsManager::WulforSettingsManager():
 	defaultInt.insert(IntMap::value_type("main-window-pos-x", 100));
 	defaultInt.insert(IntMap::value_type("main-window-pos-y", 100));
 	defaultInt.insert(IntMap::value_type("main-window-no-close", 0));
-	defaultInt.insert(IntMap::value_type("transfer-pane-position", 482));
-	defaultInt.insert(IntMap::value_type("nick-pane-position", 500));
+	defaultInt.insert(IntMap::value_type("transfer-pane-position", 204));
+	defaultInt.insert(IntMap::value_type("nick-pane-position", 255));
 	defaultInt.insert(IntMap::value_type("downloadqueue-pane-position", 200));
 	defaultInt.insert(IntMap::value_type("sharebrowser-pane-position", 200));
 	defaultInt.insert(IntMap::value_type("tab-position", 0));
@@ -119,6 +120,8 @@ WulforSettingsManager::WulforSettingsManager():
 	defaultInt.insert(IntMap::value_type("open-favorite-users", 0));
 	defaultInt.insert(IntMap::value_type("open-search-spy", 0));
 ///core 0.762]
+	defaultInt.insert(IntMap::value_type("toolbar-position", 1));
+	defaultInt.insert(IntMap::value_type("toolbar-small", 0));
 	defaultString.insert(StringMap::value_type("magnet-choose-dir", SETTING(DOWNLOAD_DIRECTORY)));
 	defaultString.insert(StringMap::value_type("downloadqueue-order", ""));
 	defaultString.insert(StringMap::value_type("downloadqueue-width", ""));
@@ -238,6 +241,9 @@ WulforSettingsManager::WulforSettingsManager():
 	defaultString.insert(StringMap::value_type("icon-hub-offline", "freedcpp-hub-offline"));
 
 	load();
+
+	string path_image = Util::getPath(Util::PATH_USER_CONFIG) + "Images/";
+	g_mkdir_with_parents(path_image.c_str(), S_IRUSR | S_IWUSR | S_IXUSR);
 }
 
 WulforSettingsManager::~WulforSettingsManager()

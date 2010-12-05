@@ -1,5 +1,8 @@
 		--- freedcpp core branch ---
 
+r184: 0.28
+* merging trunk r162 through r182 into core branch.
+
 r170: 0.27
 * Add miniupnpc-1.4.20100609.
 * Ревизия 2163 (dcplusplus, add MiniUPnPc for UPnP mappings and make it threaded).

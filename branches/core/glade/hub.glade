@@ -114,10 +114,66 @@
         <property name="visible">True</property>
         <property name="spacing">5</property>
         <child>
+          <widget class="GtkButton" id="italicButton">
+            <property name="visible">True</property>
+            <property name="focus_on_click">False</property>
+            <property name="response_id">0</property>
+            <child>
+              <widget class="GtkImage" id="italicButtonImage">
+                <property name="visible">True</property>
+                <property name="stock">gtk-italic</property>
+                <property name="icon_size">1</property>
+              </widget>
+            </child>
+          </widget>
+          <packing>
+            <property name="expand">False</property>
+          </packing>
+        </child>
+        <child>
+          <widget class="GtkButton" id="boldButton">
+            <property name="visible">True</property>
+            <property name="focus_on_click">False</property>
+            <property name="response_id">0</property>
+            <child>
+              <widget class="GtkImage" id="boldButtonImage">
+                <property name="visible">True</property>
+                <property name="stock">gtk-bold</property>
+                <property name="icon_size">1</property>
+              </widget>
+            </child>
+          </widget>
+          <packing>
+            <property name="expand">False</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <widget class="GtkButton" id="underlineButton">
+            <property name="visible">True</property>
+            <property name="focus_on_click">False</property>
+            <property name="response_id">0</property>
+            <child>
+              <widget class="GtkImage" id="underlineButtonImage">
+                <property name="visible">True</property>
+                <property name="stock">gtk-underline</property>
+                <property name="icon_size">1</property>
+              </widget>
+            </child>
+          </widget>
+          <packing>
+            <property name="expand">False</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+        <child>
           <widget class="GtkStatusbar" id="statusMain">
             <property name="visible">True</property>
             <property name="has_resize_grip">False</property>
           </widget>
+          <packing>
+            <property name="position">3</property>
+          </packing>
         </child>
         <child>
           <widget class="GtkStatusbar" id="statusUsers">
@@ -127,7 +183,7 @@
           </widget>
           <packing>
             <property name="expand">False</property>
-            <property name="position">1</property>
+            <property name="position">4</property>
           </packing>
         </child>
         <child>
@@ -138,7 +194,7 @@
           </widget>
           <packing>
             <property name="expand">False</property>
-            <property name="position">2</property>
+            <property name="position">5</property>
           </packing>
         </child>
         <child>
@@ -152,7 +208,7 @@
           </widget>
           <packing>
             <property name="expand">False</property>
-            <property name="position">3</property>
+            <property name="position">6</property>
           </packing>
         </child>
       </widget>
@@ -400,10 +456,43 @@
       </widget>
     </child>
     <child>
+      <widget class="GtkMenuItem" id="limitimgCommandItem">
+        <property name="visible">True</property>
+        <property name="tooltip" translatable="yes">Set download limit image</property>
+        <property name="label">/limg</property>
+      </widget>
+    </child>
+    <child>
       <widget class="GtkMenuItem" id="versionCommandItem">
         <property name="visible">True</property>
         <property name="tooltip" translatable="yes">Show version</property>
         <property name="label">/freedcpp</property>
+      </widget>
+    </child>
+  </widget>
+  <widget class="GtkMenu" id="imageMenu">
+    <property name="visible">True</property>
+    <child>
+      <widget class="GtkMenuItem" id="downloadImageItem">
+        <property name="visible">True</property>
+        <property name="label" translatable="yes">Download image</property>
+      </widget>
+    </child>
+    <child>
+      <widget class="GtkMenuItem" id="openImageItem">
+        <property name="visible">True</property>
+        <property name="label" translatable="yes">Open image</property>
+      </widget>
+    </child>
+    <child>
+      <widget class="GtkSeparatorMenuItem" id="separator22">
+        <property name="visible">True</property>
+      </widget>
+    </child>
+    <child>
+      <widget class="GtkMenuItem" id="removeImageItem">
+        <property name="visible">True</property>
+        <property name="label" translatable="yes">Remove image</property>
       </widget>
     </child>
   </widget>
