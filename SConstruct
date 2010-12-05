@@ -268,9 +268,6 @@ if not 'install' in COMMAND_LINE_TARGETS:
 
 	Export('env')
 
-	# @todo: Change build_dir to variant_dir when required SCons version is >=1.0.0
-	# 	(variant_dir doesn't seem to work with 0.97 and everything is built in ./dcpp/ and ./linux/
-	#	 -> libdcpp.a is not found when linking, as it is in ./dcpp/libdcpp.a instead of build/dcpp..)
 
 	# Build the miniupnpc library
 	if not LIB_IS_UPNP:
