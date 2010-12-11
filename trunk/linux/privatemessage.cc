@@ -35,7 +35,7 @@ using namespace std;
 using namespace dcpp;
 
 PrivateMessage::PrivateMessage(const string &cid, const string &hubUrl):
-	BookEntry(Entry::PRIVATE_MESSAGE, _("PM: ") + WulforUtil::getNicks(cid), "privatemessage.glade", cid),
+	BookEntry(Entry::PRIVATE_MESSAGE, _("PM: ") + WulforUtil::getNicks(cid, hubUrl), "privatemessage.glade", cid),//NOTE: core 0.760
 	cid(cid),
 	hubUrl(hubUrl),
 	historyIndex(0),
@@ -135,7 +135,7 @@ PrivateMessage::PrivateMessage(const string &cid, const string &hubUrl):
 	UserPtr user = ClientManager::getInstance()->findUser(CID(cid));
 	isBot = user ? user->isSet(User::BOT) : FALSE;
 
-	setLabel_gui(_("PM: ") + WulforUtil::getNicks(cid) + " [" + WulforUtil::getHubNames(cid) + "]");
+	setLabel_gui(_("PM: ") + WulforUtil::getNicks(cid, hubUrl) + " [" + WulforUtil::getHubNames(cid, hubUrl) + "]");//NOTE: core 0.762
 
 	/* initial tags map */
 	TagsMap[TAG_PRIVATE] = createTag_gui("TAG_PRIVATE", TAG_PRIVATE);
@@ -185,10 +185,10 @@ void PrivateMessage::addMessage_gui(string message, Msg::TypeMsg typemsg)
 	{
 		StringMap params;
 		params["message"] = message;
-		params["hubNI"] = WulforUtil::getHubNames(cid);
-		params["hubURL"] = Util::toString(ClientManager::getInstance()->getHubs(CID(cid)));
+		params["hubNI"] = WulforUtil::getHubNames(cid, hubUrl);//NOTE: core 0.762
+		params["hubURL"] = hubUrl;//NOTE: core 0.762
 		params["userCID"] = cid;
-		params["userNI"] = ClientManager::getInstance()->getNicks(CID(cid))[0];
+		params["userNI"] = ClientManager::getInstance()->getNicks(CID(cid), hubUrl)[0];//NOTE: core 0.762
 		params["myCID"] = ClientManager::getInstance()->getMe()->getCID().toBase32();
 		LOG(LogManager::PM, params);
 	}
@@ -1250,7 +1250,7 @@ void PrivateMessage::sendMessage_client(string message)
 	if (user && user->isOnline())
 	{
 		// FIXME: WTF does the 3rd param (bool thirdPerson) do? A: Used for /me stuff
-		ClientManager::getInstance()->privateMessage(user, message, false, hubUrl);
+		ClientManager::getInstance()->privateMessage(HintedUser(user, hubUrl), message, false);//NOTE: core 0.762
 	}
 	else
 	{
@@ -1267,7 +1267,8 @@ void PrivateMessage::addFavoriteUser_client()
 	if (user && FavoriteManager::getInstance()->isFavoriteUser(user))
 	{
 		typedef Func2<PrivateMessage, string, Msg::TypeMsg> F2;
-		F2 *func = new F2(this, &PrivateMessage::addStatusMessage_gui, WulforUtil::getNicks(user) + _(" is favorite user"), Msg::STATUS);
+		F2 *func = new F2(this, &PrivateMessage::addStatusMessage_gui, WulforUtil::getNicks(user, hubUrl) + _(" is favorite user"),
+			Msg::STATUS);//NOTE: core 0.762
 		WulforManager::get()->dispatchGuiFunc(func);
 	}
 	else
@@ -1287,7 +1288,8 @@ void PrivateMessage::removeFavoriteUser_client()
 	else
 	{
 		typedef Func2<PrivateMessage, string, Msg::TypeMsg> F2;
-		F2 *func = new F2(this, &PrivateMessage::addStatusMessage_gui, WulforUtil::getNicks(user) + _(" is not favorite user"), Msg::STATUS);
+		F2 *func = new F2(this, &PrivateMessage::addStatusMessage_gui, WulforUtil::getNicks(user, hubUrl) + _(" is not favorite user"),
+			Msg::STATUS);//NOTE: core 0.762
 		WulforManager::get()->dispatchGuiFunc(func);
 	}
 }
@@ -1298,7 +1300,7 @@ void PrivateMessage::getFileList_client()
 	{
 		UserPtr user = ClientManager::getInstance()->findUser(CID(cid));
 		if (user)
-			QueueManager::getInstance()->addList(user, hubUrl, QueueItem::FLAG_CLIENT_VIEW);
+			QueueManager::getInstance()->addList(HintedUser(user, hubUrl), QueueItem::FLAG_CLIENT_VIEW);//NOTE: core 0.762
 	}
 	catch (const Exception& e)
 	{
@@ -1313,7 +1315,7 @@ void PrivateMessage::grantSlot_client()
 	UserPtr user = ClientManager::getInstance()->findUser(CID(cid));
 	if (user)
 	{
-		UploadManager::getInstance()->reserveSlot(user, hubUrl);
+		UploadManager::getInstance()->reserveSlot(HintedUser(user, hubUrl));//NOTE: core 0.762
 	}
 	else
 	{

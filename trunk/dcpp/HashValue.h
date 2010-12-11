@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2008 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,7 +49,12 @@ struct HashValue : FastAlloc<HashValue<Hasher> >{
 namespace std { namespace tr1 {
 template<typename T>
 struct hash<dcpp::HashValue<T> > {
-	size_t operator()(const dcpp::HashValue<T>& rhs) const { return *(size_t*)rhs.data; }
+	size_t operator()(const dcpp::HashValue<T>& rhs) const {
+		// RVO should handle this as efficiently as reinterpret_cast
+		size_t hvHash;
+		memcpy(&hvHash, rhs.data, sizeof(size_t));
+		return hvHash;
+	}
 };
 }
 }

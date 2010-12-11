@@ -34,7 +34,17 @@ Hash::Hash(GtkWindow* parent):
 	HashManager::getInstance()->getStats(tmp, startBytes, startFiles);
 	HashManager::getInstance()->setPriority(Thread::NORMAL);
 	updateStats_gui("", 0, 0, 0);
+//NOTE: [core 0.762
+	bool paused = HashManager::getInstance()->isHashingPaused();
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(getWidget("pauseHashingToggleButton")), paused);
 
+	if (paused)
+		gtk_window_set_title(GTK_WINDOW(getContainer()), _("Paused..."));
+	else
+		gtk_window_set_title(GTK_WINDOW(getContainer()), _("Indexing files..."));
+
+	g_signal_connect(getWidget("pauseHashingToggleButton"), "toggled", G_CALLBACK(onPauseHashing_gui), (gpointer)this);
+//NOTE: core 0.762]
 	TimerManager::getInstance()->addListener(this);
 }
 
@@ -53,7 +63,9 @@ void Hash::updateStats_gui(string file, int64_t bytes, size_t files, uint32_t ti
 		startFiles = files;
 
 	double diff = tick - startTime;
-	if (diff < 1000 || files == 0 || bytes == 0)
+	bool paused = HashManager::getInstance()->isHashingPaused();//NOTE: core 0.762
+
+	if (diff < 1000 || files == 0 || bytes == 0 || paused)
 	{
 		gtk_label_set_text(GTK_LABEL(getWidget("labelSpeed")), string(string("-.-- ") + _("B/s") + ", " + Util::formatBytes(bytes) + _(" left")).c_str());
 		gtk_label_set_text(GTK_LABEL(getWidget("labelTime")), _("-:--:-- left"));
@@ -100,6 +112,23 @@ void Hash::updateStats_gui(string file, int64_t bytes, size_t files, uint32_t ti
 	else
 	{
 		gtk_label_set_text(GTK_LABEL(getWidget("labelFile")), file.c_str());
+	}
+}
+
+void Hash::onPauseHashing_gui(GtkWidget *widget, gpointer data)
+{
+	Hash *h = (Hash *)data;
+	bool paused = HashManager::getInstance()->isHashingPaused();
+
+	if (paused)
+	{
+		gtk_window_set_title(GTK_WINDOW(h->getContainer()), _("Indexing files..."));
+		HashManager::getInstance()->resumeHashing();
+	}
+	else
+	{
+		gtk_window_set_title(GTK_WINDOW(h->getContainer()), _("Paused..."));
+		HashManager::getInstance()->pauseHashing();
 	}
 }
 

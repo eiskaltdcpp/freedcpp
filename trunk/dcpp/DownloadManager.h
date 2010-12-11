@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2008 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -56,8 +56,9 @@ public:
 	}
 
 	bool startDownload(QueueItem::Priority prio);
+	
 private:
-
+	
 	CriticalSection cs;
 	DownloadList downloads;
 	UserConnectionList idlers;
@@ -83,9 +84,12 @@ private:
 	void startData(UserConnection* aSource, int64_t start, int64_t newSize, bool z);
 	void endData(UserConnection* aSource);
 
+	void onFailed(UserConnection* aSource, const string& aError);
+
 	// UserConnectionListener
 	virtual void on(Data, UserConnection*, const uint8_t*, size_t) throw();
-	virtual void on(Failed, UserConnection*, const string&) throw();
+	virtual void on(Failed, UserConnection* aSource, const string& aError) throw() { onFailed(aSource, aError); }
+	virtual void on(ProtocolError, UserConnection* aSource, const string& aError) throw() { onFailed(aSource, aError); }
 	virtual void on(MaxedOut, UserConnection*) throw();
 	virtual	void on(FileNotAvailable, UserConnection*) throw();
 	virtual void on(Updated, UserConnection*) throw();

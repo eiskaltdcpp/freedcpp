@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2009 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +28,21 @@
 #include "LogManager.h"
 
 namespace dcpp {
+
+const char* SearchManager::types[TYPE_LAST] = {
+	N_("Any"),
+	N_("Audio"),
+	N_("Compressed"),
+	N_("Document"),
+	N_("Executable"),
+	N_("Picture"),
+	N_("Video"),
+	N_("Directory"),
+	N_("TTH")
+};
+const char* SearchManager::getTypeStr(int type) {
+	return _(types[type]);
+}
 
 SearchManager::SearchManager() :
 	port(0),
@@ -64,9 +79,9 @@ void SearchManager::search(const string& aName, int64_t aSize, TypeModes aTypeMo
 	}
 }
 
-void SearchManager::search(StringList& who, const string& aName, int64_t aSize /* = 0 */, TypeModes aTypeMode /* = TYPE_ANY */, SizeModes aSizeMode /* = SIZE_ATLEAST */, const string& aToken /* = Util::emptyString */) {
+void SearchManager::search(StringList& who, const string& aName, int64_t aSize /* = 0 */, TypeModes aTypeMode /* = TYPE_ANY */, SizeModes aSizeMode /* = SIZE_ATLEAST */, const string& aToken /* = Util::emptyString */, const StringList& aExtList) {
 	if(okToSearch()) {
-		ClientManager::getInstance()->search(who, aSizeMode, aSize, aTypeMode, normalizeWhitespace(aName), aToken);
+		ClientManager::getInstance()->search(who, aSizeMode, aSize, aTypeMode, normalizeWhitespace(aName), aToken, aExtList);
 		lastSearch = GET_TICK();
 	}
 }
@@ -233,7 +248,7 @@ void SearchManager::onData(const uint8_t* buf, size_t aLen, const string& remote
 		string tth;
 		if(hubName.compare(0, 4, "TTH:") == 0) {
 			tth = hubName.substr(4);
-			StringList names = ClientManager::getInstance()->getHubNames(user->getCID());
+			StringList names = ClientManager::getInstance()->getHubNames(user->getCID(), Util::emptyString);
 			hubName = names.empty() ? _("Offline") : Util::toString(names);
 		}
 
@@ -295,9 +310,10 @@ void SearchManager::onRES(const AdcCommand& cmd, const UserPtr& from, const stri
 
 	if(!file.empty() && freeSlots != -1 && size != -1) {
 
-		StringList names = ClientManager::getInstance()->getHubNames(from->getCID());
+		/// @todo get the hub this was sent from, to be passed as a hint? (eg by using the token?)
+		StringList names = ClientManager::getInstance()->getHubNames(from->getCID(), Util::emptyString);
 		string hubName = names.empty() ? _("Offline") : Util::toString(names);
-		StringList hubs = ClientManager::getInstance()->getHubs(from->getCID());
+		StringList hubs = ClientManager::getInstance()->getHubs(from->getCID(), Util::emptyString);
 		string hub = hubs.empty() ? _("Offline") : Util::toString(hubs);
 
 		SearchResult::Types type = (file[file.length() - 1] == '\\' ? SearchResult::TYPE_DIRECTORY : SearchResult::TYPE_FILE);

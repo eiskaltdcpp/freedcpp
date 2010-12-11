@@ -25,12 +25,14 @@
 
 #include <dcpp/stdinc.h>
 #include <dcpp/DCPlusPlus.h>
+#include <dcpp/UPnPManager.h>//NOTE: core 0.762
 
 #include "bacon-message-connection.h"
 #include "settingsmanager.hh"
 #include "wulformanager.hh"
 #include "WulforUtil.hh"
 #include "version.hh"
+#include "upnpc.hh"//NOTE: core 0.762
 #include <iostream>
 #include <signal.h>
 
@@ -89,8 +91,9 @@ int main(int argc, char *argv[])
 	}
 
 	// Start the DC++ client core
+	dcpp::Util::initialize();//NOTE: core 0.762
 	dcpp::startup(callBack, NULL);
-
+	dcpp::UPnPManager::getInstance()->addImplementation(new UPnPc());//NOTE: core 0.762
 	dcpp::TimerManager::getInstance()->start();
 
 	g_thread_init(NULL);
@@ -110,8 +113,9 @@ int main(int argc, char *argv[])
 	WulforManager::stop();
 	WulforSettingsManager::deleteInstance();
 
-	std::cout << "Shutting down..." << std::endl;
+	std::cout << "Shutting down libdcpp..." << std::endl;
 	dcpp::shutdown();
+	std::cout << "Quit..." << std::endl;
 
 	return 0;
 }

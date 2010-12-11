@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2008 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -57,7 +57,7 @@ FinishedFileItem::FinishedFileItem(
 	time_t time_,
 	int64_t fileSize_,
 	bool crc32Checked_,
-	const UserPtr& user
+	const HintedUser& user
 	) :
 FinishedItemBase(transferred_, milliSeconds_, time_),
 fileSize(fileSize_),
@@ -71,14 +71,19 @@ void FinishedFileItem::update(
 	int64_t milliSeconds_,
 	time_t time_,
 	bool crc32Checked_,
-	const UserPtr& user
+	const HintedUser& user
 	)
 {
 	FinishedItemBase::update(transferred_, milliSeconds_, time_);
+
 	if(crc32Checked_)
 		crc32Checked = true;
-	if(find(users.begin(), users.end(), user) == users.end())
+
+	HintedUserList::iterator i = find(users.begin(), users.end(), user);
+	if(i == users.end())
 		users.push_back(user);
+	else
+		*i = user; // update, the hint might have changed
 }
 
 double FinishedFileItem::getTransferredPercentage() const {
@@ -108,6 +113,7 @@ void FinishedUserItem::update(
 	)
 {
 	FinishedItemBase::update(transferred_, milliSeconds_, time_);
+
 	if(find(files.begin(), files.end(), file) == files.end())
 		files.push_back(file);
 }

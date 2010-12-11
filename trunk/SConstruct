@@ -9,9 +9,11 @@ import glob
 EnsureSConsVersion(1, 2)
 
 APP_NAME = 'freedcpp'
-LIB_NAME = 'libdcpp'
+LIB_DCPP = 'libdcpp'
+LIB_UPNP = 'libminiupnpc'
 BUILD_PATH = '#/build/'
 BUILD_LOCALE_PATH = 'build/locale/'
+LIB_IS_UPNP = True
 
 # ----------------------------------------------------------------------
 # Function definitions
@@ -195,6 +197,10 @@ if not 'install' in COMMAND_LINE_TARGETS:
 	if conf.CheckHeader(['sys/types.h', 'sys/socket.h', 'ifaddrs.h', 'net/if.h']):
 		conf.env['HAVE_IFADDRS_H'] = True
 
+	# MiniUPnPc for UPnP
+	if not conf.CheckLib('libminiupnpc'):
+		LIB_IS_UPNP = False
+
 	env = conf.Finish()
 
 
@@ -210,6 +216,10 @@ if not 'install' in COMMAND_LINE_TARGETS:
 
 	if os.name == 'mac' or os.sys.platform == 'darwin':
 		env['ICONV_CONST'] = ''
+
+	if os.sys.platform == 'sunos5':
+		env['ICONV_CONST'] = 'const'
+		env.Append(LINKFLAGS = ['-lsocket', '-lnsl'])
 
 	if env.has_key('ICONV_CONST') and env['ICONV_CONST']:
 		env.Append(CXXFLAGS = '-DICONV_CONST=' + env['ICONV_CONST'])
@@ -240,8 +250,12 @@ if not 'install' in COMMAND_LINE_TARGETS:
 	env.ParseConfig('pkg-config --libs libnotify')
 	env.ParseConfig('pkg-config --libs gthread-2.0')
 
-	env.Append(LIBPATH = BUILD_PATH + LIB_NAME)
-	env.Prepend(LIBS = LIB_NAME)
+	env.Append(LIBPATH = BUILD_PATH + LIB_DCPP)
+	env.Prepend(LIBS = LIB_DCPP)
+
+	if not LIB_IS_UPNP:
+		env.Append(LIBPATH = BUILD_PATH + LIB_UPNP)
+		env.Prepend(LIBS = LIB_UPNP)
 
 	mo_args = ['msgfmt', '-c', '-o', '$TARGET', '$SOURCE']
 	mo_bld = Builder(action = Action([mo_args], 'Create $TARGET from $SOURCE'))
@@ -254,14 +268,22 @@ if not 'install' in COMMAND_LINE_TARGETS:
 
 	Export('env')
 
+
+	# Build the miniupnpc library
+	if not LIB_IS_UPNP:
+		upnp = SConscript(dirs = 'miniupnpc', variant_dir = BUILD_PATH + LIB_UPNP, duplicate = 0)
+
 	# Build the dcpp library
-	libdcpp = SConscript(dirs = 'dcpp', variant_dir = BUILD_PATH + LIB_NAME, duplicate = 0)
+	dcpp = SConscript(dirs = 'dcpp', variant_dir = BUILD_PATH + LIB_DCPP, duplicate = 0)
 
 	# Build the GUI
-	obj_files = SConscript(dirs = 'linux', variant_dir = BUILD_PATH + APP_NAME, duplicate = 0)
+	gui = SConscript(dirs = 'linux', variant_dir = BUILD_PATH + APP_NAME, duplicate = 0)
 
 	# Create the executable
-	env.Program(target = APP_NAME, source = [libdcpp, obj_files])
+	if not LIB_IS_UPNP:
+		env.Program(target = APP_NAME, source = [dcpp, upnp, gui])
+	else:
+		env.Program(target = APP_NAME, source = [dcpp, gui])
 
 # ----------------------------------------------------------------------
 # Install
@@ -285,11 +307,11 @@ else:
 		mo_files.append(path + lang)
 
 	# dcpp library
-	path = BUILD_LOCALE_PATH + LIB_NAME + '/'
+	path = BUILD_LOCALE_PATH + LIB_DCPP + '/'
 	languages = os.listdir(path)
 	
 	for lang in languages:
-		locale.append(os.path.join(prefix, 'locale', lang, 'LC_MESSAGES', LIB_NAME + '.mo'))
+		locale.append(os.path.join(prefix, 'locale', lang, 'LC_MESSAGES', LIB_DCPP + '.mo'))
 		mo_files.append(path + lang)
 
 	target_icons = []

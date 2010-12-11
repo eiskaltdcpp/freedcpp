@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2009 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@
 namespace dcpp {
 
 /** A user connected to one or more hubs. */
-class User : public FastAlloc<User>, public intrusive_ptr_base<User>, public Flags
+class User : public FastAlloc<User>, public intrusive_ptr_base<User>, public Flags, private boost::noncopyable
 {
 public:
 	enum Bits {
@@ -42,7 +42,6 @@ public:
 		TLS_BIT,
 		OLD_CLIENT_BIT,
 		NO_ADC_1_0_PROTOCOL_BIT,
-		NO_ADC_0_10_PROTOCOL_BIT,
 		NO_ADCS_0_10_PROTOCOL_BIT
 	};
 
@@ -56,7 +55,6 @@ public:
 		TLS = 1<<TLS_BIT,				//< Client supports TLS
 		OLD_CLIENT = 1<<OLD_CLIENT_BIT,  //< Can't download - old client
 		NO_ADC_1_0_PROTOCOL = 1<<NO_ADC_1_0_PROTOCOL_BIT,	//< Doesn't support "ADC/1.0" (dc++ <=0.703)
-		NO_ADC_0_10_PROTOCOL = 1<<NO_ADC_0_10_PROTOCOL_BIT,	//< Doesn't support "ADC/0.10"
 		NO_ADCS_0_10_PROTOCOL = 1<< NO_ADCS_0_10_PROTOCOL_BIT	//< Doesn't support "ADCS/0.10"
 	};
 
@@ -75,10 +73,25 @@ public:
 	bool isNMDC() const { return isSet(NMDC); }
 
 private:
-	User(const User&);
-	User& operator=(const User&);
-
 	CID cid;
+};
+
+/** User pointer associated to a hub url */
+struct HintedUser {
+	UserPtr user;
+	string hint;
+
+	explicit HintedUser(const UserPtr& user_, const string& hint_) : user(user_), hint(hint_) { }
+
+	bool operator==(const UserPtr& rhs) const {
+		return user == rhs;
+	}
+	bool operator==(const HintedUser& rhs) const {
+		return user == rhs.user;
+		// ignore the hint, we don't want lists with multiple instances of the same user...
+	}
+
+	operator UserPtr() const { return user; }
 };
 
 /** One of possibly many identities of a user, mainly for UI purposes */
@@ -106,6 +119,11 @@ public:
 	Identity(const Identity& rhs) : Flags(), sid(0) { *this = rhs; } // Use operator= since we have to lock before reading...
 	Identity& operator=(const Identity& rhs) { FastLock l(cs); *static_cast<Flags*>(this) = rhs; user = rhs.user; sid = rhs.sid; info = rhs.info; return *this; }
 
+// GS is already defined on some systems (e.g. OpenSolaris)
+#ifdef GS
+#undef GS
+#endif
+
 #define GS(n, x) string get##n() const { return get(x); } void set##n(const string& v) { set(x, v); }
 	GS(Nick, "NI")
 	GS(Description, "DE")
@@ -129,8 +147,8 @@ public:
 	bool isHidden() const { return isSet("HI"); }
 	bool isBot() const { return isClientType(CT_BOT) || isSet("BO"); }
 	bool isAway() const { return isSet("AW"); }
-	bool isTcpActive() const { return !getIp().empty() || (user->isSet(User::NMDC) && !user->isSet(User::PASSIVE)); }
-	bool isUdpActive() const { return !getIp().empty() && !getUdpPort().empty(); }
+	bool isTcpActive() const;
+	bool isUdpActive() const;
 	string get(const char* name) const;
 	void set(const char* name, const string& val);
 	bool isSet(const char* name) const;
@@ -153,7 +171,7 @@ private:
 class Client;
 class NmdcHub;
 
-class OnlineUser : public FastAlloc<OnlineUser> {
+class OnlineUser : public FastAlloc<OnlineUser>, private boost::noncopyable {
 public:
 	typedef vector<OnlineUser*> List;
 	typedef List::iterator Iter;
@@ -172,9 +190,6 @@ public:
 	GETSET(Identity, identity, Identity);
 private:
 	friend class NmdcHub;
-
-	OnlineUser(const OnlineUser&);
-	OnlineUser& operator=(const OnlineUser&);
 
 	Client& client;
 };

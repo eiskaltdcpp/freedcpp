@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2009 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,6 +34,9 @@
 #include "FinishedManager.h"
 #include "ResourceManager.h"
 #include "ADLSearch.h"
+#include "UPnPManager.h"
+#include "WindowManager.h"
+#include "ThrottleManager.h"
 
 #include "StringTokenizer.h"
 
@@ -59,8 +62,6 @@ void startup(void (*f)(void*, const string&), void* p) {
 	WSAStartup(MAKEWORD(2, 2), &wsaData);
 #endif
 
-	Util::initialize();
-
 	bindtextdomain(PACKAGE, LOCALEDIR);
 
 	ResourceManager::newInstance();
@@ -75,11 +76,14 @@ void startup(void (*f)(void*, const string&), void* p) {
 	ConnectionManager::newInstance();
 	DownloadManager::newInstance();
 	UploadManager::newInstance();
+	ThrottleManager::newInstance();
+	QueueManager::newInstance();
 	ShareManager::newInstance();
 	FavoriteManager::newInstance();
-	QueueManager::newInstance();
 	FinishedManager::newInstance();
 	ADLSearchManager::newInstance();
+	UPnPManager::newInstance();
+	WindowManager::newInstance();
 
 	SettingsManager::getInstance()->load();
 
@@ -100,27 +104,47 @@ void startup(void (*f)(void*, const string&), void* p) {
 	if(f != NULL)
 		(*f)(p, _("Hash database"));
 	HashManager::getInstance()->startup();
+
 	if(f != NULL)
 		(*f)(p, _("Shared Files"));
 	ShareManager::getInstance()->refresh(true, false, true);
+
 	if(f != NULL)
 		(*f)(p, _("Download Queue"));
 	QueueManager::getInstance()->loadQueue();
+
+	if(f != NULL)
+		(*f)(p, _("Users"));
+	ClientManager::getInstance()->loadUsers();
 }
 
 void shutdown() {
+
+#ifndef _WIN32 //*nix system
+
+	ThrottleManager::getInstance()->shutdown();
+#endif
 	TimerManager::getInstance()->shutdown();
 	HashManager::getInstance()->shutdown();
+#ifdef _WIN32
+	ThrottleManager::getInstance()->shutdown();
+#endif
 	ConnectionManager::getInstance()->shutdown();
-
+	UPnPManager::getInstance()->close();
 	BufferedSocket::waitShutdown();
 
+	WindowManager::getInstance()->prepareSave();
+	QueueManager::getInstance()->saveQueue(true);
+	ClientManager::getInstance()->saveUsers();
 	SettingsManager::getInstance()->save();
 
+	WindowManager::deleteInstance();
+	UPnPManager::deleteInstance();
 	ADLSearchManager::deleteInstance();
 	FinishedManager::deleteInstance();
 	ShareManager::deleteInstance();
 	CryptoManager::deleteInstance();
+	ThrottleManager::deleteInstance();
 	DownloadManager::deleteInstance();
 	UploadManager::deleteInstance();
 	QueueManager::deleteInstance();

@@ -196,7 +196,7 @@ void UserCommandMenu::sendUserCommand_client(string cid, string commandName, str
 
 		UserPtr user = ClientManager::getInstance()->findUser(CID(cid));
 		if (user)
-			ClientManager::getInstance()->userCommand(user, uc, params, true);
+			ClientManager::getInstance()->userCommand(HintedUser(user, hub), uc, params, true);//NOTE: core 0.762
 	}
 }
 

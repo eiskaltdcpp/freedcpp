@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2008 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -91,6 +91,18 @@ namespace Text {
 	inline const string& fromT(const tstring& str, string& tmp) throw() { return acpToUtf8(str, tmp); }
 	inline string fromT(const tstring& str) throw() { return acpToUtf8(str); }
 #endif
+
+	inline const TStringList& toT(const StringList& lst, TStringList& tmp) throw() {
+		for(StringIterC i = lst.begin(), iend = lst.end(); i != iend; ++i)
+			tmp.push_back(toT(*i));
+		return tmp;
+	}
+
+	inline const StringList& fromT(const TStringList& lst, StringList& tmp) throw() {
+		for(TStringIterC i = lst.begin(), iend = lst.end(); i != iend; ++i)
+			tmp.push_back(fromT(*i));
+		return tmp;
+	}
 
 	inline bool isAscii(const string& str) throw() { return isAscii(str.c_str()); }
 	bool isAscii(const char* str) throw();

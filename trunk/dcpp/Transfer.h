@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2008 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -50,6 +50,8 @@ public:
 
 	int64_t getStartPos() const { return getSegment().getStart(); }
 
+	void resetPos() { pos = 0; }
+
 	void addPos(int64_t aBytes, int64_t aActual) { pos += aBytes; actual+= aActual; }
 
 	enum { MIN_SAMPLES = 15, MIN_SECS = 15 };
@@ -77,6 +79,7 @@ public:
 
 	UserPtr getUser();
 	const UserPtr getUser() const;
+	const HintedUser getHintedUser() const;
 
 	const string& getPath() const { return path; }
 	const TTHValue& getTTH() const { return tth; }

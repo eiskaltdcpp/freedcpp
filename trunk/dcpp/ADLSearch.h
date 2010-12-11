@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2008 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -233,7 +233,7 @@ public:
 	typedef vector<DestDir> DestDirList;
 
 	// Constructor/destructor
-	ADLSearchManager() { Load(); }
+	ADLSearchManager() : user(UserPtr(), Util::emptyString) { Load(); }
 	virtual ~ADLSearchManager() { Save(); }
 
 	// Search collection
@@ -246,7 +246,7 @@ public:
 
 	// Settings
 	GETSET(bool, breakOnFirst, BreakOnFirst)
-	GETSET(UserPtr, user, User)
+	GETSET(HintedUser, user, User)
 
 	// @remarks Used to add ADLSearch directories to an existing DirectoryListing
 	void matchListing(DirectoryListing& /*aDirList*/) throw();

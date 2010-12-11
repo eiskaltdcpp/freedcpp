@@ -27,6 +27,7 @@
 #include <dcpp/ShareManager.h>
 #include <dcpp/UserCommand.h>
 #include <dcpp/version.h>
+#include <dcpp/ChatMessage.h>//NOTE: core 0.762
 #include "privatemessage.hh"
 #include "search.hh"
 #include "settingsmanager.hh"
@@ -127,7 +128,7 @@ Hub::Hub(const string &address, const string &encoding):
 	g_object_ref_sink(getWidget("imageMenu"));
 
 	// Initialize the user command menu
-	userCommandMenu = new UserCommandMenu(getWidget("usercommandMenu"), ::UserCommand::CONTEXT_CHAT);
+	userCommandMenu = new UserCommandMenu(getWidget("usercommandMenu"), ::UserCommand::CONTEXT_USER);//NOTE: core 0.762
 	addChild(userCommandMenu);
 
 	// Emoticons dialog
@@ -502,7 +503,7 @@ void Hub::popupNickMenu_gui()
 	{
 		GtkTreePath *path = (GtkTreePath *)i->data;
 		if (gtk_tree_model_get_iter(GTK_TREE_MODEL(nickStore), &iter, path))
- 		{
+		{
 			userCommandMenu->addUser(nickView.getString(&iter, "CID"));
 		}
 		gtk_tree_path_free(path);
@@ -2508,6 +2509,8 @@ void Hub::getFileList_client(string cid, bool match)
 			UserPtr user = ClientManager::getInstance()->findUser(CID(cid));
 			if (user)
 			{
+				const HintedUser hintedUser(user, client->getHubUrl());//NOTE: core 0.762
+
 				if (user == ClientManager::getInstance()->getMe())
 				{
 					// Don't download file list, open locally instead
@@ -2515,11 +2518,11 @@ void Hub::getFileList_client(string cid, bool match)
 				}
 				else if (match)
 				{
-					QueueManager::getInstance()->addList(user, client->getHubUrl(), QueueItem::FLAG_MATCH_QUEUE);
+					QueueManager::getInstance()->addList(hintedUser, QueueItem::FLAG_MATCH_QUEUE);//NOTE: core 0.762
 				}
 				else
 				{
-					QueueManager::getInstance()->addList(user, client->getHubUrl(), QueueItem::FLAG_CLIENT_VIEW);
+					QueueManager::getInstance()->addList(hintedUser, QueueItem::FLAG_CLIENT_VIEW);//NOTE: core 0.762
 				}
 			}
 			else
@@ -2545,14 +2548,15 @@ void Hub::getFileList_client(string cid, bool match)
 void Hub::grantSlot_client(string cid)
 {
 	string message = _("User not found");
-
+ 
 	if (!cid.empty())
 	{
 		UserPtr user = ClientManager::getInstance()->findUser(CID(cid));
 		if (user)
 		{
-			UploadManager::getInstance()->reserveSlot(user, client->getHubUrl());
-			message = _("Slot granted to ") + WulforUtil::getNicks(user);
+			const string hubUrl = client->getHubUrl();//NOTE: core 0.762
+			UploadManager::getInstance()->reserveSlot(HintedUser(user, hubUrl));//NOTE: core 0.762
+			message = _("Slot granted to ") + WulforUtil::getNicks(user, hubUrl);//NOTE: core 0.762
 		}
 	}
 
@@ -2616,29 +2620,29 @@ void Hub::refreshFileList_client()
 
 void Hub::addAsFavorite_client()
 {
-	typedef Func3<Hub, string, Msg::TypeMsg, Sound::TypeSound> F3;
-	F3 *func;
-
-	FavoriteHubEntry *existingHub = FavoriteManager::getInstance()->getFavoriteHubEntry(client->getHubUrl());
-
-	if (!existingHub)
-	{
-		FavoriteHubEntry aEntry;
-		aEntry.setServer(client->getHubUrl());
-		aEntry.setName(client->getHubName());
-		aEntry.setDescription(client->getHubDescription());
-		aEntry.setConnect(FALSE);
-		aEntry.setNick(client->getMyNick());
-		aEntry.setEncoding(encoding);
-		FavoriteManager::getInstance()->addFavorite(aEntry);
-		func = new F3(this, &Hub::addStatusMessage_gui, _("Favorite hub added"), Msg::STATUS, Sound::NONE);
-		WulforManager::get()->dispatchGuiFunc(func);
-	}
-	else
-	{
-		func = new F3(this, &Hub::addStatusMessage_gui, _("Favorite hub already exists"), Msg::STATUS, Sound::NONE);
-		WulforManager::get()->dispatchGuiFunc(func);
-	}
+// 	typedef Func3<Hub, string, Msg::TypeMsg, Sound::TypeSound> F3;
+// 	F3 *func;
+// 
+// 	FavoriteHubEntry *existingHub = FavoriteManager::getInstance()->getFavoriteHubEntry(client->getHubUrl());
+// 
+// 	if (!existingHub)
+// 	{
+// 		FavoriteHubEntry aEntry;
+// 		aEntry.setServer(client->getHubUrl());
+// 		aEntry.setName(client->getHubName());
+// 		aEntry.setDescription(client->getHubDescription());
+// 		aEntry.setConnect(FALSE);
+// 		aEntry.setNick(client->getMyNick());
+// 		aEntry.setEncoding(encoding);
+// 		FavoriteManager::getInstance()->addFavorite(aEntry);
+// 		func = new F3(this, &Hub::addStatusMessage_gui, _("Favorite hub added"), Msg::STATUS, Sound::NONE);
+// 		WulforManager::get()->dispatchGuiFunc(func);
+// 	}
+// 	else
+// 	{
+// 		func = new F3(this, &Hub::addStatusMessage_gui, _("Favorite hub already exists"), Msg::STATUS, Sound::NONE);
+// 		WulforManager::get()->dispatchGuiFunc(func);
+// 	}
 }
 
 void Hub::reconnect_client()
@@ -2699,7 +2703,7 @@ void Hub::download_client(string target, int64_t size, string tth, string cid)
 			return;
 
 		string hubUrl = client->getHubUrl();
-		QueueManager::getInstance()->add(target, size, TTHValue(tth), user, hubUrl);
+		QueueManager::getInstance()->add(target, size, TTHValue(tth), HintedUser(user, hubUrl));
 	}
 	catch (const Exception&)
 	{
@@ -3129,28 +3133,67 @@ void Hub::on(ClientListener::HubUpdated, Client *) throw()
 	WulforManager::get()->dispatchGuiFunc(func1);
 }
 
-void Hub::on(ClientListener::Message, Client *, const OnlineUser &from, const string &message, bool thirdPerson) throw()
+void Hub::on(ClientListener::Message, Client*, const ChatMessage& message) throw() //NOTE: core 0.762
 {
-	if (!message.empty())
+	if (message.text.empty())
+		return;
+
+	Msg::TypeMsg typemsg;
+	string line;
+
+	if (message.thirdPerson)
+		line = "* " + message.from->getIdentity().getNick() + " " +  message.text;
+	else
+		line = "<" + message.from->getIdentity().getNick() + "> " + message.text;
+
+	if(message.to && message.replyTo)
 	{
-		Msg::TypeMsg typemsg;
-		string cid = from.getIdentity().getUser()->getCID().toBase32();
+		//private message
 
-		if (from.getIdentity().isHub()) typemsg = Msg::STATUS;
-		else if (from.getUser() == client->getMyIdentity().getUser()) typemsg = Msg::MYOWN;
-		else typemsg = Msg::GENERAL;
+		string error;
+		const OnlineUser *user = (message.replyTo->getUser() == ClientManager::getInstance()->getMe())?
+			message.to : message.replyTo;
 
-		string line;
+		if (message.from->getIdentity().isOp()) typemsg = Msg::OPERATOR;
+		else if (message.from->getUser() == client->getMyIdentity().getUser()) typemsg = Msg::MYOWN;
+		else typemsg = Msg::PRIVATE;
 
-		if (thirdPerson)
-			line = "* " + from.getIdentity().getNick() + " " +  message;
+		if (user->getIdentity().isHub() && BOOLSETTING(IGNORE_HUB_PMS))
+		{
+			error = _("Ignored private message from hub");
+			typedef Func3<Hub, string, Msg::TypeMsg, Sound::TypeSound> F3;
+			F3 *func = new F3(this, &Hub::addStatusMessage_gui, error, Msg::STATUS, Sound::NONE);
+			WulforManager::get()->dispatchGuiFunc(func);
+		}
+		else if (user->getIdentity().isBot() && BOOLSETTING(IGNORE_BOT_PMS))
+		{
+			error = _("Ignored private message from bot ") + user->getIdentity().getNick();
+			typedef Func3<Hub, string, Msg::TypeMsg, Sound::TypeSound> F3;
+			F3 *func = new F3(this, &Hub::addStatusMessage_gui, error, Msg::STATUS, Sound::NONE);
+			WulforManager::get()->dispatchGuiFunc(func);
+		}
 		else
-			line = "<" + from.getIdentity().getNick() + "> " + message;
+		{
+			typedef Func6<Hub, Msg::TypeMsg, string, string, string, string, bool> F6;
+			F6 *func = new F6(this, &Hub::addPrivateMessage_gui, typemsg, message.from->getUser()->getCID().toBase32(),
+			user->getUser()->getCID().toBase32(), client->getHubUrl(), line, TRUE);
+			WulforManager::get()->dispatchGuiFunc(func);
+		}
+	}
+	else
+	{
+		 // chat message
+		string cid = message.from->getIdentity().getUser()->getCID().toBase32();
+
+		if (message.from->getIdentity().isHub()) typemsg = Msg::STATUS;
+		else if (message.from->getUser() == client->getMyIdentity().getUser()) typemsg = Msg::MYOWN;
+		else typemsg = Msg::GENERAL;
 
 		if (BOOLSETTING(FILTER_MESSAGES))
 		{
-			if ((message.find("Hub-Security") != string::npos && message.find("was kicked by") != string::npos) ||
-				(message.find("is kicking") != string::npos && message.find("because:") != string::npos))
+			if ((message.text.find("Hub-Security") != string::npos &&
+				message.text.find("was kicked by") != string::npos) ||
+				(message.text.find("is kicking") != string::npos && message.text.find("because:") != string::npos))
 			{
 				typedef Func3<Hub, string, Msg::TypeMsg, Sound::TypeSound> F3;
 				F3 *func = new F3(this, &Hub::addStatusMessage_gui, line, Msg::STATUS, Sound::NONE);
@@ -3175,9 +3218,9 @@ void Hub::on(ClientListener::Message, Client *, const OnlineUser &from, const st
 		WulforManager::get()->dispatchGuiFunc(func);
 
 		// Set urgency hint if message contains user's nick
-		if (BOOLSETTING(BOLD_HUB) && from.getIdentity().getUser() != client->getMyIdentity().getUser())
+		if (BOOLSETTING(BOLD_HUB) && message.from->getIdentity().getUser() != client->getMyIdentity().getUser())
 		{
-			if (message.find(client->getMyIdentity().getNick()) != string::npos)
+			if (message.text.find(client->getMyIdentity().getNick()) != string::npos)
 			{
 				typedef Func0<Hub> F0;
 				F0 *func = new F0(this, &Hub::setUrgent_gui);
@@ -3185,7 +3228,7 @@ void Hub::on(ClientListener::Message, Client *, const OnlineUser &from, const st
 			}
 		}
 	}
-}
+} //NOTE: core 0.762
 
 void Hub::on(ClientListener::StatusMessage, Client *, const string &message, int /* flag */) throw()
 {
@@ -3215,47 +3258,6 @@ void Hub::on(ClientListener::StatusMessage, Client *, const string &message, int
 
 		typedef Func3<Hub, string, string, Msg::TypeMsg> F3;
 		F3 *func = new F3(this, &Hub::addMessage_gui, "", message, Msg::STATUS);
-		WulforManager::get()->dispatchGuiFunc(func);
-	}
-}
-
-void Hub::on(ClientListener::PrivateMessage, Client *, const OnlineUser &from,
-	const OnlineUser& to, const OnlineUser& replyTo, const string &msg, bool thirdPerson) throw()
-{
-	string error;
-	const OnlineUser& user = (replyTo.getUser() == ClientManager::getInstance()->getMe()) ? to : replyTo;
-	string line;
-
-	Msg::TypeMsg typemsg;
-
-	if (from.getIdentity().isOp()) typemsg = Msg::OPERATOR;
-	else if (from.getUser() == client->getMyIdentity().getUser()) typemsg = Msg::MYOWN;
-	else typemsg = Msg::PRIVATE;
-
- 	if (thirdPerson)
-		line = "* " + from.getIdentity().getNick() + " " + msg;
-	else
-		line  = "<" + from.getIdentity().getNick() + "> " + msg;
-
-	if (user.getIdentity().isHub() && BOOLSETTING(IGNORE_HUB_PMS))
-	{
-		error = _("Ignored private message from hub");
-		typedef Func3<Hub, string, Msg::TypeMsg, Sound::TypeSound> F3;
-		F3 *func = new F3(this, &Hub::addStatusMessage_gui, error, Msg::STATUS, Sound::NONE);
-		WulforManager::get()->dispatchGuiFunc(func);
-	}
-	else if (user.getIdentity().isBot() && BOOLSETTING(IGNORE_BOT_PMS))
-	{
-		error = _("Ignored private message from bot ") + user.getIdentity().getNick();
-		typedef Func3<Hub, string, Msg::TypeMsg, Sound::TypeSound> F3;
-		F3 *func = new F3(this, &Hub::addStatusMessage_gui, error, Msg::STATUS, Sound::NONE);
-		WulforManager::get()->dispatchGuiFunc(func);
-	}
-	else
-	{
-		typedef Func6<Hub, Msg::TypeMsg, string, string, string, string, bool> F6;
-		F6 *func = new F6(this, &Hub::addPrivateMessage_gui, typemsg, from.getUser()->getCID().toBase32(),
-			user.getUser()->getCID().toBase32(), client->getHubUrl(), line, TRUE);
 		WulforManager::get()->dispatchGuiFunc(func);
 	}
 }

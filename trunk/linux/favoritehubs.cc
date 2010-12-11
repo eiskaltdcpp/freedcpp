@@ -118,7 +118,7 @@ void FavoriteHubs::editEntry_gui(StringMap &params, GtkTreeIter *iter)
 	string password = params["Password"].empty() ? "" : string(8, '*');
 
 	gtk_list_store_set(favoriteStore, iter,
-		favoriteView.col(_("Auto Connect")), Util::toInt(params["Auto Connect"]),
+		favoriteView.col(_("Auto Connect")), 0,//TODO: add auto connect
 		favoriteView.col(_("Name")), params["Name"].c_str(),
 		favoriteView.col(_("Description")), params["Description"].c_str(),
 		favoriteView.col(_("Nick")), params["Nick"].c_str(),
@@ -490,7 +490,8 @@ void FavoriteHubs::initializeList_client()
 
 void FavoriteHubs::getFavHubParams_client(const FavoriteHubEntry *entry, StringMap &params)
 {
-	params["Auto Connect"] = entry->getConnect() ? "1" : "0";
+	//TODO add auto connect
+	//params["Auto Connect"] = entry->getConnect() ? "1" : "0";
 	params["Name"] = entry->getName();
 	params["Description"] = entry->getDescription();
 	params["Nick"] = entry->getNick(FALSE); // Don't display default nick to avoid accidentally saving it
@@ -498,12 +499,14 @@ void FavoriteHubs::getFavHubParams_client(const FavoriteHubEntry *entry, StringM
 	params["Address"] = entry->getServer();
 	params["User Description"] = entry->getUserDescription();
 	params["Encoding"] = entry->getEncoding();
+	//TODO add groups
+	//params["Group"] = entry->getGroup();
 }
 
 void FavoriteHubs::addEntry_client(StringMap params)
 {
 	FavoriteHubEntry entry;
-	entry.setConnect(Util::toInt(params["Auto Connect"]));
+// 	entry.setConnect(Util::toInt(params["Auto Connect"]));
 	entry.setName(params["Name"]);
 	entry.setServer(params["Address"]);
 	entry.setDescription(params["Description"]);
@@ -511,6 +514,8 @@ void FavoriteHubs::addEntry_client(StringMap params)
 	entry.setPassword(params["Password"]);
 	entry.setUserDescription(params["User Description"]);
 	entry.setEncoding(params["Encoding"]);
+	//TODO add groups
+	//entry.setGroup(params["Group"]);
 	FavoriteManager::getInstance()->addFavorite(entry);
 
 	const FavoriteHubEntryList &fh = FavoriteManager::getInstance()->getFavoriteHubs();
@@ -523,7 +528,7 @@ void FavoriteHubs::editEntry_client(string address, StringMap params)
 
 	if (entry)
 	{
-		entry->setConnect(Util::toInt(params["Auto Connect"]));
+//		entry->setConnect(Util::toInt(params["Auto Connect"]));
 		entry->setName(params["Name"]);
 		entry->setServer(params["Address"]);
 		entry->setDescription(params["Description"]);
@@ -531,6 +536,8 @@ void FavoriteHubs::editEntry_client(string address, StringMap params)
 		entry->setPassword(params["Password"]);
 		entry->setUserDescription(params["User Description"]);
 		entry->setEncoding(params["Encoding"]);
+		//TODO add groups
+		//entry.setGroup(params["Group"]);
 		FavoriteManager::getInstance()->save();
 
 		const FavoriteHubEntryList &fh = FavoriteManager::getInstance()->getFavoriteHubs();
@@ -553,13 +560,13 @@ void FavoriteHubs::removeEntry_client(string address)
 
 void FavoriteHubs::setConnect_client(string address, bool active)
 {
-	FavoriteHubEntry *entry = FavoriteManager::getInstance()->getFavoriteHubEntry(address);
-
-	if (entry)
-	{
-		entry->setConnect(active);
-		FavoriteManager::getInstance()->save();
-	}
+// 	FavoriteHubEntry *entry = FavoriteManager::getInstance()->getFavoriteHubEntry(address);
+// 
+// 	if (entry)
+// 	{
+// 		entry->setConnect(active);
+// 		FavoriteManager::getInstance()->save();
+// 	}
 }
 
 void FavoriteHubs::on(FavoriteManagerListener::FavoriteAdded, const FavoriteHubEntryPtr entry) throw()

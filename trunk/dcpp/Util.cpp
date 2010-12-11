@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2009 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,7 +28,6 @@
 #include "version.h"
 #include "File.h"
 #include "SimpleXML.h"
-#include "Socket.h"
 
 #ifndef _WIN32
 #include <sys/socket.h>
@@ -37,6 +36,7 @@
 #include <netdb.h>
 #include <sys/utsname.h>
 #include <ctype.h>
+#include <string.h>
 #endif
 #include <locale.h>
 
@@ -130,10 +130,15 @@ void Util::initialize() {
 
 	if(localMode) {
 		paths[PATH_USER_LOCAL] = paths[PATH_USER_CONFIG];
+
+		paths[PATH_DOWNLOADS] = paths[PATH_USER_CONFIG] + "Downloads\\";
+
 	} else {
 		if(::SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, SHGFP_TYPE_CURRENT, buf) == S_OK) {
 			paths[PATH_USER_CONFIG] = Text::fromT(buf) + "\\DC++\\";
 		}
+
+		paths[PATH_DOWNLOADS] = getDownloadsPath(paths[PATH_USER_CONFIG]);
 
 		paths[PATH_USER_LOCAL] = ::SHGetFolderPath(NULL, CSIDL_LOCAL_APPDATA, NULL, SHGFP_TYPE_CURRENT, buf) == S_OK ? Text::fromT(buf) + "\\DC++\\" : paths[PATH_USER_CONFIG];
 	}
@@ -147,7 +152,6 @@ void Util::initialize() {
 	::GetShortPathName(localePath_.c_str(), buf, sizeof(buf)/sizeof(TCHAR));
 
 	paths[PATH_LOCALE] = Text::fromT(buf);
-	paths[PATH_DOWNLOADS] = getDownloadsPath(paths[PATH_USER_CONFIG]);
 
 #else
 	paths[PATH_GLOBAL_CONFIG] = "/etc/";
@@ -173,6 +177,7 @@ void Util::initialize() {
 	// @todo paths[PATH_RESOURCES] = <replace from sconscript?>;
 	// @todo paths[PATH_LOCALE] = <replace from sconscript?>;
 
+	paths[PATH_LOCALE] = LOCALEDIR;//NOTE: freedcpp
 	paths[PATH_DOWNLOADS] = home + "/Downloads/";
 #endif
 
@@ -362,6 +367,18 @@ string Util::validateFileName(string tmp) {
 	return tmp;
 }
 
+bool Util::checkExtension(const string& tmp) {
+	for(int i = 0; i < tmp.length(); i++) {
+		if (tmp[i] < 0 || tmp[i] == 32 || tmp[i] == ':') {
+			return false;
+		}
+	}
+	if(tmp.find_first_of(badChars, 0) != string::npos) {
+		return false;
+	}
+	return true;
+}
+
 string Util::cleanPathChars(string aNick) {
 	string::size_type i = 0;
 
@@ -531,25 +548,6 @@ bool Util::isPrivateIp(string const& ip) {
 	return false;
 }
 
-bool Util::resolveNmdc(string& ip) {
-	ip = Socket::resolve(ip);
-
-	// Temporary fix to avoid spamming some servers
-	if(
-		ip == "70.85.55.252" || // hublist.org
-		ip == "207.44.220.108" || // dcpp.net
-		ip == "216.34.181.97" || // hubtracker.com -- this is old hosting
-		ip == "81.181.249.83" || //openhublist.org
-		ip == "64.19.158.42" || // dchublist.com
-		ip == "174.133.138.93" // adchublist.com
-		) {
-		LogManager::getInstance()->message("Someone is trying to use your client to spam " + ip + ", please urge hub owner to fix this");
-		return false;
-	}
-
-	return true;
-}
-
 typedef const uint8_t* ccp;
 static wchar_t utf8ToLC(ccp& str) {
 	wchar_t c = 0;
@@ -589,6 +587,14 @@ static wchar_t utf8ToLC(ccp& str) {
 	}
 
 	return Text::toLower(c);
+}
+
+string Util::toString(const StringList& lst) {
+	if(lst.empty())
+		return emptyString;
+	if(lst.size() == 1)
+		return lst[0];
+	return '[' + toString(",", lst) + ']';
 }
 
 string::size_type Util::findSubString(const string& aString, const string& aSubString, string::size_type start) throw() {
@@ -740,7 +746,7 @@ string Util::encodeURI(const string& aString, bool reverse) {
  * date/time and then finally written to the log file. If the parameter is not present at all,
  * it is removed from the string completely...
  */
-string Util::formatParams(const string& msg, StringMap& params, bool filter) {
+string Util::formatParams(const string& msg, const StringMap& params, bool filter) {
 	string result = msg;
 
 	string::size_type i, j, k;
@@ -750,7 +756,7 @@ string Util::formatParams(const string& msg, StringMap& params, bool filter) {
 			break;
 		}
 		string name = result.substr(j + 2, k - j - 2);
-		StringMapIter smi = params.find(name);
+		StringMap::const_iterator smi = params.find(name);
 		if(smi == params.end()) {
 			result.erase(j, k-j + 1);
 			i = j;
@@ -784,40 +790,6 @@ string Util::formatParams(const string& msg, StringMap& params, bool filter) {
 	return result;
 }
 
-/** Fix for wide formatting bug in wcsftime in the ms c lib for multibyte encodings of unicode in singlebyte locales */
-string fixedftime(const string& format, struct tm* t) {
-	string ret = format;
-	const char codes[] = "aAbBcdHIjmMpSUwWxXyYzZ%";
-
-	char tmp[4];
-	tmp[0] = '%';
-	tmp[1] = tmp[2] = tmp[3] = 0;
-
-	StringMap sm;
-	static const size_t BUF_SIZE = 1024;
-	boost::scoped_array<char> buf(new char[BUF_SIZE]);
-	for(size_t i = 0; i < strlen(codes); ++i) {
-		tmp[1] = codes[i];
-		tmp[2] = 0;
-		strftime(&buf[0], BUF_SIZE-1, tmp, t);
-		sm[tmp] = &buf[0];
-
-		tmp[1] = '#';
-		tmp[2] = codes[i];
-		strftime(&buf[0], BUF_SIZE-1, tmp, t);
-		sm[tmp] = &buf[0];
-	}
-
-	for(StringMapIter i = sm.begin(); i != sm.end(); ++i) {
-		for(string::size_type j = ret.find(i->first); j != string::npos; j = ret.find(i->first, j)) {
-			ret.replace(j, i->first.length(), i->second);
-			j += i->second.length() - i->first.length();
-		}
-	}
-
-	return ret;
-}
-
 string Util::formatTime(const string &msg, const time_t t) {
 	if (!msg.empty()) {
 		size_t bufsize = msg.size() + 256;
@@ -826,19 +798,7 @@ string Util::formatTime(const string &msg, const time_t t) {
 		if(!loc) {
 			return Util::emptyString;
 		}
-#if _WIN32
-		tstring buf(bufsize, 0);
 
-		buf.resize(_tcsftime(&buf[0], buf.size()-1, Text::toT(msg).c_str(), loc));
-
-		if(buf.empty()) {
-			return fixedftime(msg, loc);
-		}
-
-		return Text::fromT(buf);
-#else
-		// will this give wide representations for %a and %A?
-		// surely win32 can't have a leg up on linux/unixen in this area. - Todd
 		string buf(bufsize, 0);
 
 		buf.resize(strftime(&buf[0], bufsize-1, msg.c_str(), loc));
@@ -849,8 +809,13 @@ string Util::formatTime(const string &msg, const time_t t) {
 			buf.resize(strftime(&buf[0], bufsize-1, msg.c_str(), loc));
 		}
 
-		return Text::toUtf8(buf);
+#ifdef _WIN32
+		if(!Text::validateUtf8(buf))
 #endif
+		{
+			buf = Text::toUtf8(buf);
+		}
+		return buf;
 	}
 	return Util::emptyString;
 }
@@ -1019,25 +984,6 @@ string Util::getIpCountry (string IP) {
 	}
 
 	return Util::emptyString; //if doesn't returned anything already, something is wrong...
-}
-
-string Util::formatMessage(const string& nick, const string& message, bool thirdPerson) {
-	// let's *not* obey the spec here and add a space after the star. :P
-	string tmp = (thirdPerson ? "* " + nick + ' ' : '<' + nick + "> ") + message;
-
-	// Check all '<' and '[' after newlines as they're probably pasts...
-	size_t i = 0;
-	while( (i = tmp.find('\n', i)) != string::npos) {
-		if(i + 1 < tmp.length()) {
-			if(tmp[i+1] == '[' || tmp[i+1] == '<') {
-				tmp.insert(i+1, "- ");
-				i += 2;
-			}
-		}
-		i++;
-	}
-
-	return Text::toDOS(tmp);
 }
 
 string Util::getTimeString() {

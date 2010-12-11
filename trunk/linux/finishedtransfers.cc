@@ -608,16 +608,19 @@ void FinishedTransfers::initializeList_client()
 	//WulforManager::get()->dispatchGuiFunc(new Func0<FinishedTransfers>(this, &FinishedTransfers::updateStatus_gui));
 }
 
+/** finished file */
 void FinishedTransfers::getFinishedParams_client(const FinishedFileItemPtr& item, const string& file, StringMap &params)
 {
 	string nicks;
 	params["Filename"] = Util::getFileName(file);
-	params["Time"] = Util::formatTime("%Y-%m-%d %H:%M:%S", item->getTime());	
+	params["Time"] = Util::formatTime("%Y-%m-%d %H:%M:%S", item->getTime());
 	params["Path"] = Util::getFilePath(file);
-	for (UserList::const_iterator it = item->getUsers().begin(); it != item->getUsers().end(); ++it)
+
+	for (HintedUserList::const_iterator it = item->getUsers().begin(); it != item->getUsers().end(); ++it)//NOTE: core 0.762
 	{
-		nicks += WulforUtil::getNicks(it->get()->getCID()) + ", ";
+		nicks += WulforUtil::getNicks(it->user->getCID(), it->hint) + ", ";//NOTE: core 0.762
 	}
+
 	params["Nicks"] = nicks.substr(0, nicks.length() - 2);
 	// item->getFileSize() seems to return crap. I guess there's no way to get 
 	// the real file size with this core version? Only the transferred part (I guess
@@ -629,12 +632,13 @@ void FinishedTransfers::getFinishedParams_client(const FinishedFileItemPtr& item
 	params["Elapsed Time"] = Util::toString(item->getMilliSeconds());
 }
 
-void FinishedTransfers::getFinishedParams_client(const FinishedUserItemPtr& item, const UserPtr& user, StringMap &params)
+/** finished user */
+void FinishedTransfers::getFinishedParams_client(const FinishedUserItemPtr &item, const HintedUser &user, StringMap &params)//NOTE: core 0.762
 {
 	string files;
-	params["Time"] = Util::formatTime("%Y-%m-%d %H:%M:%S", item->getTime());	
-	params["Nick"] = WulforUtil::getNicks(user->getCID());
-	params["Hub"] = Util::toString(ClientManager::getInstance()->getHubNames(user->getCID()));
+	params["Time"] = Util::formatTime("%Y-%m-%d %H:%M:%S", item->getTime());
+	params["Nick"] = WulforUtil::getNicks(user);//NOTE: core 0.762
+	params["Hub"] = WulforUtil::getHubNames(user);//NOTE: core 0.762
 	for (StringList::const_iterator it = item->getFiles().begin(); it != item->getFiles().end(); ++it)
 	{
 		files += *it + ", ";
@@ -642,7 +646,7 @@ void FinishedTransfers::getFinishedParams_client(const FinishedUserItemPtr& item
 	params["Files"] = files.substr(0, files.length() - 2);
 	params["Transferred"] = Util::toString(item->getTransferred());
 	params["Speed"] = Util::toString(item->getAverageSpeed());
-	params["CID"] = user->getCID().toBase32();
+	params["CID"] = user.user->getCID().toBase32();//NOTE: core 0.762
 	params["Elapsed Time"] = Util::toString(item->getMilliSeconds());
 }
 
@@ -651,8 +655,8 @@ void FinishedTransfers::removeUser_client(string cid)
 	UserPtr user = ClientManager::getInstance()->findUser(CID(cid));
 
 	if (user)
-		FinishedManager::getInstance()->remove(isUpload, user);
-	
+		// ignore the hint url user...
+		FinishedManager::getInstance()->remove(isUpload, HintedUser(user, ""));//NOTE: core 0.762
 }
 
 void FinishedTransfers::removeFile_client(string target)
@@ -681,18 +685,19 @@ void FinishedTransfers::on(FinishedManagerListener::AddedFile, bool upload, cons
 	}
 }
 
-void FinishedTransfers::on(FinishedManagerListener::AddedUser, bool upload, const UserPtr& user, const FinishedUserItemPtr& item) throw()
+//NOTE: core 0.762
+void FinishedTransfers::on(FinishedManagerListener::AddedUser, bool upload, const HintedUser &user, const FinishedUserItemPtr &item) throw()
 {
 	if (isUpload == upload)
 	{
 		StringMap params;
 		getFinishedParams_client(item, user, params);
-	
+
 		typedef Func2<FinishedTransfers, StringMap, bool> F2;
 		F2 *func = new F2(this, &FinishedTransfers::addUser_gui, params, TRUE);
 		WulforManager::get()->dispatchGuiFunc(func);
 	}
-}
+}//NOTE: core 0.762
 
 void FinishedTransfers::on(FinishedManagerListener::UpdatedFile, bool upload, const string& file, const FinishedFileItemPtr& item) throw()
 {
@@ -707,7 +712,7 @@ void FinishedTransfers::on(FinishedManagerListener::UpdatedFile, bool upload, co
 	}
 }
 
-void FinishedTransfers::on(FinishedManagerListener::UpdatedUser, bool upload, const UserPtr& user) throw()
+void FinishedTransfers::on(FinishedManagerListener::UpdatedUser, bool upload, const HintedUser &user) throw()//NOTE: core 0.762
 {
 	if (isUpload == upload)
 	{
@@ -737,12 +742,12 @@ void FinishedTransfers::on(FinishedManagerListener::RemovedFile, bool upload, co
 	}
 }
 
-void FinishedTransfers::on(FinishedManagerListener::RemovedUser, bool upload, const UserPtr& user) throw()
+void FinishedTransfers::on(FinishedManagerListener::RemovedUser, bool upload, const HintedUser &user) throw()//NOTE: core 0.762
 {
 	if (isUpload == upload)
 	{
 		typedef Func1<FinishedTransfers, string> F1;
-		F1 *func = new F1(this, &FinishedTransfers::removeUser_gui, user->getCID().toBase32());
+		F1 *func = new F1(this, &FinishedTransfers::removeUser_gui, user.user->getCID().toBase32());//NOTE: core 0.762
 		WulforManager::get()->dispatchGuiFunc(func);
 	}
 }
