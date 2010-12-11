@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2009 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,8 @@
 #include "File.h"
 #include "version.h"
 #include "CID.h"
+#include "SearchManager.h"
+#include "StringTokenizer.h"
 
 namespace dcpp {
 
@@ -48,7 +50,7 @@ const string SettingsManager::settingTags[] =
 	"LogFilePrivateChat", "LogFileStatus", "LogFileUpload", "LogFileDownload", "LogFileSystem",
 	"LogFormatSystem", "LogFormatStatus", "DirectoryListingFrameOrder", "DirectoryListingFrameWidths",
 	"TLSPrivateKeyFile", "TLSCertificateFile", "TLSTrustedCertificatesPath",
-	"Language", "DownloadsOrder", "DownloadsWidth",
+	"Language", "DownloadsOrder", "DownloadsWidth", "Toolbar", "LastSearchType",
 	"SoundMainChat", "SoundPM", "SoundPMWindow",
 	"SENTRY",
 	// Ints
@@ -67,22 +69,26 @@ const string SettingsManager::settingTags[] =
 	"GetUserCountry", "FavShowJoins", "LogStatusMessages", "ShowStatusbar",
 	"ShowToolbar", "ShowTransferview", "PopunderPm", "PopunderFilelist", "MagnetAsk", "MagnetAction", "MagnetRegister",
 	"AddFinishedInstantly", "DontDLAlreadyShared", "UseCTRLForLineHistory",
-	"OpenNewWindow", "UDPPort", "ShowLastLinesLog",
+	"OpenNewWindow", "UDPPort", "HubLastLogLines", "PMLastLogLines",
 	"AdcDebug", "ToggleActiveWindow", "SearchHistory", "SetMinislotSize", "MaxFilelistSize",
 	"HighestPrioSize", "HighPrioSize", "NormalPrioSize", "LowPrioSize", "LowestPrio",
 	"AutoDropSpeed", "AutoDropInterval", "AutoDropElapsed", "AutoDropInactivity", "AutoDropMinSources", "AutoDropFilesize",
 	"AutoDropAll", "AutoDropFilelists", "AutoDropDisconnect",
-	"OpenPublic", "OpenFavoriteHubs", "OpenFavoriteUsers", "OpenQueue", "OpenFinishedDownloads",
-	"OpenFinishedUploads", "OpenSearchSpy", "OpenNetworkStatistics", "OpenNotepad", "OutgoingConnections",
-	"NoIpOverride", "SearchOnlyFreeSlots", "LastSearchType", "BoldFinishedDownloads", "BoldFinishedUploads", "BoldQueue",
-	"BoldHub", "BoldPm", "BoldSearch", "BoldSearchSpy", "SocketInBuffer", "SocketOutBuffer",
-	"OpenWaitingUsers", "BoldWaitingUsers", "OpenSystemLog", "BoldSystemLog", "AutoRefreshTime",
+	"OutgoingConnections",
+	"NoIpOverride", "SearchOnlyFreeSlots", "BoldFinishedDownloads", "BoldFinishedUploads", "BoldQueue",
+	"BoldHub", "BoldPm", "BoldFL", "BoldSearch", "BoldSearchSpy", "SocketInBuffer", "SocketOutBuffer",
+	"BoldWaitingUsers", "BoldSystemLog", "AutoRefreshTime",
 	"UseTLS", "AutoSearchLimit", "AltSortOrder", "AutoKickNoFavs", "PromptPassword", "SpyFrameIgnoreTthSearches",
 	"DontDlAlreadyQueued", "MaxCommandLength", "AllowUntrustedHubs", "AllowUntrustedClients",
 	"TLSPort", "FastHash", "SortFavUsersFirst", "SegmentedDL", "FollowLinks",
 	"SendBloom", "OwnerDrawnMenus", "Coral", "SearchFilterShared", "MaxTabChars", "FinishedDLOnlyFull",
 	"ConfirmExit", "ConfirmHubClosing", "ConfirmHubRemoval", "ConfirmUserRemoval", "ConfirmItemRemoval", "ConfirmADLSRemoval",
-	"SearchMerge",
+	"SearchMerge", "ToolbarSize",
+	"KeepFinishedFiles",
+	"MinMessageLines", "MaxMessageLines",
+	"BandwidthLimitStart", "BandwidthLimitEnd", "TimeDependentThrottle", "MaxDownloadSpeedRealTime",
+	"MaxUploadSpeedTime", "MaxDownloadSpeedPrimary", "MaxUploadSpeedPrimary",
+	"SlotsAlternateLimiting", "SlotsPrimaryLimiting",
 	"SENTRY",
 	// Int64
 	"TotalUpload", "TotalDownload",
@@ -149,8 +155,8 @@ SettingsManager::SettingsManager()
 	setDefault(IGNORE_BOT_PMS, false);
 	setDefault(LIST_DUPES, true);
 	setDefault(BUFFER_SIZE, 64);
-	setDefault(HUBLIST_SERVERS, "http://hublist.openhublist.org/hublist.xml.bz2;http://dchublist.com/hublist.xml.bz2;http://adchublist.com/hublist.xml.bz2;http://www.hublist.org/PublicHubList.xml.bz2;http://dclist.eu/hublist.xml.bz2;http://download.hublist.cz/hublist.xml.bz2;http://hublist.awenet.info/PublicHubList.xml.bz2");
-	setDefault(DOWNLOAD_SLOTS, 3);
+	setDefault(HUBLIST_SERVERS, "http://dchublist.com/hublist.xml.bz2;http://www.hublista.hu/hublist.xml.bz2;http://hublist.openhublist.org/hublist.xml.bz2;");
+	setDefault(DOWNLOAD_SLOTS, 6);
 	setDefault(MAX_DOWNLOAD_SPEED, 0);
 	setDefault(LOG_DIRECTORY, Util::getPath(Util::PATH_USER_LOCAL) + "Logs" PATH_SEPARATOR_STR);
 	setDefault(LOG_UPLOADS, false);
@@ -216,12 +222,13 @@ SettingsManager::SettingsManager()
 	setDefault(DONT_DL_ALREADY_SHARED, false);
 	setDefault(USE_CTRL_FOR_LINE_HISTORY, true);
 	setDefault(JOIN_OPEN_NEW_WINDOW, false);
-	setDefault(SHOW_LAST_LINES_LOG, 0);
+	setDefault(HUB_LAST_LOG_LINES, 10);
+	setDefault(PM_LAST_LOG_LINES, 10);
 	setDefault(ADC_DEBUG, false);
 	setDefault(TOGGLE_ACTIVE_WINDOW, true);
 	setDefault(SEARCH_HISTORY, 10);
 	setDefault(SET_MINISLOT_SIZE, 64);
-	setDefault(MAX_FILELIST_SIZE, 512);
+	setDefault(MAX_FILELIST_SIZE, 256);
 	setDefault(PRIO_HIGHEST_SIZE, 64);
 	setDefault(PRIO_HIGH_SIZE, 0);
 	setDefault(PRIO_NORMAL_SIZE, 0);
@@ -236,23 +243,11 @@ SettingsManager::SettingsManager()
 	setDefault(AUTODROP_ALL, false);
 	setDefault(AUTODROP_FILELISTS, false);
 	setDefault(AUTODROP_DISCONNECT, false);
-	setDefault(OPEN_PUBLIC, false);
-	setDefault(OPEN_FAVORITE_HUBS, false);
-	setDefault(OPEN_FAVORITE_USERS, false);
-	setDefault(OPEN_QUEUE, false);
-	setDefault(OPEN_FINISHED_DOWNLOADS, false);
-	setDefault(OPEN_FINISHED_UPLOADS, false);
-	setDefault(OPEN_SEARCH_SPY, false);
-	setDefault(OPEN_NETWORK_STATISTICS, false);
-	setDefault(OPEN_NOTEPAD, false);
 	setDefault(NO_IP_OVERRIDE, false);
 	setDefault(SEARCH_ONLY_FREE_SLOTS, false);
 	setDefault(SEARCH_FILTER_SHARED, true);
-	setDefault(LAST_SEARCH_TYPE, 0);
 	setDefault(SOCKET_IN_BUFFER, 64*1024);
 	setDefault(SOCKET_OUT_BUFFER, 64*1024);
-	setDefault(OPEN_WAITING_USERS, false);
-	setDefault(OPEN_SYSTEM_LOG, true);
 	setDefault(TLS_TRUSTED_CERTIFICATES_PATH, Util::getPath(Util::PATH_USER_CONFIG) + "Certificates" PATH_SEPARATOR_STR);
 	setDefault(TLS_PRIVATE_KEY_FILE, Util::getPath(Util::PATH_USER_CONFIG) + "Certificates" PATH_SEPARATOR_STR "client.key");
 	setDefault(TLS_CERTIFICATE_FILE, Util::getPath(Util::PATH_USER_CONFIG) + "Certificates" PATH_SEPARATOR_STR "client.crt");
@@ -261,6 +256,7 @@ SettingsManager::SettingsManager()
 	setDefault(BOLD_QUEUE, true);
 	setDefault(BOLD_HUB, true);
 	setDefault(BOLD_PM, true);
+	setDefault(BOLD_FL, true);
 	setDefault(BOLD_SEARCH, true);
 	setDefault(BOLD_SEARCH_SPY, true);
 	setDefault(BOLD_WAITING_USERS, true);
@@ -292,9 +288,24 @@ SettingsManager::SettingsManager()
 	setDefault(CONFIRM_ITEM_REMOVAL, true);
 	setDefault(CONFIRM_ADLS_REMOVAL, true);
 	setDefault(SEARCH_MERGE, true);
+	setDefault(TOOLBAR_SIZE, 20);
 	setDefault(TRANSFERS_PANED_POS, .7);
 	setDefault(QUEUE_PANED_POS, .3);
 	setDefault(SEARCH_PANED_POS, .2);
+	setDefault(KEEP_FINISHED_FILES, false);
+	setDefault(MIN_MESSAGE_LINES, 1);
+	setDefault(MAX_MESSAGE_LINES, 10);
+	setDefault(MAX_UPLOAD_SPEED_MAIN, 0);
+	setDefault(MAX_DOWNLOAD_SPEED_MAIN, 0);
+	setDefault(TIME_DEPENDENT_THROTTLE, false);
+	setDefault(MAX_DOWNLOAD_SPEED_ALTERNATE, 0);
+	setDefault(MAX_UPLOAD_SPEED_ALTERNATE, 0);
+	setDefault(BANDWIDTH_LIMIT_START, 1);
+	setDefault(BANDWIDTH_LIMIT_END, 1);
+	setDefault(SLOTS_ALTERNATE_LIMITING, 1);
+	setDefault(SLOTS_PRIMARY, 3);
+
+	setSearchTypeDefaults();
 
 #ifdef _WIN32
 	setDefault(MAIN_WINDOW_STATE, SW_SHOWNORMAL);
@@ -363,6 +374,28 @@ void SettingsManager::load(string const& aFileName)
 			}
 
 			xml.stepOut();
+		}
+
+		xml.resetCurrentChild();
+		if(xml.findChild("SearchTypes")) {
+			try {
+				searchTypes.clear();
+				xml.stepIn();
+				while(xml.findChild("SearchType")) {
+					const string& extensions = xml.getChildData();
+					if(extensions.empty()) {
+						continue;
+					}
+					const string& name = xml.getChildAttrib("Id");
+					if(name.empty()) {
+						continue;
+					}
+					searchTypes[name] = StringTokenizer<string>(extensions, ';').getTokens();
+				}
+				xml.stepOut();
+			} catch(const SimpleXMLException&) {
+				setSearchTypeDefaults();
+			}
 		}
 
 		if(SETTING(PRIVATE_ID).length() != 39 || CID(SETTING(PRIVATE_ID)).isZero()) {
@@ -464,6 +497,14 @@ void SettingsManager::save(string const& aFileName) {
 		}
 	}
 	xml.stepOut();
+	
+	xml.addTag("SearchTypes");
+	xml.stepIn();
+	for(SearchTypesIterC i = searchTypes.begin(); i != searchTypes.end(); ++i) {
+		xml.addTag("SearchType", Util::toString(";", i->second));
+		xml.addChildAttrib("Id", i->first);
+	}
+	xml.stepOut();
 
 	fire(SettingsManagerListener::Save(), xml);
 
@@ -479,6 +520,119 @@ void SettingsManager::save(string const& aFileName) {
 	} catch(const FileException&) {
 		// ...
 	}
+}
+
+void SettingsManager::validateSearchTypeName(const string& name) const {
+	if(name.empty() || (name.size() == 1 && name[0] >= '1' && name[0] <= '6')) {
+		throw SearchTypeException(_("Invalid search type name"));
+	}
+	for(int type = SearchManager::TYPE_ANY; type != SearchManager::TYPE_LAST; ++type) {
+		if(SearchManager::getTypeStr(type) == name) {
+			throw SearchTypeException(_("This search type already exists"));
+		}
+	}
+}
+
+void SettingsManager::setSearchTypeDefaults() {
+	searchTypes.clear();
+
+	// @todo simplify this as searchTypes['0' + SearchManager::TYPE_AUDIO] = { "mp3", "etc" } when we'll have C++0x
+
+	// @todo the default extension list contains some depreciated formats they kept to get all the NMDC-built subset of results for both type 
+	// of hubs. Some of these may worth to be dropped along with NMDC support...
+
+	{
+		StringList& l = searchTypes.insert(make_pair(string(1, '0' + SearchManager::TYPE_AUDIO), StringList())).first->second;
+		l.push_back("mp3"); l.push_back("flac"); l.push_back("ogg"); l.push_back("mpc");
+		l.push_back("ape"); l.push_back("wma");l.push_back("wav"); l.push_back("m4a");
+		l.push_back("mp2"); l.push_back("mid"); l.push_back("au"); l.push_back("aiff");
+		l.push_back("ra");
+	}
+
+	{
+		StringList& l = searchTypes.insert(make_pair(string(1, '0' + SearchManager::TYPE_COMPRESSED), StringList())).first->second;
+		l.push_back("rar"); l.push_back("7z"); l.push_back("zip"); l.push_back("tar");
+		l.push_back("gz"); l.push_back("bz2"); l.push_back("z"); l.push_back("ace");
+		l.push_back("lha"); l.push_back("lzh"); l.push_back("arj");
+	}
+
+	{
+		StringList& l = searchTypes.insert(make_pair(string(1, '0' + SearchManager::TYPE_DOCUMENT), StringList())).first->second;
+		l.push_back("doc"); l.push_back("xls"); l.push_back("ppt"); l.push_back("docx");
+		l.push_back("xlsx"); l.push_back("pptx"); l.push_back("odf"); l.push_back("odt");
+		l.push_back("ods"); l.push_back("odp"); l.push_back("pdf"); l.push_back("xps");
+		l.push_back("htm"); l.push_back("html"); l.push_back("xml"); l.push_back("txt");
+		l.push_back("nfo"); l.push_back("rtf");
+	}
+
+	{
+		StringList& l = searchTypes.insert(make_pair(string(1, '0' + SearchManager::TYPE_EXECUTABLE), StringList())).first->second;
+		l.push_back("exe"); l.push_back("com"); l.push_back("bat"); l.push_back("cmd");
+		l.push_back("dll"); l.push_back("vbs"); l.push_back("ps1"); l.push_back("msi");
+	}
+
+	{
+		StringList& l = searchTypes.insert(make_pair(string(1, '0' + SearchManager::TYPE_PICTURE), StringList())).first->second;
+		l.push_back("bmp"); l.push_back("ico"); l.push_back("jpg"); l.push_back("jpeg");
+		l.push_back("png"); l.push_back("gif"); l.push_back("tga"); l.push_back("ai");
+		l.push_back("ps"); l.push_back("pict"); l.push_back("eps"); l.push_back("img");
+		l.push_back("pct"); l.push_back("psp"); l.push_back("tif"); l.push_back("rle");
+		l.push_back("pcx"); l.push_back("sfw"); l.push_back("psd"); l.push_back("cdr");
+	}
+
+	{
+		StringList& l = searchTypes.insert(make_pair(string(1, '0' + SearchManager::TYPE_VIDEO), StringList())).first->second;
+		l.push_back("mpg"); l.push_back("avi"); l.push_back("mkv"); l.push_back("wmv");
+		l.push_back("mov"); l.push_back("mp4"); l.push_back("3gp"); l.push_back("qt");
+		l.push_back("asx"); l.push_back("divx"); l.push_back("asf"); l.push_back("pxp");
+		l.push_back("ogm"); l.push_back("flv"); l.push_back("rm"); l.push_back("rmvb");
+		l.push_back("webm"); l.push_back("mpeg");
+	}
+
+	fire(SettingsManagerListener::SearchTypesChanged());
+}
+
+void SettingsManager::addSearchType(const string& name, const StringList& extensions, bool validated) {
+	if(!validated) {
+		validateSearchTypeName(name);
+	}
+
+	if(searchTypes.find(name) != searchTypes.end()) {
+		throw SearchTypeException(_("This search type already exists"));
+	}
+
+	searchTypes[name] = extensions;
+	fire(SettingsManagerListener::SearchTypesChanged());
+}
+
+void SettingsManager::delSearchType(const string& name) {
+	validateSearchTypeName(name);
+	searchTypes.erase(name);
+	fire(SettingsManagerListener::SearchTypesChanged());
+}
+
+void SettingsManager::renameSearchType(const string& oldName, const string& newName) {
+	validateSearchTypeName(newName);
+	StringList exts = getSearchType(oldName)->second;
+	addSearchType(newName, exts, true);
+	searchTypes.erase(oldName);
+}
+
+void SettingsManager::modSearchType(const string& name, const StringList& extensions) {
+	getSearchType(name)->second = extensions;
+	fire(SettingsManagerListener::SearchTypesChanged());
+}
+
+const StringList& SettingsManager::getExtensions(const string& name) {
+	return getSearchType(name)->second;
+}
+
+SettingsManager::SearchTypesIter SettingsManager::getSearchType(const string& name) {
+	SearchTypesIter ret = searchTypes.find(name);
+	if(ret == searchTypes.end()) {
+		throw SearchTypeException(_("No such search type"));
+	}
+	return ret;
 }
 
 } // namespace dcpp

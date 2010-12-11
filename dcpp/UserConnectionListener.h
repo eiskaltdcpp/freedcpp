@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2008 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,12 +46,14 @@ public:
 	typedef X<16> MyNick;
 	typedef X<17> TransmitDone;
 	typedef X<18> Supports;
-	typedef X<19> FileNotAvailable;
+	typedef X<19> ProtocolError;
+	typedef X<20> FileNotAvailable;
 
 	virtual void on(BytesSent, UserConnection*, size_t, size_t) throw() { }
 	virtual void on(Connected, UserConnection*) throw() { }
 	virtual void on(Data, UserConnection*, const uint8_t*, size_t) throw() { }
 	virtual void on(Failed, UserConnection*, const string&) throw() { }
+	virtual void on(ProtocolError, UserConnection*, const string&) throw() { }
 	virtual void on(CLock, UserConnection*, const string&, const string&) throw() { }
 	virtual void on(Key, UserConnection*, const string&) throw() { }
 	virtual void on(Direction, UserConnection*, const string&, const string&) throw() { }

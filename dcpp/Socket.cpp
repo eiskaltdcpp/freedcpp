@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2008 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -530,6 +530,7 @@ bool Socket::waitAccepted(uint32_t millis) {
 }
 
 string Socket::resolve(const string& aDns) {
+#ifdef _WIN32
 	sockaddr_in sock_addr;
 
 	memset(&sock_addr, 0, sizeof(sock_addr));
@@ -548,6 +549,22 @@ string Socket::resolve(const string& aDns) {
 	} else {
 		return aDns;
 	}
+#else
+	// POSIX doesn't guarantee the gethostbyname to be thread safe. And it may (will) return a pointer to static data.
+	string address = Util::emptyString;
+	addrinfo hints = { 0 };
+	addrinfo *result;
+	hints.ai_family = AF_INET;
+
+	if (getaddrinfo(aDns.c_str(), NULL, &hints, &result) == 0) {
+		if (result->ai_addr != NULL)
+			address = inet_ntoa(((sockaddr_in*)(result->ai_addr))->sin_addr);
+
+		freeaddrinfo(result);
+	}
+
+	return address;		
+#endif
 }
 
 string Socket::getLocalIp() throw() {
@@ -560,6 +577,18 @@ string Socket::getLocalIp() throw() {
 		return inet_ntoa(sock_addr.sin_addr);
 	}
 	return Util::emptyString;
+}
+
+uint16_t Socket::getLocalPort() throw() {
+	if(sock == INVALID_SOCKET)
+		return 0;
+
+	sockaddr_in sock_addr;
+	socklen_t len = sizeof(sock_addr);
+	if(getsockname(sock, (sockaddr*)&sock_addr, &len) == 0) {
+		return ntohs(sock_addr.sin_port);
+	}
+	return 0;
 }
 
 void Socket::socksUpdated() {

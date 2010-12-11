@@ -29,6 +29,7 @@ gui_files = [
 	'sound.cc',
 	'transfers.cc',
 	'treeview.cc',
+	'upnpc.cc',
 	'UserCommandMenu.cc',
 	'wulfor.cc',
 	'wulformanager.cc',

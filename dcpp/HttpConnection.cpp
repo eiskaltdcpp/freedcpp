@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2008 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -64,7 +64,7 @@ void HttpConnection::downloadFile(const string& aUrl) {
 		file = currentUrl;
 	}
 
-	if(SETTING(CORAL) && coralizeState != CST_NOCORALIZE) {
+	if(BOOLSETTING(CORAL) && coralizeState != CST_NOCORALIZE) {
 		if(server.length() > CORAL_SUFFIX.length() && server.compare(server.length() - CORAL_SUFFIX.length(), CORAL_SUFFIX.length(), CORAL_SUFFIX) !=0) {
 			server += CORAL_SUFFIX;
 		} else {
@@ -163,7 +163,7 @@ void HttpConnection::on(BufferedSocketListener::Failed, const string& aLine) thr
 	socket->removeListener(this);
 	BufferedSocket::putSocket(socket);
 	socket = NULL;
-	if(SETTING(CORAL) && coralizeState == CST_DEFAULT) {
+	if(BOOLSETTING(CORAL) && coralizeState == CST_DEFAULT) {
 		coralizeState = CST_NOCORALIZE;
 		dcdebug("Coralized address failed, retrying : %s\n",currentUrl.c_str());
 		downloadFile(currentUrl);
@@ -178,7 +178,7 @@ void HttpConnection::on(BufferedSocketListener::ModeChange) throw() {
 	socket->disconnect();
 	BufferedSocket::putSocket(socket);
 	socket = NULL;
-	fire(HttpConnectionListener::Complete(), this, currentUrl);
+	fire(HttpConnectionListener::Complete(), this, currentUrl, BOOLSETTING(CORAL) && coralizeState != CST_NOCORALIZE);
 	coralizeState = CST_DEFAULT;
 }
 void HttpConnection::on(BufferedSocketListener::Data, uint8_t* aBuf, size_t aLen) throw() {

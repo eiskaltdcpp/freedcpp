@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2008 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,8 +37,8 @@ public:
 
 	virtual void hubMessage(const string& aMessage, bool thirdPerson = false);
 	virtual void privateMessage(const OnlineUser& user, const string& aMessage, bool thirdPerson = false);
-	virtual void sendUserCmd(const string& aUserCmd) { send(aUserCmd); }
-	virtual void search(int aSizeMode, int64_t aSize, int aFileType, const string& aString, const string& aToken);
+	virtual void sendUserCmd(const UserCommand& command, const StringMap& params);
+	virtual void search(int aSizeMode, int64_t aSize, int aFileType, const string& aString, const string& aToken, const StringList& aExtList);
 	virtual void password(const string& pwd);
 	virtual void info(bool alwaysSend);
 
@@ -52,6 +52,7 @@ public:
 private:
 	friend class ClientManager;
 	friend class CommandHandler<AdcHub>;
+	friend class Identity;
 
 	AdcHub(const string& aHubURL, bool secure);
 
@@ -72,12 +73,14 @@ private:
 	string salt;
 	uint32_t sid;
 
+	std::tr1::unordered_set<uint32_t> forbiddenCommands;
+
 	static const string CLIENT_PROTOCOL;
-	static const string CLIENT_PROTOCOL_TEST;
 	static const string SECURE_CLIENT_PROTOCOL_TEST;
 	static const string ADCS_FEATURE;
 	static const string TCP4_FEATURE;
 	static const string UDP4_FEATURE;
+	static const string NAT0_FEATURE;
 	static const string BASE_SUPPORT;
 	static const string BAS0_SUPPORT;
 	static const string TIGR_SUPPORT;
@@ -106,10 +109,14 @@ private:
 	void handle(AdcCommand::CMD, AdcCommand& c) throw();
 	void handle(AdcCommand::RES, AdcCommand& c) throw();
 	void handle(AdcCommand::GET, AdcCommand& c) throw();
+	void handle(AdcCommand::NAT, AdcCommand& c) throw();
+	void handle(AdcCommand::RNT, AdcCommand& c) throw();
 
 	template<typename T> void handle(T, AdcCommand&) { }
 
 	void sendUDP(const AdcCommand& cmd) throw();
+	void unknownProtocol(uint32_t target, const string& protocol, const string& token);
+	bool secureAvail(uint32_t target, const string& protocol, const string& token);
 
 	virtual void on(Connecting) throw() { fire(ClientListener::Connecting(), this); }
 	virtual void on(Connected) throw();

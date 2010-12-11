@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2009 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -53,7 +53,7 @@ public:
 		time_t time_,
 		int64_t fileSize_,
 		bool crc32Checked_,
-		const UserPtr& user
+		const HintedUser& user
 		);
 
 	void update(
@@ -61,13 +61,13 @@ public:
 		int64_t milliSeconds_,
 		time_t time_,
 		bool crc32Checked_,
-		const UserPtr& user
+		const HintedUser& user
 		);
 
 	double getTransferredPercentage() const;
 	bool isFull() const;
 
-	GETSET(UserList, users, Users);
+	GETSET(HintedUserList, users, Users);
 	GETSET(int64_t, fileSize, FileSize);
 	GETSET(bool, crc32Checked, Crc32Checked);
 };

@@ -30,6 +30,7 @@
 #include <dcpp/Upload.h>
 #include <dcpp/Download.h>
 #include <dcpp/ClientManager.h>
+#include <dcpp/UPnPManager.h>//NOTE: core 0.762
 #include <dcpp/version.h>
 #include "downloadqueue.hh"
 #include "favoritehubs.hh"
@@ -75,6 +76,8 @@ MainWindow::MainWindow():
 	gtk_window_set_transient_for(GTK_WINDOW(getWidget("connectDialog")), window);
 	gtk_window_set_transient_for(GTK_WINDOW(getWidget("flistDialog")), window);
 	gtk_window_set_transient_for(GTK_WINDOW(getWidget("ucLineDialog")), window);
+
+	setStatRate_gui();//NOTE: core 0.762
 
 	// toolbar
 	setToolbarMenu_gui("connectMenuItemBar", "connect", "toolbar-button-connect");
@@ -418,24 +421,29 @@ void MainWindow::loadIcons_gui()
 	gtk_image_set_from_stock(GTK_IMAGE(getWidget("imageHubs")), "freedcpp-public-hubs", GTK_ICON_SIZE_SMALL_TOOLBAR);
 	gtk_image_set_from_stock(GTK_IMAGE(getWidget("imageDownloadSpeed")), "freedcpp-download", GTK_ICON_SIZE_SMALL_TOOLBAR);
 	gtk_image_set_from_stock(GTK_IMAGE(getWidget("imageUploadSpeed")), "freedcpp-upload", GTK_ICON_SIZE_SMALL_TOOLBAR);
+//NOTE: core 0.762
+	gtk_image_set_from_stock(GTK_IMAGE(getWidget("imageDownloadRate")), "freedcpp-download", GTK_ICON_SIZE_SMALL_TOOLBAR);
+	gtk_image_set_from_stock(GTK_IMAGE(getWidget("imageUploadRate")), "freedcpp-upload", GTK_ICON_SIZE_SMALL_TOOLBAR);
 }
 
 void MainWindow::autoOpen_gui()
 {
-	if (BOOLSETTING(OPEN_PUBLIC))
+//NOTE: core 0.762
+	if (WGETB("open-public"))
 		showPublicHubs_gui();
-	if (BOOLSETTING(OPEN_QUEUE))
+	if (WGETB("open-queue"))
 		showDownloadQueue_gui();
-	if (BOOLSETTING(OPEN_FAVORITE_HUBS))
+	if (WGETB("open-favorite-hubs"))
 		showFavoriteHubs_gui();
-	if (BOOLSETTING(OPEN_FAVORITE_USERS))
+	if (WGETB("open-favorite-users"))
 		showFavoriteUsers_gui();
-	if (BOOLSETTING(OPEN_FINISHED_DOWNLOADS))
+	if (WGETB("open-finished-downloads"))
 		showFinishedDownloads_gui();
-	if (BOOLSETTING(OPEN_FINISHED_UPLOADS))
+	if (WGETB("open-finished-uploads"))
 		showFinishedUploads_gui();
-	if (BOOLSETTING(OPEN_SEARCH_SPY))
+	if (WGETB("open-search-spy"))
 		showSearchSpy_gui();
+//NOTE: core 0.762
 }
 
 void MainWindow::setToolbarMenu_gui(const string &item_key, const string &button_key, const string &key)
@@ -632,6 +640,16 @@ void MainWindow::setStats_gui(string hubs, string downloadSpeed,
 	gtk_label_set_text(GTK_LABEL(getWidget("labelDownloaded")), downloaded.c_str());
 	gtk_label_set_text(GTK_LABEL(getWidget("labelUploadSpeed")), uploadSpeed.c_str());
 	gtk_label_set_text(GTK_LABEL(getWidget("labelUploaded")), uploaded.c_str());
+}
+
+void MainWindow::setStatRate_gui()//NOTE: core 0.762
+{
+	int uploadSpeed = SETTING(MAX_UPLOAD_SPEED_MAIN);
+	int downloadSpeed = SETTING(MAX_DOWNLOAD_SPEED_MAIN);
+	string uploadRate = uploadSpeed ? Util::formatBytes(uploadSpeed*1024) + "/" + _("s") : "max";
+	string downloadRate = downloadSpeed ? Util::formatBytes(downloadSpeed*1024) + "/" + _("s") : "max";
+	gtk_label_set_text(GTK_LABEL(getWidget("labelDownloadRate")), downloadRate.c_str());
+	gtk_label_set_text(GTK_LABEL(getWidget("labelUploadRate")), uploadRate.c_str());
 }
 
 BookEntry* MainWindow::findBookEntry(const EntryType type, const string &id)
@@ -1679,8 +1697,20 @@ void MainWindow::onPreferencesClicked_gui(GtkWidget *widget, gpointer data)
 	{
 		if (SETTING(INCOMING_CONNECTIONS) != lastConn || SETTING(TCP_PORT) != tcpPort || SETTING(UDP_PORT) != udpPort)
 		{
+			//NOTE: core 0.762
+			if (SETTING(INCOMING_CONNECTIONS) == SettingsManager::INCOMING_FIREWALL_UPNP ||
+				lastConn == SettingsManager::INCOMING_FIREWALL_UPNP)
+			{
+				UPnPManager::getInstance()->close();
+			}
+
 			F0 *func = new F0(mw, &MainWindow::startSocket_client);
 			WulforManager::get()->dispatchClientFunc(func);
+		}
+		else if (SETTING(INCOMING_CONNECTIONS) == SettingsManager::INCOMING_FIREWALL_UPNP && !UPnPManager::getInstance()->getOpened())//NOTE: core 0.762
+		{
+			// previous UPnP mappings had failed; try again
+			UPnPManager::getInstance()->open();
 		}
 
 		if (BOOLSETTING(ALWAYS_TRAY))
@@ -1725,6 +1755,9 @@ void MainWindow::onPreferencesClicked_gui(GtkWidget *widget, gpointer data)
 
 		// Toolbar
 		mw->checkToolbarMenu_gui();
+
+		// Rate
+		mw->setStatRate_gui();//NOTE: core 0.762
 	}
 }
 
@@ -1973,21 +2006,23 @@ void MainWindow::onLinkClicked_gui(GtkWidget *widget, gpointer data)
 
 void MainWindow::autoConnect_client()
 {
-	FavoriteHubEntry *hub;
-	FavoriteHubEntryList &l = FavoriteManager::getInstance()->getFavoriteHubs();
-	typedef Func2<MainWindow, string, string> F2;
-	F2 *func;
-
-	for (FavoriteHubEntryList::const_iterator it = l.begin(); it != l.end(); ++it)
-	{
-		hub = *it;
-
-		if (hub->getConnect())
-		{
-			func = new F2(this, &MainWindow::showHub_gui, hub->getServer(), hub->getEncoding());
-			WulforManager::get()->dispatchGuiFunc(func);
-		}
-	}
+// TODO: add auto connect for core 0.762
+//
+// 	FavoriteHubEntry *hub;
+// 	FavoriteHubEntryList &l = FavoriteManager::getInstance()->getFavoriteHubs();
+// 	typedef Func2<MainWindow, string, string> F2;
+// 	F2 *func;
+// 
+// 	for (FavoriteHubEntryList::const_iterator it = l.begin(); it != l.end(); ++it)
+// 	{
+// 		hub = *it;
+// 
+// 		if (hub->getConnect())
+// 		{
+// 			func = new F2(this, &MainWindow::showHub_gui, hub->getServer(), hub->getEncoding());
+// 			WulforManager::get()->dispatchGuiFunc(func);
+// 		}
+// 	}
 
 	string link = WulforManager::get()->getURL();
 
@@ -1998,7 +2033,8 @@ void MainWindow::autoConnect_client()
 
 	if (WulforUtil::isHubURL(link) && BOOLSETTING(URL_HANDLER))
 	{
-		func = new F2(this, &MainWindow::showHub_gui, link, "");
+		typedef Func2<MainWindow, string, string> F2;//TODO: core 0.762
+		F2 *func = new F2(this, &MainWindow::showHub_gui, link, "");//TODO: core 0.762
 		WulforManager::get()->dispatchGuiFunc(func);
 	}
 	else if (WulforUtil::isMagnet(link) && BOOLSETTING(MAGNET_REGISTER))
@@ -2041,6 +2077,10 @@ void MainWindow::startSocket_client()
 			F2* func = new F2(this, &MainWindow::showMessageDialog_gui, primaryText, secondaryText);
 			WulforManager::get()->dispatchGuiFunc(func);
 		}
+
+		// must be done after listen calls; otherwise ports won't be set
+		if (SETTING(INCOMING_CONNECTIONS) == SettingsManager::INCOMING_FIREWALL_UPNP)// NOTE: core 0.762
+			UPnPManager::getInstance()->open();
 	}
 
 	ClientManager::getInstance()->infoUpdated();
@@ -2081,15 +2121,18 @@ void MainWindow::on(QueueManagerListener::Finished, QueueItem *item, const strin
 
 	if (item->isSet(QueueItem::FLAG_CLIENT_VIEW | QueueItem::FLAG_USER_LIST))
 	{
-		UserPtr user = item->getDownloads()[0]->getUser();
+// 		UserPtr user = item->getDownloads()[0]->getUser();
+		const HintedUser user = item->getDownloads()[0]->getHintedUser();//NOTE: core 0.762
 		string listName = item->getListName();
 
 		F3 *f3 = new F3(this, &MainWindow::showNotification_gui, _("file list from "), WulforUtil::getNicks(user),
 			Notify::DOWNLOAD_FINISHED_USER_LIST);
+
 		WulforManager::get()->dispatchGuiFunc(f3);
 
 		typedef Func4<MainWindow, UserPtr, string, string, bool> F4;
-		F4 *func = new F4(this, &MainWindow::showShareBrowser_gui, user, listName, dir, TRUE);
+// 		F4 *func = new F4(this, &MainWindow::showShareBrowser_gui, user, listName, dir, TRUE);
+		F4 *func = new F4(this, &MainWindow::showShareBrowser_gui, user.user, listName, dir, TRUE);//NOTE: core 0.762
 		WulforManager::get()->dispatchGuiFunc(func);
 	}
 	else if (!item->isSet(QueueItem::FLAG_XML_BZLIST))

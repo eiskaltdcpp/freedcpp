@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2009 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -91,12 +91,12 @@ public:
 				| FLAG_BAD_TREE | FLAG_NO_TREE | FLAG_SLOW_SOURCE | FLAG_UNTRUSTED
 		};
 
-		Source(const UserPtr& aUser) : user(aUser) { }
+		Source(const HintedUser& aUser) : user(aUser) { }
 		Source(const Source& aSource) : Flags(aSource), user(aSource.user) { }
 
 		bool operator==(const UserPtr& aUser) const { return user == aUser; }
-		UserPtr& getUser() { return user; }
-		GETSET(UserPtr, user, User);
+
+		GETSET(HintedUser, user, User);
 	};
 
 	typedef std::vector<Source> SourceList;
@@ -123,17 +123,12 @@ public:
 
 	int countOnlineUsers() const;
 	bool hasOnlineUsers() const { return countOnlineUsers() > 0; }
+	void getOnlineUsers(HintedUserList& l) const;
 
 	SourceList& getSources() { return sources; }
 	const SourceList& getSources() const { return sources; }
 	SourceList& getBadSources() { return badSources; }
 	const SourceList& getBadSources() const { return badSources; }
-
-	void getOnlineUsers(UserList& l) const {
-		for(SourceConstIter i = sources.begin(); i != sources.end(); ++i)
-			if(i->getUser()->isOnline())
-				l.push_back(i->getUser());
-	}
 
 	string getTargetFileName() const { return Util::getFileName(getTarget()); }
 
@@ -200,7 +195,7 @@ private:
 	SourceList badSources;
 	string tempTarget;
 
-	void addSource(const UserPtr& aUser);
+	void addSource(const HintedUser& aUser);
 	void removeSource(const UserPtr& aUser, int reason);
 };
 

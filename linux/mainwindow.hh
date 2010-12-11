@@ -114,6 +114,7 @@ class MainWindow:
 		void setChooseMagnetDialog_gui();
 		void showMagnetDialog_gui(const std::string &magnet, const std::string &name, const int64_t size,
 			const std::string &tth);
+		void setStatRate_gui();//NOTE: core 0.762
 		void setToolbarMenu_gui(const std::string &item_key, const std::string &button_key, const std::string &key);
 		void updateFavoriteHubMenu_gui(ListParamPair list);
 		void checkToolbarMenu_gui();

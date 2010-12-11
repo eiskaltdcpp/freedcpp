@@ -35,6 +35,9 @@ msgid ""
 "\n"
 "In addition, as a special exception, compiling, linking, and/or using "
 "OpenSSL with this program is allowed.\n"
+"\n"
+"This program uses the MiniUPnP client library by Thomas Bernard "
+"http://miniupnp.tuxfamily.org http://miniupnp.free.fr\n"
 msgstr ""
 
 #: hub.cc:1021 hub.cc:1100 privatemessage.cc:536 privatemessage.cc:615

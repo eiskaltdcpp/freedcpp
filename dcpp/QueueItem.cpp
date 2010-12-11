@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2009 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 #include "HashManager.h"
 #include "Download.h"
 #include "File.h"
+#include "Util.h"
 
 namespace dcpp {
 
@@ -39,16 +40,21 @@ namespace {
 
 int QueueItem::countOnlineUsers() const {
 	int n = 0;
-	SourceConstIter i = sources.begin();
-	for(; i != sources.end(); ++i) {
-		if(i->getUser()->isOnline())
+	for(SourceConstIter i = sources.begin(), iend = sources.end(); i != iend; ++i) {
+		if(i->getUser().user->isOnline())
 			n++;
 	}
 	return n;
 }
 
-void QueueItem::addSource(const UserPtr& aUser) {
-	dcassert(!isSource(aUser));
+void QueueItem::getOnlineUsers(HintedUserList& l) const {
+	for(SourceConstIter i = sources.begin(), iend = sources.end(); i != iend; ++i)
+		if(i->getUser().user->isOnline())
+			l.push_back(i->getUser());
+}
+
+void QueueItem::addSource(const HintedUser& aUser) {
+	dcassert(!isSource(aUser.user));
 	SourceIter i = getBadSource(aUser);
 	if(i != badSources.end()) {
 		sources.push_back(*i);
@@ -84,17 +90,6 @@ const string& QueueItem::getTempTarget() {
 	return tempTarget;
 }
 
-namespace {
-
-inline int64_t roundDown(int64_t size, int64_t blockSize) {
-	return ((size + blockSize / 2) / blockSize) * blockSize;
-}
-inline int64_t roundUp(int64_t size, int64_t blockSize) {
-	return ((size + blockSize - 1) / blockSize) * blockSize;
-}
-
-}
-
 Segment QueueItem::getNextSegment(int64_t blockSize, int64_t wantedSize) const {
 	if(getSize() == -1 || blockSize == 0) {
 		return Segment(0, -1);
@@ -112,13 +107,13 @@ Segment QueueItem::getNextSegment(int64_t blockSize, int64_t wantedSize) const {
 			const Segment& first = *done.begin();
 
 			if(first.getStart() > 0) {
-				end = roundUp(first.getStart(), blockSize);
+				end = Util::roundUp(first.getStart(), blockSize);
 			} else {
-				start = roundDown(first.getEnd(), blockSize);
+				start = Util::roundDown(first.getEnd(), blockSize);
 
 				if(done.size() > 1) {
 					const Segment& second = *(++done.begin());
-					end = roundUp(second.getStart(), blockSize);
+					end = Util::roundUp(second.getStart(), blockSize);
 				}
 			}
 		}
@@ -133,7 +128,7 @@ Segment QueueItem::getNextSegment(int64_t blockSize, int64_t wantedSize) const {
 
 	if(targetSize > blockSize) {
 		// Round off to nearest block size
-		targetSize = roundDown(targetSize, blockSize);
+		targetSize = Util::roundDown(targetSize, blockSize);
 	} else {
 		targetSize = blockSize;
 	}

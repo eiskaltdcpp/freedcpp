@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2008 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -185,6 +185,8 @@ extern void shutdown();
 #define PACKAGE "libdcpp"
 #define LOCALEDIR _DATADIR PATH_SEPARATOR_STR "locale"
 #define _(String) dgettext(PACKAGE, String)
+#define gettext_noop(String) String
+#define N_(String) gettext_noop (String)
 #define F_(String) dcpp_fmt(dgettext(PACKAGE, String))
 #define FN_(String1,String2, N) dcpp_fmt(dngettext(PACKAGE, String1, String2, N))
 
