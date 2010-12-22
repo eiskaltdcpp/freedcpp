@@ -1,6 +1,9 @@
 		--- freedcpp 0.0.x ---
 
-r183: 0.0.4.1 merging trunk@182 core@184
+r186: 0.0.4.2
+* Менеджер групп (Issue 66).
+
+r185: 0.0.4.1 merging trunk@182 core@184
 * Add miniupnpc-1.4.20100609, ревизия 2163 (dcplusplus, add MiniUPnPc for UPnP mappings and make it threaded).
 * Ревизия 2177 (dcplusplus, prevent hub-provided cmds from 'open own list' from going to the wrong hub).
 * Update translations, ревизия 2176 (dcplusplus, update translations & zlib).
