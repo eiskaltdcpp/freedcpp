@@ -39,13 +39,22 @@ class FavoriteHubs:
 		virtual void show();
 
 	private:
+		typedef std::tr1::unordered_map<std::string, GtkTreeIter> FavHubGroupsIter;
+
 		// GUI functions
 		void addEntry_gui(dcpp::StringMap params);
 		void editEntry_gui(dcpp::StringMap &params, GtkTreeIter *iter);
 		void removeEntry_gui(std::string address);
+		void removeGroupComboBox_gui(const std::string &group);
+		void addGroupComboBox_gui(const std::string &group);
+		void setFavoriteHubs_gui(bool remove, const std::string &group);
 		void popupMenu_gui();
 		static bool showErrorDialog_gui(const std::string &description, FavoriteHubs *fh);
 		static bool showFavoriteHubDialog_gui(dcpp::StringMap &params, FavoriteHubs *fh);
+		void updateFavHubGroups_gui(bool updated);
+		void saveFavHubGroups();
+		void initFavHubGroupsDialog_gui();
+		bool checkEntry_gui(std::string address_old, std::string address_new);
 
 		// GUI callbacks
 		static gboolean onButtonPressed_gui(GtkWidget *widget, GdkEventButton *event, gpointer data);
@@ -55,8 +64,13 @@ class FavoriteHubs:
 		static void onEditEntry_gui(GtkWidget *widget, gpointer data);
 		static void onRemoveEntry_gui(GtkWidget *widget, gpointer data);
 		static void onConnect_gui(GtkButton *widget, gpointer data);
-		static void onToggledClicked_gui(GtkCellRendererToggle *cell, gchar *path, gpointer data);
 		static void onCheckButtonToggled_gui(GtkToggleButton *button, gpointer data);
+		static void onAddGroupClicked_gui(GtkWidget *widget, gpointer data);
+		static void onRemoveGroupClicked_gui(GtkWidget *widget, gpointer data);
+		static void onUpdateGroupClicked_gui(GtkWidget *widget, gpointer data);
+		static void onManageGroupsClicked_gui(GtkWidget *widget, gpointer data);
+		static gboolean onGroupsButtonReleased_gui(GtkWidget *widget, GdkEventButton *event, gpointer data);
+		static gboolean onGroupsKeyReleased_gui(GtkWidget *widget, GdkEventKey *event, gpointer data);
 
 		// Client functions
 		void initializeList_client();
@@ -64,16 +78,16 @@ class FavoriteHubs:
 		void addEntry_client(dcpp::StringMap params);
 		void editEntry_client(std::string address, dcpp::StringMap params);
 		void removeEntry_client(std::string address);
-		void setConnect_client(std::string address, bool active);
 
 		// Client callbacks
 		virtual void on(dcpp::FavoriteManagerListener::FavoriteAdded, const dcpp::FavoriteHubEntryPtr entry) throw();
 		virtual void on(dcpp::FavoriteManagerListener::FavoriteRemoved, const dcpp::FavoriteHubEntryPtr entry) throw();
 
-		TreeView favoriteView;
-		GtkListStore *favoriteStore;
-		GtkTreeSelection *favoriteSelection;
+		TreeView favoriteView, groupsView;
+		GtkListStore *favoriteStore, *groupsStore;
+		GtkTreeSelection *favoriteSelection, *groupsSelection;
 		GdkEventType previous;
+		FavHubGroupsIter GroupsIter;
 };
 
 #else
