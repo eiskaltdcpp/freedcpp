@@ -1,5 +1,20 @@
 		--- freedcpp core branch ---
 
+r188: 0.29
+* Update core:
+  r2206: Add a browser tab style.
+  r2195: Prevent potential re-hashing (thanks vasily.n).
+  r2194: Re-add missing File fields.
+  r2193: Tab touch-ups.
+  r2187: Tabs.
+  r2185: Remove 0.698-imposed empty token workaround; add DEP.
+  r2183: Delete forward-declared remnants of ServerSocket.
+  r2182: rm dead code.
+  r2180: Fixes for VS.
+* Исключены ревизии:
+  r2179: C++0x: update headers, compile flags and other minor changes.
+  r2181: Use perfect forwarding in the Speaker class.
+
 r184: 0.28
 * merging trunk r162 through r182 into core branch.
 

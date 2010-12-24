@@ -144,9 +144,10 @@ public:
 		bool isLink();
 		int64_t getSize();
 		uint32_t getLastWriteTime();
-
-		struct dirent *ent;//NOTE: freedcpp, see dcplusplus r2140: Move the impl of FileFindIter.
-		string base;//NOTE: freedcpp, see dcplusplus r2140: Move the impl of FileFindIter.
+		#ifndef _WIN32
+			dirent *ent;
+			string base;
+		#endif
 	};
 
 	DirData& operator*() { return data; }

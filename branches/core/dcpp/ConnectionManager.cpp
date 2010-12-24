@@ -677,8 +677,7 @@ void ConnectionManager::on(AdcCommand::INF, UserConnection* aSource, const AdcCo
 
 			const string& to = (*i)->getToken();
 
-			// 0.698 would send an empty token in some cases...remove this bugfix at some point
-			if(to == token || token.empty()) {
+			if(to == token) {
 				down = true;
 			}
 		}

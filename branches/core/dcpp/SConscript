@@ -33,7 +33,6 @@ dcpp_files = [
 	'ResourceManager.cpp',
 	'SearchManager.cpp',
 	'SearchResult.cpp',
-	'ServerSocket.cpp',
 	'SettingsManager.cpp',
 	'SFVReader.cpp',
 	'ShareManager.cpp',

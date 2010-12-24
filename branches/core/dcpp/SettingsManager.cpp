@@ -70,7 +70,7 @@ const string SettingsManager::settingTags[] =
 	"ShowToolbar", "ShowTransferview", "PopunderPm", "PopunderFilelist", "MagnetAsk", "MagnetAction", "MagnetRegister",
 	"AddFinishedInstantly", "DontDLAlreadyShared", "UseCTRLForLineHistory",
 	"OpenNewWindow", "UDPPort", "HubLastLogLines", "PMLastLogLines",
-	"AdcDebug", "ToggleActiveWindow", "SearchHistory", "SetMinislotSize", "MaxFilelistSize",
+	"AdcDebug", "ToggleActiveTab", "SearchHistory", "SetMinislotSize", "MaxFilelistSize",
 	"HighestPrioSize", "HighPrioSize", "NormalPrioSize", "LowPrioSize", "LowestPrio",
 	"AutoDropSpeed", "AutoDropInterval", "AutoDropElapsed", "AutoDropInactivity", "AutoDropMinSources", "AutoDropFilesize",
 	"AutoDropAll", "AutoDropFilelists", "AutoDropDisconnect",
@@ -81,9 +81,9 @@ const string SettingsManager::settingTags[] =
 	"UseTLS", "AutoSearchLimit", "AltSortOrder", "AutoKickNoFavs", "PromptPassword", "SpyFrameIgnoreTthSearches",
 	"DontDlAlreadyQueued", "MaxCommandLength", "AllowUntrustedHubs", "AllowUntrustedClients",
 	"TLSPort", "FastHash", "SortFavUsersFirst", "SegmentedDL", "FollowLinks",
-	"SendBloom", "OwnerDrawnMenus", "Coral", "SearchFilterShared", "MaxTabChars", "FinishedDLOnlyFull",
+	"SendBloom", "OwnerDrawnMenus", "Coral", "SearchFilterShared", "FinishedDLOnlyFull",
 	"ConfirmExit", "ConfirmHubClosing", "ConfirmHubRemoval", "ConfirmUserRemoval", "ConfirmItemRemoval", "ConfirmADLSRemoval",
-	"SearchMerge", "ToolbarSize",
+	"SearchMerge", "ToolbarSize", "TabWidth", "TabStyle",
 	"KeepFinishedFiles",
 	"MinMessageLines", "MaxMessageLines",
 	"BandwidthLimitStart", "BandwidthLimitEnd", "TimeDependentThrottle", "MaxDownloadSpeedRealTime",
@@ -225,7 +225,7 @@ SettingsManager::SettingsManager()
 	setDefault(HUB_LAST_LOG_LINES, 10);
 	setDefault(PM_LAST_LOG_LINES, 10);
 	setDefault(ADC_DEBUG, false);
-	setDefault(TOGGLE_ACTIVE_WINDOW, true);
+	setDefault(TOGGLE_ACTIVE_WINDOW, false);
 	setDefault(SEARCH_HISTORY, 10);
 	setDefault(SET_MINISLOT_SIZE, 64);
 	setDefault(MAX_FILELIST_SIZE, 256);
@@ -279,7 +279,6 @@ SettingsManager::SettingsManager()
 	setDefault(SEND_BLOOM, true);
 	setDefault(OWNER_DRAWN_MENUS, true);
 	setDefault(CORAL, true);
-	setDefault(MAX_TAB_CHARS, 20);
 	setDefault(FINISHED_DL_ONLY_FULL, true);
 	setDefault(CONFIRM_EXIT, true);
 	setDefault(CONFIRM_HUB_CLOSING, true);
@@ -289,6 +288,8 @@ SettingsManager::SettingsManager()
 	setDefault(CONFIRM_ADLS_REMOVAL, true);
 	setDefault(SEARCH_MERGE, true);
 	setDefault(TOOLBAR_SIZE, 20);
+	setDefault(TAB_WIDTH, 150);
+	setDefault(TAB_STYLE, TAB_STYLE_OD);
 	setDefault(TRANSFERS_PANED_POS, .7);
 	setDefault(QUEUE_PANED_POS, .3);
 	setDefault(SEARCH_PANED_POS, .2);
@@ -536,7 +537,7 @@ void SettingsManager::validateSearchTypeName(const string& name) const {
 void SettingsManager::setSearchTypeDefaults() {
 	searchTypes.clear();
 
-	// @todo simplify this as searchTypes['0' + SearchManager::TYPE_AUDIO] = { "mp3", "etc" } when we'll have C++0x
+	// @todo simplify this as searchTypes[string(1, '0' + SearchManager::TYPE_AUDIO)] = { "mp3", "etc" } when VC++ supports initializer lists
 
 	// @todo the default extension list contains some depreciated formats they kept to get all the NMDC-built subset of results for both type 
 	// of hubs. Some of these may worth to be dropped along with NMDC support...
