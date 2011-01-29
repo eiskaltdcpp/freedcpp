@@ -106,6 +106,8 @@ FinishedTransfers::FinishedTransfers(const EntryType type, const string &title, 
 	g_signal_connect(userView.get(), "key-release-event", G_CALLBACK(onKeyReleased_gui), (gpointer)this);
 	g_signal_connect_after(getWidget("finishedbook"), "switch-page", G_CALLBACK(onPageSwitched_gui), (gpointer)this);
 
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(getWidget("showOnlyFullFilesCheckButton")), BOOLSETTING(FINISHED_DL_ONLY_FULL));
+
 	if (type == Entry::FINISHED_DOWNLOADS)
 		g_signal_connect(getWidget("showOnlyFullFilesCheckButton"), "toggled", G_CALLBACK(onShowOnlyFullFilesToggled_gui), (gpointer)this);
 	else
@@ -117,6 +119,8 @@ FinishedTransfers::~FinishedTransfers()
 	FinishedManager::getInstance()->removeListener(this);
 	g_object_unref(getWidget("menu"));
 	delete appsPreviewMenu;
+	int active = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(getWidget("showOnlyFullFilesCheckButton")));
+	SettingsManager::getInstance()->set(SettingsManager::FINISHED_DL_ONLY_FULL, active);
 }
 
 void FinishedTransfers::show()
@@ -202,9 +206,11 @@ void FinishedTransfers::addUser_gui(StringMap params, bool update)
 		}
 	}
 }
+
 void FinishedTransfers::addFile_gui(StringMap params, bool update)
 {
-	if (params["full"] == "p" && gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(getWidget("showOnlyFullFilesCheckButton"))))
+	if (!isUpload && params["full"] == "0" &&
+		gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(getWidget("showOnlyFullFilesCheckButton"))))
 	{
 		return;
 	}
@@ -671,9 +677,9 @@ void FinishedTransfers::getFinishedParams_client(const FinishedFileItemPtr& item
 	params["Elapsed Time"] = Util::toString(item->getMilliSeconds());
 
 	if (item->isFull())
-		params["full"] = "f";
+		params["full"] = "1";
 	else
-		params["full"] = "p";
+		params["full"] = "0";
 }
 
 /** finished user */
