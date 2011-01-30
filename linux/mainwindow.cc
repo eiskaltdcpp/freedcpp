@@ -2142,7 +2142,7 @@ void MainWindow::on(QueueManagerListener::Finished, QueueItem *item, const strin
 	}
 }
 
-void MainWindow::on(TimerManagerListener::Second, uint32_t ticks) throw()
+void MainWindow::on(TimerManagerListener::Second, uint64_t ticks) throw()
 {
 	// Avoid calculating status update if it's not needed
 	if (!BOOLSETTING(ALWAYS_TRAY) && minimized)

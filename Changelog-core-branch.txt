@@ -1,5 +1,8 @@
 		--- freedcpp core branch ---
 
+r194: 0.31
+* Fix tick variable types.
+
 r193: 0.30
 * Update core 0.781 revision 2393.
 * Fixed compilation error: ‘class dcpp::CriticalSection’ has no member named ‘getMutex’.
