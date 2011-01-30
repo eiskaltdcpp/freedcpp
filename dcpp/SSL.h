@@ -27,6 +27,7 @@ private:
 	T* t;
 };
 
+typedef scoped_handle<ASN1_INTEGER, ASN1_INTEGER_free> ASN1_INTEGER;
 typedef scoped_handle<BIGNUM, BN_free> BIGNUM;
 typedef scoped_handle<DH, DH_free> DH;
 typedef scoped_handle<DSA, DSA_free> DSA;

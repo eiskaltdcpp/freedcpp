@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2011 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -54,11 +54,11 @@ void WindowManager::autoOpen(bool skipHubs) {
 }
 
 void WindowManager::lock() {
-	cs.enter();
+	cs.lock();
 }
 
 void WindowManager::unlock() {
-	cs.leave();
+	cs.unlock();
 }
 
 void WindowManager::add(const string& id, const StringMap& params) {

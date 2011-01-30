@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2011 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -105,8 +105,13 @@ public:
 	void setPriority(const string& aTarget, QueueItem::Priority p) throw();
 
 	void getTargets(const TTHValue& tth, StringList& sl);
-	QueueItem::StringMap& lockQueue() throw() { cs.enter(); return fileQueue.getQueue(); } ;
-	void unlockQueue() throw() { cs.leave(); }
+
+	using Speaker<QueueManagerListener>::addListener;
+	void addListener(QueueManagerListener* l, const function<void(const QueueItem::StringMap&)>& currentQueue);
+
+//TODO: freedcpp, remove lockQueue() and unlockQueue() functions
+	QueueItem::StringMap& lockQueue() throw() { cs.lock(); return fileQueue.getQueue(); }
+	void unlockQueue() throw() { cs.unlock(); }
 
 	Download* getDownload(UserConnection& aSource, bool supportsTrees) throw();
 	void putDownload(Download* aDownload, bool finished) throw();
@@ -240,7 +245,7 @@ private:
 	/** The queue needs to be saved */
 	bool dirty;
 	/** Next search */
-	uint32_t nextSearch;
+	uint64_t nextSearch;
 	/** File lists not to delete */
 	StringList protectedFileLists;
 	/** Sanity check for the target filename */
@@ -260,9 +265,12 @@ private:
 
 	string getListPath(const HintedUser& user);
 
+	void checkSfv(QueueItem* qi, Download* d);
+	uint32_t calcCrc32(const string& file) throw(FileException);
+
 	// TimerManagerListener
-	virtual void on(TimerManagerListener::Second, uint32_t aTick) throw();
-	virtual void on(TimerManagerListener::Minute, uint32_t aTick) throw();
+	virtual void on(TimerManagerListener::Second, uint64_t aTick) throw();
+	virtual void on(TimerManagerListener::Minute, uint64_t aTick) throw();
 
 	// SearchManagerListener
 	virtual void on(SearchManagerListener::SR, const SearchResultPtr&) throw();

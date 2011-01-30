@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2011 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -569,7 +569,6 @@ void NmdcHub::onLine(const string& aLine) throw() {
 			OnlineUser& u = getUser(param);
 
 			if(u.getUser() == getMyIdentity().getUser()) {
-				u.getUser()->setFlag(User::DCPLUSPLUS);
 				if(ClientManager::getInstance()->isActive())
 					u.getUser()->unsetFlag(User::PASSIVE);
 				else
@@ -780,8 +779,6 @@ void NmdcHub::myInfo(bool alwaysSend) {
 
 	reloadSettings(false);
 
-	lastCounts = counts;
-
 	string tmp1 = ";**\x1fU9";
 	string tmp2 = "+L9";
 	string tmp3 = "+G9";
@@ -968,7 +965,7 @@ void NmdcHub::on(Failed, const string& aLine) throw() {
 	Client::on(Failed(), aLine);
 }
 
-void NmdcHub::on(Second, uint32_t aTick) throw() {
+void NmdcHub::on(Second, uint64_t aTick) throw() {
 	Client::on(Second(), aTick);
 
 	if(state == STATE_NORMAL && (aTick > (getLastActivity() + 120*1000)) ) {
@@ -976,13 +973,11 @@ void NmdcHub::on(Second, uint32_t aTick) throw() {
 	}
 }
 
-void NmdcHub::on(Minute, uint32_t aTick) throw() {
+void NmdcHub::on(Minute, uint64_t aTick) throw() {
 	if(aTick > (lastProtectedIPsUpdate + 24*3600*1000)) {
 		protectedIPs.clear();
 
 		protectedIPs.push_back("dcpp.net");
-		protectedIPs.push_back("hublist.org");
-		protectedIPs.push_back("openhublist.org");
 		protectedIPs.push_back("dchublist.com");
 		protectedIPs.push_back("hublista.hu");
 		protectedIPs.push_back("adcportal.com");

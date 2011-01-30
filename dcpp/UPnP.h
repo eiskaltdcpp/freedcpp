@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2011 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,8 +37,10 @@ public:
 
 	bool open(const unsigned short port, const Protocol protocol, const string& description);
 	bool close();
+	bool hasRules() const;
 
 	virtual string getExternalIP() = 0;
+	virtual const string& getName() const = 0;
 
 protected:
 	static const char* protocols[PROTOCOL_LAST];

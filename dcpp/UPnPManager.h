@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2011 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +24,8 @@
 #include "Thread.h"
 #include "UPnP.h"
 
+#include <atomic>
+
 #include <boost/ptr_container/ptr_vector.hpp>
 
 namespace dcpp {
@@ -39,7 +41,7 @@ public:
 	* first added impl will be tried first.
 	*/
 	void addImplementation(UPnP* impl);
-	void open();
+	bool open();
 	void close();
 
 	bool getOpened() const { return opened; }
@@ -51,8 +53,9 @@ private:
 	Impls impls;
 
 	bool opened;
+	atomic_flag portMapping;
 
-	UPnPManager() : opened(false) { }
+	UPnPManager() : opened(false), portMapping(false) { }
 	virtual ~UPnPManager() throw() { join(); }
 
 	int run();

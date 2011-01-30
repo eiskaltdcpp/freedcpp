@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2011 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,14 +20,16 @@
 #include "DCPlusPlus.h"
 
 #include "Util.h"
-#include "File.h"
 
-#include "StringTokenizer.h"
-#include "SettingsManager.h"
-#include "LogManager.h"
-#include "version.h"
+#include "CID.h"
+#include "ClientManager.h"
+#include "FastAlloc.h"
 #include "File.h"
+#include "LogManager.h"
+#include "SettingsManager.h"
 #include "SimpleXML.h"
+#include "StringTokenizer.h"
+#include "version.h"
 
 #ifndef _WIN32
 #include <sys/socket.h>
@@ -39,10 +41,6 @@
 #include <string.h>
 #endif
 #include <locale.h>
-
-#include "CID.h"
-
-#include "FastAlloc.h"
 
 namespace dcpp {
 
@@ -60,6 +58,7 @@ string Util::awayMsg;
 time_t Util::awayTime;
 
 Util::CountryList Util::countries;
+StringList Util::countryNames;
 
 string Util::paths[Util::PATH_LAST];
 
@@ -104,7 +103,7 @@ static string getDownloadsPath(const string& def) {
 
 #endif
 
-void Util::initialize() {
+void Util::initialize(PathsMap pathOverrides) {
 	Text::initialize();
 
 	sgenrand((unsigned long)time(NULL));
@@ -173,17 +172,21 @@ void Util::initialize() {
 	}
 
 	paths[PATH_USER_LOCAL] = paths[PATH_USER_CONFIG];
-
-	// @todo paths[PATH_RESOURCES] = <replace from sconscript?>;
-	// @todo paths[PATH_LOCALE] = <replace from sconscript?>;
-
-	paths[PATH_LOCALE] = LOCALEDIR;//NOTE: freedcpp
+	paths[PATH_RESOURCES] = "/usr/share/";
+	paths[PATH_LOCALE] = paths[PATH_RESOURCES] + "locale/";
 	paths[PATH_DOWNLOADS] = home + "/Downloads/";
 #endif
 
 	paths[PATH_FILE_LISTS] = paths[PATH_USER_LOCAL] + "FileLists" PATH_SEPARATOR_STR;
 	paths[PATH_HUB_LISTS] = paths[PATH_USER_LOCAL] + "HubLists" PATH_SEPARATOR_STR;
 	paths[PATH_NOTEPAD] = paths[PATH_USER_CONFIG] + "Notepad.txt";
+
+	// Override core generated paths
+	for (PathsMap::const_iterator it = pathOverrides.begin(); it != pathOverrides.end(); ++it)
+	{
+		if (!it->second.empty())
+			paths[it->first] = it->second;
+	}
 
 	File::ensureDirectory(paths[PATH_USER_CONFIG]);
 	File::ensureDirectory(paths[PATH_USER_LOCAL]);
@@ -196,33 +199,43 @@ void Util::initialize() {
 
 		const char* start = data.c_str();
 		string::size_type linestart = 0;
-		string::size_type comma1 = 0;
-		string::size_type comma2 = 0;
-		string::size_type comma3 = 0;
-		string::size_type comma4 = 0;
 		string::size_type lineend = 0;
-		CountryIter last = countries.end();
+		auto last = countries.end();
 		uint32_t startIP = 0;
 		uint32_t endIP = 0, endIPprev = 0;
 
-		for(;;) {
-			comma1 = data.find(',', linestart);
-			if(comma1 == string::npos) break;
-			comma2 = data.find(',', comma1 + 1);
-			if(comma2 == string::npos) break;
-			comma3 = data.find(',', comma2 + 1);
-			if(comma3 == string::npos) break;
-			comma4 = data.find(',', comma3 + 1);
-			if(comma4 == string::npos) break;
-			lineend = data.find('\n', comma4);
+		countryNames.push_back(_("Unknown"));
+		auto addCountry = [](const string& countryName) -> size_t {
+			auto begin = countryNames.cbegin(), end = countryNames.cend();
+			auto pos = std::find(begin, end, countryName);
+			if(pos != end)
+				return pos - begin;
+			countryNames.push_back(countryName);
+			return countryNames.size() - 1;
+		};
+
+		while(true) {
+			auto pos = data.find(',', linestart);
+			if(pos == string::npos) break;
+			pos = data.find(',', pos + 1);
+			if(pos == string::npos) break;
+			startIP = toUInt32(start + pos + 2) - 1;
+
+			pos = data.find(',', pos + 1);
+			if(pos == string::npos) break;
+			endIP = toUInt32(start + pos + 2);
+
+			pos = data.find(',', pos + 1);
+			if(pos == string::npos) break;
+			pos = data.find(',', pos + 1);
+			if(pos == string::npos) break;
+			lineend = data.find('\n', pos);
 			if(lineend == string::npos) break;
 
-			startIP = Util::toUInt32(start + comma2 + 2);
-			endIP = Util::toUInt32(start + comma3 + 2);
-			uint16_t* country = (uint16_t*)(start + comma4 + 2);
-			if((startIP-1) != endIPprev)
-				last = countries.insert(last, make_pair((startIP-1), (uint16_t)16191));
-			last = countries.insert(last, make_pair(endIP, *country));
+			if(startIP != endIPprev)
+				last = countries.insert(last, make_pair(startIP, 0));
+			pos += 2;
+			last = countries.insert(last, make_pair(endIP, addCountry(data.substr(pos, lineend - 1 - pos))));
 
 			endIPprev = endIP;
 			linestart = lineend + 1;
@@ -368,7 +381,7 @@ string Util::validateFileName(string tmp) {
 }
 
 bool Util::checkExtension(const string& tmp) {
-	for(int i = 0; i < tmp.length(); i++) {
+	for(size_t i = 0, n = tmp.size(); i < n; ++i) {
 		if (tmp[i] < 0 || tmp[i] == 32 || tmp[i] == ':') {
 			return false;
 		}
@@ -890,100 +903,33 @@ uint32_t Util::rand() {
 	return y;
 }
 
-string Util::getOsVersion() {
-	string os;
-
-#ifdef _WIN32
-
-	OSVERSIONINFOEX ver;
-	memset(&ver, 0, sizeof(OSVERSIONINFOEX));
-	ver.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
-
-	if(!GetVersionEx((OSVERSIONINFO*)&ver)) {
-		ver.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
-		if(!GetVersionEx((OSVERSIONINFO*)&ver)) {
-			os = "Windows (version unknown)";
-		}
-	}
-
-	if(os.empty()) {
-		if(ver.dwPlatformId != VER_PLATFORM_WIN32_NT) {
-			os = "Win9x/ME/Junk";
-		} else if(ver.dwMajorVersion == 4) {
-			os = "WinNT4";
-		} else if(ver.dwMajorVersion == 5) {
-			if(ver.dwMinorVersion == 0) {
-				os = "Win2000";
-			} else if(ver.dwMinorVersion == 1) {
-				os = "WinXP";
-			} else if(ver.dwMinorVersion == 2) {
-				os = "Win2003";
-			} else {
-				os = "Unknown WinNT5";
-			}
-
-			if(ver.wProductType & VER_NT_WORKSTATION)
-				os += " Pro";
-			else if(ver.wProductType & VER_NT_SERVER)
-				os += " Server";
-			else if(ver.wProductType & VER_NT_DOMAIN_CONTROLLER)
-				os += " DC";
-		} else if(ver.dwMajorVersion == 6) {
-			os = "WinVista";
-		}
-
-		if(ver.wServicePackMajor != 0) {
-			os += "SP";
-			os += Util::toString(ver.wServicePackMajor);
-			if(ver.wServicePackMinor != 0) {
-				os += '.';
-				os += Util::toString(ver.wServicePackMinor);
-			}
-		}
-	}
-
-
-#else // _WIN32
-	struct utsname n;
-
-	if(uname(&n) != 0) {
-		os = "unix (unknown version)";
-	} else {
-		os = Text::toUtf8(string(n.sysname) + " " + n.release + " (" + n.machine + ")");
-	}
-
-#endif // _WIN32
-
-	return os;
-}
-
 /*	getIpCountry
-	This function returns the country(Abbreviation) of an ip
-	for exemple: it returns "PT", whitch standards for "Portugal"
+	This function returns the full country name of an ip, eg "Portugal".
 	more info: http://www.maxmind.com/app/csv
 */
-string Util::getIpCountry (string IP) {
-	if (BOOLSETTING(GET_USER_COUNTRY)) {
-		dcassert(count(IP.begin(), IP.end(), '.') == 3);
+const string& Util::getIpCountry(const string& IP) {
+	if(BOOLSETTING(GET_USER_COUNTRY)) {
+		if(count(IP.begin(), IP.end(), '.') != 3)
+			return emptyString;
 
 		//e.g IP 23.24.25.26 : w=23, x=24, y=25, z=26
 		string::size_type a = IP.find('.');
 		string::size_type b = IP.find('.', a+1);
 		string::size_type c = IP.find('.', b+2);
 
-		uint32_t ipnum = (Util::toUInt32(IP.c_str()) << 24) |
-			(Util::toUInt32(IP.c_str() + a + 1) << 16) |
-			(Util::toUInt32(IP.c_str() + b + 1) << 8) |
-			(Util::toUInt32(IP.c_str() + c + 1) );
+		/// @todo this is impl dependant and is working by chance because we are currently using atoi!
+		uint32_t ipnum = (toUInt32(IP.c_str()) << 24) |
+			(toUInt32(IP.c_str() + a + 1) << 16) |
+			(toUInt32(IP.c_str() + b + 1) << 8) |
+			(toUInt32(IP.c_str() + c + 1) );
 
-		CountryIter i = countries.lower_bound(ipnum);
-
+		auto i = countries.lower_bound(ipnum);
 		if(i != countries.end()) {
-			return string((char*)&(i->second), 2);
+			return countryNames[i->second];
 		}
 	}
 
-	return Util::emptyString; //if doesn't returned anything already, something is wrong...
+	return emptyString;
 }
 
 string Util::getTimeString() {
@@ -1058,5 +1004,23 @@ string Util::translateError(int aError) {
 #endif // _WIN32
 }
 
+bool Util::getAway() {
+	return away;
+}
+
+void Util::setAway(bool aAway) {
+	bool changed = aAway != away;
+
+	away = aAway;
+	if(away)
+		awayTime = time(NULL);
+
+	if(changed)
+		ClientManager::getInstance()->infoUpdated();
+}
+
+void Util::switchAway() {
+	setAway(!away);
+}
 
 } // namespace dcpp

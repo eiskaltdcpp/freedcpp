@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2011 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,6 @@
 
 #ifndef _WIN32
 #include <sys/stat.h>
-#include <sys/types.h>
 #include <unistd.h>
 #include <stdlib.h>
 #endif
@@ -118,7 +117,8 @@ public:
 		PATH_LAST
 	};
 
-	static void initialize();
+	typedef std::map<Util::Paths, std::string> PathsMap;
+	static void initialize(PathsMap pathOverrides = PathsMap());
 
 	/** Path of temporary storage */
 	static string getTempPath() {
@@ -412,19 +412,11 @@ public:
 	static int stricmp(const wstring& a, const wstring& b) { return stricmp(a.c_str(), b.c_str()); }
 	static int strnicmp(const wstring& a, const wstring& b, size_t n) { return strnicmp(a.c_str(), b.c_str(), n); }
 
-	static string getOsVersion();
+	static const string& getIpCountry(const string& IP);
 
-	static string getIpCountry (string IP);
-
-	static bool getAway() { return away; }
-	static void setAway(bool aAway) {
-		away = aAway;
-		if (away)
-			awayTime = time(NULL);
-	}
-	static void switchAway() {
-		setAway(!away);
-	}
+	static bool getAway();
+	static void setAway(bool aAway);
+	static void switchAway();
 
 	static bool getManualAway() { return manualAway; }
 	static void setManualAway(bool aManualAway) { manualAway = aManualAway;	}
@@ -448,10 +440,9 @@ private:
 	static string awayMsg;
 	static time_t awayTime;
 
-	typedef map<uint32_t, uint16_t> CountryList;
-	typedef CountryList::iterator CountryIter;
-
+	typedef map<uint32_t, size_t> CountryList;
 	static CountryList countries;
+	static StringList countryNames;
 
 	static void loadBootConfig();
 };

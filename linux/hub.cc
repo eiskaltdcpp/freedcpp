@@ -2656,11 +2656,13 @@ void Hub::reconnect_client()
 
 void Hub::getParams_client(ParamMap &params, Identity &id)
 {
-	if (id.getUser()->isSet(User::DCPLUSPLUS))
-		params.insert(ParamMap::value_type("Icon", "dc++"));
-	else
-		params.insert(ParamMap::value_type("Icon", "normal"));
+// 	if (id.getUser()->isSet(User::DCPLUSPLUS))
+// 		params.insert(ParamMap::value_type("Icon", "dc++"));
+// 	else
+// 		params.insert(ParamMap::value_type("Icon", "normal"));
 
+	params.insert(ParamMap::value_type("Icon", "normal"));
+	
 	if (id.getUser()->isSet(User::PASSIVE))
 		params["Icon"] += "-fw";
 

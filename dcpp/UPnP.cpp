@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2011 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,11 +39,15 @@ bool UPnP::open(const unsigned short port, const Protocol protocol, const string
 bool UPnP::close() {
 	bool ret = true;
 
-	for(std::vector<rule>::const_iterator i = rules.begin(), iend = rules.end(); i != iend; ++i)
+	for(auto i = rules.cbegin(), iend = rules.cend(); i != iend; ++i)
 		ret &= remove(i->first, i->second);
 	rules.clear();
 
 	return ret;
+}
+
+bool UPnP::hasRules() const {
+	return !rules.empty();
 }
 
 } // namespace dcpp

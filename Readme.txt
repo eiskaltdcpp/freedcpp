@@ -5,9 +5,9 @@ FreeDC++ -DC++ клиент основан на исходном коде LinuxD
 
 Dependencies:
 -------------
-scons >= 0.96
+scons >= 1.2
 pkg-config
-g++ >= 3.4
+g++ >= 4.5
 gtk+-2.0 >= 2.10
 gthread-2.0 >= 2.4
 libglade-2.0 >= 2.4
@@ -17,7 +17,7 @@ libbz2
 libssl
 libgnome
 libnotify >= 0.4.1
-libboost
+libboost >= 1.42
 libminiupnpc
 
 Compiling:

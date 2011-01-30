@@ -7,62 +7,62 @@ msgid ""
 msgstr ""
 "Project-Id-Version: dcpp\n"
 "Report-Msgid-Bugs-To: dcplusplus-devel@lists.sourceforge.net\n"
-"POT-Creation-Date: 2010-07-05 22:22+0200\n"
-"PO-Revision-Date: 2009-11-18 14:53+0000\n"
-"Last-Translator: Izumi <Unknown>\n"
+"POT-Creation-Date: 2011-01-10 22:54+0100\n"
+"PO-Revision-Date: 2010-10-29 17:02+0000\n"
+"Last-Translator: Mantas Kriaučiūnas <mantas@akl.lt>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2010-07-05 15:21+0000\n"
-"X-Generator: Launchpad (build Unknown)\n"
+"X-Launchpad-Export-Date: 2011-01-10 21:46+0000\n"
+"X-Generator: Launchpad (build 12161)\n"
 
-#: dcpp\UPnPManager.cpp:71
+#: dcpp\UPnPManager.cpp:83
 #, boost-format
 msgid " Encrypted Transfer Port (%1% TCP)"
 msgstr ""
 
-#: dcpp\UPnPManager.cpp:74
+#: dcpp\UPnPManager.cpp:88
 #, boost-format
 msgid " Search Port (%1% UDP)"
 msgstr ""
 
-#: dcpp\UPnPManager.cpp:68
+#: dcpp\UPnPManager.cpp:78
 #, boost-format
 msgid " Transfer Port (%1% TCP)"
 msgstr ""
 
-#: dcpp\Util.cpp:503
+#: dcpp\Util.cpp:517
 #, c-format, boost-format
 msgid "%'lld B"
 msgstr "%'lld B"
 
-#: dcpp\Util.cpp:465
+#: dcpp\Util.cpp:479
 #, c-format, boost-format
 msgid "%.02f GiB"
 msgstr "%.02f GiB"
 
-#: dcpp\Util.cpp:461
+#: dcpp\Util.cpp:475
 #, c-format, boost-format
 msgid "%.02f KiB"
 msgstr "%.02f KiB"
 
-#: dcpp\Util.cpp:463
+#: dcpp\Util.cpp:477
 #, c-format, boost-format
 msgid "%.02f MiB"
 msgstr "%.02f MiB"
 
-#: dcpp\Util.cpp:469
+#: dcpp\Util.cpp:483
 #, c-format, boost-format
 msgid "%.02f PiB"
 msgstr "%.02f PiB"
 
-#: dcpp\Util.cpp:467
+#: dcpp\Util.cpp:481
 #, c-format, boost-format
 msgid "%.02f TiB"
 msgstr "%.02f TiB"
 
-#: dcpp\AdcHub.cpp:144
+#: dcpp\AdcHub.cpp:148
 #, boost-format
 msgid "%1% (%2%) has same CID {%3%} as %4% (%5%), ignoring"
 msgstr "%1% (%2%) turi tokį patį CID {%3%} kaip ir %4% (%5%), ignoruojama"
@@ -78,56 +78,60 @@ msgid ""
 "%1% not shared; calculated CRC32 does not match the one found in SFV file."
 msgstr "%1% nėra sąraše; apskaičiuotas CRC32 neatitinka rastojo SFV faile."
 
-#: dcpp\AdcHub.cpp:293
+#: dcpp\AdcHub.cpp:297
 #, boost-format
 msgid "%1% was kicked by %2%: %3%"
 msgstr "%1% buvo išspirtas %2%: %3%"
 
-#: dcpp\AdcHub.cpp:296
+#: dcpp\AdcHub.cpp:300
 #, boost-format
 msgid "%1% was kicked: %2%"
 msgstr "%1% buvo išspirtas: %2%"
 
-#: dcpp\AdcHub.cpp:181
+#: dcpp\AdcHub.cpp:185
 #, boost-format
 msgid "%1%/s"
 msgstr "%1%/s"
 
-#: dcpp\DownloadManager.cpp:540
+#: dcpp\DownloadManager.cpp:489
 #, boost-format
 msgid "%1%: File not available"
 msgstr "%1%: Failas neegzistuoja"
 
-#: dcpp\Util.cpp:459
+#: dcpp\Util.cpp:473
 #, c-format, boost-format
 msgid "%d B"
 msgstr "%d B"
 
-#: dcpp\Util.cpp:499
+#: dcpp\Util.cpp:513
 #, c-format, boost-format
 msgid "%s B"
 msgstr "%s B"
 
-#: dcpp\ADLSearch.h:48
+#: dcpp\ADLSearch.cpp:38
 msgid "<Enter string>"
 msgstr "<Įveskite eilutę>"
 
-#: dcpp\QueueManager.cpp:631
+#: dcpp\QueueManager.cpp:633
 #, fuzzy
 msgid "A file with a different TTH root already exists in the queue"
 msgstr "Byla su kitu TTH jau eilėje"
 
-#: dcpp\QueueManager.cpp:628
+#: dcpp\QueueManager.cpp:630
 msgid "A file with a different size already exists in the queue"
 msgstr "Kito dydžio byla jau eilėje"
 
-#: dcpp\QueueManager.cpp:574
+#: dcpp\QueueManager.cpp:576
 msgid "A file with the same hash already exists in your share"
 msgstr "Byla su ta pačia žyme jau yra sąraše"
 
-#: dcpp\ConnectionManager.cpp:183
+#: dcpp\ConnectionManager.cpp:193
 msgid "All download slots taken"
-msgstr "Visos atsisiuntimo vietos užimtos"
+msgstr "Visi siuntimosi lizdai užimti"
+
+#: dcpp\UPnPManager.cpp:46
+msgid "Another UPnP port mapping attempt is in progress..."
+msgstr ""
 
 #: dcpp\SearchManager.cpp:33
 msgid "Any"
@@ -135,13 +139,19 @@ msgstr ""
 
 #: dcpp\SearchManager.cpp:34
 msgid "Audio"
-msgstr ""
+msgstr "Audio"
 
-#: dcpp\FavoriteManager.cpp:478
+#: dcpp\FavoriteManager.cpp:490
 msgid "Auto-connect group (converted)"
 msgstr ""
 
-#: dcpp\DownloadManager.cpp:384 dcpp\DownloadManager.cpp:386
+#: dcpp\ConnectivityManager.cpp:117
+msgid ""
+"Automatic setup of active mode has failed. You may want to set up your "
+"connection manually for better connectivity"
+msgstr ""
+
+#: dcpp\QueueManager.cpp:1732 dcpp\QueueManager.cpp:1741
 msgid "CRC32 inconsistency (SFV-Check)"
 msgstr "CRC32 neatitikimas (SFV patikra)"
 
@@ -154,28 +164,36 @@ msgid "Connection closed"
 msgstr "Ryšys nutrauktas"
 
 #: dcpp\BufferedSocket.cpp:154 dcpp\BufferedSocket.cpp:170
-#: dcpp\ConnectionManager.cpp:190 dcpp\Socket.cpp:154
+#: dcpp\ConnectionManager.cpp:200 dcpp\Socket.cpp:161
 msgid "Connection timeout"
 msgstr "Baigėsi jungimosi laikas"
 
-#: dcpp\ConnectionManager.cpp:258
+#: dcpp\ConnectionManager.cpp:269
 #, boost-format
 msgid "Connectivity error: %1%"
 msgstr "Prisijungimo problema: %1%"
 
-#: dcpp\ConnectionManager.cpp:251
+#: dcpp\ConnectionManager.cpp:261
 msgid "Connectivity restored"
 msgstr "Prisijungimas atkurtas"
 
-#: dcpp\DownloadManager.cpp:235
+#: dcpp\ConnectivityManager.cpp:146
+#, fuzzy
+msgid "Connectivity: "
+msgstr "Prisijungimo problema: %1%"
+
+#: dcpp\DownloadManager.cpp:234
 #, boost-format
 msgid "Could not open target file: %1%"
 msgstr "Nepavyko atverti failo: %1%"
 
+#: dcpp\ConnectivityManager.cpp:67
+msgid "Determining connection type..."
+msgstr ""
+
 #: dcpp\SearchManager.cpp:40
-#, fuzzy
 msgid "Directory"
-msgstr "Katalogas jau sąraše"
+msgstr "Aplankas"
 
 #: dcpp\ShareManager.cpp:462
 msgid "Directory already shared"
@@ -190,7 +208,7 @@ msgstr "Katalogas jau sąraše"
 msgid "Directory missing name attribute"
 msgstr "Katalogui trūksta vardo atributo"
 
-#: dcpp\ADLSearch.h:277
+#: dcpp\ADLSearch.cpp:474
 msgid "Discard"
 msgstr "Atsisakyti pakeitimų"
 
@@ -205,13 +223,13 @@ msgstr "Atsijungęs vartotojas palieka hub'ą: %1%"
 
 #: dcpp\SearchManager.cpp:36
 msgid "Document"
-msgstr ""
+msgstr "Dokumentas"
 
-#: dcpp\DCPlusPlus.cpp:113
+#: dcpp\DCPlusPlus.cpp:115
 msgid "Download Queue"
 msgstr "Siuntimų eilė"
 
-#: dcpp\ShareManager.cpp:710
+#: dcpp\ShareManager.cpp:715
 #, boost-format
 msgid ""
 "Duplicate file will not be shared: %1% (Size: %2% B) Dupe matched against: %"
@@ -220,7 +238,7 @@ msgstr ""
 "Dubliuoti failai į sąrašą nebus įtraukti: %1% (Dydis: %2% B) Suderintas "
 "prieš: %3%"
 
-#: dcpp\QueueManager.cpp:706 dcpp\QueueManager.cpp:710
+#: dcpp\QueueManager.cpp:708 dcpp\QueueManager.cpp:712
 #, boost-format
 msgid "Duplicate source: %1%"
 msgstr "Šaltinis dubliuojasi: %1%"
@@ -257,16 +275,21 @@ msgstr "Klaida išsaugant maišos duomenis: %1%"
 
 #: dcpp\SearchManager.cpp:37
 msgid "Executable"
-msgstr ""
+msgstr "Vykdomasis failas"
 
-#: dcpp\UPnPManager.cpp:97
+#: dcpp\UPnPManager.cpp:116
 #, fuzzy
 msgid "Failed to create port mappings"
 msgstr "Negalima sukurti gijos"
 
-#: dcpp\UPnPManager.cpp:89
+#: dcpp\UPnPManager.cpp:106
 msgid "Failed to get external IP"
 msgstr ""
+
+#: dcpp\UPnPManager.cpp:74
+#, fuzzy, boost-format
+msgid "Failed to initalize the %1% interface"
+msgstr "Sąrašas atnaujinamas"
 
 #: dcpp\CryptoManager.cpp:228 dcpp\CryptoManager.cpp:232
 #: dcpp\CryptoManager.cpp:237 dcpp\CryptoManager.cpp:241
@@ -278,41 +301,42 @@ msgstr "Nepavyko įkelti sertifikato bylos"
 msgid "Failed to load private key"
 msgstr "Nepavyko įkelti asmeninio rakto"
 
-#: dcpp\AdcHub.cpp:216
+#: dcpp\AdcHub.cpp:220
 msgid "Failed to negotiate base protocol"
 msgstr "Nepavyko suderinti bazės protokolo"
 
-#: dcpp\UPnPManager.cpp:105
-msgid "Failed to remove port mappings"
-msgstr ""
+#: dcpp\UPnPManager.cpp:127
+#, fuzzy, boost-format
+msgid "Failed to remove port mappings with the %1% interface"
+msgstr "Negalima sukurti gijos"
 
-#: dcpp\Socket.cpp:402
+#: dcpp\Socket.cpp:409
 msgid ""
 "Failed to set up the socks server for UDP relay (check socks address and "
 "port)"
 msgstr ""
 "Nepavyko nustatyti Socks serverio UDP sesijai (patikrink adresą bei prievadą)"
 
-#: dcpp\QueueManager.cpp:693
+#: dcpp\QueueManager.cpp:695
 #, fuzzy
 msgid "File already exists at the target location"
 msgstr "Tokia pati ar didesnė byla jau egzistuoja kataloge"
 
-#: dcpp\ShareManager.cpp:866
+#: dcpp\ShareManager.cpp:872
 #, fuzzy, boost-format
 msgid "File list %1% generated"
 msgstr "Sąrašas atnaujinamas"
 
-#: dcpp\ShareManager.cpp:747
+#: dcpp\ShareManager.cpp:752
 #, boost-format
 msgid "File list refresh failed: %1%"
 msgstr "Bylų sąrašo atnaujinti nepavyko: %1%"
 
-#: dcpp\ShareManager.cpp:795
+#: dcpp\ShareManager.cpp:800
 msgid "File list refresh finished"
 msgstr "Sąrašas atnaujintas"
 
-#: dcpp\ShareManager.cpp:727
+#: dcpp\ShareManager.cpp:732
 msgid ""
 "File list refresh in progress, please wait for it to finish before trying to "
 "refresh again"
@@ -320,7 +344,7 @@ msgstr ""
 "Vyksta bylų sąrašo atnaujinimas, prašome palaukti prieš bandant atnaujinti "
 "jį dar kartą."
 
-#: dcpp\ShareManager.cpp:770
+#: dcpp\ShareManager.cpp:775
 msgid "File list refresh initiated"
 msgstr "Inicijuotas sąrašo atnaujinimas"
 
@@ -339,7 +363,7 @@ msgstr ""
 msgid "Finished hashing: %1% (%2%)"
 msgstr ""
 
-#: dcpp\DownloadManager.cpp:314
+#: dcpp\DownloadManager.cpp:313
 msgid "Full tree does not match TTH root"
 msgstr "Medis neatitinka TTH"
 
@@ -347,7 +371,7 @@ msgstr "Medis neatitinka TTH"
 msgid "Generated new TLS certificate"
 msgstr "Sugeneruotas naujas TLS setifikatas"
 
-#: dcpp\DCPlusPlus.cpp:105
+#: dcpp\DCPlusPlus.cpp:107
 msgid "Hash database"
 msgstr "Duomenų bazė"
 
@@ -360,7 +384,7 @@ msgstr "Duomenų bazė perkrauta"
 msgid "Hashing failed: %1%"
 msgstr "Indeksavimo klaida: %1%"
 
-#: dcpp\AdcHub.cpp:222
+#: dcpp\AdcHub.cpp:226
 msgid ""
 "Hub probably uses an old version of ADC, please encourage the owner to "
 "upgrade"
@@ -368,29 +392,45 @@ msgstr ""
 "Hub'as tikriausiai naudoja seną ADC versiją, prašome susisiekti su hub'o "
 "savininku"
 
+#: dcpp\ADLSearch.cpp:138
+#, boost-format
+msgid "Invalid ADL Search regular expression: %1%"
+msgstr ""
+
 #: dcpp\UserConnection.cpp:50 dcpp\UserConnection.cpp:64
 #: dcpp\UserConnection.cpp:132
-#, fuzzy
 msgid "Invalid data"
-msgstr "Netinkamas dydis"
+msgstr "Netinkami duomenys"
 
-#: dcpp\SettingsManager.cpp:527
+#: dcpp\ShareManager.cpp:635
+#, boost-format
+msgid "Invalid file name found while hashing folder %1%"
+msgstr ""
+
+#: dcpp\SettingsManager.cpp:536
 msgid "Invalid search type name"
 msgstr ""
 
-#: dcpp\DownloadManager.cpp:223
+#: dcpp\DownloadManager.cpp:222
 msgid "Invalid size"
 msgstr "Netinkamas dydis"
 
-#: dcpp\QueueManager.cpp:677 dcpp\QueueManager.cpp:685
+#: dcpp\QueueManager.cpp:679 dcpp\QueueManager.cpp:687
 msgid ""
 "Invalid target file (missing directory, check default download directory "
 "setting)"
-msgstr "Netinkama byla (rūksta katalogo, patikrinkite katalogų nustatymus)"
+msgstr ""
+"Netinkama byla (nerastas aplankas, patikrinkite siuntimosi aplanko nustatymą)"
 
-#: dcpp\FavoriteManager.cpp:426
+#: dcpp\FavoriteManager.cpp:438
 msgid "Kick user(s)"
 msgstr "Išspirti vartotoją(-us)"
+
+#: dcpp\ConnectivityManager.cpp:89
+msgid ""
+"Local network with possible NAT detected, trying to map the ports using "
+"UPnP..."
+msgstr ""
 
 #: dcpp\BufferedSocket.cpp:276
 msgid "Maximum command length exceeded"
@@ -400,7 +440,7 @@ msgstr "Viršytas maksimalus komandos ilgis"
 msgid "More bytes written than requested"
 msgstr "Įrašyta daugiau baitų nei prašyta"
 
-#: dcpp\UPnPManager.cpp:40
+#: dcpp\UPnPManager.cpp:41
 #, fuzzy
 msgid "No UPnP implementation available"
 msgstr "Vietų nėra"
@@ -411,17 +451,17 @@ msgstr "Nepasirinkta sertifikato byla"
 
 #: dcpp\ShareManager.cpp:445
 msgid "No directory specified"
-msgstr "Nenurodytas katalogas"
+msgstr "Nenurodytas aplankas"
 
 #: dcpp\CryptoManager.cpp:140
 msgid "No private key file chosen"
 msgstr "Nepasirinkta asmeninio rakto byla"
 
-#: dcpp\DownloadManager.cpp:429
+#: dcpp\DownloadManager.cpp:378
 msgid "No slots available"
 msgstr "Vietų nėra"
 
-#: dcpp\SettingsManager.cpp:633
+#: dcpp\SettingsManager.cpp:594
 msgid "No such search type"
 msgstr ""
 
@@ -429,22 +469,27 @@ msgstr ""
 msgid "Non-UTF-8 data in an ADC connection"
 msgstr ""
 
-#: dcpp\AdcHub.cpp:660
+#: dcpp\AdcHub.cpp:668
 #, boost-format
 msgid "Not listening for connections - please restart %1%"
 msgstr "Nesiklausoma ryšių - prašome perkrauti %1%"
 
-#: dcpp\ClientManager.cpp:153 dcpp\SearchManager.cpp:252
-#: dcpp\SearchManager.cpp:315 dcpp\SearchManager.cpp:317 dcpp\Transfer.cpp:82
+#: dcpp\ClientManager.cpp:153 dcpp\SearchManager.cpp:256
+#: dcpp\SearchManager.cpp:319 dcpp\SearchManager.cpp:321 dcpp\Transfer.cpp:82
 #: dcpp\Transfer.cpp:86
 msgid "Offline"
 msgstr "Atsijungęs"
 
 #: dcpp\SearchManager.cpp:38
 msgid "Picture"
+msgstr "Paveikslėlis"
+
+#: dcpp\ConnectivityManager.cpp:82
+msgid ""
+"Public IP address detected, selecting active mode with direct connection"
 msgstr ""
 
-#: dcpp\FavoriteManager.cpp:430
+#: dcpp\FavoriteManager.cpp:442
 msgid "Redirect user(s)"
 msgstr "Nukreipti vartotoją(-us)"
 
@@ -456,7 +501,7 @@ msgstr "Pašalinkite visus pakatalogius prieš pridėdamas šį"
 msgid "Request to seek beyond the end of data"
 msgstr "Prašymas kreiptis į duomenis už ribos"
 
-#: dcpp\DownloadManager.cpp:228
+#: dcpp\DownloadManager.cpp:227
 msgid "Response does not match request"
 msgstr "Atsakymas neatitinka prašymo"
 
@@ -465,12 +510,12 @@ msgstr "Atsakymas neatitinka prašymo"
 msgid "SSL Error: %1% (%2%, %3%)"
 msgstr "SSL Klaida: %1% (%2%, %3%)"
 
-#: dcpp\SearchManager.cpp:150
+#: dcpp\SearchManager.cpp:154
 #, boost-format
 msgid "Search disabled: %1%"
 msgstr "Paieška išjungta: %1%"
 
-#: dcpp\SearchManager.cpp:143
+#: dcpp\SearchManager.cpp:146
 msgid "Search enabled again"
 msgstr "Paieška vėl įjungta"
 
@@ -478,16 +523,28 @@ msgstr "Paieška vėl įjungta"
 msgid "Sent "
 msgstr ""
 
-#: dcpp\DCPlusPlus.cpp:109
+#: dcpp\DCPlusPlus.cpp:111
 msgid "Shared Files"
-msgstr "Bendrai naudojamos bylos"
+msgstr "Paviešintos bylos"
 
-#: dcpp\Socket.cpp:263 dcpp\Socket.cpp:267
+#: dcpp\Socket.cpp:270 dcpp\Socket.cpp:274
 msgid "Socks server authentication failed (bad login / password?)"
 msgstr "Atmetė Socks serveris (klaidingas vartotojas / slaptažodis?)"
 
-#: dcpp\UPnPManager.cpp:78
-msgid "Successfully created port mappings"
+#: dcpp\UPnPManager.cpp:95
+#, boost-format
+msgid ""
+"Successfully created port mappings (TCP: %1%, UDP: %2%, TLS: %3%), mapped "
+"using the %4% interface"
+msgstr ""
+
+#: dcpp\UPnPManager.cpp:126
+#, boost-format
+msgid "Successfully removed port mappings with the %1% interface"
+msgstr ""
+
+#: dcpp\ConnectivityManager.cpp:129
+msgid "TCP/TLS"
 msgstr ""
 
 #: dcpp\CryptoManager.cpp:223
@@ -507,28 +564,33 @@ msgstr ""
 msgid "TTH inconsistency"
 msgstr "TTH nesuderinamumas"
 
-#: dcpp\QueueManager.cpp:987
+#: dcpp\QueueManager.cpp:997
 msgid "Target file is missing or wrong size"
 msgstr "Byla yra dingusi arba jos dydis neteisingas"
 
-#: dcpp\QueueManager.cpp:672 dcpp\QueueManager.cpp:681
+#: dcpp\QueueManager.cpp:674 dcpp\QueueManager.cpp:683
 msgid "Target filename too long"
 msgstr "Pavadinimas per ilgas"
 
-#: dcpp\QueueManager.cpp:979
+#: dcpp\QueueManager.cpp:989
 msgid "Target removed"
 msgstr "Objektas pašalintas"
 
-#: dcpp\Socket.cpp:249
+#: dcpp\UPnPManager.cpp:79 dcpp\UPnPManager.cpp:84 dcpp\UPnPManager.cpp:89
+#, boost-format
+msgid "The %1% interface has failed to map the %2% %3% port"
+msgstr ""
+
+#: dcpp\Socket.cpp:256
 msgid "The socks server doesn't support login / password authentication"
 msgstr "Socks serveris nepalaiko vartotojo / slaptažodžio režimo"
 
-#: dcpp\Socket.cpp:162 dcpp\Socket.cpp:170 dcpp\Socket.cpp:203
-#: dcpp\Socket.cpp:207 dcpp\Socket.cpp:231 dcpp\Socket.cpp:246
+#: dcpp\Socket.cpp:169 dcpp\Socket.cpp:177 dcpp\Socket.cpp:210
+#: dcpp\Socket.cpp:214 dcpp\Socket.cpp:238 dcpp\Socket.cpp:253
 msgid "The socks server failed establish a connection"
 msgstr "Nepavyko prisijungti prie Socks serverio"
 
-#: dcpp\Socket.cpp:235
+#: dcpp\Socket.cpp:242
 msgid "The socks server requires authentication"
 msgstr "Socks serveris reikalauja identifikacijos"
 
@@ -536,45 +598,54 @@ msgstr "Socks serveris reikalauja identifikacijos"
 msgid "The temporary download directory cannot be shared"
 msgstr "Laikinų bylų katalogas nepridedamas"
 
-#: dcpp\QueueManager.cpp:635
+#: dcpp\QueueManager.cpp:637
 msgid "This file has already finished downloading"
 msgstr ""
 
-#: dcpp\QueueManager.cpp:616
+#: dcpp\QueueManager.cpp:618
 msgid "This file is already queued"
 msgstr "Ši byla jau yra eilėje"
 
-#: dcpp\NmdcHub.cpp:944
+#: dcpp\NmdcHub.cpp:941
 #, boost-format
 msgid ""
 "This hub is trying to use your client to spam %1%, please urge hub owner to "
 "fix this"
 msgstr ""
 
-#: dcpp\SettingsManager.cpp:531 dcpp\SettingsManager.cpp:601
+#: dcpp\SettingsManager.cpp:540 dcpp\SettingsManager.cpp:562
 msgid "This search type already exists"
 msgstr ""
 
-#: dcpp\UPnPManager.cpp:110
+#: dcpp\ConnectivityManager.cpp:135
+msgid "UDP"
+msgstr ""
+
+#: dcpp\UPnPManager.cpp:132
 #, boost-format
 msgid "UPnP: %1%"
 msgstr ""
 
-#: dcpp\Thread.cpp:34 dcpp\Thread.cpp:42
+#: dcpp\Thread.cpp:30 dcpp\Thread.cpp:38
 msgid "Unable to create thread"
 msgstr "Negalima sukurti gijos"
 
-#: dcpp\QueueManager.cpp:1038
+#: dcpp\QueueManager.cpp:1049
 #, boost-format
 msgid "Unable to move %1% to %2% (%3%) nor to rename to %4% (%5%)"
 msgstr ""
 
-#: dcpp\QueueManager.cpp:1035
+#: dcpp\QueueManager.cpp:1046
 #, boost-format
 msgid "Unable to move %1% to %2% (%3%); renamed to %4%"
 msgstr ""
 
-#: dcpp\QueueManager.cpp:1209
+#: dcpp\ConnectivityManager.cpp:72
+#, boost-format
+msgid "Unable to open %1% port(s). You must set up your connection manually"
+msgstr ""
+
+#: dcpp\QueueManager.cpp:1224
 #, boost-format
 msgid "Unable to open filelist: %1%"
 msgstr "Nepavyko atidaryti bylų sąrašo: %1%"
@@ -588,28 +659,32 @@ msgstr "Nepavyko nuskaityti maišos duomenų bylos"
 msgid "Unable to send file %1%: %2%"
 msgstr "Nepavyko išsiųsti bylos %1%: %2%"
 
-#: dcpp\Socket.cpp:54
+#: dcpp\Util.cpp:207
+msgid "Unknown"
+msgstr ""
+
+#: dcpp\Socket.cpp:61
 #, c-format, boost-format
 msgid "Unknown error: 0x%1$x"
 msgstr "Nežinoma klaida: 0x%1$x"
 
-#: dcpp\DCPlusPlus.cpp:117
+#: dcpp\DCPlusPlus.cpp:119
 msgid "Users"
-msgstr ""
+msgstr "Naudotojai"
 
 #: dcpp\SearchManager.cpp:39
 msgid "Video"
-msgstr ""
+msgstr "Video"
 
-#: dcpp\QueueManager.cpp:568
+#: dcpp\QueueManager.cpp:570
 msgid "You're trying to download from yourself!"
 msgstr "Jūs bandote siūstis iš saves!"
 
-#: dcpp\SettingsManager.cpp:173
+#: dcpp\SettingsManager.cpp:176
 msgid "downloaded from"
 msgstr "parsisiųsta iš"
 
-#: dcpp\SettingsManager.cpp:174
+#: dcpp\SettingsManager.cpp:177
 msgid "uploaded to"
 msgstr "išsiųsta į"
 
@@ -618,3 +693,18 @@ msgstr "išsiųsta į"
 
 #~ msgid "File not available"
 #~ msgstr "Byla neprieinama"
+
+#~ msgid "%1% renamed to %2%"
+#~ msgstr "%1% pervardyta į %2%"
+
+#~ msgid "A file with different tth root already exists in the queue"
+#~ msgstr "Byla su kitu TTH jau yra eilėje"
+
+#~ msgid "Finished hashing: %1% (%2%/s)"
+#~ msgstr "Baigta indeksuoti: %1% (%2%/s)"
+
+#~ msgid "Greater than maximum filelist size"
+#~ msgstr "Didesnis nei maksimalus bylų sąrašo dydis"
+
+#~ msgid "Unable to rename %1%: %2%"
+#~ msgstr "Nepavyko pervadinti %1%: %2%"

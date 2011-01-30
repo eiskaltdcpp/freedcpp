@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2011 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@ struct FavHubGroupProperties {
 	bool connect;
 };
 
-typedef std::tr1::unordered_map<string, FavHubGroupProperties> FavHubGroups;
+typedef std::unordered_map<string, FavHubGroupProperties> FavHubGroups;
 typedef FavHubGroups::value_type FavHubGroup;
 
 } // namespace dcpp

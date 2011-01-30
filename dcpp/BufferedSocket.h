@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2011 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@
 #include "Speaker.h"
 #include "Util.h"
 #include "Socket.h"
+#include <atomic>
 
 namespace dcpp {
 
@@ -60,7 +61,7 @@ public:
 	}
 
 	static void waitShutdown() {
-		while(sockets)
+		while(sockets > 0)
 			Thread::sleep(100);
 	}
 
@@ -139,10 +140,10 @@ private:
 	CriticalSection cs;
 
 	Semaphore taskSem;
-	deque<pair<Tasks, boost::shared_ptr<TaskData> > > tasks;
+	deque<pair<Tasks, shared_ptr<TaskData> > > tasks;
 
 	Modes mode;
-	std::auto_ptr<UnZFilter> filterIn;
+	std::unique_ptr<UnZFilter> filterIn;
 	int64_t dataBytes;
 	size_t rollback;
 	string line;
@@ -150,7 +151,7 @@ private:
 	ByteVector writeBuf;
 	ByteVector sendBuf;
 
-	std::auto_ptr<Socket> sock;
+	std::unique_ptr<Socket> sock;
 	State state;
 	bool disconnecting;
 
@@ -163,12 +164,12 @@ private:
 	void threadSendData() throw(Exception);
 
 	void fail(const string& aError);
-	static volatile long sockets;
+	static atomic<long> sockets;
 
 	bool checkEvents() throw(Exception);
 	void checkSocket() throw(Exception);
 
-	void setSocket(std::auto_ptr<Socket> s);
+	void setSocket(std::unique_ptr<Socket> s);
 	void shutdown();
 	void addTask(Tasks task, TaskData* data);
 };

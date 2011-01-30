@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2011 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,7 +46,7 @@ struct HashValue : FastAlloc<HashValue<Hasher> >{
 
 } // namespace dcpp
 
-namespace std { namespace tr1 {
+namespace std {
 template<typename T>
 struct hash<dcpp::HashValue<T> > {
 	size_t operator()(const dcpp::HashValue<T>& rhs) const {
@@ -56,7 +56,6 @@ struct hash<dcpp::HashValue<T> > {
 		return hvHash;
 	}
 };
-}
 }
 
 #endif // !defined(HASH_VALUE_H)

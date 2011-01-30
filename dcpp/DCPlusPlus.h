@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2011 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,15 +31,7 @@ inline void CDECL debugTrace(const char* format, ...)
 {
 	va_list args;
 	va_start(args, format);
-
-#if defined _WIN32 && defined _MSC_VER
-	char buf[512];
-
-	_vsnprintf(buf, sizeof(buf), format, args);
-	OutputDebugStringA(buf);
-#else // _WIN32
 	vprintf(format, args);
-#endif // _WIN32
 	va_end(args);
 }
 
@@ -50,18 +42,11 @@ do { if (!(exp)) { \
 	dcdebug("Assertion hit in %s(%d): " #exp "\n", __FILE__, __LINE__); \
 	if(1 == _CrtDbgReport(_CRT_ASSERT, __FILE__, __LINE__, NULL, #exp)) \
 _CrtDbgBreak(); } } while(false)
-#define dcasserta(exp) dcassert(0)
 #else
-#define dcasserta(exp) assert(exp)
 #define dcassert(exp) assert(exp)
 #endif
 #define dcdrun(exp) exp
 #else //_DEBUG
-#ifdef _MSC_VER
-#define dcasserta(exp) __assume(exp)
-#else
-#define dcasserta(exp)
-#endif // _WIN32
 #define dcdebug if (false) printf
 #define dcassert(exp)
 #define dcdrun(exp)
@@ -85,10 +70,10 @@ typedef std::pair<string, string> StringPair;
 typedef std::vector<StringPair> StringPairList;
 typedef StringPairList::iterator StringPairIter;
 
-typedef std::tr1::unordered_map<string, string> StringMap;
+typedef std::unordered_map<string, string> StringMap;
 typedef StringMap::iterator StringMapIter;
 
-typedef std::tr1::unordered_set<string> StringSet;
+typedef std::unordered_set<string> StringSet;
 typedef StringSet::iterator StringSetIter;
 
 typedef std::vector<wstring> WStringList;
@@ -144,7 +129,6 @@ boost::basic_format<T> dcpp_fmt(const std::basic_string<T>& t) {
 
 #endif
 
-
 typedef unordered_map<wstring, wstring> WStringMap;
 typedef WStringMap::iterator WStringMapIter;
 
@@ -183,7 +167,7 @@ extern void shutdown();
 
 #ifdef BUILDING_DCPP
 #define PACKAGE "libdcpp"
-#define LOCALEDIR _DATADIR PATH_SEPARATOR_STR "locale"
+#define LOCALEDIR Util::getPath(Util::PATH_LOCALE).c_str()
 #define _(String) dgettext(PACKAGE, String)
 #define gettext_noop(String) String
 #define N_(String) gettext_noop (String)

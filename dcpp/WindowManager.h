@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2011 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,10 +30,10 @@ class WindowManager :
 	public Speaker<WindowManagerListener>,
 	private SettingsManagerListener
 {
-	typedef std::tr1::unordered_map<string, unsigned> MaxRecentItems;
+	typedef std::unordered_map<string, unsigned> MaxRecentItems;
 public:
 	typedef std::vector<WindowInfo> WindowInfoList;
-	typedef std::tr1::unordered_map<string, WindowInfoList> RecentList;
+	typedef std::unordered_map<string, WindowInfoList> RecentList;
 
 	void autoOpen(bool skipHubs);
 

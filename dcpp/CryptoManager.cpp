@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2011 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -146,11 +146,12 @@ void CryptoManager::generateCertificate() throw(CryptoException) {
 	ssl::BIGNUM bn(BN_new());
 	ssl::RSA rsa(RSA_new());
 	ssl::EVP_PKEY pkey(EVP_PKEY_new());
+	ssl::ASN1_INTEGER sn(ASN1_INTEGER_new());
 	ssl::X509_NAME nm(X509_NAME_new());
 	const EVP_MD *digest = EVP_sha1();
 	ssl::X509 x509ss(X509_new());
 
-	if(!bn || !rsa || !pkey || !nm || !x509ss) {
+	if(!bn || !rsa || !pkey || !sn || !nm || !x509ss) {
 		throw CryptoException(_("Error generating certificate"));
 	}
 
@@ -169,6 +170,8 @@ void CryptoManager::generateCertificate() throw(CryptoException) {
 		(const unsigned char*)ClientManager::getInstance()->getMyCID().toBase32().c_str(), -1, -1, 0)))
 
 	// Prepare self-signed cert
+	CHECK((ASN1_INTEGER_set(sn, 1))) // set the serial number to just "1"
+	CHECK((X509_set_serialNumber(x509ss, sn)))
 	CHECK((X509_set_issuer_name(x509ss, nm)))
 	CHECK((X509_set_subject_name(x509ss, nm)))
 	CHECK((X509_gmtime_adj(X509_get_notBefore(x509ss), 0)))
@@ -293,7 +296,11 @@ bool CryptoManager::checkCertificate() throw() {
 	}
 	ssl::X509 x509(tmpx509);
 
-	// Check subject name
+	ASN1_INTEGER* sn = X509_get_serialNumber(x509);
+	if(!sn || !ASN1_INTEGER_get(sn)) {
+		return false;
+	}
+
 	X509_NAME* name = X509_get_subject_name(x509);
 	if(!name) {
 		return false;

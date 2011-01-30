@@ -111,8 +111,8 @@ if not 'install' in COMMAND_LINE_TARGETS:
 		print 'CXX env variable is not set, attempting to use g++'
 		conf.env['CXX'] = 'g++'
 
-	if not conf.CheckCXXVersion(env['CXX'], 4, 1):
-		print 'Compiler version check failed. g++ 4.1 or later is needed'
+	if not conf.CheckCXXVersion(env['CXX'], 4, 5):
+		print 'Compiler version check failed. g++ 4.5.0 or later is needed'
 		Exit(1)
 
 	if not conf.CheckPKGConfig():
@@ -146,6 +146,11 @@ if not 'install' in COMMAND_LINE_TARGETS:
 	
 	if not conf.CheckCXXHeader('boost/version.hpp', '<>'):
 		print '\tboost not found.'
+		print '\tNote: You might have the lib but not the headers'
+		Exit(1)
+
+	if not conf.CheckLib('libboost_regex'):
+		print '\tlibboost_regex not found.'
 		print '\tNote: You might have the lib but not the headers'
 		Exit(1)
 
@@ -209,7 +214,10 @@ if not 'install' in COMMAND_LINE_TARGETS:
 # ----------------------------------------------------------------------
 
 	# todo: remove -fpermissive and fix the errors
-	env.Append(CXXFLAGS = ['-I.', '-D_GNU_SOURCE', '-D_LARGEFILE_SOURCE', '-D_FILE_OFFSET_BITS=64', '-D_REENTRANT', '-fpermissive'])
+	env.Append(CXXFLAGS = ['-I.', '-D_GNU_SOURCE', '-D_LARGEFILE_SOURCE', '-D_FILE_OFFSET_BITS=64', '-D_REENTRANT', '-fpermissive', '-std=gnu++0x'])
+
+	# boost_regex
+	env.Append(LINKFLAGS = ['-lboost_regex'])
 
 	if os.sys.platform == 'linux2':
 		env.Append(LINKFLAGS = ['-Wl,--as-needed'])

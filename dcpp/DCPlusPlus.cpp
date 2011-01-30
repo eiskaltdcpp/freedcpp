@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2011 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,6 +37,7 @@
 #include "UPnPManager.h"
 #include "WindowManager.h"
 #include "ThrottleManager.h"
+#include "ConnectivityManager.h"
 
 #include "StringTokenizer.h"
 
@@ -63,6 +64,7 @@ void startup(void (*f)(void*, const string&), void* p) {
 #endif
 
 	bindtextdomain(PACKAGE, LOCALEDIR);
+	bind_textdomain_codeset(PACKAGE, "UTF-8");
 
 	ResourceManager::newInstance();
 	SettingsManager::newInstance();
@@ -82,21 +84,21 @@ void startup(void (*f)(void*, const string&), void* p) {
 	FavoriteManager::newInstance();
 	FinishedManager::newInstance();
 	ADLSearchManager::newInstance();
+	ConnectivityManager::newInstance();
 	UPnPManager::newInstance();
 	WindowManager::newInstance();
 
 	SettingsManager::getInstance()->load();
 
-	if(!SETTING(LANGUAGE).empty()) {
 #ifdef _WIN32
+	if(!SETTING(LANGUAGE).empty()) {
 		string language = "LANGUAGE=" + SETTING(LANGUAGE);
 		putenv(language.c_str());
-#else
-		setenv("LANGUAGE", SETTING(LANGUAGE).c_str(), true);
-#endif
+
 		// Apparently this is supposted to make gettext reload the message catalog...
 		_nl_msg_cat_cntr++;
 	}
+#endif
 
 	FavoriteManager::getInstance()->load();
 	CryptoManager::getInstance()->loadCertificates();
@@ -140,6 +142,7 @@ void shutdown() {
 
 	WindowManager::deleteInstance();
 	UPnPManager::deleteInstance();
+	ConnectivityManager::deleteInstance();
 	ADLSearchManager::deleteInstance();
 	FinishedManager::deleteInstance();
 	ShareManager::deleteInstance();

@@ -40,16 +40,6 @@
 #define _ATL_SECURE_NO_DEPRECATE 1
 #define _CRT_NON_CONFORMING_SWPRINTFS 1
 
-typedef signed __int8 int8_t;
-typedef signed __int16 int16_t;
-typedef signed __int32 int32_t;
-typedef signed __int64 int64_t;
-
-typedef unsigned __int8 uint8_t;
-typedef unsigned __int16 uint16_t;
-typedef unsigned __int32 uint32_t;
-typedef unsigned __int64 uint64_t;
-
 # ifndef CDECL
 #  define CDECL _cdecl
 # endif
@@ -63,7 +53,7 @@ typedef unsigned __int64 uint64_t;
 #endif // _MSC_VER
 
 #ifdef _WIN32
-# define _WIN32_WINNT 0x0501
+# define _WIN32_WINNT 0x0502
 # define _WIN32_IE	0x0501
 # define WINVER 0x501
 
@@ -88,15 +78,26 @@ typedef unsigned __int64 uint64_t;
 #include <assert.h>
 #endif
 
-#include <ctype.h>
-#include <stdio.h>
-#include <stdarg.h>
+#include <cctype>
+#include <clocale>
+#include <cstdarg>
+#include <cstdint>
+#include <cstdio>
+#include <ctime>
+
 #include <memory.h>
 #include <sys/types.h>
-#include <time.h>
-#include <locale.h>
-#ifndef _MSC_VER
-#include <stdint.h>
+
+#ifdef __MINGW32__
+/* the shared_ptr implementation provided by MinGW / GCC 4.5's libstdc++ consumes too many
+semaphores, so we prefer boost's one. see <https://bugs.launchpad.net/dcplusplus/+bug/654040>. */
+#define _SHARED_PTR_H 1 // skip libstdc++'s bits/shared_ptr.h
+#include <boost/shared_ptr.hpp>
+#include <boost/enable_shared_from_this.hpp>
+#include <boost/make_shared.hpp>
+using boost::shared_ptr;
+using boost::enable_shared_from_this;
+using boost::make_shared;
 #endif
 
 #include <algorithm>
@@ -111,29 +112,19 @@ typedef unsigned __int64 uint64_t;
 #include <memory>
 #include <numeric>
 #include <limits>
+#include <unordered_map>
+#include <unordered_set>
+
 #include <libintl.h>
 
 #include <boost/format.hpp>
 #include <boost/scoped_array.hpp>
 #include <boost/noncopyable.hpp>
 
-#if defined(_MSC_VER) || defined(_STLPORT_VERSION)
-
-#include <unordered_map>
-#include <unordered_set>
-
-#elif defined(__GLIBCPP__) || defined(__GLIBCXX__)  // Using GNU C++ library?
-
-#include <tr1/unordered_set>
-#include <tr1/unordered_map>
-
-#else
-#error "Unknown STL, please configure accordingly"
-#endif
+#include "nullptr.h"
 
 namespace dcpp {
 using namespace std;
-using namespace std::tr1;
 }
 
 #endif // !defined(STDINC_H)

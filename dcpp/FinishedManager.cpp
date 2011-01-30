@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2011 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,18 +34,20 @@ namespace dcpp {
 FinishedManager::FinishedManager() {
 	DownloadManager::getInstance()->addListener(this);
 	UploadManager::getInstance()->addListener(this);
+	QueueManager::getInstance()->addListener(this);
 }
 
 FinishedManager::~FinishedManager() throw() {
 	DownloadManager::getInstance()->removeListener(this);
 	UploadManager::getInstance()->removeListener(this);
+	QueueManager::getInstance()->removeListener(this);
 
 	clearDLs();
 	clearULs();
 }
 
 void FinishedManager::lockLists() {
-	cs.enter();
+	cs.lock();
 }
 
 const FinishedManager::MapByFile& FinishedManager::getMapByFile(bool upload) const {
@@ -57,7 +59,7 @@ const FinishedManager::MapByUser& FinishedManager::getMapByUser(bool upload) con
 }
 
 void FinishedManager::unLockLists() {
-	cs.leave();
+	cs.unlock();
 }
 
 void FinishedManager::remove(bool upload, const string& file) {
@@ -111,7 +113,7 @@ void FinishedManager::onComplete(Transfer* t, bool upload, bool crc32Checked) {
 		string file = t->getPath();
 		const HintedUser& user = t->getHintedUser();
 
-		int64_t milliSeconds = GET_TICK() - t->getStart();
+		uint64_t milliSeconds = GET_TICK() - t->getStart();
 		time_t time = GET_TIME();
 
 		int64_t size = 0;
@@ -150,7 +152,7 @@ void FinishedManager::onComplete(Transfer* t, bool upload, bool crc32Checked) {
 				fire(FinishedManagerListener::AddedFile(), upload, file, p);
 			} else {
 				it->second->update(
-					t->getPos(),
+					crc32Checked ? 0 : t->getPos(), // in case of a successful crc check at the end we want to update the status only
 					milliSeconds,
 					time,
 					crc32Checked,
@@ -186,13 +188,17 @@ void FinishedManager::onComplete(Transfer* t, bool upload, bool crc32Checked) {
 	}
 }
 
+void FinishedManager::on(QueueManagerListener::CRCChecked, Download* d) throw() {
+	onComplete(d, false, /*crc32Checked*/true);
+}
+
 void FinishedManager::on(DownloadManagerListener::Complete, Download* d) throw() {
-	onComplete(d, false, d->isSet(Download::FLAG_CRC32_OK));
+	onComplete(d, false);
 }
 
 void FinishedManager::on(DownloadManagerListener::Failed, Download* d, const string&) throw() {
 	if(d->getPos() > 0)
-		onComplete(d, false, d->isSet(Download::FLAG_CRC32_OK));
+		onComplete(d, false);
 }
 
 void FinishedManager::on(UploadManagerListener::Complete, Upload* u) throw() {

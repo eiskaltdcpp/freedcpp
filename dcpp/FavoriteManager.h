@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2011 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -58,6 +58,11 @@ public:
 		return publicListMatrix[publicListServer];
 	}
 	bool isDownloading() { return (useHttp && running); }
+	const string& getCurrentHubList() const { return publicListServer; }
+	/// @return ref to the reason string the current list is blacklisted for; or empty string otherwise
+	const string& blacklisted() const;
+	/// @param domain a domain name with 2 words max, such as "example.com"
+	void addBlacklist(const string& domain, const string& reason);
 
 // Favorite Users
 	typedef unordered_map<CID, FavoriteUser> FavoriteMap;
@@ -132,6 +137,7 @@ private:
 	int lastServer;
 	HubTypes listType;
 	string downloadBuf;
+	StringMap blacklist;
 
 	/** Used during loading to prevent saving. */
 	bool dontSave;
@@ -155,6 +161,7 @@ private:
 	virtual void on(Redirected, HttpConnection*, const string&) throw();
 	virtual void on(TypeNormal, HttpConnection*) throw();
 	virtual void on(TypeBZ2, HttpConnection*) throw();
+	virtual void on(Retried, HttpConnection*, const bool) throw(); 
 
 	bool onHttpFinished(bool fromHttp) throw();
 

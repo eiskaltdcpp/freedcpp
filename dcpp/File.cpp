@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2011 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -554,7 +554,6 @@ FileFindIter& FileFindIter::operator++() {
 	return *this;
 }
 
-//NOTE: freedcpp, see dcplusplus r2140: Move the impl of FileFindIter.
 bool FileFindIter::operator!=(const FileFindIter& rhs) const {
 	// good enough to to say if it's null
 	return dir != rhs.dir;

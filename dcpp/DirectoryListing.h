@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2011 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -68,7 +68,7 @@ public:
 		GETSET(bool, adls, Adls);
 	};
 
-	class Directory : public FastAlloc<Directory> {
+	class Directory : public FastAlloc<Directory>, boost::noncopyable {
 	public:
 		typedef Directory* Ptr;
 		struct DirSort {
@@ -112,10 +112,6 @@ public:
 		GETSET(Directory*, parent, Parent);
 		GETSET(bool, adls, Adls);
 		GETSET(bool, complete, Complete);
-
-	private:
-		Directory(const Directory&);
-		Directory& operator=(const Directory&);
 	};
 
 	class AdlDirectory : public Directory {

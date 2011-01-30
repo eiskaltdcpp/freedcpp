@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2011 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,13 +42,13 @@ disconnecting(false)
 {
 	start();
 
-	Thread::safeInc(sockets);
+	++sockets;
 }
 
-volatile long BufferedSocket::sockets = 0;
+atomic<long> BufferedSocket::sockets(0);
 
 BufferedSocket::~BufferedSocket() throw() {
-	Thread::safeDec(sockets);
+	--sockets;
 }
 
 void BufferedSocket::setMode (Modes aMode, size_t aRollback) {
@@ -62,7 +62,7 @@ void BufferedSocket::setMode (Modes aMode, size_t aRollback) {
 			rollback = aRollback;
 			break;
 		case MODE_ZPIPE:
-			filterIn = std::auto_ptr<UnZFilter>(new UnZFilter);
+			filterIn = std::unique_ptr<UnZFilter>(new UnZFilter);
 			break;
 		case MODE_DATA:
 			break;
@@ -70,7 +70,7 @@ void BufferedSocket::setMode (Modes aMode, size_t aRollback) {
 	mode = aMode;
 }
 
-void BufferedSocket::setSocket(std::auto_ptr<Socket> s) {
+void BufferedSocket::setSocket(std::unique_ptr<Socket> s) {
 	dcassert(!sock.get());
 	if(SETTING(SOCKET_IN_BUFFER) > 0)
 		s->setSocketOpt(SO_RCVBUF, SETTING(SOCKET_IN_BUFFER));
@@ -80,17 +80,17 @@ void BufferedSocket::setSocket(std::auto_ptr<Socket> s) {
 
 	inbuf.resize(s->getSocketOptInt(SO_RCVBUF));
 
-	sock = s;
+	sock = move(s);
 }
 
 void BufferedSocket::accept(const Socket& srv, bool secure, bool allowUntrusted) throw(SocketException) {
 	dcdebug("BufferedSocket::accept() %p\n", (void*)this);
 
-	std::auto_ptr<Socket> s(secure ? CryptoManager::getInstance()->getServerSocket(allowUntrusted) : new Socket);
+	std::unique_ptr<Socket> s(secure ? CryptoManager::getInstance()->getServerSocket(allowUntrusted) : new Socket);
 
 	s->accept(srv);
 
-	setSocket(s);
+	setSocket(move(s));
 
 	Lock l(cs);
 	addTask(ACCEPTED, 0);
@@ -102,10 +102,10 @@ void BufferedSocket::connect(const string& aAddress, uint16_t aPort, bool secure
 
 void BufferedSocket::connect(const string& aAddress, uint16_t aPort, uint16_t localPort, NatRoles natRole, bool secure, bool allowUntrusted, bool proxy) throw(SocketException) {
 	dcdebug("BufferedSocket::connect() %p\n", (void*)this);
-	std::auto_ptr<Socket> s(secure ? (natRole == NAT_SERVER ? CryptoManager::getInstance()->getServerSocket(allowUntrusted) : CryptoManager::getInstance()->getClientSocket(allowUntrusted)) : new Socket);
+	std::unique_ptr<Socket> s(secure ? (natRole == NAT_SERVER ? CryptoManager::getInstance()->getServerSocket(allowUntrusted) : CryptoManager::getInstance()->getClientSocket(allowUntrusted)) : new Socket);
 
 	s->create();
-	setSocket(s);
+	setSocket(move(s));
 	sock->bind(localPort, SETTING(BIND_ADDRESS));
 
 	Lock l(cs);
@@ -420,7 +420,7 @@ void BufferedSocket::threadSendData() throw(Exception) {
 
 bool BufferedSocket::checkEvents() throw(Exception) {
 	while(state == RUNNING ? taskSem.wait(0) : taskSem.wait()) {
-		pair<Tasks, boost::shared_ptr<TaskData> > p;
+		pair<Tasks, shared_ptr<TaskData> > p;
 		{
 			Lock l(cs);
 			dcassert(tasks.size() > 0);

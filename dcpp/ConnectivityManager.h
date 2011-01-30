@@ -16,53 +16,52 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef DCPLUSPLUS_DCPP_TIMER_MANAGER_H
-#define DCPLUSPLUS_DCPP_TIMER_MANAGER_H
+#ifndef DCPLUSPLUS_DCPP_CONNECTIVITY_MANAGER_H
+#define DCPLUSPLUS_DCPP_CONNECTIVITY_MANAGER_H
 
-#include "Thread.h"
+#include "Util.h"
 #include "Speaker.h"
 #include "Singleton.h"
 
-#include <boost/thread/mutex.hpp>
-
-#ifndef _WIN32
-#include <sys/time.h>
-#endif
-
 namespace dcpp {
 
-class TimerManagerListener {
+class ConnectivityManagerListener {
 public:
-	virtual ~TimerManagerListener() { }
+	virtual ~ConnectivityManagerListener() { }
 	template<int I>	struct X { enum { TYPE = I }; };
 
-	typedef X<0> Second;
-	typedef X<1> Minute;
+	typedef X<0> Message;
+	typedef X<1> Finished;
 
-	virtual void on(Second, uint64_t) throw() { }
-	virtual void on(Minute, uint64_t) throw() { }
+	virtual void on(Message, const string&) throw() { }
+	virtual void on(Finished) throw() { }
 };
 
-class TimerManager : public Speaker<TimerManagerListener>, public Singleton<TimerManager>, public Thread
+class ConnectivityManager : public Singleton<ConnectivityManager>, public Speaker<ConnectivityManagerListener>
 {
 public:
-	void shutdown();
+	void detectConnection();
+	void setup(bool settingsChanged, int lastConnectionMode);
+	bool isRunning() const { return running; }
 
-	static time_t getTime() { return (time_t)time(NULL); }
-	static uint64_t getTick();
 private:
-	friend class Singleton<TimerManager>;
-	boost::timed_mutex mtx;
+	friend class Singleton<ConnectivityManager>;
+	friend class UPnPManager;
+	
+	ConnectivityManager();
+	virtual ~ConnectivityManager() throw() { }
 
-	TimerManager();
-	virtual ~TimerManager() throw();
+	void mappingFinished(bool success);
+	void log(const string& msg);
 
-	virtual int run();
+	void startSocket();
+	void listen();
+	void disconnect();
+
+	bool autoDetected;
+	bool running;
 };
-
-#define GET_TICK() TimerManager::getTick()
-#define GET_TIME() TimerManager::getTime()
 
 } // namespace dcpp
 
-#endif // DCPLUSPLUS_DCPP_TIMER_MANAGER_H
+#endif // !defined(CONNECTIVITY_MANAGER_H)
