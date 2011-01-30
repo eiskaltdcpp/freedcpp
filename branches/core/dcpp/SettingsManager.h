@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2011 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,7 +48,7 @@ class SettingsManager : public Singleton<SettingsManager>, public Speaker<Settin
 {
 public:
 
-	typedef std::tr1::unordered_map<string, StringList> SearchTypes;
+	typedef std::unordered_map<string, StringList> SearchTypes;
 	typedef SearchTypes::iterator SearchTypesIter;
 	typedef SearchTypes::const_iterator SearchTypesIterC;
 
@@ -56,7 +56,7 @@ public:
 
 	enum StrSetting { STR_FIRST,
 		NICK = STR_FIRST, UPLOAD_SPEED, DESCRIPTION, DOWNLOAD_DIRECTORY, EMAIL, EXTERNAL_IP,
-		TEXT_FONT, CONNECTIONS_ORDER, CONNECTIONS_WIDTHS, HUBFRAME_ORDER, HUBFRAME_WIDTHS,
+		MAIN_FONT, CONNECTIONS_ORDER, CONNECTIONS_WIDTHS, HUBFRAME_ORDER, HUBFRAME_WIDTHS,
 		SEARCHFRAME_ORDER, SEARCHFRAME_WIDTHS, FAVHUBSFRAME_ORDER, FAVHUBSFRAME_WIDTHS,
 		HUBLIST_SERVERS, QUEUEFRAME_ORDER, QUEUEFRAME_WIDTHS, PUBLICHUBSFRAME_ORDER, PUBLICHUBSFRAME_WIDTHS,
 		FINISHED_DL_FILES_ORDER, FINISHED_DL_FILES_WIDTHS, FINISHED_DL_USERS_ORDER, FINISHED_DL_USERS_WIDTHS,
@@ -109,6 +109,7 @@ public:
 		BANDWIDTH_LIMIT_START, BANDWIDTH_LIMIT_END, TIME_DEPENDENT_THROTTLE, MAX_DOWNLOAD_SPEED_ALTERNATE,
 		MAX_UPLOAD_SPEED_ALTERNATE, MAX_DOWNLOAD_SPEED_MAIN, MAX_UPLOAD_SPEED_MAIN,
 		SLOTS_ALTERNATE_LIMITING, SLOTS_PRIMARY,
+		AUTO_DETECT_CONNECTION, SETTINGS_SAVE_INTERVAL,
 		INT_LAST };
 
 	enum Int64Setting { INT64_FIRST = INT_LAST + 1,

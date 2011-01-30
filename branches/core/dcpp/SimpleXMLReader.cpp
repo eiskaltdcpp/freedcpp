@@ -22,8 +22,8 @@ static bool isNameStartChar(int c) {
 		|| inRange(c, 'A', 'Z')
 		|| c == '_'
 		|| inRange(c, 'a', 'z')
-		// Comment out some valid XML chars that we don't allow
 		|| c == '+' //NOTE: freedcpp
+		// Comment out some valid XML chars that we don't allow
 /*		|| inRange(c, 0xC0, 0xD6)
 		|| inRange(c, 0xD8, 0xF6)
 		|| inRange(c, 0xF8, 0x2FF)

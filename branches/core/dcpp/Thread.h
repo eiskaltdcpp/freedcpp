@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2011 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -64,17 +64,6 @@ public:
 	static void sleep(uint32_t millis) { ::Sleep(millis); }
 	static void yield() { ::Sleep(0); }
 
-#ifdef __MINGW32__
-	static long safeInc(volatile long& v) { return InterlockedIncrement((long*)&v); }
-	static long safeDec(volatile long& v) { return InterlockedDecrement((long*)&v); }
-	static long safeExchange(volatile long& target, long value) { return InterlockedExchange((long*)&target, value); }
-
-#else
-	static long safeInc(volatile long& v) { return InterlockedIncrement(&v); }
-	static long safeDec(volatile long& v) { return InterlockedDecrement(&v); }
-	static long safeExchange(volatile long& target, long value) { return InterlockedExchange(&target, value); }
-#endif
-
 #else
 
 	enum Priority {
@@ -100,25 +89,6 @@ public:
 	void setThreadPriority(Priority p) { setpriority(PRIO_PROCESS, 0, p); }
 	static void sleep(uint32_t millis) { ::usleep(millis*1000); }
 	static void yield() { ::sched_yield(); }
-	static long safeInc(volatile long& v) {
-		pthread_mutex_lock(&mtx);
-		long ret = ++v;
-		pthread_mutex_unlock(&mtx);
-		return ret;
-	}
-	static long safeDec(volatile long& v) {
-		pthread_mutex_lock(&mtx);
-		long ret = --v;
-		pthread_mutex_unlock(&mtx);
-		return ret;
-	}
-	static long safeExchange(volatile long& target, long value) {
-		pthread_mutex_lock(&mtx);
-		long ret = target;
-		target = value;
-		pthread_mutex_unlock(&mtx);
-		return ret;
-	}
 #endif
 
 protected:
@@ -133,7 +103,6 @@ protected:
 		return 0;
 	}
 #else
-	static pthread_mutex_t mtx;
 	pthread_t threadHandle;
 	static void* starter(void* p) {
 		Thread* t = (Thread*)p;

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2011 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@
 
 namespace dcpp {
 
-Client::Counts Client::counts;
+atomic<long> Client::counts[COUNT_UNCOUNTED];
 
 Client::Client(const string& hubURL, char separator_, bool secure_) :
 	myIdentity(ClientManager::getInstance()->getMe(), 0),
@@ -106,19 +106,18 @@ void Client::connect() {
 		sock->addListener(this);
 		sock->connect(address, port, secure, BOOLSETTING(ALLOW_UNTRUSTED_HUBS), true);
 	} catch(const Exception& e) {
-		if(sock) {
-			BufferedSocket::putSocket(sock);
-			sock = 0;
-		}
+		shutdown();
+		/// @todo at this point, this hub instance is completely useless
 		fire(ClientListener::Failed(), this, e.getError());
 	}
 	updateActivity();
 }
 
 void Client::send(const char* aMessage, size_t aLen) {
-	dcassert(sock);
-	if(!sock)
+	if(!isReady()) {
+		dcassert(0);
 		return;
+	}
 	updateActivity();
 	sock->write(aMessage, aLen);
 }
@@ -144,40 +143,33 @@ void Client::disconnect(bool graceLess) {
 }
 
 bool Client::isSecure() const {
-	return sock && sock->isSecure();
+	return isReady() && sock->isSecure();
 }
 
 bool Client::isTrusted() const {
-	return sock && sock->isTrusted();
+	return isReady() && sock->isTrusted();
 }
 
 std::string Client::getCipherName() const {
-	return sock ? sock->getCipherName() : Util::emptyString;
+	return isReady() ? sock->getCipherName() : Util::emptyString;
 }
 
 void Client::updateCounts(bool aRemove) {
 	// We always remove the count and then add the correct one if requested...
-	if(countType == COUNT_NORMAL) {
-		Thread::safeDec(counts.normal);
-	} else if(countType == COUNT_REGISTERED) {
-		Thread::safeDec(counts.registered);
-	} else if(countType == COUNT_OP) {
-		Thread::safeDec(counts.op);
+	if(countType != COUNT_UNCOUNTED) {
+		--counts[countType];
+		countType = COUNT_UNCOUNTED;
 	}
-
-	countType = COUNT_UNCOUNTED;
 
 	if(!aRemove) {
 		if(getMyIdentity().isOp()) {
-			Thread::safeInc(counts.op);
 			countType = COUNT_OP;
 		} else if(getMyIdentity().isRegistered()) {
-			Thread::safeInc(counts.registered);
 			countType = COUNT_REGISTERED;
 		} else {
-			Thread::safeInc(counts.normal);
 			countType = COUNT_NORMAL;
 		}
+		++counts[countType];
 	}
 }
 
@@ -202,7 +194,7 @@ void Client::on(Line, const string& /*aLine*/) throw() {
 	updateActivity();
 }
 
-void Client::on(Second, uint32_t aTick) throw() {
+void Client::on(Second, uint64_t aTick) throw() {
 	if(state == STATE_DISCONNECTED && getAutoReconnect() && (aTick > (getLastActivity() + getReconnDelay() * 1000)) ) {
 		// Try to reconnect...
 		connect();

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2011 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,6 +41,18 @@ FavoriteManager::FavoriteManager() : lastId(0), useHttp(false), running(false), 
 	ClientManager::getInstance()->addListener(this);
 
 	File::ensureDirectory(Util::getHubListsPath());
+
+	/* after the release of the first version including this blacklist (DC++ 0.780), remember to
+	also update version.xml when a domain has to be added to this list, using the following format:
+	<Blacklist>
+		<Blacklisted Domain="example1.com" Reason="Domain used for spam purposes."/>
+		<Blacklisted Domain="example2.com" Reason="Domain used for spam purposes."/>
+	</Blacklist>
+	(the "Blacklist" tag should be under the main "DCUpdate" tag.) */
+	addBlacklist("adchublist.com", "Domain used for spam purposes.");
+	addBlacklist("hublist.org", "Domain used for spam purposes.");
+	addBlacklist("hubtracker.com", "Domain lost to unknown owners advertising dubious pharmaceuticals.");
+	addBlacklist("openhublist.org", "Domain used for spam purposes.");
 }
 
 FavoriteManager::~FavoriteManager() throw() {
@@ -640,6 +652,35 @@ StringList FavoriteManager::getHubLists() {
 	return lists.getTokens();
 }
 
+const string& FavoriteManager::blacklisted() const {
+	if(publicListServer.empty())
+		return Util::emptyString;
+
+	// get the host
+	string server;
+	uint16_t port = 0;
+	string file;
+	Util::decodeUrl(publicListServer, server, port, file);
+	// only keep the last 2 words (example.com)
+	size_t pos = server.rfind('.');
+	if(pos == string::npos || pos == 0 || pos >= server.size() - 2)
+		return Util::emptyString;
+	pos = server.rfind('.', pos - 1);
+	if(pos != string::npos)
+		server = server.substr(pos + 1);
+
+	StringMap::const_iterator i = blacklist.find(server);
+	if(i == blacklist.end())
+		return Util::emptyString;
+	return i->second;
+}
+
+void FavoriteManager::addBlacklist(const string& domain, const string& reason) {
+	if(domain.empty() || reason.empty())
+		return;
+	blacklist[domain] = reason;
+}
+
 FavoriteHubEntryList::iterator FavoriteManager::getFavoriteHub(const string& aServer) {
 	for(FavoriteHubEntryList::iterator i = favoriteHubs.begin(); i != favoriteHubs.end(); ++i) {
 		if(Util::stricmp((*i)->getServer(), aServer) == 0) {
@@ -768,14 +809,13 @@ void FavoriteManager::on(Failed, HttpConnection*, const string& aLine) throw() {
 	}
 }
 void FavoriteManager::on(Complete, HttpConnection*, const string& aLine, bool fromCoral) throw() {
-	bool parseSuccess;
-
+	bool parseSuccess = false;
 	c->removeListener(this);
 	if(useHttp) {
 		parseSuccess = onHttpFinished(true);
 	}	
 	running = false;
-	if(useHttp && parseSuccess) {
+	if(parseSuccess) {
 		fire(FavoriteManagerListener::DownloadFinished(), aLine, fromCoral);
 	}
 }
@@ -790,6 +830,10 @@ void FavoriteManager::on(TypeNormal, HttpConnection*) throw() {
 void FavoriteManager::on(TypeBZ2, HttpConnection*) throw() {
 	if(useHttp)
 		listType = TYPE_BZIP2;
+}
+void FavoriteManager::on(Retried, HttpConnection*, const bool Connected) throw() {
+	if (Connected)
+		downloadBuf = Util::emptyString;
 }
 
 void FavoriteManager::on(UserUpdated, const OnlineUser& user) throw() {

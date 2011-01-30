@@ -1,5 +1,18 @@
 /*
- * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
+ * The Tiger algorithm was written by Eli Biham and Ross Anderson and
+ * is available on the official Tiger algorithm page <http://www.cs.technion.ac.il/~biham/Reports/Tiger/>.
+ * The below Tiger implementation is a C++ version of their original C code.
+ * Permission was granted by Eli Biham to use with the following conditions;
+ * a) This note must be retained.
+ * b) The algorithm must correctly compute Tiger.
+ * c) The algorithm's use must be legal.
+ * d) The algorithm may not be exported to countries banned by law.
+ * e) The authors of the C code are not responsible of this use of the code, 
+ *    the software or anything else.
+ */
+
+/*
+ * Copyright (C) 2001-2011 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

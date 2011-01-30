@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2011 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@
 #include "HashManager.h"
 #include "QueueManager.h"
 
+#include "AdcHub.h"
 #include "SimpleXML.h"
 #include "StringTokenizer.h"
 #include "File.h"
@@ -40,7 +41,6 @@
 #include "version.h"
 
 #ifndef _WIN32
-#include <sys/types.h>
 #include <dirent.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -52,7 +52,7 @@
 namespace dcpp {
 
 ShareManager::ShareManager() : hits(0), xmlListLen(0), bzXmlListLen(0),
-	xmlDirty(true), forceXmlRefresh(false), refreshDirs(false), update(false), initial(true), listN(0), refreshing(0),
+	xmlDirty(true), forceXmlRefresh(true), refreshDirs(false), update(false), initial(true), listN(0), refreshing(false),
 	lastXmlUpdate(0), lastFullUpdate(GET_TICK()), bloom(1<<20)
 {
 	SettingsManager::getInstance()->addListener(this);
@@ -116,7 +116,7 @@ string ShareManager::findRealRoot(const string& virtualRoot, const string& virtu
 		if(Util::stricmp(i->second, virtualRoot) == 0) {
 			std::string name = i->first + virtualPath;
 			dcdebug("Matching %s\n", name.c_str());
-//			if(FileFindIter(name) != FileFindIter())
+// 			if(FileFindIter(name) != FileFindIter())
 			if (File::getSize(name) != -1)//NOTE: see core 0.750
 				return name;
 		}
@@ -631,6 +631,11 @@ ShareManager::Directory::Ptr ShareManager::buildTree(const string& aName, const 
 #endif
 		string name = i->getFileName();
 
+		if(name.empty()) {
+			LogManager::getInstance()->message(str(F_("Invalid file name found while hashing folder %1%") % Util::addBrackets(aName)));
+			continue;
+		}
+		
 		if(name == "." || name == "..")
 			continue;
 		if(!BOOLSETTING(SHARE_HIDDEN) && i->isHidden())
@@ -750,7 +755,7 @@ void ShareManager::updateIndices(Directory& dir, const Directory::File::Set::ite
 }
 
 void ShareManager::refresh(bool dirs /* = false */, bool aUpdate /* = true */, bool block /* = false */) throw() {
-	if(Thread::safeExchange(refreshing, 1) == 1) {
+	if(refreshing.test_and_set()) {
 		LogManager::getInstance()->message(_("File list refresh in progress, please wait for it to finish before trying to refresh again"));
 		return;
 	}
@@ -825,7 +830,8 @@ int ShareManager::run() {
 	if(update) {
 		ClientManager::getInstance()->infoUpdated();
 	}
-	refreshing = 0;
+
+	refreshing.clear();
 	return 0;
 }
 
@@ -887,7 +893,8 @@ void ShareManager::generateXmlList() {
 			} catch(const FileException&) {
 				// Ignore, this is for caching only...
 			}
-			bzXmlRef = auto_ptr<File>(new File(newXmlName, File::READ, File::OPEN));
+// 			bzXmlRef = auto_ptr<File>(new File(newXmlName, File::READ, File::OPEN));
+			bzXmlRef = unique_ptr<File>(new File(newXmlName, File::READ, File::OPEN));//NOTE: revision 2179
 			setBZXmlFile(newXmlName);
 			bzXmlListLen = File::getSize(newXmlName);
 			LogManager::getInstance()->message(str(F_("File list %1% generated") % Util::addBrackets(bzXmlFile)));
@@ -1087,7 +1094,7 @@ static bool checkType(const string& aString, int aType) {
 		}
 		break;
 	default:
-		dcasserta(0);
+		dcassert(0);
 		break;
 	}
 	return false;
@@ -1242,6 +1249,11 @@ ShareManager::AdcSearch::AdcSearch(const StringList& params) : include(&includeX
 			exclude.push_back(StringSearch(p.substr(2)));
 		} else if(toCode('E', 'X') == cmd) {
 			ext.push_back(p.substr(2));
+		} else if(toCode('G', 'R') == cmd) {
+			auto exts = AdcHub::parseSearchExts(Util::toInt(p.substr(2)));
+			ext.insert(ext.begin(), exts.begin(), exts.end());
+		} else if(toCode('R', 'X') == cmd) {
+			noExt.push_back(p.substr(2));
 		} else if(toCode('G', 'E') == cmd) {
 			gt = Util::toInt64(p.substr(2));
 		} else if(toCode('L', 'E') == cmd) {
@@ -1252,6 +1264,28 @@ ShareManager::AdcSearch::AdcSearch(const StringList& params) : include(&includeX
 			isDirectory = (p[2] == '2');
 		}
 	}
+}
+
+bool ShareManager::AdcSearch::isExcluded(const string& str) {
+	for(StringSearch::List::iterator i = exclude.begin(); i != exclude.end(); ++i) {
+		if(i->match(str))
+			return true;
+	}
+	return false;
+}
+
+bool ShareManager::AdcSearch::hasExt(const string& name) {
+	if(ext.empty())
+		return true;
+	if(!noExt.empty()) {
+		ext = StringList(ext.begin(), set_difference(ext.begin(), ext.end(), noExt.begin(), noExt.end(), ext.begin()));
+		noExt.clear();
+	}
+	for(auto i = ext.cbegin(), iend = ext.cend(); i != iend; ++i) {
+		if(name.length() >= i->length() && Util::stricmp(name.c_str() + name.length() - i->length(), i->c_str()) == 0)
+			return true;
+	}
+	return false;
 }
 
 void ShareManager::Directory::search(SearchResultList& aResults, AdcSearch& aStrings, StringList::size_type maxResults) const throw() {
@@ -1377,16 +1411,15 @@ ShareManager::Directory::Ptr ShareManager::getDirectory(const string& fname) {
 	return Directory::Ptr();
 }
 
-void ShareManager::on(QueueManagerListener::Finished, QueueItem* qi, const string& dir, int64_t speed) throw() {
+void ShareManager::on(QueueManagerListener::FileMoved, const string& n) throw() {
 	if(BOOLSETTING(ADD_FINISHED_INSTANTLY)) {
 		// Check if finished download is supposed to be shared
 		Lock l(cs);
-		const string& n = qi->getTarget();
 		for(StringMapIter i = shares.begin(); i != shares.end(); i++) {
 			if(Util::strnicmp(i->first, n, i->first.size()) == 0 && n[i->first.size() - 1] == PATH_SEPARATOR) {
 				try {
 					// Schedule for hashing, it'll be added automatically later on...
-					HashManager::getInstance()->checkTTH(n, qi->getSize(), 0);
+					HashManager::getInstance()->checkTTH(n, File::getSize(n), 0);
 				} catch(const Exception&) {
 					// Not a vital feature...
 				}
@@ -1419,7 +1452,7 @@ void ShareManager::on(HashManagerListener::TTHDone, const string& fname, const T
 	}
 }
 
-void ShareManager::on(TimerManagerListener::Minute, uint32_t tick) throw() {
+void ShareManager::on(TimerManagerListener::Minute, uint64_t tick) throw() {
 	if(SETTING(AUTO_REFRESH_TIME) > 0) {
 		if(lastFullUpdate + SETTING(AUTO_REFRESH_TIME) * 60 * 1000 <= tick) {
 			refresh(true, true);

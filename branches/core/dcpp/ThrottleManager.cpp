@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2009-2010 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2009-2011 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -180,7 +180,7 @@ ThrottleManager::~ThrottleManager(void)
 void ThrottleManager::shutdown() {
 	Lock l(stateCS);
 	if (activeWaiter != -1) {
-		waitCS[activeWaiter].leave();
+		waitCS[activeWaiter].unlock();
 		activeWaiter = -1;
 	}
 }
@@ -209,7 +209,7 @@ void ThrottleManager::shutdown()
 #endif //*nix
 
 // TimerManagerListener
-void ThrottleManager::on(TimerManagerListener::Second, uint32_t /* aTick */) throw()
+void ThrottleManager::on(TimerManagerListener::Second, uint64_t /* aTick */) throw()
 {
 	int newSlots = SettingsManager::getInstance()->get(getCurSetting(SettingsManager::SLOTS));
 	if(newSlots != SETTING(SLOTS)) {
@@ -228,8 +228,8 @@ void ThrottleManager::on(TimerManagerListener::Second, uint32_t /* aTick */) thr
 
 			// unlock shutdown and token wait
 			dcassert(n_lock == 0 || n_lock == 1);
-			waitCS[n_lock].leave();
-			shutdownCS.leave();
+			waitCS[n_lock].unlock();
+			shutdownCS.unlock();
 
 			return;
 		}
@@ -242,12 +242,12 @@ void ThrottleManager::on(TimerManagerListener::Second, uint32_t /* aTick */) thr
 		{
 			// This will create slight weirdness for the read/write calls between
 			// here and the first activeWaiter-toggle below.
-			waitCS[activeWaiter = 0].enter();
+			waitCS[activeWaiter = 0].lock();
 
 #ifndef _WIN32 //*nix
 
 			// lock shutdown
-			shutdownCS.enter();
+			shutdownCS.lock();
 #endif
 		}
 	}
@@ -279,9 +279,9 @@ void ThrottleManager::on(TimerManagerListener::Second, uint32_t /* aTick */) thr
 		Lock l(stateCS);
 
 		dcassert(activeWaiter == 0 || activeWaiter == 1);
-		waitCS[1-activeWaiter].enter();
-		Thread::safeExchange(activeWaiter, 1-activeWaiter);
-		waitCS[1-activeWaiter].leave();
+		waitCS[1-activeWaiter].lock();
+		activeWaiter = 1-activeWaiter;
+		waitCS[1-activeWaiter].unlock();
 	}
 }
 

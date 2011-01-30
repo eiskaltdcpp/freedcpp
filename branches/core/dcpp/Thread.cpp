@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2011 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,10 +22,6 @@
 #include "Thread.h"
 
 namespace dcpp {
-
-#ifndef _WIN32
-pthread_mutex_t Thread::mtx = PTHREAD_MUTEX_INITIALIZER;
-#endif
 
 #ifdef _WIN32
 void Thread::start() throw(ThreadException) {

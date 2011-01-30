@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2011 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,18 +49,28 @@ ConnectionManager::ConnectionManager() : floodCounter(0), server(0), secureServe
 
 void ConnectionManager::listen() throw(SocketException){
 	disconnect();
-	uint16_t port = static_cast<uint16_t>(SETTING(TCP_PORT));
+	uint16_t port;
 
-	server = new Server(false, port, SETTING(BIND_ADDRESS));
+	if (BOOLSETTING(AUTO_DETECT_CONNECTION)) {
+		server = new Server(false, 0, Util::emptyString);
+	} else {
+		port = static_cast<uint16_t>(SETTING(TCP_PORT));
+
+		server = new Server(false, port, SETTING(BIND_ADDRESS));
+	}
 
 	if(!CryptoManager::getInstance()->TLSOk()) {
 		dcdebug("Skipping secure port: %d\n", SETTING(USE_TLS));
 		return;
 	}
 
-	port = static_cast<uint16_t>(SETTING(TLS_PORT));
+	if (BOOLSETTING(AUTO_DETECT_CONNECTION)) {
+		secureServer = new Server(true, 0, Util::emptyString);
+	} else {
+		port = static_cast<uint16_t>(SETTING(TLS_PORT));
 
-	secureServer = new Server(true, port, SETTING(BIND_ADDRESS));
+		secureServer = new Server(true, port, SETTING(BIND_ADDRESS));
+	}
 }
 
 /**
@@ -128,7 +138,7 @@ void ConnectionManager::putConnection(UserConnection* aConn) {
 	userConnections.erase(remove(userConnections.begin(), userConnections.end(), aConn), userConnections.end());
 }
 
-void ConnectionManager::on(TimerManagerListener::Second, uint32_t aTick) throw() {
+void ConnectionManager::on(TimerManagerListener::Second, uint64_t aTick) throw() {
 	UserList passiveUsers;
 	ConnectionQueueItem::List removed;
 
@@ -204,7 +214,7 @@ void ConnectionManager::on(TimerManagerListener::Second, uint32_t aTick) throw()
 	}
 }
 
-void ConnectionManager::on(TimerManagerListener::Minute, uint32_t aTick) throw() {
+void ConnectionManager::on(TimerManagerListener::Minute, uint64_t aTick) throw() {
 	Lock l(cs);
 
 	for(UserConnectionList::iterator j = userConnections.begin(); j != userConnections.end(); ++j) {
@@ -251,6 +261,7 @@ int ConnectionManager::Server::run() throw() {
 					LogManager::getInstance()->message(_("Connectivity restored"));
 					failed = false;
 				}
+				break;
 			} catch(const SocketException& e) {
 				dcdebug("ConnectionManager::Server::run Stopped listening: %s\n", e.getError().c_str());
 
@@ -510,10 +521,6 @@ void ConnectionManager::on(UserConnectionListener::CLock, UserConnection* aSourc
 	}
 
 	if( CryptoManager::getInstance()->isExtended(aLock) ) {
-		// Alright, we have an extended protocol, set a user flag for this user and refresh his info...
-		if( (aPk.find("DCPLUSPLUS") != string::npos) && aSource->getUser() && !aSource->getUser()->isSet(User::DCPLUSPLUS)) {
-			aSource->getUser()->setFlag(User::DCPLUSPLUS);
-		}
 		StringList defFeatures = features;
 		if(BOOLSETTING(COMPRESS_TRANSFERS)) {
 			defFeatures.push_back(UserConnection::FEATURE_ZLIB_GET);

@@ -25,64 +25,38 @@
 #include "upnpc.hh"
 
 #include <miniupnpc/miniupnpc.h>
-#include <miniupnpc/miniwget.h>
+// #include <miniupnpc/miniwget.h>
 #include <miniupnpc/upnpcommands.h>
 #include <dcpp/Util.h>
 
 static UPNPUrls urls;
 static IGDdatas data;
+const std::string UPnPc::name = "MiniUPnP";
 
 using namespace std;
 using namespace dcpp;
 
 bool UPnPc::init()
 {
-	UPNPDev *devices = upnpDiscover(2000, 0, 0, 0);
-	if (!devices)
+	UPNPDev* devices = upnpDiscover(2000, 0, 0, 0);
+	if(!devices)
 		return false;
 
-	UPNPDev *device = 0;
-	if (devices)
-	{
-		device = devices;
-		while (device)
-		{
-			if (strstr(device->st, "InternetGatewayDevice"))
-				break;
-			device = device->pNext;
-		}
-	}
-	if (!device)
-		device = devices; /* defaulting to first device */
-
-	bool ret = false;
-
-	int descXMLsize = 0;
-	char *descXML = reinterpret_cast<char*>(miniwget(device->descURL, &descXMLsize));
-	if (descXML)
-	{
-		memset(&urls, 0, sizeof(UPNPUrls));
-		memset(&data, 0, sizeof(IGDdatas));
-		parserootdesc(descXML, descXMLsize, &data);
-		delete descXML;
-
-		GetUPNPUrls(&urls, &data, device->descURL);
-		ret = true;
-	}
+	bool ret = UPNP_GetValidIGD(devices, &urls, &data, 0, 0);
 
 	freeUPNPDevlist(devices);
 
 	return ret;
 }
 
-bool UPnPc::add(const unsigned short port, const UPnP::Protocol protocol, const string& description)
+bool UPnPc::add(const unsigned short port, const Protocol protocol, const string& description)
 {
 	const string port_ = Util::toString(port);
 	return UPNP_AddPortMapping(urls.controlURL, data.first.servicetype, port_.c_str(), port_.c_str(),
 		Util::getLocalIp().c_str(), description.c_str(), protocols[protocol], 0) == UPNPCOMMAND_SUCCESS;
 }
 
-bool UPnPc::remove(const unsigned short port, const UPnP::Protocol protocol)
+bool UPnPc::remove(const unsigned short port, const Protocol protocol)
 {
 	return UPNP_DeletePortMapping(urls.controlURL, data.first.servicetype, Util::toString(port).c_str(),
 		protocols[protocol], 0) == UPNPCOMMAND_SUCCESS;
@@ -91,7 +65,7 @@ bool UPnPc::remove(const unsigned short port, const UPnP::Protocol protocol)
 string UPnPc::getExternalIP()
 {
 	char buf[16] = { 0 };
-	if (UPNP_GetExternalIPAddress(urls.controlURL, data.first.servicetype, buf) == UPNPCOMMAND_SUCCESS)
+	if(UPNP_GetExternalIPAddress(urls.controlURL, data.first.servicetype, buf) == UPNPCOMMAND_SUCCESS)
 		return buf;
 	return Util::emptyString;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2011 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,7 +41,7 @@ namespace dcpp {
 
 static const string UPLOAD_AREA = "Uploads";
 
-UploadManager::UploadManager() throw() : running(0), extra(0), lastGrant(0) {
+UploadManager::UploadManager() throw() : running(0), extra(0), lastGrant(0), lastFreeSlots(-1) {
 	ClientManager::getInstance()->addListener(this);
 	TimerManager::getInstance()->addListener(this);
 }
@@ -414,7 +414,7 @@ void UploadManager::removeConnection(UserConnection* aSource) {
 	}
 }
 
-void UploadManager::on(TimerManagerListener::Minute, uint32_t /* aTick */) throw() {
+void UploadManager::on(TimerManagerListener::Minute, uint64_t /* aTick */) throw() {
 	UserList disconnects;
 	{
 		Lock l(cs);
@@ -455,6 +455,12 @@ void UploadManager::on(TimerManagerListener::Minute, uint32_t /* aTick */) throw
 			Util::toString(ClientManager::getInstance()->getNicks((*i)->getCID(), Util::emptyString))));
 		ConnectionManager::getInstance()->disconnect(*i, false);
 	}
+
+	int freeSlots = getFreeSlots();
+	if(freeSlots != lastFreeSlots) {
+		lastFreeSlots = freeSlots;
+		ClientManager::getInstance()->infoUpdated();
+	}
 }
 
 void UploadManager::on(GetListLength, UserConnection* conn) throw() {
@@ -488,7 +494,7 @@ void UploadManager::on(AdcCommand::GFI, UserConnection* aSource, const AdcComman
 }
 
 // TimerManagerListener
-void UploadManager::on(TimerManagerListener::Second, uint32_t) throw() {
+void UploadManager::on(TimerManagerListener::Second, uint64_t) throw() {
 	Lock l(cs);
 	UploadList ticks;
 

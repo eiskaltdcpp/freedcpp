@@ -12,6 +12,7 @@ dcpp_files = [
 	'Client.cpp',
 	'ClientManager.cpp',
 	'ConnectionManager.cpp',
+	'ConnectivityManager.cpp',
 	'CryptoManager.cpp',
 	'DCPlusPlus.cpp',
 	'DirectoryListing.cpp',

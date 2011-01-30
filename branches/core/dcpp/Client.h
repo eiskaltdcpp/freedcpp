@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2011 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,8 @@
 #include "BufferedSocketListener.h"
 #include "TimerManager.h"
 #include "ClientListener.h"
+
+#include <atomic>
 
 namespace dcpp {
 
@@ -55,6 +57,7 @@ public:
 	virtual string escape(string const& str) const { return str; }
 
 	bool isConnected() const { return state != STATE_DISCONNECTED; }
+	bool isReady() const { return state != STATE_CONNECTING && state != STATE_DISCONNECTED; }
 	bool isSecure() const;
 	bool isTrusted() const;
 	std::string getCipherName() const;
@@ -72,7 +75,8 @@ public:
 
 	static string getCounts() {
 		char buf[128];
-		return string(buf, snprintf(buf, sizeof(buf), "%ld/%ld/%ld", counts.normal, counts.registered, counts.op));
+		return string(buf, snprintf(buf, sizeof(buf), "%ld/%ld/%ld",
+				counts[COUNT_NORMAL].load(), counts[COUNT_REGISTERED].load(), counts[COUNT_OP].load()));
 	}
 
 	StringMap& escapeParams(StringMap& sm) {
@@ -112,13 +116,15 @@ protected:
 	friend class ClientManager;
 	Client(const string& hubURL, char separator, bool secure_);
 	virtual ~Client() throw();
-	struct Counts {
-		Counts(long n = 0, long r = 0, long o = 0) : normal(n), registered(r), op(o) { }
-		volatile long normal;
-		volatile long registered;
-		volatile long op;
-		bool operator !=(const Counts& rhs) { return normal != rhs.normal || registered != rhs.registered || op != rhs.op; }
+
+	enum CountType {
+		COUNT_NORMAL,
+		COUNT_REGISTERED,
+		COUNT_OP,
+		COUNT_UNCOUNTED,
 	};
+
+	static atomic<long> counts[COUNT_UNCOUNTED];
 
 	enum States {
 		STATE_CONNECTING,	///< Waiting for socket to connect
@@ -131,9 +137,6 @@ protected:
 
 	BufferedSocket* sock;
 
-	static Counts counts;
-	Counts lastCounts;
-
 	void updateCounts(bool aRemove);
 	void updateActivity() { lastActivity = GET_TICK(); }
 
@@ -143,7 +146,7 @@ protected:
 	virtual string checkNick(const string& nick) = 0;
 
 	// TimerManagerListener
-	virtual void on(Second, uint32_t aTick) throw();
+	virtual void on(Second, uint64_t aTick) throw();
 	// BufferedSocketListener
 	virtual void on(Connecting) throw() { fire(ClientListener::Connecting(), this); }
 	virtual void on(Connected) throw();
@@ -151,13 +154,6 @@ protected:
 	virtual void on(Failed, const string&) throw();
 
 private:
-
-	enum CountType {
-		COUNT_UNCOUNTED,
-		COUNT_NORMAL,
-		COUNT_REGISTERED,
-		COUNT_OP
-	};
 
 	Client(const Client&);
 	Client& operator=(const Client&);

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2011 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,6 +33,8 @@
 #include "FastAlloc.h"
 #include "MerkleTree.h"
 #include "Pointer.h"
+
+#include <atomic>
 
 namespace dcpp {
 
@@ -94,7 +96,7 @@ public:
 		hits += aHits;
 	}
 
-	string getOwnListFile() {
+	const string& getOwnListFile() {
 		generateXmlList();
 		return getBZXmlFile();
 	}
@@ -205,28 +207,14 @@ private:
 	struct AdcSearch {
 		AdcSearch(const StringList& params);
 
-		bool isExcluded(const string& str) {
-			for(StringSearch::List::iterator i = exclude.begin(); i != exclude.end(); ++i) {
-				if(i->match(str))
-					return true;
-			}
-			return false;
-		}
-
-		bool hasExt(const string& name) {
-			if(ext.empty())
-				return true;
-			for(StringIter i = ext.begin(); i != ext.end(); ++i) {
-				if(name.length() >= i->length() && Util::stricmp(name.c_str() + name.length() - i->length(), i->c_str()) == 0)
-					return true;
-			}
-			return false;
-		}
+		bool isExcluded(const string& str);
+		bool hasExt(const string& name);
 
 		StringSearch::List* include;
 		StringSearch::List includeX;
 		StringSearch::List exclude;
 		StringList ext;
+		StringList noExt;
 
 		int64_t gt;
 		int64_t lt;
@@ -241,7 +229,7 @@ private:
 	TTHValue xmlRoot;
 	int64_t bzXmlListLen;
 	TTHValue bzXmlRoot;
-	auto_ptr<File> bzXmlRef;
+	unique_ptr<File> bzXmlRef;
 
 	bool xmlDirty;
 	bool forceXmlRefresh; /// bypass the 15-minutes guard
@@ -251,7 +239,7 @@ private:
 
 	int listN;
 
-	volatile long refreshing;
+	atomic_flag refreshing;
 
 	uint64_t lastXmlUpdate;
 	uint64_t lastFullUpdate;
@@ -295,7 +283,7 @@ private:
 	virtual int run();
 
 	// QueueManagerListener
-	virtual void on(QueueManagerListener::Finished, QueueItem* qi, const string& dir, int64_t speed) throw();
+	virtual void on(QueueManagerListener::FileMoved, const string& n) throw();
 
 	// HashManagerListener
 	virtual void on(HashManagerListener::TTHDone, const string& fname, const TTHValue& root) throw();
@@ -309,7 +297,7 @@ private:
 	}
 
 	// TimerManagerListener
-	virtual void on(TimerManagerListener::Minute, uint32_t tick) throw();
+	virtual void on(TimerManagerListener::Minute, uint64_t tick) throw();
 	void load(SimpleXML& aXml);
 	void save(SimpleXML& aXml);
 

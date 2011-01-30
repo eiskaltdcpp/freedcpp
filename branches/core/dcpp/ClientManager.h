@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2011 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -73,7 +73,8 @@ public:
 	* @param priv discard any user that doesn't match the hint.
 	* @return OnlineUser* found by CID and hint; might be only by CID if priv is false.
 	*/
-	OnlineUser* findOnlineUser(const CID& cid, const string& hintUrl, bool priv) throw();
+	OnlineUser* findOnlineUser(const HintedUser& user, bool priv);
+	OnlineUser* findOnlineUser(const CID& cid, const string& hintUrl, bool priv);
 
 	UserPtr findUser(const string& aNick, const string& aHubUrl) const throw() { return findUser(makeCid(aNick, aHubUrl)); }
 	UserPtr findUser(const CID& cid) const throw();
@@ -102,8 +103,8 @@ public:
 
 	bool isActive() { return SETTING(INCOMING_CONNECTIONS) != SettingsManager::INCOMING_FIREWALL_PASSIVE; }
 
-	void lock() throw() { cs.enter(); }
-	void unlock() throw() { cs.leave(); }
+	void lock() throw() { cs.lock(); }
+	void unlock() throw() { cs.unlock(); }
 
 	Client::List& getClients() { return clients; }
 
@@ -156,7 +157,7 @@ private:
 	void updateNick(const OnlineUser& user) throw();
 
 	/// @return OnlineUser* found by CID and hint; discard any user that doesn't match the hint.
-	OnlineUser* findOnlineUser_hint(const CID& cid, const string& hintUrl) throw() {
+	OnlineUser* findOnlineUser_hint(const CID& cid, const string& hintUrl) {
 		OnlinePair p;
 		return findOnlineUser_hint(cid, hintUrl, p);
 	}
@@ -164,7 +165,7 @@ private:
 	* @param p OnlinePair of all the users found by CID, even those who don't match the hint.
 	* @return OnlineUser* found by CID and hint; discard any user that doesn't match the hint.
 	*/
-	OnlineUser* findOnlineUser_hint(const CID& cid, const string& hintUrl, OnlinePair& p) throw();
+	OnlineUser* findOnlineUser_hint(const CID& cid, const string& hintUrl, OnlinePair& p);
 
 	string getUsersFile() const { return Util::getPath(Util::PATH_USER_LOCAL) + "Users.xml"; }
 
@@ -179,7 +180,7 @@ private:
 		int aFileType, const string& aString) throw();
 	virtual void on(AdcSearch, Client* c, const AdcCommand& adc, const CID& from) throw();
 	// TimerManagerListener
-	virtual void on(TimerManagerListener::Minute, uint32_t aTick) throw();
+	virtual void on(TimerManagerListener::Minute, uint64_t aTick) throw();
 };
 
 } // namespace dcpp

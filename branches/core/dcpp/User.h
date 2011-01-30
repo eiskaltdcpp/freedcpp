@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2011 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,7 +35,6 @@ class User : public FastAlloc<User>, public intrusive_ptr_base<User>, public Fla
 public:
 	enum Bits {
 		ONLINE_BIT,
-		DCPLUSPLUS_BIT,
 		PASSIVE_BIT,
 		NMDC_BIT,
 		BOT_BIT,
@@ -48,7 +47,6 @@ public:
 	/** Each flag is set if it's true in at least one hub */
 	enum UserFlags {
 		ONLINE = 1<<ONLINE_BIT,
-		DCPLUSPLUS = 1<<DCPLUSPLUS_BIT,
 		PASSIVE = 1<<PASSIVE_BIT,
 		NMDC = 1<<NMDC_BIT,
 		BOT = 1<<BOT_BIT,
@@ -111,7 +109,8 @@ public:
 		CT_OP = 4,
 		CT_SU = 8,
 		CT_OWNER = 16,
-		CT_HUB = 32
+		CT_HUB = 32,
+		CT_HIDDEN = 64
 	};
 
 	Identity() : sid(0) { }
@@ -140,11 +139,12 @@ public:
 	void setBot(bool bot) { set("BO", bot ? "1" : Util::emptyString); }
 	void setHidden(bool hidden) { set("HI", hidden ? "1" : Util::emptyString); }
 	string getTag() const;
+	const string& getCountry() const;
 	bool supports(const string& name) const;
 	bool isHub() const { return isClientType(CT_HUB) || isSet("HU"); }
 	bool isOp() const { return isClientType(CT_OP) || isClientType(CT_SU) || isClientType(CT_OWNER) || isSet("OP"); }
 	bool isRegistered() const { return isClientType(CT_REGGED) || isSet("RG"); }
-	bool isHidden() const { return isSet("HI"); }
+	bool isHidden() const { return isClientType(CT_HIDDEN) || isSet("HI"); }
 	bool isBot() const { return isClientType(CT_BOT) || isSet("BO"); }
 	bool isAway() const { return isSet("AW"); }
 	bool isTcpActive() const;
@@ -161,7 +161,7 @@ public:
 	GETSET(UserPtr, user, User);
 	GETSET(uint32_t, sid, SID);
 private:
-	typedef std::tr1::unordered_map<short, string> InfMap;
+	typedef std::unordered_map<short, string> InfMap;
 	typedef InfMap::iterator InfIter;
 	InfMap info;
 

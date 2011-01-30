@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2011 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -69,13 +69,14 @@ public:
 	GETSET(uint64_t, lastGrant, LastGrant);
 	
 private:
-
 	UploadList uploads;
 	mutable CriticalSection cs;
 
 	typedef unordered_set<UserPtr, User::Hash> SlotSet;
 	typedef SlotSet::iterator SlotIter;
 	SlotSet reservedSlots;
+
+	int lastFreeSlots; /// amount of free slots at the previous minute
 
 	typedef pair<HintedUser, uint64_t> WaitingUser;
 	typedef list<WaitingUser> WaitingUserList;
@@ -101,8 +102,8 @@ private:
 	virtual void on(ClientManagerListener::UserDisconnected, const UserPtr& aUser) throw();
 
 	// TimerManagerListener
-	virtual void on(Second, uint32_t aTick) throw();
-	virtual void on(Minute, uint32_t aTick) throw();
+	virtual void on(Second, uint64_t aTick) throw();
+	virtual void on(Minute, uint64_t aTick) throw();
 
 	// UserConnectionListener
 	virtual void on(BytesSent, UserConnection*, size_t, size_t) throw();

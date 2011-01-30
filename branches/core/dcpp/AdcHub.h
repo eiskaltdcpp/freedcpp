@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2011 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,6 +49,23 @@ public:
 	virtual void send(const AdcCommand& cmd);
 
 	string getMySID() { return AdcCommand::fromSID(sid); }
+
+	static const vector<StringList>& getSearchExts();
+	static StringList parseSearchExts(int flag);
+
+	static const string CLIENT_PROTOCOL;
+	static const string SECURE_CLIENT_PROTOCOL_TEST;
+	static const string ADCS_FEATURE;
+	static const string TCP4_FEATURE;
+	static const string UDP4_FEATURE;
+	static const string NAT0_FEATURE;
+	static const string SEGA_FEATURE;
+	static const string BASE_SUPPORT;
+	static const string BAS0_SUPPORT;
+	static const string TIGR_SUPPORT;
+	static const string UCM0_SUPPORT;
+	static const string BLO0_SUPPORT;
+
 private:
 	friend class ClientManager;
 	friend class CommandHandler<AdcHub>;
@@ -73,19 +90,9 @@ private:
 	string salt;
 	uint32_t sid;
 
-	std::tr1::unordered_set<uint32_t> forbiddenCommands;
+	std::unordered_set<uint32_t> forbiddenCommands;
 
-	static const string CLIENT_PROTOCOL;
-	static const string SECURE_CLIENT_PROTOCOL_TEST;
-	static const string ADCS_FEATURE;
-	static const string TCP4_FEATURE;
-	static const string UDP4_FEATURE;
-	static const string NAT0_FEATURE;
-	static const string BASE_SUPPORT;
-	static const string BAS0_SUPPORT;
-	static const string TIGR_SUPPORT;
-	static const string UCM0_SUPPORT;
-	static const string BLO0_SUPPORT;
+	static const vector<StringList> searchExts;
 
 	virtual string checkNick(const string& nick);
 
@@ -114,6 +121,7 @@ private:
 
 	template<typename T> void handle(T, AdcCommand&) { }
 
+	void sendSearch(AdcCommand& c);
 	void sendUDP(const AdcCommand& cmd) throw();
 	void unknownProtocol(uint32_t target, const string& protocol, const string& token);
 	bool secureAvail(uint32_t target, const string& protocol, const string& token);
@@ -123,7 +131,7 @@ private:
 	virtual void on(Line, const string& aLine) throw();
 	virtual void on(Failed, const string& aLine) throw();
 
-	virtual void on(Second, uint32_t aTick) throw();
+	virtual void on(Second, uint64_t aTick) throw();
 
 };
 

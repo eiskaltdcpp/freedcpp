@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2011 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@
 #include "Util.h"
 #include "File.h"
 #include "version.h"
+#include "AdcHub.h"
 #include "CID.h"
 #include "SearchManager.h"
 #include "StringTokenizer.h"
@@ -37,7 +38,7 @@ const string SettingsManager::settingTags[] =
 {
 	// Strings
 	"Nick", "UploadSpeed", "Description", "DownloadDirectory", "EMail", "ExternalIp",
-	"Font", "ConnectionsOrder", "ConnectionsWidths", "HubFrameOrder", "HubFrameWidths",
+	"MainFont", "ConnectionsOrder", "ConnectionsWidths", "HubFrameOrder", "HubFrameWidths",
 	"SearchFrameOrder", "SearchFrameWidths", "FavHubsFrameOrder", "FavHubsFrameWidths",
 	"HublistServers", "QueueFrameOrder", "QueueFrameWidths", "PublicHubsFrameOrder", "PublicHubsFrameWidths",
 	"FinishedDLFilesOrder", "FinishedDLFilesWidths", "FinishedDLUsersOrder", "FinishedDLUsersWidths",
@@ -89,6 +90,7 @@ const string SettingsManager::settingTags[] =
 	"BandwidthLimitStart", "BandwidthLimitEnd", "TimeDependentThrottle", "MaxDownloadSpeedRealTime",
 	"MaxUploadSpeedTime", "MaxDownloadSpeedPrimary", "MaxUploadSpeedPrimary",
 	"SlotsAlternateLimiting", "SlotsPrimaryLimiting",
+	"AutoDetectIncomingConnection", "SettingsSaveInterval",
 	"SENTRY",
 	// Int64
 	"TotalUpload", "TotalDownload",
@@ -141,6 +143,7 @@ SettingsManager::SettingsManager()
 	setDefault(TLS_PORT, 0);
 	setDefault(INCOMING_CONNECTIONS, INCOMING_DIRECT);
 	setDefault(OUTGOING_CONNECTIONS, OUTGOING_DIRECT);
+	setDefault(AUTO_DETECT_CONNECTION, true);
 	setDefault(AUTO_FOLLOW, true);
 	setDefault(CLEAR_SEARCH, true);
 	setDefault(SHARE_HIDDEN, false);
@@ -155,7 +158,7 @@ SettingsManager::SettingsManager()
 	setDefault(IGNORE_BOT_PMS, false);
 	setDefault(LIST_DUPES, true);
 	setDefault(BUFFER_SIZE, 64);
-	setDefault(HUBLIST_SERVERS, "http://dchublist.com/hublist.xml.bz2;http://www.hublista.hu/hublist.xml.bz2;http://hublist.openhublist.org/hublist.xml.bz2;");
+	setDefault(HUBLIST_SERVERS, "http://dchublist.com/hublist.xml.bz2;http://www.hublista.hu/hublist.xml.bz2");
 	setDefault(DOWNLOAD_SLOTS, 6);
 	setDefault(MAX_DOWNLOAD_SPEED, 0);
 	setDefault(LOG_DIRECTORY, Util::getPath(Util::PATH_USER_LOCAL) + "Logs" PATH_SEPARATOR_STR);
@@ -289,7 +292,7 @@ SettingsManager::SettingsManager()
 	setDefault(SEARCH_MERGE, true);
 	setDefault(TOOLBAR_SIZE, 20);
 	setDefault(TAB_WIDTH, 150);
-	setDefault(TAB_STYLE, TAB_STYLE_OD);
+	setDefault(TAB_STYLE, TAB_STYLE_OD | TAB_STYLE_BROWSER);
 	setDefault(TRANSFERS_PANED_POS, .7);
 	setDefault(QUEUE_PANED_POS, .3);
 	setDefault(SEARCH_PANED_POS, .2);
@@ -305,6 +308,7 @@ SettingsManager::SettingsManager()
 	setDefault(BANDWIDTH_LIMIT_END, 1);
 	setDefault(SLOTS_ALTERNATE_LIMITING, 1);
 	setDefault(SLOTS_PRIMARY, 3);
+	setDefault(SETTINGS_SAVE_INTERVAL, 10);
 
 	setSearchTypeDefaults();
 
@@ -423,6 +427,10 @@ void SettingsManager::load(string const& aFileName)
 			set(LOG_FILE_SYSTEM, Util::emptyString);
 		}
 
+		if(v <= 0.770 && SETTING(INCOMING_CONNECTIONS) != INCOMING_FIREWALL_PASSIVE) {
+			set(AUTO_DETECT_CONNECTION, false); //Don't touch if it works
+		}
+
 		if(SETTING(SET_MINISLOT_SIZE) < 64)
 			set(SET_MINISLOT_SIZE, 64);
 		if(SETTING(AUTODROP_INTERVAL) < 1)
@@ -537,58 +545,10 @@ void SettingsManager::validateSearchTypeName(const string& name) const {
 void SettingsManager::setSearchTypeDefaults() {
 	searchTypes.clear();
 
-	// @todo simplify this as searchTypes[string(1, '0' + SearchManager::TYPE_AUDIO)] = { "mp3", "etc" } when VC++ supports initializer lists
-
-	// @todo the default extension list contains some depreciated formats they kept to get all the NMDC-built subset of results for both type 
-	// of hubs. Some of these may worth to be dropped along with NMDC support...
-
-	{
-		StringList& l = searchTypes.insert(make_pair(string(1, '0' + SearchManager::TYPE_AUDIO), StringList())).first->second;
-		l.push_back("mp3"); l.push_back("flac"); l.push_back("ogg"); l.push_back("mpc");
-		l.push_back("ape"); l.push_back("wma");l.push_back("wav"); l.push_back("m4a");
-		l.push_back("mp2"); l.push_back("mid"); l.push_back("au"); l.push_back("aiff");
-		l.push_back("ra");
-	}
-
-	{
-		StringList& l = searchTypes.insert(make_pair(string(1, '0' + SearchManager::TYPE_COMPRESSED), StringList())).first->second;
-		l.push_back("rar"); l.push_back("7z"); l.push_back("zip"); l.push_back("tar");
-		l.push_back("gz"); l.push_back("bz2"); l.push_back("z"); l.push_back("ace");
-		l.push_back("lha"); l.push_back("lzh"); l.push_back("arj");
-	}
-
-	{
-		StringList& l = searchTypes.insert(make_pair(string(1, '0' + SearchManager::TYPE_DOCUMENT), StringList())).first->second;
-		l.push_back("doc"); l.push_back("xls"); l.push_back("ppt"); l.push_back("docx");
-		l.push_back("xlsx"); l.push_back("pptx"); l.push_back("odf"); l.push_back("odt");
-		l.push_back("ods"); l.push_back("odp"); l.push_back("pdf"); l.push_back("xps");
-		l.push_back("htm"); l.push_back("html"); l.push_back("xml"); l.push_back("txt");
-		l.push_back("nfo"); l.push_back("rtf");
-	}
-
-	{
-		StringList& l = searchTypes.insert(make_pair(string(1, '0' + SearchManager::TYPE_EXECUTABLE), StringList())).first->second;
-		l.push_back("exe"); l.push_back("com"); l.push_back("bat"); l.push_back("cmd");
-		l.push_back("dll"); l.push_back("vbs"); l.push_back("ps1"); l.push_back("msi");
-	}
-
-	{
-		StringList& l = searchTypes.insert(make_pair(string(1, '0' + SearchManager::TYPE_PICTURE), StringList())).first->second;
-		l.push_back("bmp"); l.push_back("ico"); l.push_back("jpg"); l.push_back("jpeg");
-		l.push_back("png"); l.push_back("gif"); l.push_back("tga"); l.push_back("ai");
-		l.push_back("ps"); l.push_back("pict"); l.push_back("eps"); l.push_back("img");
-		l.push_back("pct"); l.push_back("psp"); l.push_back("tif"); l.push_back("rle");
-		l.push_back("pcx"); l.push_back("sfw"); l.push_back("psd"); l.push_back("cdr");
-	}
-
-	{
-		StringList& l = searchTypes.insert(make_pair(string(1, '0' + SearchManager::TYPE_VIDEO), StringList())).first->second;
-		l.push_back("mpg"); l.push_back("avi"); l.push_back("mkv"); l.push_back("wmv");
-		l.push_back("mov"); l.push_back("mp4"); l.push_back("3gp"); l.push_back("qt");
-		l.push_back("asx"); l.push_back("divx"); l.push_back("asf"); l.push_back("pxp");
-		l.push_back("ogm"); l.push_back("flv"); l.push_back("rm"); l.push_back("rmvb");
-		l.push_back("webm"); l.push_back("mpeg");
-	}
+	// for conveniency, the default search exts will be the same as the ones defined by SEGA.
+	const auto& searchExts = AdcHub::getSearchExts();
+	for(size_t i = 0, n = searchExts.size(); i < n; ++i)
+		searchTypes[string(1, '1' + i)] = searchExts[i];
 
 	fire(SettingsManagerListener::SearchTypesChanged());
 }

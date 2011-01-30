@@ -17,11 +17,11 @@
  */
 
 #define APPNAME "DC++"
-#define VERSIONSTRING "0.770"
-#define VERSIONFLOAT 0.770
+
+// don't forget to update the .rc file as well!
+#define VERSIONSTRING "0.781"
+#define VERSIONFLOAT 0.781
 
 namespace dcpp {
 extern const string fullVersionString;
 }
-
-/* Update the .rc file as well... */

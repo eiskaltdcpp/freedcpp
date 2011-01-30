@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2011 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -83,7 +83,7 @@ private:
 	FloodMap seekers;
 	FloodMap flooders;
 
-	uint32_t lastProtectedIPsUpdate;
+	uint64_t lastProtectedIPsUpdate;
 	StringList protectedIPs;
 
 	NmdcHub(const string& aHubURL);
@@ -120,8 +120,8 @@ private:
 	virtual string checkNick(const string& aNick);
 
 	// TimerManagerListener
-	virtual void on(Second, uint32_t aTick) throw();
-	virtual void on(Minute, uint32_t aTick) throw();
+	virtual void on(Second, uint64_t aTick) throw();
+	virtual void on(Minute, uint64_t aTick) throw();
 
 	virtual void on(Connected) throw();
 	virtual void on(Line, const string& l) throw();

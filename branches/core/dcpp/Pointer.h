@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2011 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
 #define DCPLUSPLUS_DCPP_POINTER_H
 
 #include <boost/intrusive_ptr.hpp>
-#include "Thread.h"
+#include <boost/smart_ptr/detail/atomic_count.hpp>
 
 namespace dcpp {
 
@@ -36,10 +36,10 @@ protected:
 	intrusive_ptr_base() throw() : ref(0) { }
 
 private:
-	friend void intrusive_ptr_add_ref(intrusive_ptr_base* p) { Thread::safeInc(p->ref); }
-	friend void intrusive_ptr_release(intrusive_ptr_base* p) { if(Thread::safeDec(p->ref) == 0) { delete static_cast<T*>(p); } }
+	friend void intrusive_ptr_add_ref(intrusive_ptr_base* p) { ++p->ref; }
+	friend void intrusive_ptr_release(intrusive_ptr_base* p) { if(--p->ref == 0) { delete static_cast<T*>(p); } }
 
-	volatile long ref;
+	boost::detail::atomic_count ref;
 };
 
 

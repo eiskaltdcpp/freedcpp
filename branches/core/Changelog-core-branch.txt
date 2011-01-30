@@ -1,5 +1,10 @@
 		--- freedcpp core branch ---
 
+r193: 0.30
+* Update core 0.781 revision 2393.
+* Fixed compilation error: ‘class dcpp::CriticalSection’ has no member named ‘getMutex’.
+* Fixed crash timer manager shutdown.
+
 r188: 0.29
 * Update core:
   r2206: Add a browser tab style.

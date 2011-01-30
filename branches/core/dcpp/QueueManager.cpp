@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2011 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,6 +37,8 @@
 #include "version.h"
 #include "SearchResult.h"
 #include "MerkleCheckOutputStream.h"
+#include "SFVReader.h"
+#include "FilteredFile.h"
 
 #include <climits>
 
@@ -519,7 +521,7 @@ bool QueueManager::getTTH(const string& name, TTHValue& tth) throw() {
 	return false;
 }
 
-void QueueManager::on(TimerManagerListener::Minute, uint32_t aTick) throw() {
+void QueueManager::on(TimerManagerListener::Minute, uint64_t aTick) throw() {
 	string fn;
 	string searchString;
 	bool online = false;
@@ -557,6 +559,7 @@ string QueueManager::getListPath(const HintedUser& user) {
 	string nick = nicks.empty() ? Util::emptyString : Util::cleanPathChars(nicks[0]) + ".";
 	return checkTarget(Util::getListPath() + nick + user.user->getCID().toBase32(), /*checkExistence*/ false);
 }
+
 //NOTE: freedcpp
 void QueueManager::add(const string& aTarget, int64_t aSize, const TTHValue& root) throw(QueueException, FileException)
 {
@@ -941,6 +944,14 @@ void QueueManager::getTargets(const TTHValue& tth, StringList& sl) {
 	}
 }
 
+void QueueManager::addListener(QueueManagerListener* ql, const function<void (const QueueItem::StringMap&)>& currentQueue) {
+	Lock l(cs);
+	Speaker<QueueManagerListener>::addListener(ql);
+	if(currentQueue) {
+		currentQueue(fileQueue.getQueue());
+	}
+}
+
 Download* QueueManager::getDownload(UserConnection& aSource, bool supportsTrees) throw() {
 	Lock l(cs);
 
@@ -1084,6 +1095,7 @@ void QueueManager::moveFile(const string& source, const string& target) {
 void QueueManager::moveFile_(const string& source, const string& target) {
 	try {
 		File::renameFile(source, target);
+		getInstance()->fire(QueueManagerListener::FileMoved(), target);
 	} catch(const FileException& e1) {
 		// Try to just rename it to the correct name at least
 		string newTarget = Util::getFilePath(source) + Util::getFileName(target);
@@ -1188,6 +1200,10 @@ void QueueManager::putDownload(Download* aDownload, bool finished) throw() {
 							q->addSegment(Segment(0, q->getSize()));
 						} else if(aDownload->getType() == Transfer::TYPE_FILE) {
 							q->addSegment(aDownload->getSegment());
+
+							if (q->isFinished() && BOOLSETTING(SFV_CHECK)) {
+								checkSfv(q, aDownload);
+							}
 						}
 
 						if(aDownload->getType() != Transfer::TYPE_FILE || q->isFinished()) {
@@ -1358,23 +1374,12 @@ void QueueManager::removeSource(const string& aTarget, const UserPtr& aUser, int
 			return;
 		}
 
-		if(reason == QueueItem::Source::FLAG_CRC_WARN) {
-			// Already flagged?
-			QueueItem::SourceIter s = q->getSource(aUser);
-			if(s->isSet(QueueItem::Source::FLAG_CRC_WARN)) {
-				reason = QueueItem::Source::FLAG_CRC_FAILED;
-			} else {
-				s->setFlag(reason);
-				return;
-			}
-		}
-
 		if(q->isRunning() && userQueue.getRunning(aUser) == q) {
 			isRunning = true;
 			userQueue.removeDownload(q, aUser);
 			fire(QueueManagerListener::StatusUpdated(), q);
-
 		}
+
 		if(!q->isFinished()) {
 			userQueue.remove(q, aUser);
 		}
@@ -1538,14 +1543,12 @@ void QueueManager::saveQueue(bool force) throw() {
 	// Put this here to avoid very many saves tries when disk is full...
 	lastSave = GET_TICK();
 
-	//NOTE: freedcpp, save user cids and nicks to Users.xml see dcplusplus revision 1771
-	ClientManager* cm = ClientManager::getInstance();
 #ifdef _WIN32
-	std::for_each(cids.begin(), cids.end(), std::tr1::bind(&ClientManager::saveUser, cm, std::tr1::placeholders::_1));
+	std::for_each(cids.begin(), cids.end(), [](const CID& cid) { ClientManager::getInstance()->saveUser(cid); });
 #else
 	for (vector<CID>::const_iterator it = cids.begin(); it != cids.end(); ++it)
 	{
-		cm->saveUser(*it);
+		ClientManager::getInstance()->saveUser(*it);
 	}
 #endif
 }
@@ -1766,10 +1769,60 @@ void QueueManager::on(ClientManagerListener::UserDisconnected, const UserPtr& aU
 	}
 }
 
-void QueueManager::on(TimerManagerListener::Second, uint32_t aTick) throw() {
+void QueueManager::on(TimerManagerListener::Second, uint64_t aTick) throw() {
 	if(dirty && ((lastSave + 10000) < aTick)) {
 		saveQueue();
 	}
+}
+
+void QueueManager::checkSfv(QueueItem* qi, Download* d) {
+	SFVReader sfv(qi->getTarget());
+
+	if(sfv.hasCRC()) {
+		bool crcMatch = false;
+		try {
+			crcMatch = (calcCrc32(qi->getTempTarget()) == sfv.getCRC());
+		} catch(const FileException& ) {
+			// Couldn't read the file to get the CRC(!!!)
+		}
+
+		if(!crcMatch) {
+			/// @todo There is a slight chance that something happens with a file while it's being saved to disk 
+			/// maybe calculate tth along with crc and if tth is ok and crc is not flag the file as bad at once
+			/// if tth mismatches (possible disk error) then repair / redownload the file
+
+			File::deleteFile(qi->getTempTarget());
+			qi->resetDownloaded();
+			dcdebug("QueueManager: CRC32 mismatch for %s\n", qi->getTarget().c_str());
+			LogManager::getInstance()->message(_("CRC32 inconsistency (SFV-Check)") + ' ' + Util::addBrackets(qi->getTarget()));
+
+			setPriority(qi->getTarget(), QueueItem::PAUSED);
+
+			QueueItem::SourceList sources = qi->getSources();
+			for(QueueItem::SourceConstIter i = sources.begin(); i != sources.end(); ++i) {
+				removeSource(qi->getTarget(), i->getUser(), QueueItem::Source::FLAG_CRC_FAILED, false);
+			}
+
+			fire(QueueManagerListener::CRCFailed(), d, _("CRC32 inconsistency (SFV-Check)"));
+			return;
+		}
+
+		dcdebug("QueueManager: CRC32 match for %s\n", qi->getTarget().c_str());
+		fire(QueueManagerListener::CRCChecked(), d);
+	}
+}
+
+uint32_t QueueManager::calcCrc32(const string& file) throw(FileException) {
+	File ff(file, File::READ, File::OPEN);
+	CalcInputStream<CRC32Filter, false> f(&ff);
+
+	const size_t BUF_SIZE = 1024*1024;
+	boost::scoped_array<uint8_t> b(new uint8_t[BUF_SIZE]);
+	size_t n = BUF_SIZE;
+	while(f.read(&b[0], n) > 0)
+		;		// Keep on looping...
+
+	return f.getFilter().getValue();
 }
 
 } // namespace dcpp
