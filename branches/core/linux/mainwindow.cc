@@ -2006,23 +2006,26 @@ void MainWindow::onLinkClicked_gui(GtkWidget *widget, gpointer data)
 
 void MainWindow::autoConnect_client()
 {
-// TODO: add auto connect for core 0.762
-//
-// 	FavoriteHubEntry *hub;
-// 	FavoriteHubEntryList &l = FavoriteManager::getInstance()->getFavoriteHubs();
-// 	typedef Func2<MainWindow, string, string> F2;
-// 	F2 *func;
-// 
-// 	for (FavoriteHubEntryList::const_iterator it = l.begin(); it != l.end(); ++it)
-// 	{
-// 		hub = *it;
-// 
-// 		if (hub->getConnect())
-// 		{
-// 			func = new F2(this, &MainWindow::showHub_gui, hub->getServer(), hub->getEncoding());
-// 			WulforManager::get()->dispatchGuiFunc(func);
-// 		}
-// 	}
+	const FavHubGroups &favHubGroups = FavoriteManager::getInstance()->getFavHubGroups();
+	const FavoriteHubEntryList &favoriteHubs = FavoriteManager::getInstance()->getFavoriteHubs();
+
+	for (FavoriteHubEntryList::const_iterator i = favoriteHubs.begin(); i != favoriteHubs.end(); ++i)
+	{
+		FavoriteHubEntry *hub = *i;
+		string group = hub->getGroup();
+		FavHubGroups::const_iterator it = favHubGroups.find(group);
+
+		if (it != favHubGroups.end())
+		{
+			const FavHubGroupProperties &p = it->second;
+			if (p.connect)
+			{
+				typedef Func2<MainWindow, string, string> F2;
+				F2 *func = new F2(this, &MainWindow::showHub_gui, hub->getServer(), hub->getEncoding());
+				WulforManager::get()->dispatchGuiFunc(func);
+			}
+		}
+	}
 
 	string link = WulforManager::get()->getURL();
 

@@ -2620,29 +2620,35 @@ void Hub::refreshFileList_client()
 
 void Hub::addAsFavorite_client()
 {
-// 	typedef Func3<Hub, string, Msg::TypeMsg, Sound::TypeSound> F3;
-// 	F3 *func;
-// 
-// 	FavoriteHubEntry *existingHub = FavoriteManager::getInstance()->getFavoriteHubEntry(client->getHubUrl());
-// 
-// 	if (!existingHub)
-// 	{
-// 		FavoriteHubEntry aEntry;
-// 		aEntry.setServer(client->getHubUrl());
-// 		aEntry.setName(client->getHubName());
-// 		aEntry.setDescription(client->getHubDescription());
-// 		aEntry.setConnect(FALSE);
-// 		aEntry.setNick(client->getMyNick());
-// 		aEntry.setEncoding(encoding);
-// 		FavoriteManager::getInstance()->addFavorite(aEntry);
-// 		func = new F3(this, &Hub::addStatusMessage_gui, _("Favorite hub added"), Msg::STATUS, Sound::NONE);
-// 		WulforManager::get()->dispatchGuiFunc(func);
-// 	}
-// 	else
-// 	{
-// 		func = new F3(this, &Hub::addStatusMessage_gui, _("Favorite hub already exists"), Msg::STATUS, Sound::NONE);
-// 		WulforManager::get()->dispatchGuiFunc(func);
-// 	}
+	typedef Func3<Hub, string, Msg::TypeMsg, Sound::TypeSound> F3;
+	F3 *func;
+
+	FavoriteHubEntry *existingHub = FavoriteManager::getInstance()->getFavoriteHubEntry(client->getHubUrl());
+ 
+	if (!existingHub)
+	{
+		FavoriteHubEntry entry;
+		entry.setServer(client->getHubUrl());
+		entry.setName(client->getHubName());
+		entry.setDescription(client->getHubDescription());
+		entry.setNick(client->getMyNick());
+		entry.setEncoding(encoding);
+		entry.setPassword(Util::emptyString);
+		entry.setGroup(Util::emptyString);
+
+		FavoriteManager::getInstance()->addFavorite(entry);
+
+		const FavoriteHubEntryList &fh = FavoriteManager::getInstance()->getFavoriteHubs();
+		WulforManager::get()->getMainWindow()->updateFavoriteHubMenu_client(fh);
+
+		func = new F3(this, &Hub::addStatusMessage_gui, _("Favorite hub added"), Msg::STATUS, Sound::NONE);
+		WulforManager::get()->dispatchGuiFunc(func);
+	}
+	else
+	{
+		func = new F3(this, &Hub::addStatusMessage_gui, _("Favorite hub already exists"), Msg::STATUS, Sound::NONE);
+		WulforManager::get()->dispatchGuiFunc(func);
+	}
 }
 
 void Hub::reconnect_client()
