@@ -1,3 +1,60 @@
+		--- freedcpp 0.0.x ---
+
+r192: 0.0.4.7
+* Доработка r191.
+
+r191: 0.0.4.6
+* Отображать только завершенные закачки.
+
+r190: 0.0.4.5
+* Добавить хаб в избранные.
+
+r189: 0.0.4.4
+* Слоты отдачи (Issue 72).
+
+r187: 0.0.4.3
+* Закачка списка хабов (eiskaltdcpp-gtk Issue 68).
+
+r186: 0.0.4.2
+* Менеджер групп (Issue 66).
+
+r185: 0.0.4.1 merging trunk@182 core@184
+* Add miniupnpc-1.4.20100609, ревизия 2163 (dcplusplus, add MiniUPnPc for UPnP mappings and make it threaded).
+* Ревизия 2177 (dcplusplus, prevent hub-provided cmds from 'open own list' from going to the wrong hub).
+* Update translations, ревизия 2176 (dcplusplus, update translations & zlib).
+* Ревизия 2174 (dcplusplus, add a few more predefined extensions).
+* Ревизия 2171 (dcplusplus, update translation templates).
+* Search Types, ревизия 2170 (dcplusplus, customizable search type extensions).
+* Update version libdcpp -> 0.770, ревизия 2164 (dcplusplus, version -> 0.770).
+* Ревизия 2162 (dcplusplus, fix crashes related to file lists).
+* Ревизия 2161 (dcplusplus, fix DL reco interval).
+* Ревизия 2160 (dcplusplus, untested; enable rather optimistic NAT-T searching).
+* Ревизия 2159 (dcplusplus, c-c error handling: increase reconnect intervals after timeouts; no reconnect after a protocol error).
+* Ревизия 2158 (dcplusplus, add a generic StringListDlg based on the public hub list config dialog).
+* Ревизия 374 (linuxdcpp, fix Socket::resolve in *nix systems).
+* Исправлена ошибка, deadlock.
+  Воспроизведение ошибки: (аналогичная ошибка при отдаче файла если установлена низкая скорость отдачи 5-100 КБ/с.)
+  1. Устанавливаем низкую скорость закачки 5-100 КБ/с.
+  2. Закачиваем файл.
+  3. Процесс закачки идёт нормально, выходим из программы не дожидаясь окончания, идёт выход... доходит до "Shutting down..." и впадает в ступор.
+* Добавил в статус-панель информацию - ограничение скорости.
+* Лог ЛС.
+* Ревизия 2154 (dcplusplus, catch all flush exceptions).
+* Ревизия 2153 (dcplusplus, fix the file corruption fix).
+* Сборка под OpenSolaris. Ревизия 366 (linuxdcpp, compilation fixes for OpenSolaris).
+* Исправлена ошибка, поиск файлов (see revision 2126 compilation fixes for OpenSolaris).
+* Share Manager:
+  Исправлена ошибка, недоступность файла при отдаче (file not available).
+  Исправлено обновление окна, когда переключается режим "Шарить скрытые файлы" (Настройки/Шара).
+  Исправлена ошибка проверки скрытых директорий (share manager).
+* Ограничение скорости (Настройки).
+* Остановка хеширования.
+* Added char '+' to SimpleXMLReader.
+* Added initialization.
+* Fixed locale path libdcpp.
+* Fixed compilation error, see dcplusplus revision 2140 (move the impl of FileFindIter).
+* Fixed compilation error, save user cids and nicks to Users.xml see dcplusplus revision 1771.
+
 		--- freedcpp 0.0.4 ---
 
 r182: 0.0.4

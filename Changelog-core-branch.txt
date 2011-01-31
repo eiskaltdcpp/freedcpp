@@ -1,5 +1,8 @@
 		--- freedcpp core branch ---
 
+r195: 0.32
+* merging trunk r186 through r192 into core branch.
+
 r194: 0.31
 * Fix tick variable types.
 
