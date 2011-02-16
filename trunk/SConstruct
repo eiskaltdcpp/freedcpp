@@ -250,12 +250,12 @@ if not 'install' in COMMAND_LINE_TARGETS:
 	env.ParseConfig('pkg-config --libs libnotify')
 	env.ParseConfig('pkg-config --libs gthread-2.0')
 
-	env.Append(LIBPATH = BUILD_PATH + LIB_DCPP)
-	env.Prepend(LIBS = LIB_DCPP)
+	env.Append(LIBPATH = [BUILD_PATH + LIB_DCPP])
+	env.Prepend(LIBS = [LIB_DCPP])
 
 	if not LIB_IS_UPNP:
-		env.Append(LIBPATH = BUILD_PATH + LIB_UPNP)
-		env.Prepend(LIBS = LIB_UPNP)
+		env.Append(LIBPATH = [BUILD_PATH + LIB_UPNP])
+		env.Prepend(LIBS = [LIB_UPNP])
 
 	mo_args = ['msgfmt', '-c', '-o', '$TARGET', '$SOURCE']
 	mo_bld = Builder(action = Action([mo_args], 'Create $TARGET from $SOURCE'))
