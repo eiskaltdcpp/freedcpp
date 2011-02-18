@@ -68,7 +68,13 @@ Notify* Notify::get()
 void Notify::init()
 {
 	notify_init(g_get_application_name());
+
+	//TODO: Use check NOTIFY_CHECK_VERSION(major, minor, micro) 
+#if LIBNOTIFY_NEW
+	notification = notify_notification_new("template", "template", NULL);
+#else
 	notification = notify_notification_new("template", "template", NULL, NULL);
+#endif
 	action = FALSE;
 }
 
