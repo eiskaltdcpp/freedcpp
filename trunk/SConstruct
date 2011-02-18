@@ -145,7 +145,7 @@ if not 'install' in COMMAND_LINE_TARGETS:
 		print '\tNote: You might have the lib but not the headers'
 		Exit(1)
 
-	elif conf.CheckPKG('libnotify >= 0.5.2'):
+	elif conf.CheckPKG('libnotify >= 0.7.0'):
 		LIBNOTIFY_NEW = True
 	
 	if not conf.CheckCXXHeader('boost/version.hpp', '<>'):
