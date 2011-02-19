@@ -901,7 +901,12 @@ void FavoriteHubs::removeEntry_client(string address)
 	FavoriteHubEntry *entry = FavoriteManager::getInstance()->getFavoriteHubEntry(address);
 
 	if (entry)
+	{
 		FavoriteManager::getInstance()->removeFavorite(entry);
+
+		const FavoriteHubEntryList &fh = FavoriteManager::getInstance()->getFavoriteHubs();
+		WulforManager::get()->getMainWindow()->updateFavoriteHubMenu_client(fh);
+	}
 }
 
 void FavoriteHubs::on(FavoriteManagerListener::FavoriteAdded, const FavoriteHubEntryPtr entry) throw()
