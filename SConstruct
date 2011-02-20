@@ -14,7 +14,6 @@ LIB_UPNP = 'libminiupnpc'
 BUILD_PATH = '#/build/'
 BUILD_LOCALE_PATH = 'build/locale/'
 LIB_IS_UPNP = True
-LIBNOTIFY_NEW = False
 
 # ----------------------------------------------------------------------
 # Function definitions
@@ -144,9 +143,6 @@ if not 'install' in COMMAND_LINE_TARGETS:
 		print '\tlibnotify >= 0.4.1 not found.'
 		print '\tNote: You might have the lib but not the headers'
 		Exit(1)
-
-	elif conf.CheckPKG('libnotify >= 0.7.0'):
-		LIBNOTIFY_NEW = True
 	
 	if not conf.CheckCXXHeader('boost/version.hpp', '<>'):
 		print '\tboost not found.'

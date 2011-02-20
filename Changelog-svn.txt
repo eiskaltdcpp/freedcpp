@@ -1,5 +1,8 @@
 		--- freedcpp 0.0.x ---
 
+r200: 0.0.4.12
+* Use check NOTIFY_CHECK_VERSION (thanks https://github.com/tehnick).
+
 r199: 0.0.4.11
 * Ошибка удаления хаба из меню.
 

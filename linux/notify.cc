@@ -41,6 +41,10 @@
 #include <dcpp/Text.h>
 #include "notify.hh"
 
+#ifndef NOTIFY_CHECK_VERSION
+#define NOTIFY_CHECK_VERSION(major,minor,micro) 0
+#endif
+
 using namespace std;
 using namespace dcpp;
 
@@ -69,8 +73,7 @@ void Notify::init()
 {
 	notify_init(g_get_application_name());
 
-	//TODO: Use check NOTIFY_CHECK_VERSION(major, minor, micro) 
-#if LIBNOTIFY_NEW
+#if NOTIFY_CHECK_VERSION(0,7,0)
 	notification = notify_notification_new("template", "template", NULL);
 #else
 	notification = notify_notification_new("template", "template", NULL, NULL);
