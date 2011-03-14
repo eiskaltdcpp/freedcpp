@@ -3436,7 +3436,7 @@ void Settings::onRemoveShare_gui(GtkWidget *widget, gpointer data)
 
 	if (gtk_tree_selection_get_selected(selection, NULL, &iter))
 	{
-		string path = s->shareView.getString(&iter, "Directory");
+		string path = s->shareView.getString(&iter, _("Directory"));
 		gtk_list_store_remove(s->shareStore, &iter);
 		gtk_widget_set_sensitive(s->getWidget("sharedRemoveButton"), FALSE);
 
@@ -3594,8 +3594,8 @@ void Settings::onUserCommandEdit_gui(GtkWidget *widget, gpointer data)
 
 	if (gtk_tree_selection_get_selected(selection, NULL, &iter))
 	{
-		string name = s->userCommandView.getString(&iter, "Name");
-		string hubStr = s->userCommandView.getString(&iter, "Hub");
+		string name = s->userCommandView.getString(&iter, _("Name"));
+		string hubStr = s->userCommandView.getString(&iter, _("Hub"));
 		int cid = FavoriteManager::getInstance()->findUserCommand(name, hubStr);
 		if (cid < 0)
 			return;
@@ -3685,8 +3685,8 @@ void Settings::onUserCommandMoveUp_gui(GtkWidget *widget, gpointer data)
 		GtkTreePath *path = gtk_tree_model_get_path(m, &current);
 		if (gtk_tree_path_prev(path) && gtk_tree_model_get_iter(m, &prev, path))
 		{
-			string name = s->userCommandView.getString(&current, "Name");
-			string hub= s->userCommandView.getString(&current, "Hub");
+			string name = s->userCommandView.getString(&current, _("Name"));
+			string hub= s->userCommandView.getString(&current, _("Hub"));
 			gtk_list_store_swap(s->userCommandStore, &current, &prev);
 
 			typedef Func3<Settings, string, string, int> F3;
@@ -3708,8 +3708,8 @@ void Settings::onUserCommandMoveDown_gui(GtkWidget *widget, gpointer data)
 		next = current;
 		if (gtk_tree_model_iter_next(GTK_TREE_MODEL(s->userCommandStore), &next))
 		{
-			string name = s->userCommandView.getString(&current, "Name");
-			string hub = s->userCommandView.getString(&current, "Hub");
+			string name = s->userCommandView.getString(&current, _("Name"));
+			string hub = s->userCommandView.getString(&current, _("Hub"));
 			gtk_list_store_swap(s->userCommandStore, &current, &next);
 
 			typedef Func3<Settings, string, string, int> F3;
@@ -3727,8 +3727,8 @@ void Settings::onUserCommandRemove_gui(GtkWidget *widget, gpointer data)
 
 	if (gtk_tree_selection_get_selected(selection, NULL, &iter))
 	{
-		string name = s->userCommandView.getString(&iter, "Name");
-		string hub = s->userCommandView.getString(&iter, "Hub");
+		string name = s->userCommandView.getString(&iter, _("Name"));
+		string hub = s->userCommandView.getString(&iter, _("Hub"));
 		gtk_list_store_remove(s->userCommandStore, &iter);
 
 		typedef Func2<Settings, string, string> F2;
