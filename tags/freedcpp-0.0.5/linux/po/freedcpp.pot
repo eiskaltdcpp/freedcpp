@@ -1,0 +1,3433 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the FreeDC++ package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: FreeDC++\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2011-03-13 00:02+1000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: mainwindow.glade:1029
+msgid ""
+"\n"
+"This program is free software; you can redistribute it and/or modify it "
+"under the terms of the GNU General Public License as published by the Free "
+"Software Foundation; either version 2 of the License, or (at your option) "
+"any later version.\n"
+"\n"
+"This program is distributed in the hope that it will be useful, but WITHOUT "
+"ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or "
+"FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for "
+"more details.\n"
+"\n"
+"You should have received a copy of the GNU General Public License along with "
+"this program; if not, write to the Free Software Foundation, Inc., 51 "
+"Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.\n"
+"\n"
+"In addition, as a special exception, compiling, linking, and/or using "
+"OpenSSL with this program is allowed.\n"
+"\n"
+"This program uses the MiniUPnP client library by Thomas Bernard http://"
+"miniupnp.tuxfamily.org http://miniupnp.free.fr\n"
+msgstr ""
+
+#: hub.cc:1022 hub.cc:1101 privatemessage.cc:536 privatemessage.cc:615
+msgid " *** Emoticons limit"
+msgstr ""
+
+#: hub.cc:1017 privatemessage.cc:531
+msgid " *** Emoticons mode off"
+msgstr ""
+
+#: hub.cc:1012 privatemessage.cc:526
+msgid " *** Emoticons not loaded"
+msgstr ""
+
+#: settingsdialog.cc:2249
+msgid " + system icons"
+msgstr ""
+
+#: hub.cc:426 hub.cc:444
+msgid " Users"
+msgstr ""
+
+#: hub.cc:2387
+msgid " added to favorites list"
+msgstr ""
+
+#: search.cc:1904
+msgid " dropped"
+msgstr ""
+
+#: hub.cc:1823
+msgid " empty..."
+msgstr ""
+
+#: finishedtransfers.cc:258 sharebrowser.cc:1044
+msgid " files"
+msgstr ""
+
+#: search.cc:1891
+msgid " filtered"
+msgstr ""
+
+#: publichubs.cc:455
+msgid " from Coral"
+msgstr ""
+
+#: hub.cc:409 hub.cc:420
+msgid " has joined"
+msgstr ""
+
+#: hub.cc:410 hub.cc:419
+msgid " has joined hub "
+msgstr ""
+
+#: hub.cc:451 hub.cc:461
+msgid " has quit"
+msgstr ""
+
+#: hub.cc:450 hub.cc:460
+msgid " has quit hub "
+msgstr ""
+
+#: hub.cc:1796 hub.cc:2319 privatemessage.cc:1270
+msgid " is favorite user"
+msgstr ""
+
+#: hub.cc:1814 hub.cc:2358 privatemessage.cc:1291
+msgid " is not favorite user"
+msgstr ""
+
+#: search.cc:646
+msgid " items"
+msgstr ""
+
+#: hashdialog.cc:70 hashdialog.cc:79 hashdialog.cc:88
+msgid " left"
+msgstr ""
+
+#: downloadqueue.cc:1287
+msgid " of "
+msgstr ""
+
+#: hub.cc:2414
+msgid " removed from favorites list"
+msgstr ""
+
+#: transfers.cc:582
+msgid " user(s)"
+msgstr ""
+
+#: downloadqueue.cc:1287
+msgid " user(s) online"
+msgstr ""
+
+#: finishedtransfers.cc:267
+msgid " users"
+msgstr ""
+
+#: transfers.cc:582
+msgid "%) from "
+msgstr ""
+
+#: settingsdialog.glade:2404
+msgid ""
+"%a abbreviated weekday name.\n"
+"%b abbreviated month name.\n"
+"%H hour as a decimal number using a 24-hour clock.\n"
+"%M minute as a decimal number (range 00 to 59).\n"
+"%S second as a decimal number (range 00 to 59).\n"
+"%% a literal '%' character.\n"
+"\n"
+"see man strftime for details."
+msgstr ""
+
+#: hub.cc:1965
+msgid "': type /help for a list of available commands"
+msgstr ""
+
+#: hub.cc:1885 privatemessage.cc:930
+msgid "*** Available commands:"
+msgstr ""
+
+#: settingsdialog.cc:2022
+msgid "*** T E S T ***"
+msgstr ""
+
+#: mainwindow.glade:1412 mainwindow.glade:1891
+msgid "+/-"
+msgstr ""
+
+#: hashdialog.cc:71 hashdialog.cc:83
+msgid "-:--:-- left"
+msgstr ""
+
+#: settingsdialog.cc:2201 settingsdialog.cc:2225
+msgid "...must be *.theme"
+msgstr ""
+
+#: settingsdialog.cc:2104 settingsdialog.cc:2133 settingsdialog.cc:2170
+msgid "...must not be empty"
+msgstr ""
+
+#: hub.cc:490
+msgid "0 Users"
+msgstr ""
+
+#: search.cc:529
+msgid "0 filtered"
+msgstr ""
+
+#: search.cc:528
+msgid "0 items"
+msgstr ""
+
+#: privatemessage.cc:944
+msgid ": type /help for a list of available commands"
+msgstr ""
+
+#: settingsdialog.glade:1867
+msgid "<b>Add player</b>"
+msgstr ""
+
+#: settingsdialog.glade:1682
+msgid "<b>Auto-drop settings</b>"
+msgstr ""
+
+#: settingsdialog.glade:2563
+msgid "<b>Auto-open on startup</b>"
+msgstr ""
+
+#: settingsdialog.glade:1397
+msgid "<b>Auto-priority settings</b>"
+msgstr ""
+
+#: settingsdialog.glade:2859
+msgid "<b>Available styles</b>"
+msgstr ""
+
+#: settingsdialog.glade:5097
+msgid "<b>Certificate Paths</b>"
+msgstr ""
+
+#: settingsdialog.glade:3818
+msgid "<b>Colors</b>"
+msgstr ""
+
+#: settingsdialog.glade:6204
+msgid "<b>Command Type</b>"
+msgstr ""
+
+#: settingsdialog.glade:2642
+msgid "<b>Confirmation Dialog Options</b>"
+msgstr ""
+
+#: mainwindow.glade:975
+msgid "<b>Connect to address:</b>"
+msgstr ""
+
+#: settingsdialog.glade:6288
+msgid "<b>Context</b>"
+msgstr ""
+
+#: settingsdialog.glade:3426
+msgid "<b>Current theme name:</b>"
+msgstr ""
+
+#: settingsdialog.glade:2383
+msgid "<b>Default away message</b>"
+msgstr ""
+
+#: favoriteusers.glade:135
+msgid "<b>Description</b>"
+msgstr ""
+
+#: adlsearch.glade:334
+msgid "<b>Destination Directory</b>"
+msgstr ""
+
+#: settingsdialog.glade:867
+msgid "<b>Directories</b>"
+msgstr ""
+
+#: hub.cc:563
+msgid "<b>Enter your password</b>"
+msgstr ""
+
+#: settingsdialog.cc:1947
+msgid "<b>Extension</b>"
+msgstr ""
+
+#: settingsdialog.glade:1179
+msgid "<b>Favorite download to directories</b>"
+msgstr ""
+
+#: publichubs.glade:51
+msgid "<b>Filter</b>"
+msgstr ""
+
+#: settingsdialog.glade:3964
+msgid "<b>Frame</b>"
+msgstr ""
+
+#: favoritehubs.glade:649
+msgid "<b>Group properties</b>"
+msgstr ""
+
+#: favoritehubs.glade:371
+msgid "<b>Group</b>"
+msgstr ""
+
+#: publichubs.glade:92
+msgid "<b>Hub List</b>"
+msgstr ""
+
+#: favoritehubs.glade:120
+msgid "<b>Hub</b>"
+msgstr ""
+
+#: settingsdialog.glade:3117
+msgid "<b>Icon size</b>"
+msgstr ""
+
+#: settingsdialog.glade:3372
+msgid "<b>Icons</b>"
+msgstr ""
+
+#: favoritehubs.glade:262
+msgid "<b>Identification</b>"
+msgstr ""
+
+#: settingsdialog.glade:499
+msgid "<b>Incoming connection settings</b>"
+msgstr ""
+
+#: settingsdialog.glade:971
+msgid "<b>Limits</b>"
+msgstr ""
+
+#: settingsdialog.glade:4289
+msgid "<b>Logging</b>"
+msgstr ""
+
+#: mainwindow.glade:1423
+msgid "<b>Magnet properties</b>"
+msgstr ""
+
+#: settingsdialog.glade:2342
+msgid "<b>Main Toolbar Style</b>"
+msgstr ""
+
+#: adlsearch.glade:262
+msgid "<b>Max FileSize</b>"
+msgstr ""
+
+#: adlsearch.glade:233
+msgid "<b>Min FileSize</b>"
+msgstr ""
+
+#: settingsdialog.cc:1594
+msgid "<b>Name of the new search type</b>"
+msgstr ""
+
+#: settingsdialog.cc:2761
+msgid "<b>Name under which the others see the directory</b>"
+msgstr ""
+
+#: settingsdialog.cc:1847
+msgid "<b>New name</b>"
+msgstr ""
+
+#: publichubs.glade:276 settingsdialog.glade:5893
+msgid "<b>Note:</b> Edit urls in the list by clicking them once when selected"
+msgstr ""
+
+#: settingsdialog.glade:3053
+msgid "<b>Notify</b>"
+msgstr ""
+
+#: settingsdialog.glade:2253
+msgid "<b>Options</b>"
+msgstr ""
+
+#: settingsdialog.glade:5133
+msgid "<b>Other Security Options</b>"
+msgstr ""
+
+#: settingsdialog.glade:1720
+msgid "<b>Other queue options</b>"
+msgstr ""
+
+#: settingsdialog.glade:732
+msgid "<b>Outgoing connection settings</b>"
+msgstr ""
+
+#: settingsdialog.glade:6450
+msgid "<b>Parameters</b>"
+msgstr ""
+
+#: settingsdialog.glade:175
+msgid "<b>Personal Information</b>"
+msgstr ""
+
+#: settingsdialog.glade:1775
+msgid "<b>Players list</b>"
+msgstr ""
+
+#: settingsdialog.glade:2891
+msgid "<b>Preview styles</b>"
+msgstr ""
+
+#: settingsdialog.glade:2793
+msgid "<b>Private message sound</b>"
+msgstr ""
+
+#: settingsdialog.glade:3293
+msgid "<b>Private message</b>"
+msgstr ""
+
+#: hash.glade:22
+msgid "<b>Processing file:</b>"
+msgstr ""
+
+#: settingsdialog.glade:1073
+msgid "<b>Public Hubs list</b>"
+msgstr ""
+
+#: adlsearch.glade:163
+msgid "<b>Search String</b>"
+msgstr ""
+
+#: settingsdialog.glade:5735
+msgid "<b>Search types</b>"
+msgstr ""
+
+#: settingsdialog.glade:5437
+msgid "<b>Secondary Transfer Rate Limiting</b>"
+msgstr ""
+
+#: settingsdialog.glade:5583
+msgid "<b>Secondary Transfer Rate Settings</b>"
+msgstr ""
+
+#: settingsdialog.glade:2097
+msgid "<b>Shared directories</b>"
+msgstr ""
+
+#: adlsearch.glade:298
+msgid "<b>Size Type</b>"
+msgstr ""
+
+#: settingsdialog.glade:2698
+msgid "<b>Sounds</b>"
+msgstr ""
+
+#: adlsearch.glade:192
+msgid "<b>Source Type</b>"
+msgstr ""
+
+#: hash.glade:81
+msgid "<b>Statistics</b>"
+msgstr ""
+
+#: settingsdialog.glade:2299
+msgid "<b>Tab Position</b>"
+msgstr ""
+
+#: settingsdialog.glade:2492
+msgid "<b>Tab bolding on content change</b>"
+msgstr ""
+
+#: settingsdialog.glade:6486
+msgid "<b>Text sent to hub</b>"
+msgstr ""
+
+#: settingsdialog.glade:3404
+msgid "<b>Text styles</b>"
+msgstr ""
+
+#: settingsdialog.glade:2419
+msgid "<b>Timestamps</b>"
+msgstr ""
+
+#: settingsdialog.glade:3088
+msgid "<b>Title</b>"
+msgstr ""
+
+#: settingsdialog.glade:3582
+msgid "<b>Toolbar buttons</b>"
+msgstr ""
+
+#: settingsdialog.glade:5300
+msgid "<b>Transfer Rate Limiting</b>"
+msgstr ""
+
+#: settingsdialog.cc:3360
+msgid "<b>Under what name you see the directory</b>"
+msgstr ""
+
+#: mainwindow.glade:1565
+msgid "<b>What would you like to do?</b>"
+msgstr ""
+
+#: settingsdialog.glade:2601
+msgid "<b>Window Options</b>"
+msgstr ""
+
+#: mainwindow.cc:2143
+msgid "<b>file:</b> "
+msgstr ""
+
+#: favoritehubs.glade:414
+msgid "<small>Note: Leave unchecked for default values</small>"
+msgstr ""
+
+#: mainwindow.glade:1674
+msgid "ADL"
+msgstr ""
+
+#: mainwindow.glade:1811 adlsearch.cc:31 settingsdialog.cc:1262
+msgid "ADL Search"
+msgstr ""
+
+#: adlsearch.glade:131
+msgid "ADLSearch Properties"
+msgstr ""
+
+#: mainwindow.glade:535
+msgid "About FreeDC++"
+msgstr ""
+
+#: settingsdialog.cc:1382
+msgid "Accept custom user commands from hub"
+msgstr ""
+
+#: settingsdialog.glade:417
+msgid "Active"
+msgstr ""
+
+#: settingsdialog.glade:5660
+msgid "Add"
+msgstr ""
+
+#: mainwindow.glade:1889
+msgid "Add / Remove"
+msgstr ""
+
+#: hub.glade:419 hub.cc:1890
+msgid "Add a hub to favorites"
+msgstr ""
+
+#: settingsdialog.cc:1384
+msgid "Add finished files to share instantly (if shared)"
+msgstr ""
+
+#: settingsdialog.glade:3674
+msgid "Add string or TTH to the top"
+msgstr ""
+
+#: mainwindow.glade:1452
+msgid "Add this file to your download queue"
+msgstr ""
+
+#: publichubs.glade:326
+msgid "Add to favorites"
+msgstr ""
+
+#: favoritehubs.glade:595
+msgid "Add to the list"
+msgstr ""
+
+#: privatemessage.glade:211 hub.cc:1891 privatemessage.cc:935
+msgid "Add user to favorites list"
+msgstr ""
+
+#: adlsearch.glade:34 adlsearch.glade:110
+msgid "Add..."
+msgstr ""
+
+#: downloadqueue.cc:74 downloadqueue.cc:286 downloadqueue.cc:393
+msgid "Added"
+msgstr ""
+
+#: favoritehubs.cc:57 favoritehubs.cc:145 favoritehubs.cc:161
+#: favoritehubs.cc:234 favoritehubs.cc:260 favoritehubs.cc:311
+#: favoritehubs.cc:323 favoritehubs.cc:348 favoritehubs.cc:529
+#: favoritehubs.cc:544 favoritehubs.cc:650 publichubs.cc:44 publichubs.cc:159
+#: publichubs.cc:269 publichubs.cc:294
+msgid "Address"
+msgstr ""
+
+#: settingsdialog.glade:4345 settingsdialog.glade:5194
+msgid "Advanced"
+msgstr ""
+
+#: settingsdialog.cc:1450
+msgid "Allow TLS connections to clients without trusted certificate"
+msgstr ""
+
+#: settingsdialog.cc:1449
+msgid "Allow TLS connections to hubs without trusted certificate"
+msgstr ""
+
+#: settingsdialog.cc:838
+msgid "Amarok player"
+msgstr ""
+
+#: favoritehubs.cc:583
+msgid "Another group with the name already exists"
+msgstr ""
+
+#: settingsdialog.glade:2456 settingsdialog.glade:4005
+msgid "Appearance"
+msgstr ""
+
+#: settingsdialog.cc:811 settingsdialog.cc:846 settingsdialog.cc:2649
+#: settingsdialog.cc:2683 settingsdialog.cc:2701 settingsdialog.cc:2732
+msgid "Application"
+msgstr ""
+
+#: settingsdialog.glade:1820
+msgid "Application:"
+msgstr ""
+
+#: searchspy.glade:56
+msgid "Apply settings"
+msgstr ""
+
+#: settingsdialog.glade:1843
+msgid "Apply to Extensions: (avi;mov;divx)"
+msgstr ""
+
+#: favoritehubs.cc:515
+#, c-format, boost-format
+msgid "Are you sure you want to delete favorite hub \"%s\"?"
+msgstr ""
+
+#: favoriteusers.cc:438
+msgid "Are you sure you want to delete favorite user(s)?"
+msgstr ""
+
+#: favoritehubs.cc:257
+msgid "Auto Connect"
+msgstr ""
+
+#: favoriteusers.cc:44 favoriteusers.cc:65 favoriteusers.cc:108
+#: favoriteusers.cc:470 favoriteusers.cc:472
+msgid "Auto grant slot"
+msgstr ""
+
+#: settingsdialog.glade:4760
+msgid "Auto refresh time"
+msgstr ""
+
+#: settingsdialog.cc:1373
+msgid "Auto-away on minimize (and back on restore)"
+msgstr ""
+
+#: settingsdialog.cc:871
+msgid "Auto-drop slow sources for all queue items (except filelists)"
+msgstr ""
+
+#: settingsdialog.cc:1378
+msgid "Automatically disconnect users who leave the hub"
+msgstr ""
+
+#: settingsdialog.cc:1374
+msgid "Automatically follow redirects"
+msgstr ""
+
+#: settingsdialog.cc:875
+msgid "Automatically match queue for auto search hits"
+msgstr ""
+
+#: settingsdialog.glade:2119
+msgid "Automatically open extra slot if speed is below (0 = disable)"
+msgstr ""
+
+#: settingsdialog.cc:874
+msgid "Automatically search for alternative download locations"
+msgstr ""
+
+#: hub.glade:398 privatemessage.glade:183 hub.cc:1886 privatemessage.cc:931
+msgid "Away mode message on/off"
+msgstr ""
+
+#: hub.glade:405 privatemessage.glade:190 hub.cc:1752 hub.cc:1765 hub.cc:1887
+#: privatemessage.cc:864 privatemessage.cc:878 privatemessage.cc:932
+msgid "Away mode off"
+msgstr ""
+
+#: hub.cc:1759 privatemessage.cc:872
+msgid "Away mode on: "
+msgstr ""
+
+#: settingsdialog.glade:4903 settingsdialog.glade:4915
+msgid "B"
+msgstr ""
+
+#: adlsearch.glade:289 search.glade:94
+msgid ""
+"B\n"
+"KiB\n"
+"MiB\n"
+"GiB"
+msgstr ""
+
+#: settingsdialog.glade:1602 hashdialog.cc:70
+msgid "B/s"
+msgstr ""
+
+#: settingsdialog.glade:2928
+msgid "Back color"
+msgstr ""
+
+#: settingsdialog.glade:5616
+msgid ""
+"Bandwidth\n"
+"Limiting"
+msgstr ""
+
+#: settingsdialog.glade:4724
+msgid "Bind address"
+msgstr ""
+
+#: settingsdialog.glade:2977
+msgid "Black/White"
+msgstr ""
+
+#: settingsdialog.glade:2909
+msgid "Bold Authors of message in chat"
+msgstr ""
+
+#: mainwindow.glade:1759
+msgid "Browse the list of public hubs"
+msgstr ""
+
+#: hub.glade:332 mainwindow.glade:1477 privatemessage.glade:118
+#: settingsdialog.glade:804 settingsdialog.glade:846 settingsdialog.glade:2739
+#: settingsdialog.glade:4052 settingsdialog.glade:4978
+#: settingsdialog.glade:4993 settingsdialog.glade:5008 search.cc:329
+#: search.cc:399 sharebrowser.cc:482 sharebrowser.cc:536
+msgid "Browse..."
+msgstr ""
+
+#: settingsdialog.cc:1201
+msgid "Button smile"
+msgstr ""
+
+#: WulforUtil.cc:195
+msgid "CP1250 (Central Europe)"
+msgstr ""
+
+#: WulforUtil.cc:204
+msgid "CP1251 (Cyrillic)"
+msgstr ""
+
+#: WulforUtil.cc:194
+msgid "CP1252 (Western Europe)"
+msgstr ""
+
+#: WulforUtil.cc:205
+msgid "CP1256 (Arabic)"
+msgstr ""
+
+#: WulforUtil.cc:206
+msgid "CP1257 (Baltic)"
+msgstr ""
+
+#: WulforUtil.cc:202
+msgid "CP949 (Korean)"
+msgstr ""
+
+#: finishedtransfers.cc:61 finishedtransfers.cc:235
+msgid "CRC Checked"
+msgstr ""
+
+#: downloadqueue.cc:1357
+msgid "CRC32 inconsistency (SFV-Check)"
+msgstr ""
+
+#: settingsdialog.glade:5067
+msgid "Certificate file"
+msgstr ""
+
+#: mainwindow.glade:481
+msgid "Changelog(svn)"
+msgstr ""
+
+#: settingsdialog.glade:6174
+msgid "Chat"
+msgstr ""
+
+#: hub.glade:66 privatemessage.glade:37
+msgid "Chat Commands"
+msgstr ""
+
+#: settingsdialog.glade:6242
+msgid "Chat Menu"
+msgstr ""
+
+#: settingsdialog.glade:1546
+msgid "Check every"
+msgstr ""
+
+#: settingsdialog.glade:6065
+msgid "Choose a File"
+msgstr ""
+
+#: search.glade:555 settingsdialog.glade:6013 sharebrowser.glade:326
+#: hub.cc:2248 mainwindow.cc:1155 mainwindow.cc:1223 privatemessage.cc:1177
+msgid "Choose a directory"
+msgstr ""
+
+#: searchspy.cc:500
+msgid "Cleaned frame search"
+msgstr ""
+
+#: searchspy.glade:136 searchspy.glade:277
+msgid "Clear"
+msgstr ""
+
+#: privatemessage.glade:197 privatemessage.cc:933
+msgid "Clear PM"
+msgstr ""
+
+#: hub.glade:412 hub.cc:1888
+msgid "Clear chat"
+msgstr ""
+
+#: searchspy.glade:135
+msgid "Clear frame search"
+msgstr ""
+
+#: settingsdialog.cc:1375
+msgid "Clear search box after each search"
+msgstr ""
+
+#: privatemessage.glade:204 privatemessage.cc:934
+msgid "Close PM"
+msgstr ""
+
+#: hub.cc:1889
+msgid "Close chat"
+msgstr ""
+
+#: bookentry.cc:70 bookentry.cc:75
+msgid "Close tab"
+msgstr ""
+
+#: transfers.cc:403
+msgid "Closing connection..."
+msgstr ""
+
+#: settingsdialog.glade:6551
+msgid "Color select"
+msgstr ""
+
+#: settingsdialog.glade:3015
+msgid "Colors & Fonts"
+msgstr ""
+
+#: settingsdialog.glade:6344 settingsdialog.cc:1397 settingsdialog.cc:1405
+#: settingsdialog.cc:2977 settingsdialog.cc:3051
+msgid "Command"
+msgstr ""
+
+#: settingsdialog.cc:3095
+msgid "Command name already exists"
+msgstr ""
+
+#: settingsdialog.glade:1014
+msgid "Configure Public Hub Lists"
+msgstr ""
+
+#: publichubs.glade:190 settingsdialog.glade:5803
+msgid "Configure hub lists"
+msgstr ""
+
+#: settingsdialog.cc:1327
+msgid "Confirm application exit"
+msgstr ""
+
+#: settingsdialog.cc:1328
+msgid "Confirm favorite hub removal"
+msgstr ""
+
+#: mainwindow.glade:1625 mainwindow.glade:1722 favoritehubs.cc:77
+#: favoritehubs.cc:495 favoritehubs.cc:596 favoritehubs.cc:766
+#: settingsdialog.cc:1215 settingsdialog.cc:1246
+msgid "Connect"
+msgstr ""
+
+#: hub.cc:3110
+msgid "Connect failed: "
+msgstr ""
+
+#: mainwindow.glade:941
+msgid "Connect to a hub"
+msgstr ""
+
+#: favoritehubs.glade:577
+msgid "Connect to all hubs in this group when the program starts"
+msgstr ""
+
+#: favoriteusers.glade:74
+msgid "Connect to hub"
+msgstr ""
+
+#: hub.glade:440 hub.cc:1897
+msgid "Connect to the hub"
+msgstr ""
+
+#: hub.cc:3054 transfers.cc:1016
+msgid "Connected"
+msgstr ""
+
+#: transfers.cc:1056
+msgid "Connecting"
+msgstr ""
+
+#: transfers.cc:370
+msgid "Connecting (forced)..."
+msgstr ""
+
+#: hub.cc:3047
+msgid "Connecting to "
+msgstr ""
+
+#: transfers.cc:1005
+msgid "Connecting..."
+msgstr ""
+
+#: settingsdialog.glade:753 hub.cc:67 hub.cc:374 hub.cc:394 search.cc:91
+#: search.cc:626 search.cc:685 search.cc:826 search.cc:1707
+msgid "Connection"
+msgstr ""
+
+#: searchspy.cc:55 searchspy.cc:154 searchspy.cc:268 searchspy.cc:293
+#: searchspy.cc:309 searchspy.cc:431
+msgid "Count"
+msgstr ""
+
+#: searchspy.glade:79 settingsdialog.glade:3906
+msgid "Count matches"
+msgstr ""
+
+#: publichubs.cc:45 publichubs.cc:160
+msgid "Country"
+msgstr ""
+
+#: mainwindow.cc:156
+#, c-format, boost-format
+msgid ""
+"DC++ Client based on the source code LinuxDC++\n"
+"\n"
+"FreeDC++ version: %s.%s\n"
+"Core version: %s"
+msgstr ""
+
+#: favoritehubs.glade:401 settingsdialog.glade:3206 settingsdialog.glade:3799
+#: settingsdialog.glade:3945 settingsdialog.glade:5705 emoticonsdialog.cc:106
+#: favoritehubs.cc:695 previewmenu.cc:88
+msgid "Default"
+msgstr ""
+
+#: settingsdialog.glade:783
+msgid "Default download directory"
+msgstr ""
+
+#: settingsdialog.glade:142
+msgid "Default hub encoding"
+msgstr ""
+
+#: settingsdialog.glade:3496
+msgid "Default icons"
+msgstr ""
+
+#: settingsdialog.glade:2964
+msgid "Default styles"
+msgstr ""
+
+#: searchspy.glade:262
+msgid "Delete item"
+msgstr ""
+
+#: favoriteusers.glade:81 settingsdialog.glade:105 favoritehubs.cc:56
+#: favoritehubs.cc:141 favoritehubs.cc:312 favoritehubs.cc:666
+#: favoriteusers.cc:48 favoriteusers.cc:112 favoriteusers.cc:372
+#: favoriteusers.cc:397 favoriteusers.cc:587 hub.cc:65 hub.cc:372 hub.cc:392
+#: publichubs.cc:42 publichubs.cc:157 publichubs.cc:293
+msgid "Description"
+msgstr ""
+
+#: adlsearch.cc:42 adlsearch.cc:62 adlsearch.cc:113 adlsearch.cc:213
+#: adlsearch.cc:238
+msgid "Destination Directory"
+msgstr ""
+
+#: mainwindow.glade:1040
+msgid ""
+"Developers:\n"
+"  troll\n"
+"\n"
+"Contributors:\n"
+"  Leliksan Floyd\n"
+msgstr ""
+
+#: settingsdialog.glade:712
+msgid "Direct connection"
+msgstr ""
+
+#: settingsdialog.glade:4035 search.cc:1693 settingsdialog.cc:789
+#: settingsdialog.cc:803 settingsdialog.cc:891 settingsdialog.cc:1217
+#: settingsdialog.cc:3376 settingsdialog.cc:3396 settingsdialog.cc:3425
+#: settingsdialog.cc:3494 sharebrowser.cc:290 UserCommandMenu.cc:65
+msgid "Directory"
+msgstr ""
+
+#: settingsdialog.cc:3381
+msgid "Directory or favorite name already exists"
+msgstr ""
+
+#: mainwindow.glade:462
+msgid "Discussion forum"
+msgstr ""
+
+#: settingsdialog.cc:928
+msgid "Do not close the program, hide in the system tray"
+msgstr ""
+
+#: mainwindow.glade:895
+msgid "Do you really want to exit?"
+msgstr ""
+
+#: settingsdialog.glade:464
+msgid "Don't allow hub/UPnP to override"
+msgstr ""
+
+#: settingsdialog.cc:1377
+msgid "Don't delete file lists when exiting"
+msgstr ""
+
+#: settingsdialog.cc:877
+msgid "Don't download files already in share"
+msgstr ""
+
+#: settingsdialog.cc:878
+msgid "Don't download files already in the queue"
+msgstr ""
+
+#: settingsdialog.cc:873
+msgid "Don't remove the source when auto-dropping, only disconnect"
+msgstr ""
+
+#: settingsdialog.cc:1385
+msgid "Don't send the away message to bots"
+msgstr ""
+
+#: hashdialog.cc:108
+msgid "Done"
+msgstr ""
+
+#: sharebrowser.glade:235 sharebrowser.glade:271 settingsdialog.cc:1202
+msgid "Download"
+msgstr ""
+
+#: adlsearch.glade:366
+msgid "Download Matches"
+msgstr ""
+
+#: mainwindow.glade:262 downloadqueue.cc:34 settingsdialog.cc:947
+#: settingsdialog.cc:1307
+msgid "Download Queue"
+msgstr ""
+
+#: hub.glade:325 privatemessage.glade:111 search.glade:437
+msgid "Download _to..."
+msgstr ""
+
+#: search.glade:448
+msgid "Download _whole directory"
+msgstr ""
+
+#: transfers.cc:965
+msgid "Download complete..."
+msgstr ""
+
+#: publichubs.cc:447
+msgid "Download failed: "
+msgstr ""
+
+#: settingsdialog.cc:977 settingsdialog.cc:1138 settingsmanager.cc:197
+#: transfers.cc:1081
+msgid "Download finished"
+msgstr ""
+
+#: settingsdialog.cc:978 settingsdialog.cc:1142 settingsmanager.cc:199
+msgid "Download finished file list"
+msgstr ""
+
+#: publichubs.cc:455
+msgid "Download finished: "
+msgstr ""
+
+#: hub.glade:478
+msgid "Download image"
+msgstr ""
+
+#: hub.cc:1866
+msgid "Download image: disable"
+msgstr ""
+
+#: hub.cc:1868
+msgid "Download image: unlimit"
+msgstr ""
+
+#: hub.cc:1870
+msgid "Download limit image: "
+msgstr ""
+
+#: hub.cc:1903
+msgid "Download limit image: 0 - disable, n < 0 - unlimit, empty - info"
+msgstr ""
+
+#: transfers.cc:1090
+msgid "Download removed"
+msgstr ""
+
+#: mainwindow.glade:678
+msgid "Download speed"
+msgstr ""
+
+#: transfers.cc:917
+msgid "Download starting..."
+msgstr ""
+
+#: publichubs.cc:439
+msgid "Download starting: "
+msgstr ""
+
+#: settingsdialog.glade:1194
+msgid "Download to"
+msgstr ""
+
+#: sharebrowser.glade:242 sharebrowser.glade:278
+msgid "Download to..."
+msgstr ""
+
+#: search.glade:455
+msgid "Download whole director_y to..."
+msgstr ""
+
+#: mainwindow.cc:617
+msgid "Download: "
+msgstr ""
+
+#: downloadqueue.cc:68 downloadqueue.cc:88 downloadqueue.cc:281
+#: downloadqueue.cc:388
+msgid "Downloaded"
+msgstr ""
+
+#: transfers.cc:577 transfers.cc:950
+msgid "Downloaded "
+msgstr ""
+
+#: mainwindow.glade:500 settingsdialog.glade:1091 settingsdialog.glade:1966
+msgid "Downloads"
+msgstr ""
+
+#: settingsdialog.glade:1670
+msgid "Drop sources below"
+msgstr ""
+
+#: settingsdialog.glade:118
+msgid "E-Mail"
+msgstr ""
+
+#: mainwindow.glade:1772
+msgid "Edit the preferences"
+msgstr ""
+
+#: hub.glade:92 privatemessage.glade:60
+msgid "Emoticons"
+msgstr ""
+
+#: hub.cc:1850 privatemessage.cc:920
+msgid "Emoticons mode off"
+msgstr ""
+
+#: hub.cc:1855 privatemessage.cc:925
+msgid "Emoticons mode on"
+msgstr ""
+
+#: hub.cc:1905 privatemessage.cc:939
+msgid "Emoticons on/off"
+msgstr ""
+
+#: emoticonsdialog.cc:69
+msgid "Emotion packs"
+msgstr ""
+
+#: settingsdialog.cc:1380
+msgid "Enable automatic SFV checking"
+msgstr ""
+
+#: settingsdialog.cc:1381
+msgid "Enable safe and compressed transfers"
+msgstr ""
+
+#: settingsdialog.cc:1379
+msgid "Enable segmented downloads"
+msgstr ""
+
+#: adlsearch.glade:354 adlsearch.cc:39 adlsearch.cc:59 adlsearch.cc:67
+#: adlsearch.cc:110 adlsearch.cc:210 adlsearch.cc:243 adlsearch.cc:391
+#: adlsearch.cc:393
+msgid "Enabled"
+msgstr ""
+
+#: favoritehubs.cc:61 favoritehubs.cc:147 favoritehubs.cc:235
+#: favoritehubs.cc:261 favoritehubs.cc:316 favoritehubs.cc:545
+#: favoritehubs.cc:670
+msgid "Encoding"
+msgstr ""
+
+#: mainwindow.glade:1113
+msgid "Enter line for user command"
+msgstr ""
+
+#: sharebrowser.glade:182
+msgid "Enter text to search for"
+msgstr ""
+
+#: mainwindow.cc:1089
+msgid "Enter value for "
+msgstr ""
+
+#: settingsdialog.cc:1655 settingsdialog.cc:1699 settingsdialog.cc:2639
+msgid "Error"
+msgstr ""
+
+#: downloadqueue.cc:73 downloadqueue.cc:285 downloadqueue.cc:392
+msgid "Errors"
+msgstr ""
+
+#: settingsdialog.glade:2767
+msgid "Every time a private message is received"
+msgstr ""
+
+#: downloadqueue.cc:72 downloadqueue.cc:87 downloadqueue.cc:279
+#: downloadqueue.cc:386 search.cc:93 search.cc:117 search.cc:628 search.cc:679
+#: sharebrowser.cc:82 sharebrowser.cc:98 sharebrowser.cc:288
+#: sharebrowser.cc:319
+msgid "Exact Size"
+msgstr ""
+
+#: mainwindow.glade:1384
+msgid "Exact size"
+msgstr ""
+
+#: mainwindow.glade:884
+msgid "Exit FreeDC++?"
+msgstr ""
+
+#: settingsdialog.glade:4951
+msgid "Experts Only"
+msgstr ""
+
+#: settingsdialog.glade:3459
+msgid "Export..."
+msgstr ""
+
+#: settingsdialog.cc:1946
+msgid "Extension edition"
+msgstr ""
+
+#: settingsdialog.cc:812 settingsdialog.cc:847 settingsdialog.cc:1483
+#: settingsdialog.cc:1622 settingsdialog.cc:1673 settingsdialog.cc:1728
+#: settingsdialog.cc:2650 settingsdialog.cc:2684 settingsdialog.cc:2702
+#: settingsdialog.cc:2733
+msgid "Extensions"
+msgstr ""
+
+#: settingsdialog.glade:449
+msgid "External / WAN IP"
+msgstr ""
+
+#: favoritehubs.glade:506
+msgid "Favorite Hub Groups"
+msgstr ""
+
+#: favoritehubs.glade:103
+msgid "Favorite Hub Properties"
+msgstr ""
+
+#: mainwindow.glade:163 mainwindow.glade:1733 favoritehubs.cc:31
+#: settingsdialog.cc:1204 settingsdialog.cc:1248 settingsdialog.cc:1306
+msgid "Favorite Hubs"
+msgstr ""
+
+#: settingsdialog.cc:788 settingsdialog.cc:802 settingsdialog.cc:3375
+msgid "Favorite Name"
+msgstr ""
+
+#: settingsdialog.cc:1041
+msgid "Favorite User"
+msgstr ""
+
+#: mainwindow.glade:178 mainwindow.glade:1746 favoriteusers.cc:34
+#: settingsdialog.cc:1205 settingsdialog.cc:1250 settingsdialog.cc:1310
+msgid "Favorite Users"
+msgstr ""
+
+#: hub.cc:2644
+msgid "Favorite hub added"
+msgstr ""
+
+#: hub.cc:2649
+msgid "Favorite hub already exists"
+msgstr ""
+
+#: settingsdialog.glade:5932 settingsdialog.cc:3358
+msgid "Favorite name"
+msgstr ""
+
+#: settingsdialog.cc:983 settingsdialog.cc:1158 settingsmanager.cc:207
+msgid "Favorite user joined"
+msgstr ""
+
+#: settingsdialog.cc:984 settingsdialog.cc:1162 settingsmanager.cc:209
+msgid "Favorite user quit"
+msgstr ""
+
+#: settingsdialog.cc:290 settingsdialog.cc:961 settingsdialog.cc:1216
+#: settingsdialog.cc:2570 settingsdialog.cc:2586 UserCommandMenu.cc:67
+msgid "File"
+msgstr ""
+
+#: transfers.cc:671 transfers.cc:875
+msgid "File list"
+msgstr ""
+
+#: sharebrowser.cc:153
+msgid "File list loaded"
+msgstr ""
+
+#: mainwindow.glade:1289
+msgid "File name"
+msgstr ""
+
+#: downloadqueue.cc:1353
+msgid "File not available"
+msgstr ""
+
+#: mainwindow.cc:2064
+msgid ""
+"File transfers will not work correctly until you change settings or turn off "
+"any application that might be using the TCP/TLS port."
+msgstr ""
+
+#: search.glade:121
+msgid "File type"
+msgstr ""
+
+#: settingsdialog.glade:6257
+msgid "Filelist Menu"
+msgstr ""
+
+#: downloadqueue.cc:65 downloadqueue.cc:89 downloadqueue.cc:90
+#: downloadqueue.cc:275 downloadqueue.cc:382 downloadqueue.cc:748
+#: downloadqueue.cc:791 downloadqueue.cc:842 finishedtransfers.cc:56
+#: finishedtransfers.cc:230 search.cc:85 search.cc:119 search.cc:344
+#: search.cc:621 search.cc:660 search.cc:817 search.cc:1058 search.cc:1099
+#: search.cc:1158 search.cc:1239 search.cc:1278 search.cc:1335 search.cc:1638
+#: search.cc:1668 search.cc:1672 search.cc:1676 search.cc:1677 search.cc:1688
+#: search.cc:1692 search.cc:1959 sharebrowser.cc:78 sharebrowser.cc:94
+#: sharebrowser.cc:96 sharebrowser.cc:280 sharebrowser.cc:310
+#: sharebrowser.cc:501 sharebrowser.cc:594 sharebrowser.cc:957
+#: sharebrowser.cc:991 transfers.cc:62 transfers.cc:671 transfers.cc:709
+#: transfers.cc:715 transfers.cc:875 transfers.cc:877 transfers.cc:879
+msgid "Filename"
+msgstr ""
+
+#: adlsearch.glade:184
+msgid ""
+"Filename\n"
+"Directory\n"
+"Full Path"
+msgstr ""
+
+#: finishedtransfers.cc:79 finishedtransfers.cc:188
+msgid "Files"
+msgstr ""
+
+#: downloadqueue.cc:238 sharebrowser.cc:338
+msgid "Files: "
+msgstr ""
+
+#: search.glade:238
+msgid "Filter files already in share"
+msgstr ""
+
+#: settingsdialog.cc:917
+msgid "Filter kick and NMDC debug messages"
+msgstr ""
+
+#: sharebrowser.glade:122
+msgid "Find"
+msgstr ""
+
+#: sharebrowser.glade:154
+msgid "Find files"
+msgstr ""
+
+#: mainwindow.glade:277 mainwindow.glade:1695 mainwindow.glade:1852
+#: finishedtransfers.cc:34 settingsdialog.cc:945 settingsdialog.cc:1206
+#: settingsdialog.cc:1266 settingsdialog.cc:1308
+msgid "Finished Downloads"
+msgstr ""
+
+#: mainwindow.glade:291 mainwindow.glade:1702 mainwindow.glade:1865
+#: finishedtransfers.cc:39 settingsdialog.cc:946 settingsdialog.cc:1207
+#: settingsdialog.cc:1268 settingsdialog.cc:1309
+msgid "Finished Uploads"
+msgstr ""
+
+#: settingsdialog.glade:432
+msgid "Firewall (passive, last resort)"
+msgstr ""
+
+#: settingsdialog.glade:482
+msgid "Firewall with manual port forward"
+msgstr ""
+
+#: settingsdialog.glade:2044
+msgid "Follow Links"
+msgstr ""
+
+#: settingsdialog.glade:6599
+msgid "Font select"
+msgstr ""
+
+#: settingsdialog.glade:4091 settingsdialog.glade:4134
+#: settingsdialog.glade:4177 settingsdialog.glade:4220
+msgid "Format"
+msgstr ""
+
+#: sharebrowser.cc:616 sharebrowser.cc:659
+msgid "Found a match"
+msgstr ""
+
+#: settingsdialog.glade:3855
+msgid "Frame (size)"
+msgstr ""
+
+#: searchspy.glade:123 settingsdialog.glade:3845
+msgid "Frame size"
+msgstr ""
+
+#: searchspy.glade:112
+msgid "Frame:"
+msgstr ""
+
+#: downloadqueue.cc:1359
+msgid "Full tree does not match TTH root"
+msgstr ""
+
+#: WulforUtil.cc:207
+msgid "GB18030 (Chinese)"
+msgstr ""
+
+#: settingsdialog.cc:1017
+msgid "General text"
+msgstr ""
+
+#: settingsdialog.glade:5151
+msgid "Generate certificates"
+msgstr ""
+
+#: privatemessage.glade:225 hub.cc:1894 privatemessage.cc:937
+msgid "Get file list"
+msgstr ""
+
+#: privatemessage.glade:232 hub.cc:1895 privatemessage.cc:938
+msgid "Grant extra slot"
+msgstr ""
+
+#: favoritehubs.cc:62 favoritehubs.cc:148 favoritehubs.cc:317
+#: favoritehubs.cc:732
+msgid "Group"
+msgstr ""
+
+#: search.glade:150
+msgid "Group by"
+msgstr ""
+
+#: favoritehubs.cc:75 favoritehubs.cc:86 favoritehubs.cc:493
+#: favoritehubs.cc:579 favoritehubs.cc:594 favoritehubs.cc:609
+#: favoritehubs.cc:702 favoritehubs.cc:764 favoritehubs.cc:782
+#: favoritehubs.cc:807
+msgid "Group name"
+msgstr ""
+
+#: finishedtransfers.glade:31
+msgid "Grouped by Files"
+msgstr ""
+
+#: finishedtransfers.glade:60
+msgid "Grouped by Users"
+msgstr ""
+
+#: settingsdialog.glade:1045
+msgid "HTTP Proxy (for hublist only)"
+msgstr ""
+
+#: downloadqueue.glade:153 downloadqueue.glade:258
+msgid "H_igh"
+msgstr ""
+
+#: mainwindow.glade:1660 mainwindow.glade:1787 settingsdialog.cc:1208
+#: settingsdialog.cc:1256
+msgid "Hash"
+msgstr ""
+
+#: mainwindow.glade:401
+msgid "Hide"
+msgstr ""
+
+#: downloadqueue.cc:1329
+msgid "High"
+msgstr ""
+
+#: settingsdialog.glade:1272
+msgid "High priority max size"
+msgstr ""
+
+#: downloadqueue.cc:1332
+msgid "Highest"
+msgstr ""
+
+#: settingsdialog.glade:1385
+msgid "Highest priority max size"
+msgstr ""
+
+#: mainwindow.glade:420
+msgid "Homepage"
+msgstr ""
+
+#: finishedtransfers.cc:78 finishedtransfers.cc:187 search.cc:92 search.cc:627
+#: search.cc:695 search.cc:835 search.cc:1708 settingsdialog.cc:1396
+#: settingsdialog.cc:1406 settingsdialog.cc:2976 settingsdialog.cc:3050
+msgid "Hub"
+msgstr ""
+
+#: settingsdialog.cc:948
+msgid "Hub (also sets urgency hint)"
+msgstr ""
+
+#: favoriteusers.cc:46 favoriteusers.cc:110 favoriteusers.cc:585
+msgid "Hub (last seen in, if offline)"
+msgstr ""
+
+#: settingsdialog.glade:6375
+msgid "Hub IP / DNS (empty = All, 'op' = where operator)"
+msgstr ""
+
+#: settingsdialog.glade:6274
+msgid "Hub Menu"
+msgstr ""
+
+#: transfers.cc:58 transfers.cc:496 transfers.cc:562 transfers.cc:593
+#: transfers.cc:862 transfers.cc:881
+msgid "Hub Name"
+msgstr ""
+
+#: settingsdialog.cc:981 settingsdialog.cc:1150 settingsmanager.cc:205
+msgid "Hub connected"
+msgstr ""
+
+#: settingsdialog.cc:982 settingsdialog.cc:1154 settingsmanager.cc:203
+msgid "Hub disconnected"
+msgstr ""
+
+#: hub.cc:47 hub.cc:3128
+msgid "Hub: "
+msgstr ""
+
+#: mainwindow.glade:1632 mainwindow.glade:1735 search.glade:264
+msgid "Hubs"
+msgstr ""
+
+#: mainwindow.glade:640
+msgid "Hubs (normal / registered / op)"
+msgstr ""
+
+#: publichubs.cc:176
+msgid "Hubs: "
+msgstr ""
+
+#: WulforUtil.cc:200
+msgid "ISO-2022-JP (Japanese)"
+msgstr ""
+
+#: WulforUtil.cc:196
+msgid "ISO-8859-2 (Central Europe)"
+msgstr ""
+
+#: WulforUtil.cc:197
+msgid "ISO-8859-7 (Greek)"
+msgstr ""
+
+#: WulforUtil.cc:198
+msgid "ISO-8859-8 (Hebrew)"
+msgstr ""
+
+#: WulforUtil.cc:199
+msgid "ISO-8859-9 (Turkish)"
+msgstr ""
+
+#: settingsdialog.cc:327 settingsdialog.cc:1121 settingsdialog.cc:2020
+#: settingsdialog.cc:2054 settingsdialog.cc:2131 settingsdialog.cc:2167
+msgid "Icon"
+msgstr ""
+
+#: emoticonsdialog.cc:74
+msgid "Icon size"
+msgstr ""
+
+#: settingsdialog.glade:3169
+msgid "Icon..."
+msgstr ""
+
+#: settingsdialog.glade:2323
+msgid ""
+"Icons\n"
+"Text\n"
+"Both\n"
+"Both horizontal\n"
+"Hidden\n"
+"System default"
+msgstr ""
+
+#: favoritehubs.cc:615
+msgid ""
+"If you select 'Yes', all of these hubs are going to be deleted!\n"
+"If you select 'No', these hubs will simply be moved to the main default "
+"group."
+msgstr ""
+
+#: searchspy.glade:33
+msgid "Ignore TTH"
+msgstr ""
+
+#: searchspy.glade:32
+msgid "Ignore TTH search"
+msgstr ""
+
+#: settingsdialog.cc:1321
+msgid "Ignore private messages from bots"
+msgstr ""
+
+#: settingsdialog.cc:1320
+msgid "Ignore private messages from the hub"
+msgstr ""
+
+#: hub.cc:3176
+msgid "Ignored private message from bot "
+msgstr ""
+
+#: hub.cc:3169
+msgid "Ignored private message from hub"
+msgstr ""
+
+#: settingsdialog.glade:3471
+msgid "Import..."
+msgstr ""
+
+#: mainwindow.glade:310
+msgid "Indexing Progress"
+msgstr ""
+
+#: hash.glade:7 hashdialog.cc:44 hashdialog.cc:125
+msgid "Indexing files..."
+msgstr ""
+
+#: settingsdialog.cc:1775 settingsdialog.cc:1962
+msgid "Invalid extension: "
+msgstr ""
+
+#: downloadqueue.cc:236 sharebrowser.cc:343
+msgid "Items: "
+msgstr ""
+
+#: sharebrowser.cc:348
+msgid "Items: 0"
+msgstr ""
+
+#: WulforUtil.cc:203
+msgid "KOI8-R (Cyrillic)"
+msgstr ""
+
+#: settingsdialog.cc:836
+msgid "Kaffeine player"
+msgstr ""
+
+#: settingsdialog.cc:1376
+msgid ""
+"Keep duplicate files in your file list (duplicates never count towards your "
+"share size)"
+msgstr ""
+
+#: settingsdialog.glade:1300 settingsdialog.glade:1315
+#: settingsdialog.glade:1344 settingsdialog.glade:1359
+#: settingsdialog.glade:1559 settingsdialog.glade:4657
+#: settingsdialog.glade:4874
+msgid "KiB"
+msgstr ""
+
+#: downloadqueue.glade:139 downloadqueue.glade:244
+msgid "L_ow"
+msgstr ""
+
+#: mainwindow.glade:376
+msgid "Left"
+msgstr ""
+
+#: sharebrowser.cc:39 sharebrowser.cc:60
+msgid "List: "
+msgstr ""
+
+#: mainwindow.cc:1871
+msgid "Loading file list"
+msgstr ""
+
+#: settingsdialog.glade:4157
+msgid "Log downloads"
+msgstr ""
+
+#: settingsdialog.glade:4273
+msgid "Log filelist transfers"
+msgstr ""
+
+#: settingsdialog.glade:4071
+msgid "Log main chat"
+msgstr ""
+
+#: settingsdialog.glade:4114
+msgid "Log private chat"
+msgstr ""
+
+#: settingsdialog.glade:4258
+msgid "Log status messages"
+msgstr ""
+
+#: settingsdialog.glade:4243
+msgid "Log system messages"
+msgstr ""
+
+#: settingsdialog.glade:4200
+msgid "Log uploads"
+msgstr ""
+
+#: settingsdialog.glade:4306
+msgid "Logs"
+msgstr ""
+
+#: downloadqueue.cc:1326
+msgid "Low"
+msgstr ""
+
+#: settingsdialog.glade:1285
+msgid "Low priority size"
+msgstr ""
+
+#: downloadqueue.cc:1323
+msgid "Lowest"
+msgstr ""
+
+#: mainwindow.glade:1241 mainwindow.glade:1278
+msgid "Magnet"
+msgstr ""
+
+#: mainwindow.cc:1216
+msgid "Magnet Choice"
+msgstr ""
+
+#: mainwindow.cc:1146
+msgid "Magnet Properties / Choice"
+msgstr ""
+
+#: favoritehubs.glade:87
+msgid "Manage groups"
+msgstr ""
+
+#: favoritehubs.glade:564
+msgid "Mark hubs in this group as private hubs"
+msgstr ""
+
+#: sharebrowser.glade:109
+msgid "Match Queue"
+msgstr ""
+
+#: sharebrowser.cc:1044
+msgid "Matched "
+msgstr ""
+
+#: settingsdialog.glade:3738
+msgid "Matches"
+msgstr ""
+
+#: publichubs.cc:49 publichubs.cc:164
+msgid "Max Hubs"
+msgstr ""
+
+#: adlsearch.cc:44 adlsearch.cc:64 adlsearch.cc:115 adlsearch.cc:215
+msgid "Max Size"
+msgstr ""
+
+#: publichubs.cc:50 publichubs.cc:165
+msgid "Max Users"
+msgstr ""
+
+#: settingsdialog.glade:4521
+msgid "Max filelist size"
+msgstr ""
+
+#: settingsdialog.glade:4485
+msgid "Max hash speed"
+msgstr ""
+
+#: settingsdialog.glade:1531
+msgid "Max inactivity"
+msgstr ""
+
+#: settingsdialog.glade:92
+msgid "Max upload speed (MiB/s)"
+msgstr ""
+
+#: mainwindow.glade:799
+msgid "Maximum Download Rate"
+msgstr ""
+
+#: settingsdialog.glade:5272 settingsdialog.glade:5515
+msgid "Maximum Download Rate (KiB/s) (0 = infinite)"
+msgstr ""
+
+#: mainwindow.glade:837
+msgid "Maximum Upload Rate"
+msgstr ""
+
+#: settingsdialog.glade:5235 settingsdialog.glade:5478
+msgid "Maximum Upload Rate (KiB/s) (0 = infinite)"
+msgstr ""
+
+#: settingsdialog.glade:3262
+msgid "Maximum message length (0 = infinite)"
+msgstr ""
+
+#: settingsdialog.glade:914
+msgid "Maximum simultaneous downloads (0 = infinite)"
+msgstr ""
+
+#: settingsdialog.glade:4669
+msgid "MiB"
+msgstr ""
+
+#: settingsdialog.glade:4635
+msgid "MiB/s"
+msgstr ""
+
+#: settingsdialog.glade:5359 settingsdialog.glade:5402
+msgid ""
+"Midnight\n"
+"1AM\n"
+"2AM\n"
+"3AM\n"
+"4AM\n"
+"5AM\n"
+"6AM\n"
+"7AM\n"
+"8AM\n"
+"9AM\n"
+"10AM\n"
+"11AM\n"
+"Noon\n"
+"1PM\n"
+"2PM\n"
+"3PM\n"
+"4PM\n"
+"5PM\n"
+"6PM\n"
+"7PM\n"
+"8PM\n"
+"9PM\n"
+"10PM\n"
+"11PM"
+msgstr ""
+
+#: publichubs.cc:47 publichubs.cc:162
+msgid "Min Share"
+msgstr ""
+
+#: adlsearch.cc:43 adlsearch.cc:63 adlsearch.cc:114 adlsearch.cc:214
+msgid "Min Size"
+msgstr ""
+
+#: publichubs.cc:48 publichubs.cc:163
+msgid "Min Slots"
+msgstr ""
+
+#: settingsdialog.glade:1657
+msgid "Min elapsed"
+msgstr ""
+
+#: settingsdialog.glade:1516
+msgid "Min filesize"
+msgstr ""
+
+#: settingsdialog.glade:1644
+msgid "Min sources online"
+msgstr ""
+
+#: settingsdialog.glade:4509
+msgid "Mini slot size"
+msgstr ""
+
+#: settingsdialog.glade:5669
+msgid "Modify"
+msgstr ""
+
+#: settingsdialog.glade:6114
+msgid "Modify User Command"
+msgstr ""
+
+#: adlsearch.glade:75
+msgid "Move Down"
+msgstr ""
+
+#: adlsearch.glade:61
+msgid "Move Up"
+msgstr ""
+
+#: downloadqueue.glade:344
+msgid "Move to..."
+msgstr ""
+
+#: settingsdialog.cc:837
+msgid "Mplayer player"
+msgstr ""
+
+#: settingsdialog.cc:2631 settingsdialog.cc:2717
+msgid "Must not be empty..."
+msgstr ""
+
+#: settingsdialog.cc:1020
+msgid "My nick"
+msgstr ""
+
+#: settingsdialog.cc:1023
+msgid "My own message"
+msgstr ""
+
+#: favoritehubs.glade:277
+msgid "N_ick:"
+msgstr ""
+
+#: favoritehubs.glade:543 settingsdialog.glade:6316 favoritehubs.cc:55
+#: favoritehubs.cc:71 favoritehubs.cc:140 favoritehubs.cc:310
+#: favoritehubs.cc:511 favoritehubs.cc:664 publichubs.cc:41 publichubs.cc:156
+#: publichubs.cc:292 settingsdialog.cc:810 settingsdialog.cc:845
+#: settingsdialog.cc:1395 settingsdialog.cc:1404 settingsdialog.cc:2648
+#: settingsdialog.cc:2664 settingsdialog.cc:2682 settingsdialog.cc:2700
+#: settingsdialog.cc:2726 settingsdialog.cc:2731 settingsdialog.cc:2975
+#: settingsdialog.cc:3049
+msgid "Name"
+msgstr ""
+
+#: settingsdialog.cc:3089
+msgid "Name and command must not be empty"
+msgstr ""
+
+#: settingsdialog.glade:1798
+msgid "Name:"
+msgstr ""
+
+#: publichubs.cc:360 settingsdialog.cc:3286
+msgid "New list"
+msgstr ""
+
+#: settingsdialog.cc:1593
+msgid "New search type"
+msgstr ""
+
+#: settingsdialog.glade:3643
+msgid "New string or TTH"
+msgstr ""
+
+#: sharebrowser.glade:135
+msgid "Next"
+msgstr ""
+
+#: settingsdialog.glade:131 favoritehubs.cc:58 favoritehubs.cc:142
+#: favoritehubs.cc:313 favoritehubs.cc:667 favoriteusers.cc:45
+#: favoriteusers.cc:60 favoriteusers.cc:61 favoriteusers.cc:109
+#: favoriteusers.cc:373 favoriteusers.cc:584 finishedtransfers.cc:77
+#: finishedtransfers.cc:186 hub.cc:63 hub.cc:83 hub.cc:85 hub.cc:355
+#: hub.cc:370 hub.cc:390 hub.cc:438 hub.cc:1221 hub.cc:1497 hub.cc:1550
+#: hub.cc:1992 hub.cc:2023 hub.cc:2308 hub.cc:2347 search.cc:86 search.cc:620
+#: search.cc:691 search.cc:832 search.cc:1704
+msgid "Nick"
+msgstr ""
+
+#: hub.cc:3274
+msgid "Nick already taken"
+msgstr ""
+
+#: finishedtransfers.cc:58 finishedtransfers.cc:232
+msgid "Nicks"
+msgstr ""
+
+#: favoritehubs.cc:494 favoritehubs.cc:495 favoritehubs.cc:595
+#: favoritehubs.cc:596 favoritehubs.cc:765 favoritehubs.cc:766
+#: finishedtransfers.cc:675
+msgid "No"
+msgstr ""
+
+#: downloadqueue.cc:1369
+msgid "No errors"
+msgstr ""
+
+#: search.glade:160
+msgid ""
+"No grouping\n"
+"Filename\n"
+"Path\n"
+"Size\n"
+"Connection\n"
+"TTH\n"
+"Nick\n"
+"Hub\n"
+"File type\n"
+msgstr ""
+
+#: sharebrowser.cc:628 sharebrowser.cc:820
+msgid "No matches"
+msgstr ""
+
+#: settingsdialog.glade:899
+msgid "No new downloads if speed exceeds (KiB/s, 0 = disable)"
+msgstr ""
+
+#: sharebrowser.cc:831
+msgid "No search text entered"
+msgstr ""
+
+#: downloadqueue.cc:1282
+msgid "No users"
+msgstr ""
+
+#: settingsdialog.glade:3193
+msgid "None icon"
+msgstr ""
+
+#: downloadqueue.cc:1335
+msgid "Normal"
+msgstr ""
+
+#: search.glade:74
+msgid ""
+"Normal\n"
+"At least\n"
+"At most"
+msgstr ""
+
+#: settingsdialog.glade:1372
+msgid "Normal priority max size"
+msgstr ""
+
+#: hub.cc:1798 hub.cc:1833 hub.cc:1843 hub.cc:1931
+msgid "Not found user: "
+msgstr ""
+
+#: settingsdialog.glade:5722
+msgid "Note: Custom search types will only be applied to ADC hubs!"
+msgstr ""
+
+#: settingsdialog.glade:2443 settingsdialog.glade:2506
+msgid "Note: Most of these options require that you restart the application"
+msgstr ""
+
+#: settingsdialog.glade:2008
+msgid "Note: New files are added to the share only once they've been hashed!"
+msgstr ""
+
+#: settingsdialog.glade:958
+msgid "Note; because of changing download speeds, this is not 100% accurate..."
+msgstr ""
+
+#: settingsdialog.glade:3332 settingsdialog.cc:1119
+msgid "Notify"
+msgstr ""
+
+#: mainwindow.glade:507
+msgid "Official"
+msgstr ""
+
+#: WulforUtil.cc:157
+msgid "Offline"
+msgstr ""
+
+#: settingsdialog.glade:3706
+msgid "Old string or TTH"
+msgstr ""
+
+#: favoriteusers.cc:103 favoriteusers.cc:623 favoriteusers.cc:642
+msgid "Online"
+msgstr ""
+
+#: settingsdialog.cc:922
+msgid "Only show joins / parts for favorite users"
+msgstr ""
+
+#: search.glade:218
+msgid "Only users with free slots"
+msgstr ""
+
+#: mainwindow.glade:25
+msgid "Open _file list..."
+msgstr ""
+
+#: mainwindow.glade:40
+msgid "Open _own list"
+msgstr ""
+
+#: finishedtransfers.glade:150
+msgid "Open containing _folder"
+msgstr ""
+
+#: notify.cc:151
+msgid "Open file"
+msgstr ""
+
+#: settingsdialog.cc:1317
+msgid "Open file list window in the background"
+msgstr ""
+
+#: notify.cc:154
+msgid "Open folder"
+msgstr ""
+
+#: hub.glade:484
+msgid "Open image"
+msgstr ""
+
+#: settingsdialog.cc:1318
+msgid "Open new private messages from other users in the background"
+msgstr ""
+
+#: settingsdialog.cc:1319
+msgid "Open new window when using /join"
+msgstr ""
+
+#: settingsdialog.cc:1044
+msgid "Operator"
+msgstr ""
+
+#: settingsdialog.glade:3310 settingsdialog.glade:6156
+msgid "PM"
+msgstr ""
+
+#: settingsdialog.glade:4497
+msgid "PM history"
+msgstr ""
+
+#: privatemessage.cc:38 privatemessage.cc:138
+msgid "PM: "
+msgstr ""
+
+#: mainwindow.glade:513
+msgid "Packages in PPA"
+msgstr ""
+
+#: downloadqueue.cc:1355
+msgid "Passive user"
+msgstr ""
+
+#: settingsdialog.glade:636 favoritehubs.cc:59 favoritehubs.cc:143
+msgid "Password"
+msgstr ""
+
+#: downloadqueue.cc:71 downloadqueue.cc:284 downloadqueue.cc:391
+#: finishedtransfers.cc:57 finishedtransfers.cc:231 finishedtransfers.cc:503
+#: search.cc:89 search.cc:624 search.cc:675 search.cc:820 search.cc:1057
+#: search.cc:1098 search.cc:1157 search.cc:1238 search.cc:1277 search.cc:1334
+#: search.cc:1399 search.cc:1673 search.cc:1689 search.cc:1690 search.cc:1691
+#: search.cc:1960 transfers.cc:64 transfers.cc:716 transfers.cc:882
+msgid "Path"
+msgstr ""
+
+#: hash.glade:109
+msgid "Pause"
+msgstr ""
+
+#: downloadqueue.cc:1320
+msgid "Paused"
+msgstr ""
+
+#: hashdialog.cc:42 hashdialog.cc:130
+msgid "Paused..."
+msgstr ""
+
+#: settingsdialog.glade:192
+msgid "Personal"
+msgstr ""
+
+#: settingsdialog.glade:2176
+msgid "Pictures"
+msgstr ""
+
+#: settingsdialog.glade:2716
+msgid "Play"
+msgstr ""
+
+#: settingsdialog.cc:1322
+msgid "Popup box to input password for hubs"
+msgstr ""
+
+#: settingsdialog.glade:665
+msgid "Port"
+msgstr ""
+
+#: settingsdialog.glade:404
+msgid "Ports"
+msgstr ""
+
+#: settingsdialog.cc:1482 settingsdialog.cc:1581 settingsdialog.cc:1672
+msgid "Predefined"
+msgstr ""
+
+#: mainwindow.glade:1653 mainwindow.glade:1774 settingsdialog.glade:6
+#: settingsdialog.cc:1209 settingsdialog.cc:1254
+msgid "Preferences"
+msgstr ""
+
+#: finishedtransfers.glade:139 settingsdialog.glade:1950 transfers.glade:89
+msgid "Preview"
+msgstr ""
+
+#: downloadqueue.cc:69 downloadqueue.cc:283 downloadqueue.cc:390
+msgid "Priority"
+msgstr ""
+
+#: favoritehubs.cc:76 favoritehubs.cc:494 favoritehubs.cc:595
+#: favoritehubs.cc:765
+msgid "Private"
+msgstr ""
+
+#: settingsdialog.cc:949
+msgid "Private Message (also sets urgency hint)"
+msgstr ""
+
+#: settingsdialog.glade:5081
+msgid "Private key file"
+msgstr ""
+
+#: hub.cc:1899 settingsdialog.cc:980 settingsdialog.cc:1026
+#: settingsdialog.cc:1146 settingsmanager.cc:201
+msgid "Private message"
+msgstr ""
+
+#: adlsearch.glade:47 adlsearch.glade:117
+msgid "Properties"
+msgstr ""
+
+#: mainwindow.glade:193 mainwindow.glade:1646 mainwindow.glade:1761
+#: publichubs.cc:29 settingsdialog.cc:1210 settingsdialog.cc:1252
+#: settingsdialog.cc:1305
+msgid "Public Hubs"
+msgstr ""
+
+#: settingsdialog.glade:1000
+msgid "Public Hubs list URL"
+msgstr ""
+
+#: mainwindow.glade:1688 mainwindow.glade:1839 settingsdialog.glade:1740
+#: settingsdialog.cc:1211 settingsdialog.cc:1264
+msgid "Queue"
+msgstr ""
+
+#: mainwindow.glade:1720
+msgid "Quick connect to a hub"
+msgstr ""
+
+#: mainwindow.glade:1709 mainwindow.glade:1878 settingsdialog.cc:1214
+#: settingsdialog.cc:1270
+msgid "Quit"
+msgstr ""
+
+#: mainwindow.glade:1876
+msgid "Quit the program"
+msgstr ""
+
+#: wulfor.cc:118
+msgid "Quit..."
+msgstr ""
+
+#: publichubs.cc:51 publichubs.cc:166
+msgid "Rating"
+msgstr ""
+
+#: settingsdialog.glade:6140
+msgid "Raw"
+msgstr ""
+
+#: downloadqueue.glade:298
+msgid "Re-_add source"
+msgstr ""
+
+#: mainwindow.glade:82
+msgid "Re_connect"
+msgstr ""
+
+#: hub.glade:454 hub.cc:1900
+msgid "Rebuild hash"
+msgstr ""
+
+#: settingsdialog.cc:1387
+msgid "Register with the OS to handle dchub:// and adc:// URL links"
+msgstr ""
+
+#: settingsdialog.cc:1388
+msgid "Register with the OS to handle magnet: URL links"
+msgstr ""
+
+#: mainwindow.glade:1536
+msgid "Remember choice"
+msgstr ""
+
+#: downloadqueue.cc:1363
+msgid "Remote client does not fully support TTH - cannot download"
+msgstr ""
+
+#: adlsearch.glade:89 favoritehubs.glade:620 settingsdialog.glade:5693
+msgid "Remove"
+msgstr ""
+
+#: finishedtransfers.glade:165
+msgid "Remove All"
+msgstr ""
+
+#: downloadqueue.glade:314
+msgid "Remove So_urce"
+msgstr ""
+
+#: hub.glade:495
+msgid "Remove image"
+msgstr ""
+
+#: settingsdialog.cc:872
+msgid "Remove slow filelists"
+msgstr ""
+
+#: privatemessage.glade:218 hub.cc:1892 privatemessage.cc:936
+msgid "Remove user favorite"
+msgstr ""
+
+#: downloadqueue.glade:325 search.glade:525
+msgid "Remove user from _queue"
+msgstr ""
+
+#: settingsdialog.glade:5681
+msgid "Rename"
+msgstr ""
+
+#: settingsdialog.cc:1846
+msgid "Rename a search type"
+msgstr ""
+
+#: mainwindow.glade:448
+msgid "Report a Bug"
+msgstr ""
+
+#: transfers.cc:904
+msgid "Requesting"
+msgstr ""
+
+#: hash.glade:138
+msgid "Run in background"
+msgstr ""
+
+#: downloadqueue.cc:1289
+msgid "Running..."
+msgstr ""
+
+#: WulforUtil.cc:201
+msgid "SJIS (Japanese)"
+msgstr ""
+
+#: hub.glade:447 hub.cc:1898
+msgid "Say a third person"
+msgstr ""
+
+#: mainwindow.glade:213 mainwindow.glade:1667 mainwindow.glade:1800
+#: searchspy.glade:184 searchspy.glade:249 settingsdialog.glade:5750
+#: settingsdialog.cc:950 settingsdialog.cc:1212 settingsdialog.cc:1258
+msgid "Search"
+msgstr ""
+
+#: mainwindow.glade:228
+msgid "Search ADL"
+msgstr ""
+
+#: settingsdialog.glade:6227
+msgid "Search Menu"
+msgstr ""
+
+#: mainwindow.glade:242 mainwindow.glade:1824 settingsdialog.glade:3989
+#: searchspy.cc:36 settingsdialog.cc:951 settingsdialog.cc:1213
+#: settingsdialog.cc:1260 settingsdialog.cc:1311
+msgid "Search Spy"
+msgstr ""
+
+#: adlsearch.cc:40 adlsearch.cc:60 adlsearch.cc:111 adlsearch.cc:211
+#: adlsearch.cc:237 searchspy.cc:54 searchspy.cc:72 searchspy.cc:74
+#: searchspy.cc:78 searchspy.cc:220 searchspy.cc:231 searchspy.cc:285
+#: searchspy.cc:292 searchspy.cc:308 searchspy.cc:467 searchspy.cc:532
+#: searchspy.cc:565
+msgid "Search String"
+msgstr ""
+
+#: search.glade:25
+msgid "Search for"
+msgstr ""
+
+#: search.glade:309
+msgid "Search for a file"
+msgstr ""
+
+#: mainwindow.glade:1798
+msgid "Search for files to download"
+msgstr ""
+
+#: settingsdialog.glade:4712
+msgid "Search history"
+msgstr ""
+
+#: search.glade:189
+msgid "Search options"
+msgstr ""
+
+#: hub.cc:3281
+msgid "Search spam detected from "
+msgstr ""
+
+#: settingsdialog.cc:1481 settingsdialog.cc:1671 settingsdialog.cc:1704
+#: settingsdialog.cc:1790 settingsdialog.cc:1839 settingsdialog.cc:1887
+msgid "Search type"
+msgstr ""
+
+#: search.glade:200
+msgid "Search within local results"
+msgstr ""
+
+#: search.cc:40 search.cc:530
+msgid "Search: "
+msgstr ""
+
+#: search.cc:527
+msgid "Searching for "
+msgstr ""
+
+#: search.cc:543
+msgid "Searching too soon, retry in "
+msgstr ""
+
+#: mainwindow.cc:2078
+msgid ""
+"Searching will not work correctly until you change settings or turn off any "
+"application that might be using the UDP port."
+msgstr ""
+
+#: settingsdialog.glade:5178
+msgid "Security Certificates"
+msgstr ""
+
+#: mainwindow.glade:1064 mainwindow.cc:1834
+msgid "Select filelist to browse"
+msgstr ""
+
+#: settingsdialog.cc:929
+msgid "Send PM when double clicked in the user list"
+msgstr ""
+
+#: downloadqueue.glade:287 search.glade:504
+msgid "Send _private message"
+msgstr ""
+
+#: settingsdialog.glade:6434
+msgid "Send once per nick"
+msgstr ""
+
+#: settingsdialog.cc:1383
+msgid "Send unknown /commands to the hub"
+msgstr ""
+
+#: settingsdialog.glade:6190 settingsdialog.cc:3001
+msgid "Separator"
+msgstr ""
+
+#: downloadqueue.glade:118 downloadqueue.glade:223
+msgid "Set Priorit_y"
+msgstr ""
+
+#: hub.glade:461
+msgid "Set download limit image"
+msgstr ""
+
+#: hub.cc:1876
+msgid "Set download limit image: "
+msgstr ""
+
+#: settingsdialog.cc:870
+msgid "Set lowest priority for newly added files larger than low priority size"
+msgstr ""
+
+#: settingsdialog.glade:2034
+msgid "Share hidden files"
+msgstr ""
+
+#: hub.cc:64 hub.cc:354 hub.cc:371 hub.cc:391 hub.cc:439 publichubs.cc:46
+#: publichubs.cc:161
+msgid "Shared"
+msgstr ""
+
+#: settingsdialog.glade:2206
+msgid "Sharing"
+msgstr ""
+
+#: hub.glade:426 hub.cc:1893
+msgid "Show favorites list"
+msgstr ""
+
+#: hub.glade:433 privatemessage.glade:239 hub.cc:1896 privatemessage.cc:940
+msgid "Show help"
+msgstr ""
+
+#: settingsdialog.cc:921
+msgid "Show joins / parts in chat by default"
+msgstr ""
+
+#: mainwindow.glade:1510
+msgid "Show magnet dialog"
+msgstr ""
+
+#: settingsdialog.glade:3278
+msgid "Show only when the application is not active."
+msgstr ""
+
+#: settingsdialog.cc:918
+msgid "Show status icon"
+msgstr ""
+
+#: settingsdialog.cc:919
+msgid "Show timestamps in chat by default"
+msgstr ""
+
+#: searchspy.glade:163
+msgid "Show top search"
+msgstr ""
+
+#: hub.glade:468 hub.cc:1904
+msgid "Show version"
+msgstr ""
+
+#: mainwindow.glade:607
+msgid "Show/Hide transfers panel"
+msgstr ""
+
+#: hub.glade:203
+msgid "Show/Hide user list"
+msgstr ""
+
+#: wulfor.cc:116
+msgid "Shutting down dcpp client..."
+msgstr ""
+
+#: mainwindow.glade:1302 search.glade:60 downloadqueue.cc:67
+#: downloadqueue.cc:86 downloadqueue.cc:278 downloadqueue.cc:385 search.cc:88
+#: search.cc:116 search.cc:623 search.cc:680 search.cc:823 search.cc:1680
+#: search.cc:1698 settingsdialog.cc:892 settingsdialog.cc:898
+#: settingsdialog.cc:3426 settingsdialog.cc:3495 sharebrowser.cc:79
+#: sharebrowser.cc:97 sharebrowser.cc:287 sharebrowser.cc:318 transfers.cc:63
+#: transfers.cc:545 transfers.cc:625 transfers.cc:717 transfers.cc:729
+#: transfers.cc:883
+msgid "Size"
+msgstr ""
+
+#: downloadqueue.cc:237 downloadqueue.cc:239 sharebrowser.cc:344
+msgid "Size: "
+msgstr ""
+
+#: sharebrowser.cc:349
+msgid "Size: 0 B"
+msgstr ""
+
+#: settingsdialog.cc:876
+msgid "Skip zero-byte files"
+msgstr ""
+
+#: privatemessage.cc:1323
+msgid "Slot granted"
+msgstr ""
+
+#: favoriteusers.cc:511 hub.cc:2559
+msgid "Slot granted to "
+msgstr ""
+
+#: search.cc:90 search.cc:118 search.cc:622
+msgid "Slots"
+msgstr ""
+
+#: mainwindow.glade:389
+msgid "Small"
+msgstr ""
+
+#: settingsdialog.glade:4736
+msgid "Socket read buffer"
+msgstr ""
+
+#: settingsdialog.glade:4748
+msgid "Socket write buffer"
+msgstr ""
+
+#: settingsdialog.glade:680
+msgid "Socks IP"
+msgstr ""
+
+#: settingsdialog.cc:923
+msgid "Sort favorite users first"
+msgstr ""
+
+#: settingsdialog.glade:2815 settingsdialog.cc:960
+msgid "Sounds"
+msgstr ""
+
+#: adlsearch.cc:41 adlsearch.cc:61 adlsearch.cc:112 adlsearch.cc:212
+msgid "Source Type"
+msgstr ""
+
+#: downloadqueue.cc:1361
+msgid "Source too slow"
+msgstr ""
+
+#: mainwindow.glade:434
+msgid "Source(svn)"
+msgstr ""
+
+#: finishedtransfers.cc:60 finishedtransfers.cc:81 finishedtransfers.cc:190
+#: finishedtransfers.cc:234 transfers.cc:61 transfers.cc:558 transfers.cc:594
+#: transfers.cc:625 transfers.cc:766 transfers.cc:885 transfers.cc:967
+#: transfers.cc:987 transfers.cc:1042 transfers.cc:1147 transfers.cc:1161
+msgid "Speed"
+msgstr ""
+
+#: mainwindow.glade:1681 mainwindow.glade:1826
+msgid "Spy"
+msgstr ""
+
+#: mainwindow.glade:1496
+msgid "Start a search for this file"
+msgstr ""
+
+#: downloadqueue.cc:66 downloadqueue.cc:277 downloadqueue.cc:384
+#: searchspy.cc:57 searchspy.cc:295 searchspy.cc:377 transfers.cc:59
+#: transfers.cc:370 transfers.cc:403 transfers.cc:497 transfers.cc:586
+#: transfers.cc:596 transfers.cc:764 transfers.cc:904 transfers.cc:917
+#: transfers.cc:952 transfers.cc:965 transfers.cc:984 transfers.cc:1005
+#: transfers.cc:1016 transfers.cc:1039 transfers.cc:1056 transfers.cc:1058
+#: transfers.cc:1099 transfers.cc:1132 transfers.cc:1145 transfers.cc:1158
+msgid "Status"
+msgstr ""
+
+#: settingsdialog.cc:1032
+msgid "Status message"
+msgstr ""
+
+#: WulforUtil.cc:40
+msgid "System default"
+msgstr ""
+
+#: settingsdialog.glade:3509
+msgid "System icons"
+msgstr ""
+
+#: settingsdialog.cc:1029
+msgid "System message"
+msgstr ""
+
+#: WulforUtil.cc:208
+msgid "TIS-620 (Thai)"
+msgstr ""
+
+#: mainwindow.glade:1315
+msgid "TTH"
+msgstr ""
+
+#: settingsdialog.glade:2522
+msgid "Tabs"
+msgstr ""
+
+#: hub.cc:66 hub.cc:373 hub.cc:393
+msgid "Tag"
+msgstr ""
+
+#: settingsdialog.glade:3144
+msgid "Test"
+msgstr ""
+
+#: settingsdialog.glade:2938
+msgid "Text color"
+msgstr ""
+
+#: settingsdialog.glade:2951
+msgid "Text style"
+msgstr ""
+
+#: favoritehubs.cc:433
+msgid "The name and address fields are required"
+msgstr ""
+
+#: settingsdialog.glade:3522
+msgid "Theme default"
+msgstr ""
+
+#: settingsdialog.glade:3544
+msgid "Themes"
+msgstr ""
+
+#: finishedtransfers.cc:55 finishedtransfers.cc:69 finishedtransfers.cc:70
+#: finishedtransfers.cc:76 finishedtransfers.cc:89 finishedtransfers.cc:90
+#: finishedtransfers.cc:185 finishedtransfers.cc:229 searchspy.cc:56
+#: searchspy.cc:269 searchspy.cc:294 searchspy.cc:310
+msgid "Time"
+msgstr ""
+
+#: transfers.cc:60 transfers.cc:595 transfers.cc:625 transfers.cc:890
+#: transfers.cc:988 transfers.cc:1043 transfers.cc:1162
+msgid "Time Left"
+msgstr ""
+
+#: favoriteusers.cc:47 favoriteusers.cc:111 favoriteusers.cc:578
+#: favoriteusers.cc:586
+msgid "Time last seen"
+msgstr ""
+
+#: settingsdialog.cc:1035 settingsdialog.cc:1063
+msgid "Timestamp"
+msgstr ""
+
+#: settingsdialog.cc:326 settingsdialog.cc:1120 settingsdialog.cc:2019
+#: settingsdialog.cc:2075 settingsdialog.cc:2091 settingsdialog.cc:2113
+#: settingsdialog.cc:2117 settingsdialog.cc:2167
+msgid "Title"
+msgstr ""
+
+#: settingsdialog.glade:6406
+msgid "To (empty for selected user)"
+msgstr ""
+
+#: settingsdialog.glade:3599
+msgid "Toolbar"
+msgstr ""
+
+#: mainwindow.glade:362
+msgid "Tools"
+msgstr ""
+
+#: searchspy.glade:164 searchspy.glade:205
+msgid "Top"
+msgstr ""
+
+#: settingsdialog.glade:2282
+msgid ""
+"Top\n"
+"Left\n"
+"Right\n"
+"Bottom"
+msgstr ""
+
+#: settingsdialog.glade:3916
+msgid "Top (count matches, >)"
+msgstr ""
+
+#: searchspy.glade:68
+msgid "Top: >"
+msgstr ""
+
+#: mainwindow.glade:716
+msgid "Total received"
+msgstr ""
+
+#: mainwindow.glade:776
+msgid "Total sent"
+msgstr ""
+
+#: settingsdialog.cc:3500
+msgid "Total size: "
+msgstr ""
+
+#: settingsdialog.glade:2023
+msgid "Total size: 0 B"
+msgstr ""
+
+#: sharebrowser.cc:339
+msgid "Total: "
+msgstr ""
+
+#: finishedtransfers.cc:59 finishedtransfers.cc:80 finishedtransfers.cc:180
+#: finishedtransfers.cc:189 finishedtransfers.cc:233 finishedtransfers.cc:595
+msgid "Transferred"
+msgstr ""
+
+#: settingsdialog.glade:5053
+msgid "Trusted certificates path"
+msgstr ""
+
+#: search.cc:87 search.cc:625 search.cc:700 search.cc:838 search.cc:1677
+#: search.cc:1678 search.cc:1679 search.cc:1693 sharebrowser.cc:80
+#: sharebrowser.cc:290 sharebrowser.cc:311
+msgid "Type"
+msgstr ""
+
+#: settingsdialog.cc:1038
+msgid "URL"
+msgstr ""
+
+#: WulforUtil.cc:193
+msgid "UTF-8 (Unicode)"
+msgstr ""
+
+#: hub.cc:2584
+msgid "Unable to connect: already connected to the requested hub"
+msgstr ""
+
+#: sharebrowser.cc:174
+msgid "Unable to load file list: "
+msgstr ""
+
+#: mainwindow.cc:1859
+msgid "Unable to load file list: Invalid file list name"
+msgstr ""
+
+#: mainwindow.cc:2063
+msgid "Unable to open TCP/TLS port"
+msgstr ""
+
+#: mainwindow.cc:2077
+msgid "Unable to open UDP port"
+msgstr ""
+
+#: settingsdialog.glade:824
+msgid "Unfinished downloads directory"
+msgstr ""
+
+#: downloadqueue.cc:1295 downloadqueue.cc:1296 WulforUtil.cc:300
+#: WulforUtil.cc:302
+msgid "Unknown"
+msgstr ""
+
+#: privatemessage.cc:944
+msgid "Unknown command "
+msgstr ""
+
+#: hub.cc:1965
+msgid "Unknown command '"
+msgstr ""
+
+#: mainwindow.glade:369
+msgid "Up"
+msgstr ""
+
+#: favoritehubs.glade:607 searchspy.glade:150
+msgid "Update"
+msgstr ""
+
+#: settingsdialog.glade:3770
+msgid "Update a string or TTH"
+msgstr ""
+
+#: searchspy.glade:149
+msgid "Update frame search"
+msgstr ""
+
+#: hub.cc:1901
+msgid "Update own file list"
+msgstr ""
+
+#: searchspy.cc:389
+msgid "Updated frame search"
+msgstr ""
+
+#: settingsdialog.cc:1203
+msgid "Upload"
+msgstr ""
+
+#: settingsdialog.glade:5555
+msgid "Upload Slots"
+msgstr ""
+
+#: transfers.cc:1145
+msgid "Upload complete..."
+msgstr ""
+
+#: settingsdialog.cc:979
+msgid "Upload finished"
+msgstr ""
+
+#: settingsdialog.glade:2147
+msgid "Upload slots"
+msgstr ""
+
+#: mainwindow.glade:738
+msgid "Upload speed"
+msgstr ""
+
+#: transfers.cc:1099
+msgid "Upload starting..."
+msgstr ""
+
+#: mainwindow.cc:617
+msgid "Upload: "
+msgstr ""
+
+#: transfers.cc:1130
+msgid "Uploaded "
+msgstr ""
+
+#: settingsdialog.cc:289 settingsdialog.cc:325 settingsdialog.cc:959
+#: settingsdialog.cc:970 settingsdialog.cc:1118 settingsdialog.cc:1133
+msgid "Use"
+msgstr ""
+
+#: mainwindow.glade:1214
+msgid "Use Blinking Icon"
+msgstr ""
+
+#: hub.cc:1671 privatemessage.cc:1100
+msgid "Use Emoticons"
+msgstr ""
+
+#: settingsdialog.cc:924
+msgid "Use OEM monospaced font for chat windows"
+msgstr ""
+
+#: settingsdialog.glade:604
+msgid "Use SOCKS5 server to resolve hostnames"
+msgstr ""
+
+#: settingsdialog.cc:1448
+msgid "Use TLS when remote client supports it"
+msgstr ""
+
+#: settingsdialog.glade:219
+msgid "Use UPnP to let client cofigure my router"
+msgstr ""
+
+#: mainwindow.glade:1451
+msgid ""
+"Use automatically search for alternative download locations (Preferences/"
+"Downloads/Queue)"
+msgstr ""
+
+#: settingsdialog.cc:926
+msgid "Use blinking status icon"
+msgstr ""
+
+#: settingsdialog.cc:927
+msgid "Use emoticons"
+msgstr ""
+
+#: settingsdialog.cc:1386
+msgid "Use fast hashing method (disable if you have problems with hashing)"
+msgstr ""
+
+#: settingsdialog.cc:925
+msgid "Use magnet split"
+msgstr ""
+
+#: settingsdialog.glade:5327
+msgid "Use second set of bandwidth limits"
+msgstr ""
+
+#: settingsdialog.glade:6673
+msgid "Use separator extensions (doc;xls;ppt;docx;xlsx;pptx)"
+msgstr ""
+
+#: transfers.cc:57 transfers.cc:83 transfers.cc:85 transfers.cc:495
+#: transfers.cc:561 transfers.cc:592 transfers.cc:861 transfers.cc:880
+#: transfers.cc:903 transfers.cc:918 transfers.cc:966 transfers.cc:985
+#: transfers.cc:1041 transfers.cc:1059 transfers.cc:1100 transfers.cc:1146
+#: transfers.cc:1159
+msgid "User"
+msgstr ""
+
+#: settingsdialog.cc:1193
+msgid "User (dc)"
+msgstr ""
+
+#: settingsdialog.cc:1197
+msgid "User (normal)"
+msgstr ""
+
+#: settingsdialog.glade:4459
+msgid "User Commands"
+msgstr ""
+
+#: favoritehubs.cc:60 favoritehubs.cc:146 favoritehubs.cc:315
+#: favoritehubs.cc:669
+msgid "User Description"
+msgstr ""
+
+#: sharebrowser.glade:258 sharebrowser.glade:315 transfers.glade:73
+msgid "User commands"
+msgstr ""
+
+#: hub.cc:1823
+msgid "User favorite list:"
+msgstr ""
+
+#: settingsdialog.cc:1194
+msgid "User firewall (dc)"
+msgstr ""
+
+#: settingsdialog.cc:1198
+msgid "User firewall (normal)"
+msgstr ""
+
+#: hub.cc:1902
+msgid "User list show/hide"
+msgstr ""
+
+#: hub.cc:2530 hub.cc:2550
+msgid "User not found"
+msgstr ""
+
+#: settingsdialog.cc:1196
+msgid "User operator (dc)"
+msgstr ""
+
+#: settingsdialog.cc:1200
+msgid "User operator (normal)"
+msgstr ""
+
+#: settingsdialog.cc:1195
+msgid "User operator firewall (dc)"
+msgstr ""
+
+#: settingsdialog.cc:1199
+msgid "User operator firewall (normal)"
+msgstr ""
+
+#: privatemessage.cc:1258
+msgid "User went offline"
+msgstr ""
+
+#: settingsdialog.glade:589
+msgid "Username"
+msgstr ""
+
+#: mainwindow.glade:1639 mainwindow.glade:1748 downloadqueue.cc:70
+#: downloadqueue.cc:276 downloadqueue.cc:383 publichubs.cc:43 publichubs.cc:57
+#: publichubs.cc:58 publichubs.cc:158
+msgid "Users"
+msgstr ""
+
+#: publichubs.cc:177
+msgid "Users: "
+msgstr ""
+
+#: settingsdialog.cc:920
+msgid "View status messages in main chat"
+msgstr ""
+
+#: mainwindow.glade:1837
+msgid "View the files to be downloaded"
+msgstr ""
+
+#: mainwindow.glade:1785
+msgid "View the hashing progress"
+msgstr ""
+
+#: mainwindow.glade:1850
+msgid "View the list of finished downloads"
+msgstr ""
+
+#: mainwindow.glade:1863
+msgid "View the list of finished uploads"
+msgstr ""
+
+#: settingsdialog.cc:890 settingsdialog.cc:3424 settingsdialog.cc:3493
+msgid "Virtual Name"
+msgstr ""
+
+#: settingsdialog.cc:2758
+msgid "Virtual name"
+msgstr ""
+
+#: settingsdialog.glade:3885
+msgid "Waiting (sec)"
+msgstr ""
+
+#: hub.cc:524
+msgid ""
+"Waiting for input password (don't remove /password before your password)"
+msgstr ""
+
+#: transfers.cc:579
+msgid "Waiting for slot "
+msgstr ""
+
+#: searchspy.glade:101 settingsdialog.glade:3875
+msgid "Waiting time(sec)"
+msgstr ""
+
+#: transfers.cc:1058
+msgid "Waiting to retry"
+msgstr ""
+
+#: searchspy.glade:90
+msgid "Waiting:"
+msgstr ""
+
+#: mainwindow.cc:276
+msgid "Welcome to "
+msgstr ""
+
+#: settingsdialog.glade:2779
+msgid "When a private message window is opened"
+msgstr ""
+
+#: settingsdialog.glade:2662
+msgid "Windows"
+msgstr ""
+
+#: settingsdialog.glade:4701
+msgid "Write buffer size"
+msgstr ""
+
+#: settingsdialog.cc:835
+msgid "Xine player"
+msgstr ""
+
+#: favoritehubs.cc:494 favoritehubs.cc:495 favoritehubs.cc:595
+#: favoritehubs.cc:596 favoritehubs.cc:765 favoritehubs.cc:766
+#: finishedtransfers.cc:675
+msgid "Yes"
+msgstr ""
+
+#: favoritehubs.cc:569
+msgid "You must enter a name"
+msgstr ""
+
+#: settingsdialog.cc:3486
+msgid "[HIDDEN SHARE] "
+msgstr ""
+
+#: transfers.cc:940 transfers.cc:1122
+msgid "[S]"
+msgstr ""
+
+#: transfers.cc:945
+msgid "[T]"
+msgstr ""
+
+#: transfers.cc:942 transfers.cc:1124
+msgid "[U]"
+msgstr ""
+
+#: transfers.cc:947 transfers.cc:1127
+msgid "[Z]"
+msgstr ""
+
+#: hub.glade:265 search.glade:511 transfers.glade:52
+msgid "_Add to favorites"
+msgstr ""
+
+#: favoritehubs.glade:178
+msgid "_Address:"
+msgstr ""
+
+#: downloadqueue.glade:276 favoriteusers.glade:39 hub.glade:239
+#: search.glade:490 transfers.glade:31
+msgid "_Browse file list"
+msgstr ""
+
+#: transfers.glade:117
+msgid "_Close connection"
+msgstr ""
+
+#: hub.glade:365 hub.glade:381 privatemessage.glade:150
+#: privatemessage.glade:166
+msgid "_Copy link"
+msgstr ""
+
+#: downloadqueue.glade:204 hub.glade:343 privatemessage.glade:129
+#: search.glade:478 sharebrowser.glade:301
+msgid "_Copy magnet"
+msgstr ""
+
+#: hub.glade:225
+msgid "_Copy nick"
+msgstr ""
+
+#: sharebrowser.glade:308
+msgid "_Copy picture"
+msgstr ""
+
+#: favoritehubs.glade:194
+msgid "_Description:"
+msgstr ""
+
+#: hub.glade:318 privatemessage.glade:104 search.glade:430
+msgid "_Download"
+msgstr ""
+
+#: favoritehubs.glade:224
+msgid "_Encoding:"
+msgstr ""
+
+#: mainwindow.glade:138 mainwindow.glade:1227
+msgid "_Exit"
+msgstr ""
+
+#: mainwindow.glade:18
+msgid "_File"
+msgstr ""
+
+#: transfers.glade:105
+msgid "_Force attempt"
+msgstr ""
+
+#: search.glade:518 transfers.glade:59
+msgid "_Grant extra slot"
+msgstr ""
+
+#: favoriteusers.glade:60 hub.glade:284
+msgid "_Grant slot"
+msgstr ""
+
+#: favoritehubs.glade:386
+msgid "_Groups:"
+msgstr ""
+
+#: downloadqueue.glade:160 downloadqueue.glade:265
+msgid "_Highest"
+msgstr ""
+
+#: downloadqueue.glade:132 downloadqueue.glade:237
+msgid "_Lowest"
+msgstr ""
+
+#: mainwindow.glade:110
+msgid "_Magnet Choice"
+msgstr ""
+
+#: search.glade:497
+msgid "_Match Queue"
+msgstr ""
+
+#: favoriteusers.glade:46 hub.glade:246 transfers.glade:38
+msgid "_Match queue"
+msgstr ""
+
+#: downloadqueue.glade:176
+msgid "_Move"
+msgstr ""
+
+#: downloadqueue.glade:211
+msgid "_Move/Rename"
+msgstr ""
+
+#: favoritehubs.glade:133
+msgid "_Name:"
+msgstr ""
+
+#: mainwindow.glade:345
+msgid "_Next Tab"
+msgstr ""
+
+#: downloadqueue.glade:146 downloadqueue.glade:251
+msgid "_Normal"
+msgstr ""
+
+#: hub.glade:388 privatemessage.glade:173
+msgid "_Open hub"
+msgstr ""
+
+#: hub.glade:372 privatemessage.glade:157
+msgid "_Open link in default application"
+msgstr ""
+
+#: favoritehubs.glade:308
+msgid "_Password:"
+msgstr ""
+
+#: downloadqueue.glade:125 downloadqueue.glade:230
+msgid "_Paused"
+msgstr ""
+
+#: mainwindow.glade:95
+msgid "_Preferences"
+msgstr ""
+
+#: mainwindow.glade:336
+msgid "_Previous Tab"
+msgstr ""
+
+#: favoriteusers.glade:53 hub.glade:253
+msgid "_Private message"
+msgstr ""
+
+#: hub.glade:355 privatemessage.glade:141
+msgid "_Properties/Choice"
+msgstr ""
+
+#: mainwindow.glade:67
+msgid "_Quick connect"
+msgstr ""
+
+#: mainwindow.glade:47
+msgid "_Refresh file list"
+msgstr ""
+
+#: adlsearch.glade:124 downloadqueue.glade:188 downloadqueue.glade:336
+#: favoriteusers.glade:93 search.glade:548 searchspy.glade:196
+#: searchspy.glade:263
+msgid "_Remove"
+msgstr ""
+
+#: hub.glade:272
+msgid "_Remove from favorites"
+msgstr ""
+
+#: favoriteusers.glade:67 hub.glade:291 transfers.glade:66
+msgid "_Remove user from queue"
+msgstr ""
+
+#: search.glade:333
+msgid "_Search"
+msgstr ""
+
+#: search.glade:471
+msgid "_Search by TTH"
+msgstr ""
+
+#: downloadqueue.glade:197 sharebrowser.glade:294
+msgid "_Search for alternates"
+msgstr ""
+
+#: hub.glade:311 privatemessage.glade:97
+msgid "_Search magnet"
+msgstr ""
+
+#: transfers.glade:45
+msgid "_Send private message"
+msgstr ""
+
+#: hub.glade:232
+msgid "_Send public message"
+msgstr ""
+
+#: mainwindow.glade:1201
+msgid "_Show Interface"
+msgstr ""
+
+#: mainwindow.glade:328
+msgid "_Tabs"
+msgstr ""
+
+#: favoritehubs.glade:340
+msgid "_User Description:"
+msgstr ""
+
+#: hub.glade:298 search.glade:532
+msgid "_User commands"
+msgstr ""
+
+#: mainwindow.glade:156
+msgid "_View"
+msgstr ""
+
+#: hub.cc:2772
+msgid "bad image"
+msgstr ""
+
+#: settingsdialog.cc:2240
+msgid "default icons"
+msgstr ""
+
+#: settingsdialog.cc:2272
+msgid "default theme"
+msgstr ""
+
+#: hub.cc:69 hub.cc:376 hub.cc:396
+msgid "eMail"
+msgstr ""
+
+#: mainwindow.cc:2131
+msgid "file list from "
+msgstr ""
+
+#: settingsdialog.glade:5349
+msgid "from"
+msgstr ""
+
+#: hub.cc:2759
+msgid "loading error"
+msgstr ""
+
+#: hub.cc:1881
+msgid "project home: "
+msgstr ""
+
+#: settingsdialog.glade:1574 settingsdialog.glade:1589
+#: settingsdialog.glade:1629 hashdialog.cc:79 mainwindow.cc:649
+#: mainwindow.cc:650 mainwindow.cc:2167 mainwindow.cc:2169 treeview.cc:211
+msgid "s"
+msgstr ""
+
+#: settingsdialog.cc:2825 settingsdialog.cc:2926
+msgid "selected style failed"
+msgstr ""
+
+#: settingsdialog.glade:3436
+msgid "theme"
+msgstr ""
+
+#: settingsdialog.glade:5392
+msgid "to"
+msgstr ""
+
+#: searchspy.cc:358
+msgid "top..."
+msgstr ""
+
+#: searchspy.cc:412
+msgid "top/waiting/frame: "
+msgstr ""
+
+#: searchspy.cc:295 searchspy.cc:363
+msgid "waiting..."
+msgstr ""

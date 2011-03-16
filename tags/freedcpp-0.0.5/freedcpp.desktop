@@ -1,0 +1,12 @@
+[Desktop Entry]
+Encoding=UTF-8
+Type=Application
+Exec=freedcpp
+Icon=freedcpp
+Terminal=false
+Categories=GTK;P2P;Network;FileTransfer;
+Name=FreeDC++
+GenericName=DC++ Client
+GenericName[ru]=Клиент DC++
+Comment=DC++ Client
+Comment[ru]=Клиент DC++
