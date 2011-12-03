@@ -17,14 +17,14 @@
  */
 
 #include "stdinc.h"
-#include "DCPlusPlus.h"
-
 #include "Thread.h"
+
+#include "format.h"
 
 namespace dcpp {
 
 #ifdef _WIN32
-void Thread::start() throw(ThreadException) {
+void Thread::start() {
 	join();
 	if( (threadHandle = CreateThread(NULL, 0, &starter, this, 0, &threadId)) == NULL) {
 		throw ThreadException(_("Unable to create thread"));
@@ -32,7 +32,7 @@ void Thread::start() throw(ThreadException) {
 }
 
 #else
-void Thread::start() throw(ThreadException) {
+void Thread::start() {
 	join();
 	if(pthread_create(&threadHandle, NULL, &starter, this) != 0) {
 		throw ThreadException(_("Unable to create thread"));

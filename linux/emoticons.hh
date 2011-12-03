@@ -22,6 +22,7 @@
 #ifndef EMOTICONS_HH
 #define EMOTICONS_HH
 
+#include <set> ///[+]
 #include <gtk/gtk.h>
 
 #define EMOTICONS_MAX 48

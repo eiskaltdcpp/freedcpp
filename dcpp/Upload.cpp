@@ -17,8 +17,6 @@
  */
 
 #include "stdinc.h"
-#include "DCPlusPlus.h"
-
 #include "Upload.h"
 
 #include "UserConnection.h"
@@ -35,7 +33,7 @@ Upload::~Upload() {
 	delete stream;
 }
 
-void Upload::getParams(const UserConnection& aSource, StringMap& params) {
+void Upload::getParams(const UserConnection& aSource, ParamMap& params) {
 	Transfer::getParams(aSource, params);
 	params["source"] = getPath();
 }

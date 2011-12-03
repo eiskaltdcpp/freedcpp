@@ -19,11 +19,18 @@
 #ifndef DCPLUSPLUS_DCPP_CONNECTIVITY_MANAGER_H
 #define DCPLUSPLUS_DCPP_CONNECTIVITY_MANAGER_H
 
-#include "Util.h"
+#include "SettingsManager.h"
 #include "Speaker.h"
 #include "Singleton.h"
 
+#include <string>
+#include <unordered_map>
+#include <boost/variant.hpp>
+
 namespace dcpp {
+
+using std::string;
+using std::unordered_map;
 
 class ConnectivityManagerListener {
 public:
@@ -31,28 +38,41 @@ public:
 	template<int I>	struct X { enum { TYPE = I }; };
 
 	typedef X<0> Message;
-	typedef X<1> Finished;
+	typedef X<1> Started;
+	typedef X<2> Finished;
+	typedef X<3> SettingChanged; // auto-detection has been enabled / disabled
 
-	virtual void on(Message, const string&) throw() { }
-	virtual void on(Finished) throw() { }
+	virtual void on(Message, const string&) noexcept { }
+	virtual void on(Started) noexcept { }
+	virtual void on(Finished) noexcept { }
+	virtual void on(SettingChanged) noexcept { }
 };
 
 class ConnectivityManager : public Singleton<ConnectivityManager>, public Speaker<ConnectivityManagerListener>
 {
 public:
+	/// @param useDefault return an empty string if the value hasn't been configured (rather than the SettingsManager default).
+	const string& get(SettingsManager::StrSetting setting, bool useDefault = true) const;
+	int get(SettingsManager::IntSetting setting) const;
+	void set(SettingsManager::StrSetting setting, const string& str);
+
 	void detectConnection();
-	void setup(bool settingsChanged, int lastConnectionMode);
+	void setup(bool settingsChanged);
+	void editAutoSettings();
+	bool ok() const { return autoDetected; }
 	bool isRunning() const { return running; }
+	const string& getStatus() const { return status; }
+	string getInformation() const;
 
 private:
 	friend class Singleton<ConnectivityManager>;
-	friend class UPnPManager;
+	friend class MappingManager;
 	
 	ConnectivityManager();
-	virtual ~ConnectivityManager() throw() { }
+	virtual ~ConnectivityManager() { }
 
-	void mappingFinished(bool success);
-	void log(const string& msg);
+	void mappingFinished(const string& mapper);
+	void log(string&& message);
 
 	void startSocket();
 	void listen();
@@ -60,7 +80,16 @@ private:
 
 	bool autoDetected;
 	bool running;
+
+	string status;
+
+	/* contains auto-detected settings. they are stored separately from manual connectivity
+	settings (stored in SettingsManager) in case the user wants to keep the manually set ones for
+	future use. */
+	unordered_map<int, boost::variant<int, string>> autoSettings;
 };
+
+#define CONNSETTING(k) ConnectivityManager::getInstance()->get(SettingsManager::k)
 
 } // namespace dcpp
 

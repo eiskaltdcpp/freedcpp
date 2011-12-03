@@ -19,14 +19,17 @@
 #ifndef DCPLUSPLUS_DCPP_TRANSFER_H_
 #define DCPLUSPLUS_DCPP_TRANSFER_H_
 
+#include <deque>
+
 #include "forward.h"
 #include "MerkleTree.h"
-#include "TimerManager.h"
-#include "Util.h"
 #include "CriticalSection.h"
 #include "Segment.h"
+#include "Util.h"
 
 namespace dcpp {
+
+using std::deque;
 
 class Transfer : private boost::noncopyable {
 public:
@@ -75,7 +78,7 @@ public:
 		return getSize() - getPos();
 	}
 
-	virtual void getParams(const UserConnection& aSource, StringMap& params);
+	virtual void getParams(const UserConnection& aSource, ParamMap& params);
 
 	UserPtr getUser();
 	const UserPtr getUser() const;

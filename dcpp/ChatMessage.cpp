@@ -17,11 +17,10 @@
  */
 
 #include "stdinc.h"
-#include "DCPlusPlus.h"
-
 #include "ChatMessage.h"
 
-#include "User.h"
+#include "format.h"
+#include "OnlineUser.h"
 #include "Util.h"
 
 namespace dcpp {

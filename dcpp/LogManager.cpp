@@ -17,8 +17,6 @@
  */
 
 #include "stdinc.h"
-#include "DCPlusPlus.h"
-
 #include "LogManager.h"
 
 #include "File.h"
@@ -26,13 +24,13 @@
 
 namespace dcpp {
 
-void LogManager::log(Area area, StringMap& params) throw() {
-	log(getPath(area, params), Util::formatParams(getSetting(area, FORMAT), params, false));
+void LogManager::log(Area area, ParamMap& params) noexcept {
+	log(getPath(area, params), Util::formatParams(getSetting(area, FORMAT), params));
 }
 
 void LogManager::message(const string& msg) {
 	if(BOOLSETTING(LOG_SYSTEM)) {
-		StringMap params;
+		ParamMap params;
 		params["message"] = msg;
 		log(SYSTEM, params);
 	}
@@ -52,12 +50,12 @@ LogManager::List LogManager::getLastLogs() {
 	return lastLogs;
 }
 
-string LogManager::getPath(Area area, StringMap& params) const {
-	return SETTING(LOG_DIRECTORY) + Util::formatParams(getSetting(area, FILE), params, true);
+string LogManager::getPath(Area area, ParamMap& params) const {
+	return SETTING(LOG_DIRECTORY) + Util::formatParams(getSetting(area, FILE), params, Util::cleanPathChars);
 }
 
 string LogManager::getPath(Area area) const {
-	StringMap params;
+	ParamMap params;
 	return getPath(area, params);
 }
 
@@ -69,7 +67,7 @@ void LogManager::saveSetting(int area, int sel, const string& setting) {
 	SettingsManager::getInstance()->set(static_cast<SettingsManager::StrSetting>(options[area][sel]), setting);
 }
 
-void LogManager::log(const string& area, const string& msg) throw() {
+void LogManager::log(const string& area, const string& msg) noexcept {
 	Lock l(cs);
 	try {
 		string aArea = Util::validateFileName(area);
@@ -87,6 +85,8 @@ LogManager::LogManager() {
 	options[UPLOAD][FORMAT]		= SettingsManager::LOG_FORMAT_POST_UPLOAD;
 	options[DOWNLOAD][FILE]		= SettingsManager::LOG_FILE_DOWNLOAD;
 	options[DOWNLOAD][FORMAT]	= SettingsManager::LOG_FORMAT_POST_DOWNLOAD;
+	options[FINISHED_DOWNLOAD][FILE] = SettingsManager::LOG_FILE_FINISHED_DOWNLOAD;
+	options[FINISHED_DOWNLOAD][FORMAT] = SettingsManager::LOG_FORMAT_POST_FINISHED_DOWNLOAD;
 	options[CHAT][FILE]		= SettingsManager::LOG_FILE_MAIN_CHAT;
 	options[CHAT][FORMAT]		= SettingsManager::LOG_FORMAT_MAIN_CHAT;
 	options[PM][FILE]		= SettingsManager::LOG_FILE_PRIVATE_CHAT;
@@ -97,7 +97,7 @@ LogManager::LogManager() {
 	options[STATUS][FORMAT]		= SettingsManager::LOG_FORMAT_STATUS;
 }
 
-LogManager::~LogManager() throw() {
+LogManager::~LogManager() {
 }
 
 } // namespace dcpp

@@ -35,6 +35,7 @@
 #include <dcpp/ClientManager.h>
 #include <dcpp/TimerManager.h>
 #include <dcpp/FavoriteManager.h>
+#include <dcpp/UserConnection.h> ///[+]
 
 using namespace std;
 using namespace dcpp;

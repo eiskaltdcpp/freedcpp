@@ -19,26 +19,24 @@
 #ifndef DCPLUSPLUS_DCPP_HASH_MANAGER_H
 #define DCPLUSPLUS_DCPP_HASH_MANAGER_H
 
+#include <map>
+
 #include "Singleton.h"
 #include "MerkleTree.h"
 #include "Thread.h"
 #include "CriticalSection.h"
 #include "Semaphore.h"
 #include "TimerManager.h"
-#include "Util.h"
-#include "FastAlloc.h"
-#include "Text.h"
-#include "Streams.h"
 #include "HashManagerListener.h"
+#include "Util.h"
 
 namespace dcpp {
 
+using std::map;
+
 STANDARD_EXCEPTION(HashException);
-class File;
-class CRC32Filter;
 
 class HashLoader;
-class FileException;
 
 class HashManager : public Singleton<HashManager>, public Speaker<HashManagerListener>,
 	private TimerManagerListener
@@ -51,7 +49,7 @@ public:
 	HashManager() {
 		TimerManager::getInstance()->addListener(this);
 	}
-	virtual ~HashManager() throw() {
+	virtual ~HashManager() {
 		TimerManager::getInstance()->removeListener(this);
 		hasher.join();
 	}
@@ -65,7 +63,7 @@ public:
 	void setPriority(Thread::Priority p) { hasher.setThreadPriority(p); }
 
 	/** @return TTH root */
-	TTHValue getTTH(const string& aFileName, int64_t aSize) throw(HashException);
+	TTHValue getTTH(const string& aFileName, int64_t aSize);
 
 	bool getTree(const TTHValue& root, TigerTree& tt);
 
@@ -77,7 +75,7 @@ public:
 	}
 	void addTree(const TigerTree& tree) { Lock l(cs); store.addTree(tree); }
 
-	void getStats(string& curFile, int64_t& bytesLeft, size_t& filesLeft) {
+	void getStats(string& curFile, uint64_t& bytesLeft, size_t& filesLeft) const {
 		hasher.getStats(curFile, bytesLeft, filesLeft);
 	}
 
@@ -123,7 +121,7 @@ private:
 		void stopHashing(const string& baseDir);
 		virtual int run();
 		bool fastHash(const string& fname, uint8_t* buf, TigerTree& tth, int64_t size, CRC32Filter* xcrc32);
-		void getStats(string& curFile, int64_t& bytesLeft, size_t& filesLeft);
+		void getStats(string& curFile, uint64_t& bytesLeft, size_t& filesLeft) const;
 		void shutdown() { stop = true; if(paused) s.signal(); s.signal(); }
 		void scheduleRebuild() { rebuild = true; if(paused) s.signal(); s.signal(); }
 
@@ -161,7 +159,7 @@ private:
 
 		bool checkTTH(const string& aFileName, int64_t aSize, uint32_t aTimeStamp);
 
-		void addTree(const TigerTree& tt) throw();
+		void addTree(const TigerTree& tt) noexcept;
 		const TTHValue* getTTH(const string& aFileName);
 		bool getTree(const TTHValue& root, TigerTree& tth);
 		size_t getBlockSize(const TTHValue& root) const;
@@ -212,10 +210,10 @@ private:
 		void createDataFile(const string& name);
 
 		bool loadTree(File& dataFile, const TreeInfo& ti, const TTHValue& root, TigerTree& tt);
-		int64_t saveTree(File& dataFile, const TigerTree& tt) throw(FileException);
+		int64_t saveTree(File& dataFile, const TigerTree& tt);
 
-		string getIndexFile() { return Util::getPath(Util::PATH_USER_CONFIG) + "HashIndex.xml"; }
-		string getDataFile() { return Util::getPath(Util::PATH_USER_CONFIG) + "HashData.dat"; }
+		static string getIndexFile();
+		static string getDataFile();
 	};
 
 	friend class HashLoader;
@@ -235,7 +233,7 @@ private:
 		store.rebuild();
 	}
 
-	virtual void on(TimerManagerListener::Minute, uint64_t) throw() {
+	virtual void on(TimerManagerListener::Minute, uint64_t) noexcept {
 		Lock l(cs);
 		store.save();
 	}

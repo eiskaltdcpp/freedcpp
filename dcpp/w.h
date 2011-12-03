@@ -16,45 +16,17 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#if !defined(BIT_OUTPUT_STREAM_H)
-#define BIT_OUTPUT_STREAM_H
+#ifndef DCPLUSPLUS_DCPP_W_H_
+#define DCPLUSPLUS_DCPP_W_H_
 
-namespace dcpp {
+#ifdef _WIN32
 
-class BitOutputStream
-{
-public:
-	BitOutputStream(string& aStream) : is(aStream), bitPos(0), next(0) { }
-	~BitOutputStream() { }
+#include <winsock2.h>
+#include <ws2tcpip.h>
 
-	void put(const ByteVector& b) {
-		for(ByteVector::const_iterator i = b.begin(); i != b.end(); ++i) {
-			next |= (*i) << bitPos++;
+#include <windows.h>
+#include <tchar.h>
 
-			if(bitPos > 7) {
-				bitPos-=8;
-				is += next;
-				next = 0;
-			}
+#endif
 
-		}
-	}
-
-	void skipToByte() {
-		if(bitPos > 0) {
-			bitPos = 0;
-			is += next;
-			next = 0;
-		}
-	}
-
-private:
-	BitOutputStream& operator=(const BitOutputStream&);
-	string& is;
-	int bitPos;
-	uint8_t next;
-};
-
-} // namespace dcpp
-
-#endif // !defined(BIT_OUTPUT_STREAM_H)
+#endif /* W_H_ */

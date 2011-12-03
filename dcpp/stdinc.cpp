@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2011 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,25 +17,3 @@
  */
 
 #include "stdinc.h"
-
-#include <boost/version.hpp>
-
-#if defined(BOOST_VERSION) //NOTE: freedcpp
-#if BOOST_VERSION < 104200
-#error BOOST version 1.42 is required
-#endif
-#endif
-
-#if defined(__GNUC__)
-#if __GNUC__ <= 4 && __GNUC_MINOR__ < 5
-#error GCC 4.5.0 is required
-#endif
-#elif defined(_MSC_VER)
-#if _MSC_VER < 1600
-#error MSVC 10 (2010) is required
-#endif
-
-#else
-#error No supported compiler found
-
-#endif

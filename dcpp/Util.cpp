@@ -17,18 +17,23 @@
  */
 
 #include "stdinc.h"
-#include "DCPlusPlus.h"
-
 #include "Util.h"
+
+#ifdef _WIN32
+
+#include "w.h"
+#include "shlobj.h"
+
+#endif
 
 #include "CID.h"
 #include "ClientManager.h"
+#include "ConnectivityManager.h"
 #include "FastAlloc.h"
 #include "File.h"
 #include "LogManager.h"
 #include "SettingsManager.h"
 #include "SimpleXML.h"
-#include "StringTokenizer.h"
 #include "version.h"
 
 #ifndef _WIN32
@@ -37,12 +42,14 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <sys/utsname.h>
-#include <ctype.h>
-#include <string.h>
+#include <cctype>
+#include <cstring>
 #endif
-#include <locale.h>
+#include <clocale>
 
 namespace dcpp {
+
+using std::make_pair;
 
 #ifndef _DEBUG
 FastCriticalSection FastAllocBase::cs;
@@ -56,9 +63,6 @@ bool Util::away = false;
 bool Util::manualAway = false;
 string Util::awayMsg;
 time_t Util::awayTime;
-
-Util::CountryList Util::countries;
-StringList Util::countryNames;
 
 string Util::paths[Util::PATH_LAST];
 
@@ -190,58 +194,6 @@ void Util::initialize(PathsMap pathOverrides) {
 
 	File::ensureDirectory(paths[PATH_USER_CONFIG]);
 	File::ensureDirectory(paths[PATH_USER_LOCAL]);
-
-	try {
-		// This product includes GeoIP data created by MaxMind, available from http://maxmind.com/
-		// Updates at http://www.maxmind.com/app/geoip_country
-		string file = getPath(PATH_RESOURCES) + "GeoIpCountryWhois.csv";
-		string data = File(file, File::READ, File::OPEN).read();
-
-		const char* start = data.c_str();
-		string::size_type linestart = 0;
-		string::size_type lineend = 0;
-		auto last = countries.end();
-		uint32_t startIP = 0;
-		uint32_t endIP = 0, endIPprev = 0;
-
-		countryNames.push_back(_("Unknown"));
-		auto addCountry = [](const string& countryName) -> size_t {
-			auto begin = countryNames.cbegin(), end = countryNames.cend();
-			auto pos = std::find(begin, end, countryName);
-			if(pos != end)
-				return pos - begin;
-			countryNames.push_back(countryName);
-			return countryNames.size() - 1;
-		};
-
-		while(true) {
-			auto pos = data.find(',', linestart);
-			if(pos == string::npos) break;
-			pos = data.find(',', pos + 1);
-			if(pos == string::npos) break;
-			startIP = toUInt32(start + pos + 2) - 1;
-
-			pos = data.find(',', pos + 1);
-			if(pos == string::npos) break;
-			endIP = toUInt32(start + pos + 2);
-
-			pos = data.find(',', pos + 1);
-			if(pos == string::npos) break;
-			pos = data.find(',', pos + 1);
-			if(pos == string::npos) break;
-			lineend = data.find('\n', pos);
-			if(lineend == string::npos) break;
-
-			if(startIP != endIPprev)
-				last = countries.insert(last, make_pair(startIP, 0));
-			pos += 2;
-			last = countries.insert(last, make_pair(endIP, addCountry(data.substr(pos, lineend - 1 - pos))));
-
-			endIPprev = endIP;
-			linestart = lineend + 1;
-		}
-	} catch(const FileException&) {
-	}
 }
 
 void Util::migrate(const string& file) {
@@ -274,15 +226,19 @@ void Util::loadBootConfig() {
 		}
 
 		if(boot.findChild("ConfigPath")) {
-			StringMap params;
+			ParamMap params;
 #ifdef _WIN32
-			// @todo load environment variables instead? would make it more useful on *nix
-			TCHAR path[MAX_PATH];
-
-			params["APPDATA"] = Text::fromT((::SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, SHGFP_TYPE_CURRENT, path), path));
-			params["PERSONAL"] = Text::fromT((::SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL, SHGFP_TYPE_CURRENT, path), path));
+			/// @todo load environment variables instead? would make it more useful on *nix
+			params["APPDATA"] = []() -> string {
+				TCHAR path[MAX_PATH];
+				return Text::fromT((::SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, SHGFP_TYPE_CURRENT, path), path));
+			};
+			params["PERSONAL"] = []() -> string {
+				TCHAR path[MAX_PATH];
+				return Text::fromT((::SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL, SHGFP_TYPE_CURRENT, path), path));
+			};
 #endif
-			paths[PATH_USER_CONFIG] = Util::formatParams(boot.getChildData(), params, false);
+			paths[PATH_USER_CONFIG] = Util::formatParams(boot.getChildData(), params);
 		}
 	} catch(const Exception& ) {
 		// Unable to load boot settings...
@@ -392,13 +348,13 @@ bool Util::checkExtension(const string& tmp) {
 	return true;
 }
 
-string Util::cleanPathChars(string aNick) {
+string Util::cleanPathChars(const string& str) {
+	string ret(str);
 	string::size_type i = 0;
-
-	while( (i = aNick.find_first_of("/.\\", i)) != string::npos) {
-		aNick[i] = '_';
+	while((i = ret.find_first_of("/.\\", i)) != string::npos) {
+		ret[i] = '_';
 	}
-	return aNick;
+	return ret;
 }
 
 string Util::addBrackets(const string& s) {
@@ -422,51 +378,128 @@ string Util::getShortTimeString(time_t t) {
  * http:// -> port 80
  * dchub:// -> port 411
  */
-void Util::decodeUrl(const string& url, string& aServer, uint16_t& aPort, string& aFile) {
-	// First, check for a protocol: xxxx://
-	string::size_type i = 0, j, k;
+void Util::decodeUrl(const string& url, string& protocol, string& host, string& port, string& path, string& query, string& fragment) {
+	auto fragmentEnd = url.size();
+	auto fragmentStart = url.rfind('#');
 
-	aServer = emptyString;
-	aFile = emptyString;
-
-	if( (j=url.find("://", i)) != string::npos) {
-		// Protocol found
-		string protocol = url.substr(0, j);
-		i = j + 3;
-
-		if(protocol == "http") {
-			aPort = 80;
-		} else if(protocol == "dchub") {
-			aPort = 411;
-		}
-	}
-
-	if( (j=url.find('/', i)) != string::npos) {
-		// We have a filename...
-		aFile = url.substr(j);
-	}
-
-	if( (k=url.find(':', i)) != string::npos) {
-		// Port
-		if(j == string::npos) {
-			aPort = static_cast<uint16_t>(Util::toInt(url.substr(k+1)));
-		} else if(k < j) {
-			aPort = static_cast<uint16_t>(Util::toInt(url.substr(k+1, j-k-1)));
-		}
+	size_t queryEnd;
+	if(fragmentStart == string::npos) {
+		queryEnd = fragmentStart = fragmentEnd;
 	} else {
-		k = j;
+		dcdebug("f");
+		queryEnd = fragmentStart;
+		fragmentStart++;
 	}
 
-	if(k == string::npos) {
-		aServer = url.substr(i);
-		if(i==0) aPort = 411;
-	} else
-		aServer = url.substr(i, k-i);
+	auto queryStart = url.rfind('?', queryEnd);
+	size_t fileEnd;
+
+	if(queryStart == string::npos) {
+		fileEnd = queryStart = queryEnd;
+	} else {
+		dcdebug("q");
+		fileEnd = queryStart;
+		queryStart++;
+	}
+
+	auto protoStart = 0;
+	auto protoEnd = url.find("://", protoStart);
+
+	auto authorityStart = protoEnd == string::npos ? protoStart : protoEnd + 3;
+	auto authorityEnd = url.find_first_of("/#?", authorityStart);
+
+	size_t fileStart;
+	if(authorityEnd == string::npos) {
+		authorityEnd = fileStart = fileEnd;
+	} else {
+		dcdebug("a");
+		fileStart = authorityEnd;
+	}
+
+	protocol = (protoEnd == string::npos ? Util::emptyString : url.substr(protoStart, protoEnd - protoStart));
+
+	if(authorityEnd > authorityStart) {
+		dcdebug("x");
+		size_t portStart = string::npos;
+		if(url[authorityStart] == '[') {
+			// IPv6?
+			auto hostEnd = url.find(']');
+			if(hostEnd == string::npos) {
+				return;
+			}
+
+			host = url.substr(authorityStart + 1, hostEnd - authorityStart - 1);
+			if(hostEnd + 1 < url.size() && url[hostEnd + 1] == ':') {
+				portStart = hostEnd + 2;
+			}
+		} else {
+			size_t hostEnd;
+			portStart = url.find(':', authorityStart);
+			if(portStart != string::npos && portStart > authorityEnd) {
+				portStart = string::npos;
+			}
+
+			if(portStart == string::npos) {
+				hostEnd = authorityEnd;
+			} else {
+				hostEnd = portStart;
+				portStart++;
+			}
+
+			dcdebug("h");
+			host = url.substr(authorityStart, hostEnd - authorityStart);
+		}
+
+		if(portStart == string::npos) {
+			if(protocol == "http") {
+				port = "80";
+			} else if(protocol == "https") {
+				port = "443";
+			} else if(protocol == "dchub"  || protocol.empty()) {
+				port = "411";
+			}
+		} else {
+			dcdebug("p");
+			port = url.substr(portStart, authorityEnd - portStart);
+		}
+	}
+
+	dcdebug("\n");
+	path = url.substr(fileStart, fileEnd - fileStart);
+	query = url.substr(queryStart, queryEnd - queryStart);
+	fragment = url.substr(fragmentStart, fragmentEnd - fragmentStart);
+}
+
+map<string, string> Util::decodeQuery(const string& query) {
+	map<string, string> ret;
+	size_t start = 0;
+	while(start < query.size()) {
+		auto eq = query.find('=', start);
+		if(eq == string::npos) {
+			break;
+		}
+
+		auto param = eq + 1;
+		auto end = query.find('&', param);
+
+		if(end == string::npos) {
+			end = query.size();
+		}
+
+		if(eq > start && end > param) {
+			ret[query.substr(start, eq-start)] = query.substr(param, end - param);
+		}
+
+		start = end + 1;
+	}
+
+	return ret;
 }
 
 string Util::getAwayMessage() {
 	return (formatTime(awayMsg.empty() ? SETTING(DEFAULT_AWAY_MESSAGE) : awayMsg, awayTime)) + " <" APPNAME " v" VERSIONSTRING ">";
 }
+
 string Util::formatBytes(int64_t aBytes) {
 	char buf[128];
 	if(aBytes < 1024) {
@@ -520,6 +553,11 @@ string Util::formatExactSize(int64_t aBytes) {
 }
 
 string Util::getLocalIp() {
+	const auto& bindAddr = ConnectivityManager::getInstance()->get(SettingsManager::BIND_ADDRESS, false);
+	if(!bindAddr.empty()) {
+		return bindAddr;
+	}
+
 	string tmp;
 
 	char buf[256];
@@ -610,7 +648,7 @@ string Util::toString(const StringList& lst) {
 	return '[' + toString(",", lst) + ']';
 }
 
-string::size_type Util::findSubString(const string& aString, const string& aSubString, string::size_type start) throw() {
+string::size_type Util::findSubString(const string& aString, const string& aSubString, string::size_type start) noexcept {
 	if(aString.length() < start)
 		return (string::size_type)string::npos;
 
@@ -646,7 +684,7 @@ string::size_type Util::findSubString(const string& aString, const string& aSubS
 	return (string::size_type)string::npos;
 }
 
-wstring::size_type Util::findSubString(const wstring& aString, const wstring& aSubString, wstring::size_type pos) throw() {
+wstring::size_type Util::findSubString(const wstring& aString, const wstring& aSubString, wstring::size_type pos) noexcept {
 	if(aString.length() < pos)
 		return static_cast<wstring::size_type>(wstring::npos);
 
@@ -751,6 +789,12 @@ string Util::encodeURI(const string& aString, bool reverse) {
 	return tmp;
 }
 
+// used to parse the boost::variant params of the formatParams function.
+struct GetString : boost::static_visitor<string> {
+	string operator()(const string& s) const { return s; }
+	string operator()(const std::function<string ()>& f) const { return f(); }
+};
+
 /**
  * This function takes a string and a set of parameters and transforms them according to
  * a simple formatting rule, similar to strftime. In the message, every parameter should be
@@ -759,7 +803,7 @@ string Util::encodeURI(const string& aString, bool reverse) {
  * date/time and then finally written to the log file. If the parameter is not present at all,
  * it is removed from the string completely...
  */
-string Util::formatParams(const string& msg, const StringMap& params, bool filter) {
+string Util::formatParams(const string& msg, const ParamMap& params, FilterF filter) {
 	string result = msg;
 
 	string::size_type i, j, k;
@@ -768,33 +812,25 @@ string Util::formatParams(const string& msg, const StringMap& params, bool filte
 		if( (result.size() < j + 2) || ((k = result.find(']', j + 2)) == string::npos) ) {
 			break;
 		}
-		string name = result.substr(j + 2, k - j - 2);
-		StringMap::const_iterator smi = params.find(name);
-		if(smi == params.end()) {
-			result.erase(j, k-j + 1);
-			i = j;
-		} else {
-			if(smi->second.find_first_of("%\\./") != string::npos) {
-				string tmp = smi->second;	// replace all % in params with %% for strftime
-				string::size_type m = 0;
-				while(( m = tmp.find('%', m)) != string::npos) {
-					tmp.replace(m, 1, "%%");
-					m+=2;
-				}
-				if(filter) {
-					// Filter chars that produce bad effects on file systems
-					m = 0;
-					while(( m = tmp.find_first_of("\\./", m)) != string::npos) {
-						tmp[m] = '_';
-					}
-				}
 
-				result.replace(j, k-j + 1, tmp);
-				i = j + tmp.size();
-			} else {
-				result.replace(j, k-j + 1, smi->second);
-				i = j + smi->second.size();
+		auto param = params.find(result.substr(j + 2, k - j - 2));
+
+		if(param == params.end()) {
+			result.erase(j, k - j + 1);
+			i = j;
+
+		} else {
+			auto replacement = boost::apply_visitor(GetString(), param->second);
+
+			// replace all % in params with %% for strftime
+			replace("%", "%%", replacement);
+
+			if(filter) {
+				replacement = filter(replacement);
 			}
+
+			result.replace(j, k - j + 1, replacement);
+			i = j + replacement.size();
 		}
 	}
 
@@ -804,19 +840,23 @@ string Util::formatParams(const string& msg, const StringMap& params, bool filte
 }
 
 string Util::formatTime(const string &msg, const time_t t) {
-	if (!msg.empty()) {
-		size_t bufsize = msg.size() + 256;
-		struct tm* loc = localtime(&t);
-
+	if(!msg.empty()) {
+		tm* loc = localtime(&t);
 		if(!loc) {
 			return Util::emptyString;
 		}
 
+		size_t bufsize = msg.size() + 256;
 		string buf(bufsize, 0);
+
+		errno = 0;
 
 		buf.resize(strftime(&buf[0], bufsize-1, msg.c_str(), loc));
 
 		while(buf.empty()) {
+			if(errno == EINVAL)
+				return Util::emptyString;
+
 			bufsize+=64;
 			buf.resize(bufsize);
 			buf.resize(strftime(&buf[0], bufsize-1, msg.c_str(), loc));
@@ -901,35 +941,6 @@ uint32_t Util::rand() {
 	y ^= TEMPERING_SHIFT_L(y);
 
 	return y;
-}
-
-/*	getIpCountry
-	This function returns the full country name of an ip, eg "Portugal".
-	more info: http://www.maxmind.com/app/csv
-*/
-const string& Util::getIpCountry(const string& IP) {
-	if(BOOLSETTING(GET_USER_COUNTRY)) {
-		if(count(IP.begin(), IP.end(), '.') != 3)
-			return emptyString;
-
-		//e.g IP 23.24.25.26 : w=23, x=24, y=25, z=26
-		string::size_type a = IP.find('.');
-		string::size_type b = IP.find('.', a+1);
-		string::size_type c = IP.find('.', b+2);
-
-		/// @todo this is impl dependant and is working by chance because we are currently using atoi!
-		uint32_t ipnum = (toUInt32(IP.c_str()) << 24) |
-			(toUInt32(IP.c_str() + a + 1) << 16) |
-			(toUInt32(IP.c_str() + b + 1) << 8) |
-			(toUInt32(IP.c_str() + c + 1) );
-
-		auto i = countries.lower_bound(ipnum);
-		if(i != countries.end()) {
-			return countryNames[i->second];
-		}
-	}
-
-	return emptyString;
 }
 
 string Util::getTimeString() {
@@ -1021,6 +1032,16 @@ void Util::setAway(bool aAway) {
 
 void Util::switchAway() {
 	setAway(!away);
+}
+
+string Util::getTempPath() {
+#ifdef _WIN32
+	TCHAR buf[MAX_PATH + 1];
+	DWORD x = GetTempPath(MAX_PATH, buf);
+	return Text::fromT(tstring(buf, x));
+#else
+	return "/tmp/";
+#endif
 }
 
 } // namespace dcpp

@@ -16,38 +16,43 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "stdinc.h"
-#include "DCPlusPlus.h"
+#ifndef DCPLUSPLUS_DCPP_GEOIP_H
+#define DCPLUSPLUS_DCPP_GEOIP_H
 
-#include "UPnP.h"
+#include "CriticalSection.h"
+
+#include <string>
+#include <vector>
+
+typedef struct GeoIPTag GeoIP;
 
 namespace dcpp {
 
-const char* UPnP::protocols[PROTOCOL_LAST] = {
-	"TCP",
-	"UDP"
+using std::string;
+using std::vector;
+
+class GeoIP : boost::noncopyable {
+public:
+	explicit GeoIP(string&& path);
+	~GeoIP();
+
+	const string& getCountry(const string& ip) const;
+	void update();
+	void rebuild();
+
+private:
+	bool decompress() const;
+	void open();
+	void close();
+	bool v6() const;
+
+	mutable CriticalSection cs;
+	::GeoIP* geo;
+
+	const string path;
+	vector<string> cache;
 };
 
-bool UPnP::open(const unsigned short port, const Protocol protocol, const string& description) {
-	if(!add(port, protocol, description))
-		return false;
-
-	rules.push_back(make_pair(port, protocol));
-	return true;
-}
-
-bool UPnP::close() {
-	bool ret = true;
-
-	for(auto i = rules.cbegin(), iend = rules.cend(); i != iend; ++i)
-		ret &= remove(i->first, i->second);
-	rules.clear();
-
-	return ret;
-}
-
-bool UPnP::hasRules() const {
-	return !rules.empty();
-}
-
 } // namespace dcpp
+
+#endif // !defined(DCPLUSPLUS_DCPP_GEOIP_H)

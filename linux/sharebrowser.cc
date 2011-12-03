@@ -485,7 +485,8 @@ void ShareBrowser::popupFileMenu_gui()
 
 	// Build user command menu
 // 	StringList hubs = WulforUtil::getHubAddress(listing.getUser()->getCID());
-	StringList hubs = WulforUtil::getHubAddress(listing.getUser().user->getCID(), "");//NOTE: core 0.762
+///	StringList hubs = WulforUtil::getHubAddress(listing.getUser().user->getCID(), "");//NOTE: core 0.762
+	StringPairList hubs = WulforUtil::getHubAddress(listing.getUser().user->getCID(), "");///[+] NOTE: core 0.785
 	fileUserCommandMenu->addHub(hubs);
 	GtkTreeIter iter;
 	GList *list = gtk_tree_selection_get_selected_rows(fileSelection, NULL);
@@ -539,7 +540,8 @@ void ShareBrowser::popupDirMenu_gui()
 
 	// Add user commands.
 // 	StringList hubs = WulforUtil::getHubAddress(listing.getUser()->getCID());
-	StringList hubs = WulforUtil::getHubAddress(listing.getUser().user->getCID(), "");//NOTE: core 0.762
+	///StringList hubs = WulforUtil::getHubAddress(listing.getUser().user->getCID(), "");//NOTE: core 0.762
+	StringPairList hubs = WulforUtil::getHubAddress(listing.getUser().user->getCID(), "");///[+] NOTE: core 0.785
 	dirUserCommandMenu->addHub(hubs);
 	GtkTreeIter iter;
 	GList *list = gtk_tree_selection_get_selected_rows(dirSelection, NULL);

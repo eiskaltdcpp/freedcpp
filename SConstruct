@@ -106,6 +106,9 @@ Help(vars.GenerateHelpText(env))
 # ----------------------------------------------------------------------
 
 if not 'install' in COMMAND_LINE_TARGETS:
+#debugs
+	conf.env['CXX'] = 'g++-4.5'
+	conf.env['CC'] = 'gcc-4.5'
 
 	if not (conf.env.has_key('CXX') and conf.env['CXX']):
 		print 'CXX env variable is not set, attempting to use g++'
@@ -203,8 +206,8 @@ if not 'install' in COMMAND_LINE_TARGETS:
 		conf.env['HAVE_IFADDRS_H'] = True
 
 	# MiniUPnPc for UPnP
-	if not conf.CheckLib('libminiupnpc'):
-		LIB_IS_UPNP = False
+#	if not conf.CheckLib('libminiupnpc'):
+#		LIB_IS_UPNP = False
 
 	env = conf.Finish()
 
@@ -277,9 +280,9 @@ if not 'install' in COMMAND_LINE_TARGETS:
 	Export('env')
 
 
-	# Build the miniupnpc library
-	if not LIB_IS_UPNP:
-		upnp = SConscript(dirs = 'miniupnpc', variant_dir = BUILD_PATH + LIB_UPNP, duplicate = 0)
+#	# Build the miniupnpc library
+#	if not LIB_IS_UPNP:
+#		upnp = SConscript(dirs = 'miniupnpc', variant_dir = BUILD_PATH + LIB_UPNP, duplicate = 0)
 
 	# Build the dcpp library
 	dcpp = SConscript(dirs = 'dcpp', variant_dir = BUILD_PATH + LIB_DCPP, duplicate = 0)
@@ -287,11 +290,13 @@ if not 'install' in COMMAND_LINE_TARGETS:
 	# Build the GUI
 	gui = SConscript(dirs = 'linux', variant_dir = BUILD_PATH + APP_NAME, duplicate = 0)
 
-	# Create the executable
-	if not LIB_IS_UPNP:
-		env.Program(target = APP_NAME, source = [dcpp, upnp, gui])
-	else:
-		env.Program(target = APP_NAME, source = [dcpp, gui])
+#	# Create the executable
+#	if not LIB_IS_UPNP:
+#		env.Program(target = APP_NAME, source = [dcpp, upnp, gui])
+#	else:
+#		env.Program(target = APP_NAME, source = [dcpp, gui])
+
+	env.Program(target = APP_NAME, source = [dcpp, gui])
 
 # ----------------------------------------------------------------------
 # Install

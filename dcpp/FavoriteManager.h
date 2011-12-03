@@ -19,11 +19,12 @@
 #ifndef DCPLUSPLUS_DCPP_FAVORITE_MANAGER_H
 #define DCPLUSPLUS_DCPP_FAVORITE_MANAGER_H
 
+#include <boost/optional.hpp>
+
 #include "SettingsManager.h"
 
 #include "CriticalSection.h"
-#include "HttpConnection.h"
-#include "User.h"
+#include "HttpConnectionListener.h"
 #include "UserCommand.h"
 #include "FavoriteUser.h"
 #include "Singleton.h"
@@ -31,8 +32,11 @@
 #include "FavoriteManagerListener.h"
 #include "HubEntry.h"
 #include "FavHubGroup.h"
+#include "User.h"
 
 namespace dcpp {
+
+using boost::optional;
 
 class SimpleXML;
 
@@ -72,6 +76,7 @@ public:
 	bool isFavoriteUser(const UserPtr& aUser) const { Lock l(cs); return users.find(aUser->getCID()) != users.end(); }
 	void removeFavoriteUser(const UserPtr& aUser);
 
+	optional<FavoriteUser> getFavoriteUser(const UserPtr& aUser) const;
 	bool hasSlot(const UserPtr& aUser) const;
 	void setUserDescription(const UserPtr& aUser, const string& description);
 	void setAutoGrant(const UserPtr& aUser, bool grant);
@@ -145,34 +150,34 @@ private:
 	friend class Singleton<FavoriteManager>;
 
 	FavoriteManager();
-	virtual ~FavoriteManager() throw();
+	virtual ~FavoriteManager();
 
 	FavoriteHubEntryList::iterator getFavoriteHub(const string& aServer);
 
 	// ClientManagerListener
-	virtual void on(UserUpdated, const OnlineUser& user) throw();
-	virtual void on(UserConnected, const UserPtr& user) throw();
-	virtual void on(UserDisconnected, const UserPtr& user) throw();
+	void on(UserUpdated, const OnlineUser& user) noexcept;
+	void on(UserConnected, const UserPtr& user) noexcept;
+	void on(UserDisconnected, const UserPtr& user) noexcept;
 
 	// HttpConnectionListener
-	virtual void on(Data, HttpConnection*, const uint8_t*, size_t) throw();
-	virtual void on(Failed, HttpConnection*, const string&) throw();
-	virtual void on(Complete, HttpConnection*, const string&, bool) throw();
-	virtual void on(Redirected, HttpConnection*, const string&) throw();
-	virtual void on(TypeNormal, HttpConnection*) throw();
-	virtual void on(TypeBZ2, HttpConnection*) throw();
-	virtual void on(Retried, HttpConnection*, const bool) throw(); 
+	void on(Data, HttpConnection*, const uint8_t*, size_t) noexcept;
+	void on(Failed, HttpConnection*, const string&) noexcept;
+	void on(Complete, HttpConnection*, const string&, bool) noexcept;
+	void on(Redirected, HttpConnection*, const string&) noexcept;
+	void on(TypeNormal, HttpConnection*) noexcept;
+	void on(TypeBZ2, HttpConnection*) noexcept;
+	void on(Retried, HttpConnection*, bool) noexcept; 
 
-	bool onHttpFinished(bool fromHttp) throw();
+	bool onHttpFinished(bool fromHttp) noexcept;
 
 	// SettingsManagerListener
-	virtual void on(SettingsManagerListener::Load, SimpleXML& xml) throw() {
+	void on(SettingsManagerListener::Load, SimpleXML& xml) noexcept {
 		load(xml);
 	}
 
 	void load(SimpleXML& aXml);
 
-	string getConfigFile() { return Util::getPath(Util::PATH_USER_CONFIG) + "Favorites.xml"; }
+	static string getConfigFile() { return Util::getPath(Util::PATH_USER_CONFIG) + "Favorites.xml"; }
 };
 
 } // namespace dcpp

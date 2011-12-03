@@ -16,16 +16,18 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#if !defined(Z_UTILS_H)
-#define Z_UTILS_H
+#ifndef DCPLUSPLUS_DCPP_Z_UTILS_H
+#define DCPLUSPLUS_DCPP_Z_UTILS_H
 
-#ifdef _WIN32
-#include "../zlib/zlib.h"
-#else
+#include <cstddef>
+#include <cstdint>
+#include <string>
+
 #include <zlib.h>
-#endif
 
 namespace dcpp {
+
+using std::string;
 
 class ZFilter {
 public:
@@ -65,6 +67,11 @@ public:
 	bool operator()(const void* in, size_t& insize, void* out, size_t& outsize);
 private:
 	z_stream zs;
+};
+
+class GZ {
+public:
+	static void decompress(const string& source, const string& target);
 };
 
 class CRC32Filter {

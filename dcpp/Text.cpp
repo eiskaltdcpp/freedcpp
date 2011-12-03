@@ -17,12 +17,11 @@
  */
 
 #include "stdinc.h"
-#include "DCPlusPlus.h"
-
 #include "Text.h"
-#include "Util.h"
 
-#ifndef _WIN32
+#ifdef _WIN32
+#include "w.h"
+#else
 #include <errno.h>
 #include <iconv.h>
 #include <langinfo.h>
@@ -32,6 +31,8 @@
 #endif
 
 #endif
+
+#include "Util.h"
 
 namespace dcpp {
 
@@ -55,7 +56,7 @@ void initialize() {
 #endif
 }
 
-bool isAscii(const char* str) throw() {
+bool isAscii(const char* str) noexcept {
 	for(const uint8_t* p = (const uint8_t*)str; *p; ++p) {
 		if(*p & 0x80)
 			return false;
@@ -142,12 +143,12 @@ void wcToUtf8(wchar_t c, string& str) {
 	}
 }
 
-const string& acpToUtf8(const string& str, string& tmp) throw() {
+const string& acpToUtf8(const string& str, string& tmp) noexcept {
 	wstring wtmp;
 	return wideToUtf8(acpToWide(str, wtmp), tmp);
 }
 
-const wstring& acpToWide(const string& str, wstring& tmp) throw() {
+const wstring& acpToWide(const string& str, wstring& tmp) noexcept {
 	if(str.empty())
 		return Util::emptyStringW;
 #ifdef _WIN32
@@ -189,7 +190,7 @@ const wstring& acpToWide(const string& str, wstring& tmp) throw() {
 #endif
 }
 
-const string& wideToUtf8(const wstring& str, string& tgt) throw() {
+const string& wideToUtf8(const wstring& str, string& tgt) noexcept {
 	if(str.empty()) {
 		return Util::emptyString;
 	}
@@ -202,7 +203,7 @@ const string& wideToUtf8(const wstring& str, string& tgt) throw() {
 	return tgt;
 }
 
-const string& wideToAcp(const wstring& str, string& tmp) throw() {
+const string& wideToAcp(const wstring& str, string& tmp) noexcept {
 	if(str.empty())
 		return Util::emptyString;
 #ifdef _WIN32
@@ -233,7 +234,7 @@ const string& wideToAcp(const wstring& str, string& tmp) throw() {
 #endif
 }
 
-bool validateUtf8(const string& str) throw() {
+bool validateUtf8(const string& str) noexcept {
 	string::size_type i = 0;
 	while(i < str.length()) {
 		wchar_t dummy = 0;
@@ -245,12 +246,12 @@ bool validateUtf8(const string& str) throw() {
 	return true;
 }
 
-const string& utf8ToAcp(const string& str, string& tmp) throw() {
+const string& utf8ToAcp(const string& str, string& tmp) noexcept {
 	wstring wtmp;
 	return wideToAcp(utf8ToWide(str, wtmp), tmp);
 }
 
-const wstring& utf8ToWide(const string& str, wstring& tgt) throw() {
+const wstring& utf8ToWide(const string& str, wstring& tgt) noexcept {
 	tgt.reserve(str.length());
 	string::size_type n = str.length();
 	for(string::size_type i = 0; i < n; ) {
@@ -267,7 +268,7 @@ const wstring& utf8ToWide(const string& str, wstring& tgt) throw() {
 	return tgt;
 }
 
-wchar_t toLower(wchar_t c) throw() {
+wchar_t toLower(wchar_t c) noexcept {
 #ifdef _WIN32
 		return static_cast<wchar_t>(reinterpret_cast<ptrdiff_t>(CharLowerW((LPWSTR)c)));
 #else
@@ -275,7 +276,7 @@ wchar_t toLower(wchar_t c) throw() {
 #endif
 }
 
-const wstring& toLower(const wstring& str, wstring& tmp) throw() {
+const wstring& toLower(const wstring& str, wstring& tmp) noexcept {
 	if(str.empty())
 		return Util::emptyStringW;
 	tmp.clear();
@@ -287,7 +288,7 @@ const wstring& toLower(const wstring& str, wstring& tmp) throw() {
 	return tmp;
 }
 
-const string& toLower(const string& str, string& tmp) throw() {
+const string& toLower(const string& str, string& tmp) noexcept {
 	if(str.empty())
 		return Util::emptyString;
 	tmp.reserve(str.length());
@@ -306,7 +307,7 @@ const string& toLower(const string& str, string& tmp) throw() {
 	return tmp;
 }
 
-const string& toUtf8(const string& str, const string& fromCharset, string& tmp) throw() {
+const string& toUtf8(const string& str, const string& fromCharset, string& tmp) noexcept {
 	if(str.empty()) {
 		return str;
 	}
@@ -322,7 +323,7 @@ const string& toUtf8(const string& str, const string& fromCharset, string& tmp) 
 #endif
 }
 
-const string& fromUtf8(const string& str, const string& toCharset, string& tmp) throw() {
+const string& fromUtf8(const string& str, const string& toCharset, string& tmp) noexcept {
 	if(str.empty()) {
 		return str;
 	}
@@ -338,7 +339,7 @@ const string& fromUtf8(const string& str, const string& toCharset, string& tmp) 
 #endif
 }
 
-const string& convert(const string& str, string& tmp, const string& fromCharset, const string& toCharset) throw() {
+const string& convert(const string& str, string& tmp, const string& fromCharset, const string& toCharset) noexcept {
 	if(str.empty())
 		return str;
 

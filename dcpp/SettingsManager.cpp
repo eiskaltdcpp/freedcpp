@@ -17,8 +17,6 @@
  */
 
 #include "stdinc.h"
-#include "DCPlusPlus.h"
-
 #include "SettingsManager.h"
 
 #include "SimpleXML.h"
@@ -37,33 +35,35 @@ StringList SettingsManager::connectionSpeeds;
 const string SettingsManager::settingTags[] =
 {
 	// Strings
-	"Nick", "UploadSpeed", "Description", "DownloadDirectory", "EMail", "ExternalIp",
-	"MainFont", "ConnectionsOrder", "ConnectionsWidths", "HubFrameOrder", "HubFrameWidths",
+	"Nick", "UploadSpeed", "Description", "DownloadDirectory", "EMail", "ExternalIp", "ExternalIp6",
+	"MainFont", "TextViewerFont",
+	"ConnectionsOrder", "ConnectionsWidths", "HubFrameOrder", "HubFrameWidths",
 	"SearchFrameOrder", "SearchFrameWidths", "FavHubsFrameOrder", "FavHubsFrameWidths",
 	"HublistServers", "QueueFrameOrder", "QueueFrameWidths", "PublicHubsFrameOrder", "PublicHubsFrameWidths",
 	"FinishedDLFilesOrder", "FinishedDLFilesWidths", "FinishedDLUsersOrder", "FinishedDLUsersWidths",
 	"FinishedULFilesOrder", "FinishedULFilesWidths", "FinishedULUsersOrder", "FinishedULUsersWidths",
 	"UsersFrameOrder", "UsersFrameWidths", "HttpProxy", "LogDirectory", "LogFormatPostDownload",
-	"LogFormatPostUpload", "LogFormatMainChat", "LogFormatPrivateChat",
-	"TempDownloadDirectory", "BindAddress", "SocksServer", "SocksUser", "SocksPassword", "ConfigVersion",
-	"DefaultAwayMessage", "TimeStampsFormat", "ADLSearchFrameOrder", "ADLSearchFrameWidths",
-	"CID", "SpyFrameWidths", "SpyFrameOrder", "LogFileMainChat",
-	"LogFilePrivateChat", "LogFileStatus", "LogFileUpload", "LogFileDownload", "LogFileSystem",
+	"LogFormatPostFinishedDownload", "LogFormatPostUpload", "LogFormatMainChat", "LogFormatPrivateChat",
+	"TempDownloadDirectory", "BindAddress", "BindAddress6", "SocksServer", "SocksUser", "SocksPassword", "ConfigVersion",
+	"DefaultAwayMessage", "TimeStampsFormat", "CountryFormat", "ADLSearchFrameOrder", "ADLSearchFrameWidths",
+	"CID", "SpyFrameWidths", "SpyFrameOrder", "LogFileMainChat", "LogFilePrivateChat",
+	"LogFileStatus", "LogFileUpload", "LogFileDownload", "LogFileFinishedDownload", "LogFileSystem",
 	"LogFormatSystem", "LogFormatStatus", "DirectoryListingFrameOrder", "DirectoryListingFrameWidths",
 	"TLSPrivateKeyFile", "TLSCertificateFile", "TLSTrustedCertificatesPath",
-	"Language", "DownloadsOrder", "DownloadsWidth", "Toolbar", "LastSearchType",
-	"SoundMainChat", "SoundPM", "SoundPMWindow",
+	"Language", "DownloadsOrder", "DownloadsWidth", "Toolbar", "LastSearchType", "Mapper",
+	"SoundMainChat", "SoundPM", "SoundPMWindow", "SoundFinishedDL", "SoundFinishedFL",
 	"SENTRY",
 	// Ints
 	"IncomingConnections", "InPort", "Slots", "AutoFollow", "ClearSearch",
-	"BackgroundColor", "TextColor", "UseOemMonoFont", "ShareHidden", "FilterMessages", "MinimizeToTray", "AlwaysTray",
+	"BackgroundColor", "TextColor", "ShareHidden", "FilterMessages", "MinimizeToTray", "AlwaysTray",
 	"AutoSearch", "TimeStamps", "PopupHubPms", "PopupBotPms", "IgnoreHubPms", "IgnoreBotPms",
 	"ListDuplicates", "BufferSize", "DownloadSlots", "MaxDownloadSpeed", "LogMainChat", "LogPrivateChat",
-	"LogDownloads", "LogUploads", "StatusInChat", "ShowJoins",
+	"LogDownloads", "LogFinishedDownloads", "LogUploads", "StatusInChat", "ShowJoins",
 	"UseSystemIcons", "PopupPMs", "MinUploadSpeed", "GetUserInfo", "UrlHandler", "MainWindowState",
-	"MainWindowSizeX", "MainWindowSizeY", "MainWindowPosX", "MainWindowPosY", "AutoAway",
+	"MainWindowSizeX", "MainWindowSizeY", "MainWindowPosX", "MainWindowPosY",
+	"SettingsWidth", "SettingsHeight", "SettingsPage",
 	"SocksPort", "SocksResolve", "KeepLists", "AutoKick", "QueueFrameShowTree",
-	"CompressTransfers", "SFVCheck",
+	"CompressTransfers", "SFVCheck", "AutoAway",
 	"MaxCompression", "NoAwayMsgToBots", "SkipZeroByte", "AdlsBreakOnFirst",
 	"HubUserCommands", "AutoSearchAutoMatch", "DownloadBarColor", "UploadBarColor", "LogSystem",
 	"LogFilelistTransfers", "SendUnknownCommands", "MaxHashSpeed", "OpenUserCmdHelp",
@@ -78,7 +78,7 @@ const string SettingsManager::settingTags[] =
 	"OutgoingConnections",
 	"NoIpOverride", "SearchOnlyFreeSlots", "BoldFinishedDownloads", "BoldFinishedUploads", "BoldQueue",
 	"BoldHub", "BoldPm", "BoldFL", "BoldSearch", "BoldSearchSpy", "SocketInBuffer", "SocketOutBuffer",
-	"BoldWaitingUsers", "BoldSystemLog", "AutoRefreshTime",
+	"BoldSystemLog", "AutoRefreshTime",
 	"UseTLS", "AutoSearchLimit", "AltSortOrder", "AutoKickNoFavs", "PromptPassword", "SpyFrameIgnoreTthSearches",
 	"DontDlAlreadyQueued", "MaxCommandLength", "AllowUntrustedHubs", "AllowUntrustedClients",
 	"TLSPort", "FastHash", "SortFavUsersFirst", "SegmentedDL", "FollowLinks",
@@ -91,6 +91,8 @@ const string SettingsManager::settingTags[] =
 	"MaxUploadSpeedTime", "MaxDownloadSpeedPrimary", "MaxUploadSpeedPrimary",
 	"SlotsAlternateLimiting", "SlotsPrimaryLimiting",
 	"AutoDetectIncomingConnection", "SettingsSaveInterval",
+	"BalloonMainChat", "BalloonPM", "BalloonPMWindow", "BalloonFinishedDL", "BalloonFinishedFL",
+	"UsersFilterOnline","UsersFilterFavorite","UsersFilterQueue","UsersFilterWaiting",
 	"SENTRY",
 	// Int64
 	"TotalUpload", "TotalDownload",
@@ -137,6 +139,8 @@ SettingsManager::SettingsManager()
 
 	setDefault(DOWNLOAD_DIRECTORY, Util::getPath(Util::PATH_DOWNLOADS));
 	setDefault(TEMP_DOWNLOAD_DIRECTORY, Util::getPath(Util::PATH_USER_LOCAL) + "Incomplete" PATH_SEPARATOR_STR);
+	setDefault(BIND_ADDRESS, "0.0.0.0");
+	setDefault(BIND_ADDRESS6, "::");
 	setDefault(SLOTS, 1);
 	setDefault(TCP_PORT, 0);
 	setDefault(UDP_PORT, 0);
@@ -164,17 +168,18 @@ SettingsManager::SettingsManager()
 	setDefault(LOG_DIRECTORY, Util::getPath(Util::PATH_USER_LOCAL) + "Logs" PATH_SEPARATOR_STR);
 	setDefault(LOG_UPLOADS, false);
 	setDefault(LOG_DOWNLOADS, false);
+	setDefault(LOG_FINISHED_DOWNLOADS, false);
 	setDefault(LOG_PRIVATE_CHAT, false);
 	setDefault(LOG_MAIN_CHAT, false);
 	setDefault(STATUS_IN_CHAT, true);
 	setDefault(SHOW_JOINS, false);
 	setDefault(UPLOAD_SPEED, connectionSpeeds[0]);
 	setDefault(USE_SYSTEM_ICONS, true);
-	setDefault(USE_OEM_MONOFONT, false);
 	setDefault(POPUP_PMS, true);
 	setDefault(MIN_UPLOAD_SPEED, 0);
-	setDefault(LOG_FORMAT_POST_DOWNLOAD, "%Y-%m-%d %H:%M: %[target] " + string(_("downloaded from")) + " %[userNI] (%[userCID]), %[fileSI] (%[fileSIchunk]), %[speed], %[time], %[fileTR]");
-	setDefault(LOG_FORMAT_POST_UPLOAD, "%Y-%m-%d %H:%M: %[source] " + string(_("uploaded to")) + " %[userNI] (%[userCID]), %[fileSI] (%[fileSIchunk]), %[speed], %[time], %[fileTR]");
+	setDefault(LOG_FORMAT_POST_DOWNLOAD, "%Y-%m-%d %H:%M: %[target] " + string(_("downloaded from")) + " %[userNI] (%[userCID]), %[fileSI] (%[fileSIactual]), %[speed], %[time], %[fileTR]");
+	setDefault(LOG_FORMAT_POST_FINISHED_DOWNLOAD, "%Y-%m-%d %H:%M: %[target] " + string(_("downloaded from")) + " %[userNI] (%[userCID]), %[fileSI] (%[fileSIsession]), %[speed], %[time], %[fileTR]");
+	setDefault(LOG_FORMAT_POST_UPLOAD, "%Y-%m-%d %H:%M: %[source] " + string(_("uploaded to")) + " %[userNI] (%[userCID]), %[fileSI] (%[fileSIactual]), %[speed], %[time], %[fileTR]");
 	setDefault(LOG_FORMAT_MAIN_CHAT, "[%Y-%m-%d %H:%M] %[message]");
 	setDefault(LOG_FORMAT_PRIVATE_CHAT, "[%Y-%m-%d %H:%M] %[message]");
 	setDefault(LOG_FORMAT_STATUS, "[%Y-%m-%d %H:%M] %[message]");
@@ -184,11 +189,12 @@ SettingsManager::SettingsManager()
 	setDefault(LOG_FILE_PRIVATE_CHAT, "%[userNI].%[userCID].log");
 	setDefault(LOG_FILE_UPLOAD, "Uploads.log");
 	setDefault(LOG_FILE_DOWNLOAD, "Downloads.log");
+	setDefault(LOG_FILE_FINISHED_DOWNLOAD, "Finished_downloads.log");
 	setDefault(LOG_FILE_SYSTEM, "system.log");
 	setDefault(GET_USER_INFO, true);
 	setDefault(URL_HANDLER, false);
-	setDefault(AUTO_AWAY, false);
-	setDefault(BIND_ADDRESS, "0.0.0.0");
+	setDefault(SETTINGS_WIDTH, 700);
+	setDefault(SETTINGS_HEIGHT, 600);
 	setDefault(SOCKS_PORT, 1080);
 	setDefault(SOCKS_RESOLVE, 1);
 	setDefault(CONFIG_VERSION, "0.181");		// 0.181 is the last version missing configversion
@@ -197,8 +203,10 @@ SettingsManager::SettingsManager()
 	setDefault(QUEUEFRAME_SHOW_TREE, true);
 	setDefault(COMPRESS_TRANSFERS, true);
 	setDefault(SFV_CHECK, true);
+	setDefault(AUTO_AWAY, false);
 	setDefault(DEFAULT_AWAY_MESSAGE, "I'm away. State your business and I might answer later if you're lucky.");
 	setDefault(TIME_STAMPS_FORMAT, "%H:%M");
+	setDefault(COUNTRY_FORMAT, "%[2code] - %[name]");
 	setDefault(MAX_COMPRESSION, 6);
 	setDefault(NO_AWAYMSG_TO_BOTS, true);
 	setDefault(SKIP_ZERO_BYTE, false);
@@ -262,7 +270,6 @@ SettingsManager::SettingsManager()
 	setDefault(BOLD_FL, true);
 	setDefault(BOLD_SEARCH, true);
 	setDefault(BOLD_SEARCH_SPY, true);
-	setDefault(BOLD_WAITING_USERS, true);
 	setDefault(BOLD_SYSTEM_LOG, true);
 	setDefault(AUTO_REFRESH_TIME, 60);
 	setDefault(USE_TLS, true);
@@ -309,6 +316,15 @@ SettingsManager::SettingsManager()
 	setDefault(SLOTS_ALTERNATE_LIMITING, 1);
 	setDefault(SLOTS_PRIMARY, 3);
 	setDefault(SETTINGS_SAVE_INTERVAL, 10);
+	setDefault(BALLOON_MAIN_CHAT, BALLOON_DISABLED);
+	setDefault(BALLOON_PM, BALLOON_DISABLED);
+	setDefault(BALLOON_PM_WINDOW, BALLOON_DISABLED);
+	setDefault(BALLOON_FINISHED_DL, BALLOON_ALWAYS);
+	setDefault(BALLOON_FINISHED_FL, BALLOON_DISABLED);
+	setDefault(USERS_FILTER_ONLINE, false);
+	setDefault(USERS_FILTER_FAVORITE, true);
+	setDefault(USERS_FILTER_QUEUE, false);
+	setDefault(USERS_FILTER_WAITING, false);
 
 	setSearchTypeDefaults();
 
@@ -411,24 +427,33 @@ void SettingsManager::load(string const& aFileName)
 		// if(v < 0.x) { // Fix old settings here }
 
 		if(v <= 0.674) {
-
 			// Formats changed, might as well remove these...
-			set(LOG_FORMAT_POST_DOWNLOAD, Util::emptyString);
-			set(LOG_FORMAT_POST_UPLOAD, Util::emptyString);
-			set(LOG_FORMAT_MAIN_CHAT, Util::emptyString);
-			set(LOG_FORMAT_PRIVATE_CHAT, Util::emptyString);
-			set(LOG_FORMAT_STATUS, Util::emptyString);
-			set(LOG_FORMAT_SYSTEM, Util::emptyString);
-			set(LOG_FILE_MAIN_CHAT, Util::emptyString);
-			set(LOG_FILE_STATUS, Util::emptyString);
-			set(LOG_FILE_PRIVATE_CHAT, Util::emptyString);
-			set(LOG_FILE_UPLOAD, Util::emptyString);
-			set(LOG_FILE_DOWNLOAD, Util::emptyString);
-			set(LOG_FILE_SYSTEM, Util::emptyString);
+			unset(LOG_FORMAT_POST_DOWNLOAD);
+			unset(LOG_FORMAT_POST_UPLOAD);
+			unset(LOG_FORMAT_MAIN_CHAT);
+			unset(LOG_FORMAT_PRIVATE_CHAT);
+			unset(LOG_FORMAT_STATUS);
+			unset(LOG_FORMAT_SYSTEM);
+			unset(LOG_FILE_MAIN_CHAT);
+			unset(LOG_FILE_STATUS);
+			unset(LOG_FILE_PRIVATE_CHAT);
+			unset(LOG_FILE_UPLOAD);
+			unset(LOG_FILE_DOWNLOAD);
+			unset(LOG_FILE_SYSTEM);
 		}
 
 		if(v <= 0.770 && SETTING(INCOMING_CONNECTIONS) != INCOMING_FIREWALL_PASSIVE) {
 			set(AUTO_DETECT_CONNECTION, false); //Don't touch if it works
+		}
+
+		if(v <= 0.782) {
+			// These were remade completely...
+			unset(USERSFRAME_ORDER);
+			unset(USERSFRAME_WIDTHS);
+
+			// the id has changed
+			if(isSet[TOOLBAR])
+				Util::replace("FavUsers", "Users", strSettings[TOOLBAR - STR_FIRST]);
 		}
 
 		if(SETTING(SET_MINISLOT_SIZE) < 64)
@@ -445,7 +470,6 @@ void SettingsManager::load(string const& aFileName)
 #ifdef _DEBUG
 		set(PRIVATE_ID, CID::generate().toBase32());
 #endif
-		setDefault(UDP_PORT, SETTING(TCP_PORT));
 
 		File::ensureDirectory(SETTING(TLS_TRUSTED_CERTIFICATES_PATH));
 

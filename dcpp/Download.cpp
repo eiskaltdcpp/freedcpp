@@ -17,17 +17,16 @@
  */
 
 #include "stdinc.h"
-#include "DCPlusPlus.h"
-
 #include "Download.h"
 
 #include "UserConnection.h"
 #include "QueueItem.h"
 #include "HashManager.h"
+#include "SettingsManager.h"
 
 namespace dcpp {
 
-Download::Download(UserConnection& conn, QueueItem& qi, const string& path, bool supportsTrees) throw() : Transfer(conn, path, qi.getTTH()),
+Download::Download(UserConnection& conn, QueueItem& qi, const string& path, bool supportsTrees) noexcept : Transfer(conn, path, qi.getTTH()),
 	tempTarget(qi.getTempTarget()), file(0), treeValid(false)
 {
 	conn.setDownload(this);
@@ -87,7 +86,7 @@ AdcCommand Download::getCommand(bool zlib) {
 	return cmd;
 }
 
-void Download::getParams(const UserConnection& aSource, StringMap& params) {
+void Download::getParams(const UserConnection& aSource, ParamMap& params) {
 	Transfer::getParams(aSource, params);
 	params["target"] = getPath();
 }

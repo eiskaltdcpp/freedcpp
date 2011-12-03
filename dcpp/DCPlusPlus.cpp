@@ -19,27 +19,26 @@
 #include "stdinc.h"
 #include "DCPlusPlus.h"
 
-#include "ConnectionManager.h"
-#include "DownloadManager.h"
-#include "UploadManager.h"
-#include "CryptoManager.h"
-#include "ShareManager.h"
-#include "SearchManager.h"
-#include "QueueManager.h"
+#include "ADLSearch.h"
 #include "ClientManager.h"
+#include "ConnectionManager.h"
+#include "ConnectivityManager.h"
+#include "CryptoManager.h"
+#include "DownloadManager.h"
+#include "FavoriteManager.h"
+#include "FinishedManager.h"
+#include "GeoManager.h"
 #include "HashManager.h"
 #include "LogManager.h"
-#include "FavoriteManager.h"
-#include "SettingsManager.h"
-#include "FinishedManager.h"
+#include "MappingManager.h"
+#include "QueueManager.h"
 #include "ResourceManager.h"
-#include "ADLSearch.h"
-#include "UPnPManager.h"
-#include "WindowManager.h"
+#include "SearchManager.h"
+#include "SettingsManager.h"
+#include "ShareManager.h"
 #include "ThrottleManager.h"
-#include "ConnectivityManager.h"
-
-#include "StringTokenizer.h"
+#include "UploadManager.h"
+#include "WindowManager.h"
 
 #ifdef _STLP_DEBUG
 void __stl_debug_terminate() {
@@ -85,7 +84,8 @@ void startup(void (*f)(void*, const string&), void* p) {
 	FinishedManager::newInstance();
 	ADLSearchManager::newInstance();
 	ConnectivityManager::newInstance();
-	UPnPManager::newInstance();
+	MappingManager::newInstance();
+///[-]	GeoManager::newInstance();
 	WindowManager::newInstance();
 
 	SettingsManager::getInstance()->load();
@@ -100,24 +100,31 @@ void startup(void (*f)(void*, const string&), void* p) {
 	}
 #endif
 
+	auto announce = [&f, &p](const string& str) {
+		if(f)
+			(*f)(p, str);
+	};
+
+	announce(_("Users"));
+	ClientManager::getInstance()->loadUsers();
 	FavoriteManager::getInstance()->load();
+
+	announce(_("Security certificates"));
 	CryptoManager::getInstance()->loadCertificates();
 
-	if(f != NULL)
-		(*f)(p, _("Hash database"));
+	announce(_("Hash database"));
 	HashManager::getInstance()->startup();
 
-	if(f != NULL)
-		(*f)(p, _("Shared Files"));
+	announce(_("Shared Files"));
 	ShareManager::getInstance()->refresh(true, false, true);
 
-	if(f != NULL)
-		(*f)(p, _("Download Queue"));
+	announce(_("Download Queue"));
 	QueueManager::getInstance()->loadQueue();
 
-	if(f != NULL)
-		(*f)(p, _("Users"));
-	ClientManager::getInstance()->loadUsers();
+///[-]	if(BOOLSETTING(GET_USER_COUNTRY)) {
+///[-]		announce(_("Country information"));
+///[-]		GeoManager::getInstance()->init();
+///[-]	}
 }
 
 void shutdown() {
@@ -131,8 +138,12 @@ void shutdown() {
 #ifdef _WIN32
 	ThrottleManager::getInstance()->shutdown();
 #endif
+///	TimerManager::getInstance()->shutdown();
+///	HashManager::getInstance()->shutdown();
+///	ThrottleManager::getInstance()->shutdown();
 	ConnectionManager::getInstance()->shutdown();
-	UPnPManager::getInstance()->close();
+	MappingManager::getInstance()->close();
+///[-]	GeoManager::getInstance()->close();
 	BufferedSocket::waitShutdown();
 
 	WindowManager::getInstance()->prepareSave();
@@ -141,7 +152,8 @@ void shutdown() {
 	SettingsManager::getInstance()->save();
 
 	WindowManager::deleteInstance();
-	UPnPManager::deleteInstance();
+///[-] 	GeoManager::deleteInstance();
+	MappingManager::deleteInstance();
 	ConnectivityManager::deleteInstance();
 	ADLSearchManager::deleteInstance();
 	FinishedManager::deleteInstance();

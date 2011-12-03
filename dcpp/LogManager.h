@@ -19,6 +19,11 @@
 #ifndef DCPLUSPLUS_DCPP_LOG_MANAGER_H
 #define DCPLUSPLUS_DCPP_LOG_MANAGER_H
 
+#include <deque>
+#include <utility>
+
+#include "typedefs.h"
+
 #include "CriticalSection.h"
 #include "Singleton.h"
 #include "Speaker.h"
@@ -26,27 +31,30 @@
 
 namespace dcpp {
 
+using std::deque;
+using std::pair;
+
 class LogManager : public Singleton<LogManager>, public Speaker<LogManagerListener>
 {
 public:
 	typedef pair<time_t, string> Pair;
 	typedef deque<Pair> List;
 
-	enum Area { CHAT, PM, DOWNLOAD, UPLOAD, SYSTEM, STATUS, LAST };
+	enum Area { CHAT, PM, DOWNLOAD, FINISHED_DOWNLOAD, UPLOAD, SYSTEM, STATUS, LAST };
 	enum { FILE, FORMAT };
 
-	void log(Area area, StringMap& params) throw();
+	void log(Area area, ParamMap& params) noexcept;
 	void message(const string& msg);
 
 	List getLastLogs();
-	string getPath(Area area, StringMap& params) const;
+	string getPath(Area area, ParamMap& params) const;
 	string getPath(Area area) const;
 
 	const string& getSetting(int area, int sel) const;
 	void saveSetting(int area, int sel, const string& setting);
 
 private:
-	void log(const string& area, const string& msg) throw();
+	void log(const string& area, const string& msg) noexcept;
 
 	friend class Singleton<LogManager>;
 	CriticalSection cs;
@@ -55,7 +63,7 @@ private:
 	int options[LAST][2];
 
 	LogManager();
-	virtual ~LogManager() throw();
+	virtual ~LogManager();
 };
 
 #define LOG(area, msg) LogManager::getInstance()->log(area, msg)

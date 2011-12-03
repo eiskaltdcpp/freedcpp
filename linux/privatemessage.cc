@@ -43,7 +43,8 @@ PrivateMessage::PrivateMessage(const string &cid, const string &hubUrl):
 	scrollToBottom(TRUE)
 {
 	// Intialize the chat window
-	if (SETTING(USE_OEM_MONOFONT))
+	///[+] TODO if (SETTING(USE_OEM_MONOFONT))
+	if (WGETB("use-oem-monofont"))
 	{
 		PangoFontDescription *fontDesc = pango_font_description_new();
 		pango_font_description_set_family(fontDesc, "Mono");
@@ -183,7 +184,8 @@ void PrivateMessage::addMessage_gui(string message, Msg::TypeMsg typemsg)
 
 	if (BOOLSETTING(LOG_PRIVATE_CHAT))
 	{
-		StringMap params;
+///[-] 		StringMap params;
+		ParamMap params;
 		params["message"] = message;
 		params["hubNI"] = WulforUtil::getHubNames(cid, hubUrl);//NOTE: core 0.762
 		params["hubURL"] = hubUrl;//NOTE: core 0.762

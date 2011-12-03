@@ -23,6 +23,7 @@
 #include <glib/gi18n.h>
 #include <glib/gstdio.h>
 #include <dcpp/ClientManager.h>
+#include <dcpp/FavoriteManager.h> ///[+]
 #include <dcpp/Util.h>
 #include <iostream>
 #include <arpa/inet.h>
@@ -164,12 +165,16 @@ string WulforUtil::getHubNames(const UserPtr& user, const string& hintUrl)
 	return getHubNames(user->getCID(), hintUrl);
 }
 
-StringList WulforUtil::getHubAddress(const CID& cid, const string& hintUrl)
+///StringList WulforUtil::getHubAddress(const CID& cid, const string& hintUrl)
+StringPairList WulforUtil::getHubAddress(const CID& cid, const string& hintUrl)
 {
-	return ClientManager::getInstance()->getHubs(cid, hintUrl);
+///	return ClientManager::getInstance()->getHubs(cid, hintUrl);
+	bool priv = FavoriteManager::getInstance()->isPrivate(hintUrl);///[+]
+	return ClientManager::getInstance()->getHubs(cid, hintUrl, priv);///[+]
 }
 
-StringList WulforUtil::getHubAddress(const UserPtr& user, const string& hintUrl)
+///StringList WulforUtil::getHubAddress(const UserPtr& user, const string& hintUrl)
+StringPairList WulforUtil::getHubAddress(const UserPtr& user, const string& hintUrl)
 {
 	return getHubAddress(user->getCID(), hintUrl);
 }

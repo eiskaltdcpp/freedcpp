@@ -17,8 +17,6 @@
  */
 
 #include "stdinc.h"
-#include "DCPlusPlus.h"
-
 #include "TimerManager.h"
 
 #include <boost/date_time/posix_time/ptime.hpp>
@@ -32,10 +30,10 @@ TimerManager::TimerManager() {
 	mtx.lock();
 }
 
-TimerManager::~TimerManager() throw() {
+TimerManager::~TimerManager() {
 	dcassert(listeners.size() == 0);
 
-	mtx.unlock();//NOTE: freedcpp, т.к. в ~timed_mutex() утверждение «!pthread_mutex_destroy(&m)» не выполненяется.
+	mtx.unlock();//NOTE: freedcpp, т.к. в  boost::timed_mutex::~timed_mutex(): утверждение «!pthread_mutex_destroy(&m)» не выполнено.
 }
 
 void TimerManager::shutdown() {

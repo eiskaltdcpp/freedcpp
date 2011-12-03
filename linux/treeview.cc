@@ -19,6 +19,7 @@
  * using OpenSSL with this program is allowed.
  */
 
+#include <dcpp/Util.h> ///[+]
 #include "treeview.hh"
 #include "settingsmanager.hh"
 #include "WulforUtil.hh"

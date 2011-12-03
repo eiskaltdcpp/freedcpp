@@ -1,20 +1,39 @@
+/*
+ * Copyright (C) 2001-2011 Jacek Sieka, arnetheduck on gmail point com
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ */
 
 #ifndef DCPLUSPLUS_DCPP_SIMPLEXMLREADER_H_
 #define DCPLUSPLUS_DCPP_SIMPLEXMLREADER_H_
 
-namespace dcpp {
+#include "typedefs.h"
 
-class InputStream;
+#include <boost/noncopyable.hpp>
+
+namespace dcpp {
 
 class SimpleXMLReader {
 public:
 	struct CallBack : private boost::noncopyable {
 		virtual ~CallBack() { }
-		virtual void startTag(const std::string& name, dcpp::StringPairList& attribs, bool simple) = 0;
+		virtual void startTag(const std::string& name, StringPairList& attribs, bool simple) = 0;
 		virtual void endTag(const std::string& name, const std::string& data) = 0;
 
 	protected:
-		static const std::string& getAttrib(dcpp::StringPairList& attribs, const std::string& name, size_t hint);
+		static const std::string& getAttrib(StringPairList& attribs, const std::string& name, size_t hint);
 	};
 
 	SimpleXMLReader(CallBack* callback);
@@ -104,7 +123,7 @@ private:
 	std::string::size_type bufPos;
 	uint64_t pos;
 
-	dcpp::StringPairList attribs;
+	StringPairList attribs;
 	std::string value;
 
 	CallBack* cb;
@@ -112,7 +131,7 @@ private:
 
 	ParseState state;
 
-	dcpp::StringList elements;
+	StringList elements;
 
 	void append(std::string& str, size_t maxLen, int c);
 	void append(std::string& str, size_t maxLen, std::string::const_iterator begin, std::string::const_iterator end);

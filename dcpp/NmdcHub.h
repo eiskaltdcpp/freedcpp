@@ -19,6 +19,8 @@
 #ifndef DCPLUSPLUS_DCPP_NMDC_HUB_H
 #define DCPLUSPLUS_DCPP_NMDC_HUB_H
 
+#include <list>
+
 #include "TimerManager.h"
 #include "SettingsManager.h"
 
@@ -29,7 +31,7 @@
 
 namespace dcpp {
 
-class ClientManager;
+using std::list;
 
 class NmdcHub : public Client, private Flags
 {
@@ -41,7 +43,7 @@ public:
 
 	virtual void hubMessage(const string& aMessage, bool /*thirdPerson*/ = false);
 	virtual void privateMessage(const OnlineUser& aUser, const string& aMessage, bool /*thirdPerson*/ = false);
-	virtual void sendUserCmd(const UserCommand& command, const StringMap& params);
+	virtual void sendUserCmd(const UserCommand& command, const ParamMap& params);
 	virtual void search(int aSizeType, int64_t aSize, int aFileType, const string& aString, const string& aToken, const StringList& aExtList);
 	virtual void password(const string& aPass) { send("$MyPass " + fromUtf8(aPass) + "|"); }
 	virtual void info(bool force) { myInfo(force); }
@@ -49,7 +51,7 @@ public:
 	virtual size_t getUserCount() const { Lock l(cs); return users.size(); }
 	virtual int64_t getAvailable() const;
 
-	virtual string escape(string const& str) const { return validateMessage(str, false); }
+	static string escape(const string& str) { return validateMessage(str, false); }
 	static string unescape(const string& str) { return validateMessage(str, true); }
 
 	virtual void send(const AdcCommand&) { dcassert(0); }
@@ -87,14 +89,14 @@ private:
 	StringList protectedIPs;
 
 	NmdcHub(const string& aHubURL);
-	virtual ~NmdcHub() throw();
+	virtual ~NmdcHub();
 
 	// Dummy
 	NmdcHub(const NmdcHub&);
 	NmdcHub& operator=(const NmdcHub&);
 
 	void clearUsers();
-	void onLine(const string& aLine) throw();
+	void onLine(const string& aLine) noexcept;
 
 	OnlineUser& getUser(const string& aNick);
 	OnlineUser* findUser(const string& aNick);
@@ -118,14 +120,15 @@ private:
 	void updateFromTag(Identity& id, const string& tag);
 
 	virtual string checkNick(const string& aNick);
+	virtual bool v4only() const { return true; }
 
 	// TimerManagerListener
-	virtual void on(Second, uint64_t aTick) throw();
-	virtual void on(Minute, uint64_t aTick) throw();
+	virtual void on(Second, uint64_t aTick) noexcept;
+	virtual void on(Minute, uint64_t aTick) noexcept;
 
-	virtual void on(Connected) throw();
-	virtual void on(Line, const string& l) throw();
-	virtual void on(Failed, const string&) throw();
+	virtual void on(Connected) noexcept;
+	virtual void on(Line, const string& l) noexcept;
+	virtual void on(Failed, const string&) noexcept;
 
 };
 

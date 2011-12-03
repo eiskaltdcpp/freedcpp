@@ -22,14 +22,11 @@
 #include "SettingsManager.h"
 
 #include "Socket.h"
-#include "User.h"
 #include "Thread.h"
-#include "Client.h"
 #include "Singleton.h"
 
 #include "SearchManagerListener.h"
 #include "TimerManager.h"
-#include "AdcCommand.h"
 
 namespace dcpp {
 
@@ -74,13 +71,10 @@ public:
 
 	void respond(const AdcCommand& cmd, const CID& cid,  bool isUdpActive);
 
-	uint16_t getPort()
-	{
-		return port;
-	}
+	const string& getPort() const { return port; }
 
-	void listen() throw(SocketException);
-	void disconnect() throw();
+	void listen();
+	void disconnect() noexcept;
 	void onSearchResult(const string& aLine) {
 		onData((const uint8_t*)aLine.data(), aLine.length(), Util::emptyString);
 	}
@@ -88,7 +82,7 @@ public:
 	void onRES(const AdcCommand& cmd, const UserPtr& from, const string& removeIp = Util::emptyString);
 
 	int32_t timeToSearch() {
-		return 5 - (static_cast<int32_t>(GET_TICK() - lastSearch) / 1000);
+		return 5 - (static_cast<int64_t>(GET_TICK() - lastSearch) / 1000);
 	}
 
 	bool okToSearch() {
@@ -98,7 +92,7 @@ public:
 private:
 
 	std::unique_ptr<Socket> socket;
-	uint16_t port;
+	string port;
 	bool stop;
 	uint64_t lastSearch;
 	friend class Singleton<SearchManager>;
@@ -108,7 +102,7 @@ private:
 	static std::string normalizeWhitespace(const std::string& aString);
 	virtual int run();
 
-	virtual ~SearchManager() throw();
+	virtual ~SearchManager();
 	void onData(const uint8_t* buf, size_t aLen, const string& address);
 };
 

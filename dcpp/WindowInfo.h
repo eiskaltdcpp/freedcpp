@@ -20,30 +20,42 @@
 #define DCPLUSPLUS_DCPP_WINDOW_INFO_H
 
 #include "forward.h"
+#include "Flags.h"
 #include "Util.h"
 
 namespace dcpp {
 
+struct WindowParam : Flags {
+	WindowParam() : Flags() { }
+	WindowParam(const string& content, Flags::MaskType flags = 0) : Flags(flags), content(content) { }
+
+	enum {
+		FLAG_IDENTIFIES = 1 << 1, /// this WindowParam determines the uniqueness of the WindowInfo holding it.
+
+		FLAG_CID = 1 << 2, /// this WindowParam indicates a CID for an user whose information shall be saved on exit.
+		FLAG_FILELIST = 1 << 3 /// this WindowParam specifies the path to a file list that must not be deleted on exit.
+	};
+
+	string content;
+
+	operator const string&() const { return content; }
+	template<typename T> bool operator==(const T& str) const { return content == str; }
+	bool empty() const { return content.empty(); }
+};
+
+typedef unordered_map<string, WindowParam> WindowParams;
+
 class WindowInfo {
 public:
-	explicit WindowInfo(const string& id_, const StringMap& params_);
+	explicit WindowInfo(const string& id_, const WindowParams& params_);
 
 	GETSET(string, id, Id);
-	GETSET(StringMap, params, Params);
+	GETSET(WindowParams, params, Params);
 
 	bool operator==(const WindowInfo& rhs) const;
 
-	/// special param used for displaying; ignored for identification.
-	static const string title;
-
 	/// special param for hub addresses.
 	static const string address;
-
-	/// special param that indicates a CID for an user whose information shall be saved on exit.
-	static const string cid;
-
-	/// special param for paths to file lists that must not be deleted on exit.
-	static const string fileList;
 };
 
 } // namespace dcpp

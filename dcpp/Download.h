@@ -2,10 +2,11 @@
 #define DCPLUSPLUS_DCPP_DOWNLOAD_H_
 
 #include "forward.h"
+#include "noexcept.h"
 #include "Transfer.h"
 #include "MerkleTree.h"
 #include "Flags.h"
-#include "Streams.h"
+#include "Util.h"
 
 namespace dcpp {
 
@@ -22,9 +23,9 @@ public:
 		FLAG_XML_BZ_LIST = 1 << 4
 	};
 
-	Download(UserConnection& conn, QueueItem& qi, const string& path, bool supportsTrees) throw();
+	Download(UserConnection& conn, QueueItem& qi, const string& path, bool supportsTrees) noexcept;
 
-	virtual void getParams(const UserConnection& aSource, StringMap& params);
+	virtual void getParams(const UserConnection& aSource, ParamMap& params);
 
 	virtual ~Download();
 

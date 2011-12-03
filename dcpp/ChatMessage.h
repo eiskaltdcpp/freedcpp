@@ -21,7 +21,11 @@
 
 #include "forward.h"
 
+#include <string>
+
 namespace dcpp {
+
+using std::string;
 
 struct ChatMessage {
 	string text;

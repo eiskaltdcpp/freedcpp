@@ -26,7 +26,7 @@ namespace dcpp {
 // TODO: At some point (probably when c++0x support is solid enough), remove these old names
 typedef boost::recursive_mutex CriticalSection;
 typedef boost::detail::spinlock	FastCriticalSection;
-typedef boost::lock_guard<boost::recursive_mutex> Lock;
+typedef boost::unique_lock<boost::recursive_mutex> Lock;
 typedef boost::lock_guard<boost::detail::spinlock> FastLock;
 
 } // namespace dcpp

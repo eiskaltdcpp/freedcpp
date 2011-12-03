@@ -17,19 +17,13 @@
  */
 
 #include "stdinc.h"
-#include "DCPlusPlus.h"
-
 #include "WindowInfo.h"
 
 namespace dcpp {
 
-const string WindowInfo::title = "Title";
-
 const string WindowInfo::address = "Address";
-const string WindowInfo::cid = "CID";
-const string WindowInfo::fileList = "FileList";
 
-WindowInfo::WindowInfo(const string& id_, const StringMap& params_) :
+WindowInfo::WindowInfo(const string& id_, const WindowParams& params_) :
 id(id_),
 params(params_)
 {
@@ -39,21 +33,22 @@ bool WindowInfo::operator==(const WindowInfo& rhs) const {
 	if(id != rhs.id)
 		return false;
 
-	if(params.size() != rhs.params.size())
-		return false;
-
-	// compare each param, except "Title" which is not used for identification.
-	for(StringMap::const_iterator i = params.begin(), iend = params.end(); i != iend; ++i) {
-		if(i->first == title)
-			continue;
-		StringMap::const_iterator ri = rhs.params.find(i->first);
-		if(ri == rhs.params.end())
-			return false;
-		if(i->second != ri->second)
-			return false;
+	// compare every identifying params.
+	int rParams = 0;
+	for(auto i = rhs.params.cbegin(), iend = rhs.params.cend(); i != iend; ++i)
+		if(i->second.isSet(WindowParam::FLAG_IDENTIFIES))
+			++rParams;
+	for(auto i = params.cbegin(), iend = params.cend(); i != iend; ++i) {
+		if(i->second.isSet(WindowParam::FLAG_IDENTIFIES)) {
+			auto ri = rhs.params.find(i->first);
+			if(ri == rhs.params.end())
+				return false;
+			if(i->second.content != ri->second.content)
+				return false;
+			--rParams;
+		}
 	}
-
-	return true;
+	return rParams == 0;
 }
 
 } // namespace dcpp

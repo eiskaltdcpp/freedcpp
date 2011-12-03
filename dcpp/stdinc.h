@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2011 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,112 +19,71 @@
 #ifndef DCPLUSPLUS_DCPP_STDINC_H
 #define DCPLUSPLUS_DCPP_STDINC_H
 
-// This enables stlport's debug mode (and slows it down to a crawl...)
-//#define _STLP_DEBUG 1
-//#define _STLP_USE_NEWALLOC 1
-
-// --- Shouldn't have to change anything under here...
-
-#ifndef _REENTRANT
-# define _REENTRANT 1
-#endif
+#include "compiler.h"
 
 #ifndef BZ_NO_STDIO
 #define BZ_NO_STDIO 1
 #endif
 
-#ifdef _MSC_VER
-
-//disable the deprecated warnings for the CRT functions.
-#define _CRT_SECURE_NO_DEPRECATE 1
-#define _ATL_SECURE_NO_DEPRECATE 1
-#define _CRT_NON_CONFORMING_SWPRINTFS 1
-
-# ifndef CDECL
-#  define CDECL _cdecl
-# endif
-
-#else // _MSC_VER
-
-# ifndef CDECL
-#  define CDECL
-# endif
-
-#endif // _MSC_VER
+#ifdef HAS_PCH
 
 #ifdef _WIN32
-# define _WIN32_WINNT 0x0502
-# define _WIN32_IE	0x0501
-# define WINVER 0x501
-
-#define STRICT
-#define WIN32_LEAN_AND_MEAN
-
-#include <winsock2.h>
-
-#include <windows.h>
-#include <mmsystem.h>
-
-#include <tchar.h>
-#include <shlobj.h>
-
+#include "w.h"
 #else
+#include <arpa/inet.h>
+#include <dirent.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <fnmatch.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <pthread.h>
+#include <sched.h>
+#include <semaphore.h>
+#include <sys/ioctl.h>
+#include <sys/resource.h>
+#include <sys/socket.h>
+#include <sys/stat.h>
+#include <sys/time.h>
 #include <unistd.h>
 #endif
 
-#ifdef _MSC_VER
-#include <crtdbg.h>
-#else
-#include <assert.h>
-#endif
-
-#include <cctype>
-#include <clocale>
-#include <cstdarg>
 #include <cstdint>
 #include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <ctime>
 
-#include <memory.h>
-#include <sys/types.h>
-
-#ifdef __MINGW32__
-/* the shared_ptr implementation provided by MinGW / GCC 4.5's libstdc++ consumes too many
-semaphores, so we prefer boost's one. see <https://bugs.launchpad.net/dcplusplus/+bug/654040>. */
-#define _SHARED_PTR_H 1 // skip libstdc++'s bits/shared_ptr.h
-#include <boost/shared_ptr.hpp>
-#include <boost/enable_shared_from_this.hpp>
-#include <boost/make_shared.hpp>
-using boost::shared_ptr;
-using boost::enable_shared_from_this;
-using boost::make_shared;
-#endif
-
 #include <algorithm>
-#include <vector>
-#include <string>
-#include <map>
-#include <set>
+#include <atomic>
 #include <deque>
-#include <list>
-#include <utility>
 #include <functional>
+#include <list>
+#include <map>
 #include <memory>
-#include <numeric>
-#include <limits>
+#include <set>
+#include <string>
 #include <unordered_map>
 #include <unordered_set>
+#include <utility>
+#include <vector>
 
-#include <libintl.h>
-
-#include <boost/format.hpp>
-#include <boost/scoped_array.hpp>
+#include <boost/intrusive_ptr.hpp>
 #include <boost/noncopyable.hpp>
+#include <boost/optional.hpp>
+///#include <boost/range/algorithm/find_if.hpp>
+///#include <boost/range/algorithm/find.hpp>
+#include <boost/regex.hpp>
+#include <boost/scoped_array.hpp>
+#include <boost/smart_ptr/detail/atomic_count.hpp>
+#include <boost/thread/mutex.hpp>
+#include <boost/thread/recursive_mutex.hpp>
+#include <boost/variant.hpp>
 
-#include "nullptr.h"
+#include <bzlib.h>
 
-namespace dcpp {
-using namespace std;
-}
+#include <openssl/ssl.h>
+
+#endif
 
 #endif // !defined(STDINC_H)

@@ -17,15 +17,13 @@
  */
 
 #include "stdinc.h"
-#include "DCPlusPlus.h"
-
 #include "Client.h"
 
 #include "BufferedSocket.h"
-
+#include "ClientManager.h"
+#include "ConnectivityManager.h"
 #include "FavoriteManager.h"
 #include "TimerManager.h"
-#include "ClientManager.h"
 
 namespace dcpp {
 
@@ -35,16 +33,17 @@ Client::Client(const string& hubURL, char separator_, bool secure_) :
 	myIdentity(ClientManager::getInstance()->getMe(), 0),
 	reconnDelay(120), lastActivity(GET_TICK()), registered(false), autoReconnect(false),
 	encoding(Text::systemCharset), state(STATE_DISCONNECTED), sock(0),
-	hubUrl(hubURL), port(0), separator(separator_),
+	hubUrl(hubURL),separator(separator_),
 	secure(secure_), countType(COUNT_UNCOUNTED)
 {
-	string file;
-	Util::decodeUrl(hubURL, address, port, file);
+	string file, proto, query, fragment;
+	Util::decodeUrl(hubURL, proto, address, port, file, query, fragment);
+	keyprint = Util::decodeQuery(query)["kp"];
 
 	TimerManager::getInstance()->addListener(this);
 }
 
-Client::~Client() throw() {
+Client::~Client() {
 	dcassert(!sock);
 
 	// In case we were deleted before we Failed
@@ -89,8 +88,10 @@ void Client::reloadSettings(bool updateNick) {
 }
 
 void Client::connect() {
-	if(sock)
+	if(sock) {
 		BufferedSocket::putSocket(sock);
+		sock = 0;
+	}
 
 	setAutoReconnect(true);
 	setReconnDelay(120 + Util::rand(0, 60));
@@ -102,19 +103,18 @@ void Client::connect() {
 	state = STATE_CONNECTING;
 
 	try {
-		sock = BufferedSocket::getSocket(separator);
+		sock = BufferedSocket::getSocket(separator, v4only());
 		sock->addListener(this);
 		sock->connect(address, port, secure, BOOLSETTING(ALLOW_UNTRUSTED_HUBS), true);
 	} catch(const Exception& e) {
-		shutdown();
-		/// @todo at this point, this hub instance is completely useless
+		state = STATE_DISCONNECTED;
 		fire(ClientListener::Failed(), this, e.getError());
 	}
 	updateActivity();
 }
 
 void Client::send(const char* aMessage, size_t aLen) {
-	if(!isReady()) {
+	if(!isConnected()) {
 		dcassert(0);
 		return;
 	}
@@ -122,18 +122,32 @@ void Client::send(const char* aMessage, size_t aLen) {
 	sock->write(aMessage, aLen);
 }
 
-void Client::on(Connected) throw() {
+void Client::on(Connected) noexcept {
 	updateActivity();
 	ip = sock->getIp();
 	localIp = sock->getLocalIp();
+
+	if(sock->isSecure() && keyprint.compare(0, 7, "SHA256/") == 0) {
+		auto kp = sock->getKeyprint();
+		if(!kp.empty()) {
+			vector<uint8_t> kp2v(kp.size());
+			Encoder::fromBase32(keyprint.c_str() + 7, &kp2v[0], kp2v.size());
+			if(!std::equal(kp.begin(), kp.end(), kp2v.begin())) {
+				state = STATE_DISCONNECTED;
+				sock->removeListener(this);
+				fire(ClientListener::Failed(), this, "Keyprint mismatch");
+				return;
+			}
+		}
+	}
+
 	fire(ClientListener::Connected(), this);
 	state = STATE_PROTOCOL;
 }
 
-void Client::on(Failed, const string& aLine) throw() {
+void Client::on(Failed, const string& aLine) noexcept {
 	state = STATE_DISCONNECTED;
 	FavoriteManager::getInstance()->removeUserCommand(getHubUrl());
-	sock->removeListener(this);
 	fire(ClientListener::Failed(), this, aLine);
 }
 
@@ -143,15 +157,19 @@ void Client::disconnect(bool graceLess) {
 }
 
 bool Client::isSecure() const {
-	return isReady() && sock->isSecure();
+	return isConnected() && sock->isSecure();
 }
 
 bool Client::isTrusted() const {
-	return isReady() && sock->isTrusted();
+	return isConnected() && sock->isTrusted();
 }
 
 std::string Client::getCipherName() const {
-	return isReady() ? sock->getCipherName() : Util::emptyString;
+	return isConnected() ? sock->getCipherName() : Util::emptyString;
+}
+
+vector<uint8_t> Client::getKeyprint() const {
+	return isConnected() ? sock->getKeyprint() : vector<uint8_t>();
 }
 
 void Client::updateCounts(bool aRemove) {
@@ -175,12 +193,12 @@ void Client::updateCounts(bool aRemove) {
 
 string Client::getLocalIp() const {
 	// Best case - the server detected it
-	if((!BOOLSETTING(NO_IP_OVERRIDE) || SETTING(EXTERNAL_IP).empty()) && !getMyIdentity().getIp().empty()) {
+	if((!CONNSETTING(NO_IP_OVERRIDE) || CONNSETTING(EXTERNAL_IP).empty()) && !getMyIdentity().getIp().empty()) {
 		return getMyIdentity().getIp();
 	}
 
-	if(!SETTING(EXTERNAL_IP).empty()) {
-		return Socket::resolve(SETTING(EXTERNAL_IP));
+	if(!CONNSETTING(EXTERNAL_IP).empty()) {
+		return Socket::resolve(CONNSETTING(EXTERNAL_IP), AF_INET);
 	}
 
 	if(localIp.empty()) {
@@ -190,11 +208,17 @@ string Client::getLocalIp() const {
 	return localIp;
 }
 
-void Client::on(Line, const string& /*aLine*/) throw() {
+string Client::getCounts() {
+	char buf[128];
+	return string(buf, snprintf(buf, sizeof(buf), "%ld/%ld/%ld",
+		counts[COUNT_NORMAL].load(), counts[COUNT_REGISTERED].load(), counts[COUNT_OP].load()));
+}
+
+void Client::on(Line, const string& /*aLine*/) noexcept {
 	updateActivity();
 }
 
-void Client::on(Second, uint64_t aTick) throw() {
+void Client::on(Second, uint64_t aTick) noexcept {
 	if(state == STATE_DISCONNECTED && getAutoReconnect() && (aTick > (getLastActivity() + getReconnDelay() * 1000)) ) {
 		// Try to reconnect...
 		connect();

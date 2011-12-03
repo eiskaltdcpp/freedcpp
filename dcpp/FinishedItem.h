@@ -19,7 +19,11 @@
 #ifndef DCPLUSPLUS_DCPP_FINISHED_ITEM_H
 #define DCPLUSPLUS_DCPP_FINISHED_ITEM_H
 
+#include <boost/noncopyable.hpp>
+
 #include "forward.h"
+
+#include "Pointer.h"
 #include "Util.h"
 
 namespace dcpp {
@@ -52,6 +56,7 @@ public:
 		int64_t milliSeconds_,
 		time_t time_,
 		int64_t fileSize_,
+		int64_t actual_,
 		bool crc32Checked_,
 		const HintedUser& user
 		);
@@ -60,6 +65,7 @@ public:
 		int64_t transferred_,
 		int64_t milliSeconds_,
 		time_t time_,
+		int64_t actual_,
 		bool crc32Checked_,
 		const HintedUser& user
 		);
@@ -69,6 +75,7 @@ public:
 
 	GETSET(HintedUserList, users, Users);
 	GETSET(int64_t, fileSize, FileSize);
+	GETSET(int64_t, actual, Actual);
 	GETSET(bool, crc32Checked, Crc32Checked);
 };
 

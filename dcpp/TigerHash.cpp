@@ -30,27 +30,25 @@
  */
 
 #include "stdinc.h"
-#include "DCPlusPlus.h"
-
 #include "TigerHash.h"
+
+#include <algorithm>
+#include <cstring>
+#include <boost/detail/endian.hpp>
+
+#include "debug.h"
+
+#ifdef BOOST_BIG_ENDIAN
+#define TIGER_BIG_ENDIAN
+#endif
+
+#if defined(_M_X64) || defined(__amd64__) || defined(__x86_64__) || defined(__alpha)
+#define TIGER_ARCH64
+#endif
 
 namespace dcpp {
 
-#ifdef _WIN32
-#if defined(_M_X64)
-#define TIGER_ARCH64
-#endif
-#if !(defined(_M_IX86) || defined(_M_X64))
-#define TIGER_BIG_ENDIAN
-#endif
-#else // _WIN32
-#if defined(__x86_64__) || defined(__alpha)
-#define TIGER_ARCH64
-#endif
-#if !(defined(__i386__) || defined(__x86_64__) || defined(__alpha))
-#define TIGER_BIG_ENDIAN
-#endif
-#endif // _WIN32
+using std::min;
 
 #define PASSES 3
 

@@ -62,7 +62,8 @@ class MainWindow:
 		void removeBookEntry_gui(BookEntry *entry);
 		GtkWidget *currentPage_gui();
 		void raisePage_gui(GtkWidget *page);
-		static bool getUserCommandLines_gui(const std::string &command, dcpp::StringMap &ucParams);
+///		static bool getUserCommandLines_gui(const std::string &command, dcpp::StringMap &ucParams);
+		static bool getUserCommandLines_gui(const std::string &command, dcpp::ParamMap &ucParams); ///[+]
 		void propertiesMagnetDialog_gui(std::string magnet);
 		void showMessageDialog_gui(const std::string primaryText, const std::string secondaryText);
 		void showDownloadQueue_gui();
