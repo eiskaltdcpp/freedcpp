@@ -38,7 +38,8 @@ class Hash:
 
 	private:
 		// GUI functions
-		void updateStats_gui(std::string file, int64_t bytes, size_t files, uint64_t tick);
+		///void updateStats_gui(std::string file, int64_t bytes, size_t files, uint64_t tick);
+		void updateStats_gui(std::string file, uint64_t bytes, size_t files, uint64_t tick); ///[+] core 0.785
 
 		// Client callbacks
 		virtual void on(dcpp::TimerManagerListener::Second, uint64_t tics) throw();
@@ -46,7 +47,8 @@ class Hash:
 		// GUI callback
 		static void onPauseHashing_gui(GtkWidget *widget, gpointer data);//NOTE: core 0.762
 
-		int64_t startBytes;
+		///int64_t startBytes;
+		uint64_t startBytes; ///[+] core 0.785
 		size_t startFiles;
 		uint64_t startTime;
 };

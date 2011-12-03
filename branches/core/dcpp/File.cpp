@@ -17,14 +17,12 @@
  */
 
 #include "stdinc.h"
-#include "DCPlusPlus.h"
-
 #include "File.h"
 
 namespace dcpp {
 
 #ifdef _WIN32
-File::File(const string& aFileName, int access, int mode) throw(FileException) {
+File::File(const string& aFileName, int access, int mode) {
 	dcassert(access == WRITE || access == READ || access == (READ | WRITE));
 
 	int m = 0;
@@ -50,7 +48,7 @@ File::File(const string& aFileName, int access, int mode) throw(FileException) {
 	}
 }
 
-uint32_t File::getLastModified() throw() {
+uint32_t File::getLastModified() noexcept {
 	FILETIME f = {0};
 	::GetFileTime(h, NULL, NULL, &f);
 	return convertTime(&f);
@@ -70,18 +68,18 @@ uint32_t File::convertTime(FILETIME* f) {
 	return 0;
 }
 
-bool File::isOpen() throw() {
+bool File::isOpen() noexcept {
 	return h != INVALID_HANDLE_VALUE;
 }
 
-void File::close() throw() {
+void File::close() noexcept {
 	if(isOpen()) {
 		CloseHandle(h);
 		h = INVALID_HANDLE_VALUE;
 	}
 }
 
-int64_t File::getSize() throw() {
+int64_t File::getSize() noexcept {
 	DWORD x;
 	DWORD l = ::GetFileSize(h, &x);
 
@@ -90,34 +88,34 @@ int64_t File::getSize() throw() {
 
 	return (int64_t)l | ((int64_t)x)<<32;
 }
-int64_t File::getPos() throw() {
+int64_t File::getPos() noexcept {
 	LONG x = 0;
 	DWORD l = ::SetFilePointer(h, 0, &x, FILE_CURRENT);
 
 	return (int64_t)l | ((int64_t)x)<<32;
 }
 
-void File::setSize(int64_t newSize) throw(FileException) {
+void File::setSize(int64_t newSize) {
 	int64_t pos = getPos();
 	setPos(newSize);
 	setEOF();
 	setPos(pos);
 }
-void File::setPos(int64_t pos) throw() {
+void File::setPos(int64_t pos) noexcept {
 	LONG x = (LONG) (pos>>32);
 	::SetFilePointer(h, (DWORD)(pos & 0xffffffff), &x, FILE_BEGIN);
 }
-void File::setEndPos(int64_t pos) throw() {
+void File::setEndPos(int64_t pos) noexcept {
 	LONG x = (LONG) (pos>>32);
 	::SetFilePointer(h, (DWORD)(pos & 0xffffffff), &x, FILE_END);
 }
 
-void File::movePos(int64_t pos) throw() {
+void File::movePos(int64_t pos) noexcept {
 	LONG x = (LONG) (pos>>32);
 	::SetFilePointer(h, (DWORD)(pos & 0xffffffff), &x, FILE_CURRENT);
 }
 
-size_t File::read(void* buf, size_t& len) throw(FileException) {
+size_t File::read(void* buf, size_t& len) {
 	DWORD x;
 	if(!::ReadFile(h, buf, (DWORD)len, &x, NULL)) {
 		throw(FileException(Util::translateError(GetLastError())));
@@ -126,7 +124,7 @@ size_t File::read(void* buf, size_t& len) throw(FileException) {
 	return x;
 }
 
-size_t File::write(const void* buf, size_t len) throw(FileException) {
+size_t File::write(const void* buf, size_t len) {
 	DWORD x;
 	if(!::WriteFile(h, buf, (DWORD)len, &x, NULL)) {
 		throw FileException(Util::translateError(GetLastError()));
@@ -134,20 +132,20 @@ size_t File::write(const void* buf, size_t len) throw(FileException) {
 	dcassert(x == len);
 	return x;
 }
-void File::setEOF() throw(FileException) {
+void File::setEOF() {
 	dcassert(isOpen());
 	if(!SetEndOfFile(h)) {
 		throw FileException(Util::translateError(GetLastError()));
 	}
 }
 
-size_t File::flush() throw(FileException) {
+size_t File::flush() {
 	if(isOpen() && !FlushFileBuffers(h))
 		throw FileException(Util::translateError(GetLastError()));
 	return 0;
 }
 
-void File::renameFile(const string& source, const string& target) throw(FileException) {
+void File::renameFile(const string& source, const string& target) {
 	if(!::MoveFile(Text::toT(source).c_str(), Text::toT(target).c_str())) {
 		// Can't move, try copy/delete...
 		copyFile(source, target);
@@ -155,18 +153,18 @@ void File::renameFile(const string& source, const string& target) throw(FileExce
 	}
 }
 
-void File::copyFile(const string& src, const string& target) throw(FileException) {
+void File::copyFile(const string& src, const string& target) {
 	if(!::CopyFile(Text::toT(src).c_str(), Text::toT(target).c_str(), FALSE)) {
 		throw FileException(Util::translateError(GetLastError()));
 	}
 }
 
-void File::deleteFile(const string& aFileName) throw()
+void File::deleteFile(const string& aFileName) noexcept
 {
 	::DeleteFile(Text::toT(aFileName).c_str());
 }
 
-int64_t File::getSize(const string& aFileName) throw() {
+int64_t File::getSize(const string& aFileName) noexcept {
 	WIN32_FIND_DATA fd;
 	HANDLE hFind;
 
@@ -180,7 +178,7 @@ int64_t File::getSize(const string& aFileName) throw() {
 	}
 }
 
-void File::ensureDirectory(const string& aFile) throw() {
+void File::ensureDirectory(const string& aFile) noexcept {
 	// Skip the first dir...
 	tstring file;
 	Text::toT(aFile, file);
@@ -194,13 +192,13 @@ void File::ensureDirectory(const string& aFile) throw() {
 	}
 }
 
-bool File::isAbsolute(const string& path) throw() {
+bool File::isAbsolute(const string& path) noexcept {
 	return path.size() > 2 && (path[1] == ':' || path[0] == '/' || path[0] == '\\');
 }
 
 #else // !_WIN32
 
-File::File(const string& aFileName, int access, int mode) throw(FileException) {
+File::File(const string& aFileName, int access, int mode) {
 	dcassert(access == WRITE || access == READ || access == (READ | WRITE));
 
 	int m = 0;
@@ -231,7 +229,7 @@ File::File(const string& aFileName, int access, int mode) throw(FileException) {
 		throw FileException(Util::translateError(errno));
 }
 
-uint32_t File::getLastModified() throw() {
+uint32_t File::getLastModified() noexcept {
 	struct stat s;
 	if (::fstat(h, &s) == -1)
 		return 0;
@@ -239,18 +237,18 @@ uint32_t File::getLastModified() throw() {
 	return (uint32_t)s.st_mtime;
 }
 
-bool File::isOpen() throw() {
+bool File::isOpen() noexcept {
 	return h != -1;
 }
 
-void File::close() throw() {
+void File::close() noexcept {
 	if(h != -1) {
 		::close(h);
 		h = -1;
 	}
 }
 
-int64_t File::getSize() throw() {
+int64_t File::getSize() noexcept {
 	struct stat s;
 	if(::fstat(h, &s) == -1)
 		return -1;
@@ -258,23 +256,23 @@ int64_t File::getSize() throw() {
 	return (int64_t)s.st_size;
 }
 
-int64_t File::getPos() throw() {
+int64_t File::getPos() noexcept {
 	return (int64_t)lseek(h, 0, SEEK_CUR);
 }
 
-void File::setPos(int64_t pos) throw() {
+void File::setPos(int64_t pos) noexcept {
 	lseek(h, (off_t)pos, SEEK_SET);
 }
 
-void File::setEndPos(int64_t pos) throw() {
+void File::setEndPos(int64_t pos) noexcept {
 	lseek(h, (off_t)pos, SEEK_END);
 }
 
-void File::movePos(int64_t pos) throw() {
+void File::movePos(int64_t pos) noexcept {
 	lseek(h, (off_t)pos, SEEK_CUR);
 }
 
-size_t File::read(void* buf, size_t& len) throw(FileException) {
+size_t File::read(void* buf, size_t& len) {
 	ssize_t result = ::read(h, buf, len);
 	if (result == -1) {
 		throw FileException(Util::translateError(errno));
@@ -283,7 +281,7 @@ size_t File::read(void* buf, size_t& len) throw(FileException) {
 	return (size_t)result;
 }
 
-size_t File::write(const void* buf, size_t len) throw(FileException) {
+size_t File::write(const void* buf, size_t len) {
 	ssize_t result;
 	char* pointer = (char*)buf;
 	ssize_t left = len;
@@ -304,7 +302,7 @@ size_t File::write(const void* buf, size_t len) throw(FileException) {
 
 // some ftruncate implementations can't extend files like SetEndOfFile,
 // not sure if the client code needs this...
-int File::extendFile(int64_t len) throw() {
+int File::extendFile(int64_t len) noexcept {
 	char zero;
 
 	if( (lseek(h, (off_t)len, SEEK_SET) != -1) && (::write(h, &zero,1) != -1) ) {
@@ -314,7 +312,7 @@ int File::extendFile(int64_t len) throw() {
 	return -1;
 }
 
-void File::setEOF() throw(FileException) {
+void File::setEOF() {
 	int64_t pos;
 	int64_t eof;
 	int ret;
@@ -330,14 +328,14 @@ void File::setEOF() throw(FileException) {
 		throw FileException(Util::translateError(errno));
 }
 
-void File::setSize(int64_t newSize) throw(FileException) {
+void File::setSize(int64_t newSize) {
 	int64_t pos = getPos();
 	setPos(newSize);
 	setEOF();
 	setPos(pos);
 }
 
-size_t File::flush() throw(FileException) {
+size_t File::flush() {
 	if(isOpen() && fsync(h) == -1)
 		throw FileException(Util::translateError(errno));
 	return 0;
@@ -350,7 +348,7 @@ size_t File::flush() throw(FileException) {
  * filesystem to be mounted at multiple points, but rename(2) does not
  * work across different mount points, even if the same filesystem is mounted on both.)
 */
-void File::renameFile(const string& source, const string& target) throw(FileException) {
+void File::renameFile(const string& source, const string& target) {
 	int ret = ::rename(Text::fromUtf8(source).c_str(), Text::fromUtf8(target).c_str());
 	if(ret != 0 && errno == EXDEV) {
 		copyFile(source, target);
@@ -360,7 +358,7 @@ void File::renameFile(const string& source, const string& target) throw(FileExce
 }
 
 // This doesn't assume all bytes are written in one write call, it is a bit safer
-void File::copyFile(const string& source, const string& target) throw(FileException) {
+void File::copyFile(const string& source, const string& target) {
 	const size_t BUF_SIZE = 64 * 1024;
 	boost::scoped_array<char> buffer(new char[BUF_SIZE]);
 	size_t count = BUF_SIZE;
@@ -378,11 +376,11 @@ void File::copyFile(const string& source, const string& target) throw(FileExcept
 	}
 }
 
-void File::deleteFile(const string& aFileName) throw() {
+void File::deleteFile(const string& aFileName) noexcept {
 	::unlink(Text::fromUtf8(aFileName).c_str());
 }
 
-int64_t File::getSize(const string& aFileName) throw() {
+int64_t File::getSize(const string& aFileName) noexcept {
 	struct stat s;
 	if(stat(Text::fromUtf8(aFileName).c_str(), &s) == -1)
 		return -1;
@@ -390,7 +388,7 @@ int64_t File::getSize(const string& aFileName) throw() {
 	return s.st_size;
 }
 
-void File::ensureDirectory(const string& aFile) throw() {
+void File::ensureDirectory(const string& aFile) noexcept {
 	string file = Text::fromUtf8(aFile);
 	string::size_type start = 0;
 	while( (start = file.find_first_of('/', start)) != string::npos) {
@@ -399,13 +397,13 @@ void File::ensureDirectory(const string& aFile) throw() {
 	}
 }
 
-bool File::isAbsolute(const string& path) throw() {
+bool File::isAbsolute(const string& path) noexcept {
 	return path.size() > 1 && path[0] == '/';
 }
 
 #endif // !_WIN32
 
-string File::read(size_t len) throw(FileException) {
+string File::read(size_t len) {
 	string s(len, 0);
 	size_t x = read(&s[0], len);
 	if(x != len)
@@ -413,7 +411,7 @@ string File::read(size_t len) throw(FileException) {
 	return s;
 }
 
-string File::read() throw(FileException) {
+string File::read() {
 	setPos(0);
 	int64_t sz = getSize();
 	if(sz == -1)
@@ -444,10 +442,10 @@ StringList File::findFiles(const string& path, const string& pattern) {
 			if (fnmatch(pattern.c_str(), ent->d_name, 0) == 0) {
 
 				//NOTE: dcplusplus revision 2126 compilation fixes for OpenSolaris
-// 				struct stat s;
-// 				stat(ent->d_name, &s);
-// 				const char* extra = (s.st_mode & S_IFDIR) ? "/" : "";
-// 				ret.push_back(path + Text::toUtf8(ent->d_name) + extra);
+//				struct stat s;
+//				stat(ent->d_name, &s);
+//				const char* extra = (s.st_mode & S_IFDIR) ? "/" : "";
+//				ret.push_back(path + Text::toUtf8(ent->d_name) + extra);
 
 				//NOTE: freedcpp, fix error file path
 				struct stat s;
@@ -523,14 +521,13 @@ FileFindIter::FileFindIter() {
 }
 
 FileFindIter::FileFindIter(const string& path) {
-
-// 	string filename = Text::fromUtf8(path);
-// 	dir = opendir(filename.c_str());
+//	string filename = Text::fromUtf8(path);
+//	dir = opendir(filename.c_str());
 	string base = Text::fromUtf8(path);//NOTE: freedcpp
 	dir = opendir(base.c_str());//NOTE: freedcpp
 	if (!dir)
 		return;
-// 	data.base = filename;
+//	data.base = filename;
 	data.base = base;//NOTE: freedcpp
 	data.ent = readdir(dir);
 	if (!data.ent) {
@@ -599,6 +596,6 @@ uint32_t FileFindIter::DirData::getLastWriteTime() {
 	return inode.st_mtime;
 }
 
-#endif // !_WIN32
+#endif // _WIN32
 
 } // namespace dcpp

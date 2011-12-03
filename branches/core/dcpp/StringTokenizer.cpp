@@ -17,8 +17,6 @@
  */
 
 #include "stdinc.h"
-#include "DCPlusPlus.h"
-
 #include "StringTokenizer.h"
 
 namespace dcpp {

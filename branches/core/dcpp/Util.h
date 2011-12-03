@@ -19,15 +19,37 @@
 #ifndef DCPLUSPLUS_DCPP_UTIL_H
 #define DCPLUSPLUS_DCPP_UTIL_H
 
-#ifndef _WIN32
+#include "compiler.h"
+
+#include <cstdlib>
+#include <ctime>
+
+#include <map>
+
+///#include <boost/range/algorithm/find_if.hpp>
+
+#ifdef _WIN32
+
+# define PATH_SEPARATOR '\\'
+# define PATH_SEPARATOR_STR "\\"
+
+#else
+
+# define PATH_SEPARATOR '/'
+# define PATH_SEPARATOR_STR "/"
+
 #include <sys/stat.h>
 #include <unistd.h>
-#include <stdlib.h>
+#include <cstdlib>
+
 #endif
 
 #include "Text.h"
 
 namespace dcpp {
+
+///using boost::find_if;
+using std::map;
 
 template<typename T, bool flag> struct ReferenceSelector {
 	typedef T ResultType;
@@ -58,7 +80,7 @@ public: TypeTraits<type>::ParameterType get##name2() const { return name; } \
 #define LIT(x) x, (sizeof(x)-1)
 
 /** Evaluates op(pair<T1, T2>.first, compareTo) */
-template<class T1, class T2, class op = equal_to<T1> >
+template<class T1, class T2, class op = std::equal_to<T1> >
 class CompareFirst {
 public:
 	CompareFirst(const T1& compareTo) : a(compareTo) { }
@@ -69,7 +91,7 @@ private:
 };
 
 /** Evaluates op(pair<T1, T2>.second, compareTo) */
-template<class T1, class T2, class op = equal_to<T2> >
+template<class T1, class T2, class op = std::equal_to<T2> >
 class CompareSecond {
 public:
 	CompareSecond(const T2& compareTo) : a(compareTo) { }
@@ -121,15 +143,7 @@ public:
 	static void initialize(PathsMap pathOverrides = PathsMap());
 
 	/** Path of temporary storage */
-	static string getTempPath() {
-#ifdef _WIN32
-		TCHAR buf[MAX_PATH + 1];
-		DWORD x = GetTempPath(MAX_PATH, buf);
-		return Text::fromT(tstring(buf, x));
-#else
-		return "/tmp/";
-#endif
-	}
+	static string getTempPath();
 
 	/** Path of configuration files */
 	static const string& getPath(Paths path) { return paths[path]; }
@@ -199,10 +213,12 @@ public:
 		replace(string_t(search), string_t(replacement), str);
 	}
 
-	static void decodeUrl(const string& aUrl, string& aServer, uint16_t& aPort, string& aFile);
+	static void decodeUrl(const string& aUrl, string& protocol, string& host, string& port, string& path, string& query, string& fragment);
+	static map<string, string> decodeQuery(const string& query);
+
 	static string validateFileName(string aFile);
 	static bool checkExtension(const string& tmp);
-	static string cleanPathChars(string aNick);
+	static string cleanPathChars(const string& str);
 	static string addBrackets(const string& s);
 
 	static string formatBytes(const string& aString) { return formatBytes(toInt64(aString)); }
@@ -223,7 +239,9 @@ public:
 		return buf;
 	}
 
-	static string formatParams(const string& msg, const StringMap& params, bool filter);
+	typedef string (*FilterF)(const string&);
+	static string formatParams(const string& msg, const ParamMap& params, FilterF filter = 0);
+
 	static string formatTime(const string &msg, const time_t t);
 
 	static inline int64_t roundDown(int64_t size, int64_t blockSize) {
@@ -372,8 +390,8 @@ public:
 
 	template<typename T>
 	static T& intersect(T& t1, const T& t2) {
-		for(typename T::iterator i = t1.begin(); i != t1.end();) {
-			if(find_if(t2.begin(), t2.end(), bind1st(equal_to<typename T::value_type>(), *i)) == t2.end())
+		for(auto i = t1.begin(); i != t1.end();) {
+			if(find_if(t2, [&](const typename T::value_type &v) { return v == *i; }) == t2.end())
 				i = t1.erase(i);
 			else
 				++i;
@@ -388,8 +406,8 @@ public:
 	 * Case insensitive substring search.
 	 * @return First position found or string::npos
 	 */
-	static string::size_type findSubString(const string& aString, const string& aSubString, string::size_type start = 0) throw();
-	static wstring::size_type findSubString(const wstring& aString, const wstring& aSubString, wstring::size_type start = 0) throw();
+	static string::size_type findSubString(const string& aString, const string& aSubString, string::size_type start = 0) noexcept;
+	static wstring::size_type findSubString(const wstring& aString, const wstring& aSubString, wstring::size_type start = 0) noexcept;
 
 	/* Utf-8 versions of strnicmp and stricmp, unicode char code order (!) */
 	static int stricmp(const char* a, const char* b);
@@ -411,8 +429,6 @@ public:
 	static int strnicmp(const string& a, const string& b, size_t n) { return strnicmp(a.c_str(), b.c_str(), n); }
 	static int stricmp(const wstring& a, const wstring& b) { return stricmp(a.c_str(), b.c_str()); }
 	static int strnicmp(const wstring& a, const wstring& b, size_t n) { return strnicmp(a.c_str(), b.c_str(), n); }
-
-	static const string& getIpCountry(const string& IP);
 
 	static bool getAway();
 	static void setAway(bool aAway);
@@ -439,10 +455,6 @@ private:
 	static bool manualAway;
 	static string awayMsg;
 	static time_t awayTime;
-
-	typedef map<uint32_t, size_t> CountryList;
-	static CountryList countries;
-	static StringList countryNames;
 
 	static void loadBootConfig();
 };

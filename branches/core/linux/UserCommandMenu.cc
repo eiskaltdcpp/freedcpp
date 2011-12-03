@@ -41,9 +41,16 @@ void UserCommandMenu::addHub(const string &hub)
 	hubs.push_back(hub);
 }
 
-void UserCommandMenu::addHub(const StringList &hubs2)
+///void UserCommandMenu::addHub(const StringList &hubs2)
+void UserCommandMenu::addHub(const StringPairList &hubs2)
 {
-	hubs.insert(hubs.end(), hubs2.begin(), hubs2.end());
+/// 	hubs.insert(hubs.end(), hubs2.begin(), hubs2.end());
+	
+	for (StringPairList::const_iterator it = hubs2.begin(); it != hubs2.end(); ++it)
+	{
+		string HubUrl = (*it).first;
+		hubs.push_back(HubUrl);
+	}
 }
 
 void UserCommandMenu::addUser(const string &cid)
@@ -155,8 +162,10 @@ void UserCommandMenu::onUserCommandClick_gui(GtkMenuItem *item, gpointer data)
 {
 	UserCommandMenu *ucm = (UserCommandMenu *)data;
 	string command = (gchar *)g_object_get_data(G_OBJECT(item), "command");
-	StringMap params;
-	typedef Func4<UserCommandMenu, string, string, string, StringMap> F4;
+	///StringMap params;
+	///typedef Func4<UserCommandMenu, string, string, string, StringMap> F4;
+	ParamMap params; ///[+]
+	typedef Func4<UserCommandMenu, string, string, string, ParamMap> F4; ///[+]
 
 	if (MainWindow::getUserCommandLines_gui(command, params))
 	{
@@ -184,7 +193,8 @@ void UserCommandMenu::onUserCommandClick_gui(GtkMenuItem *item, gpointer data)
 	}
 }
 
-void UserCommandMenu::sendUserCommand_client(string cid, string commandName, string hub, StringMap params)
+///void UserCommandMenu::sendUserCommand_client(string cid, string commandName, string hub, StringMap params)
+void UserCommandMenu::sendUserCommand_client(string cid, string commandName, string hub, ParamMap params) ///[+]
 {
 	if (!cid.empty() && !commandName.empty())
 	{

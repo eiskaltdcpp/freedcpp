@@ -9,6 +9,7 @@ dcpp_files = [
 	'BufferedSocket.cpp',
 	'BZUtils.cpp',
 	'ChatMessage.cpp',
+	'CID.cpp',
 	'Client.cpp',
 	'ClientManager.cpp',
 	'ConnectionManager.cpp',
@@ -27,7 +28,10 @@ dcpp_files = [
 	'HashBloom.cpp',
 	'HashManager.cpp',
 	'HttpConnection.cpp',
+	'HttpDownload.cpp',
 	'LogManager.cpp',
+	'Mapper.cpp',
+	'MappingManager.cpp',
 	'NmdcHub.cpp',
 	'QueueItem.cpp',
 	'QueueManager.cpp',
@@ -37,6 +41,7 @@ dcpp_files = [
 	'SettingsManager.cpp',
 	'SFVReader.cpp',
 	'ShareManager.cpp',
+	'SimpleBencodeReader.cpp',
 	'SimpleXML.cpp',
 	'SimpleXMLReader.cpp',
 	'Socket.cpp',
@@ -56,12 +61,14 @@ dcpp_files = [
 	'UserConnection.cpp',
 	'User.cpp',
 	'Util.cpp',
-	'UPnP.cpp',
-	'UPnPManager.cpp',
 	'version.cpp',
 	'WindowInfo.cpp',
 	'WindowManager.cpp',
 	'ZUtils.cpp']
+
+#GeoIP.cpp
+#GeoManager.cpp
+#Torrent.cpp
 
 languages = ['ar', 'be', 'bg', 'bs', 'ca', 'cs', 'da', 'de', 'el', 'en_CA',
              'en_GB', 'es', 'et', 'fi', 'fr', 'gl', 'gu', 'he', 'hr', 'hu',
@@ -73,7 +80,7 @@ Import('env')
 
 # We don't want to add this CXXFLAG globally so we copy the env
 env = env.Clone()
-env.Append(CXXFLAGS = ['-DBUILDING_DCPP'])
+env.Append(CXXFLAGS = ['-DBUILDING_DCPP', '-DHAS_PCH'])
 
 # Build the dcpp files and create the library
 libdcpp  = env.StaticLibrary(target = 'dcpp', source = dcpp_files)

@@ -1,5 +1,8 @@
 		--- freedcpp core branch ---
 
+r208: 0.33
+* Update core 0.785 revision 2657.
+
 r195: 0.32
 * merging trunk r186 through r192 into core branch.
 

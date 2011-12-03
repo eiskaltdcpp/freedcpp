@@ -19,32 +19,32 @@
 #ifndef DCPLUSPLUS_DCPP_CLIENT_H
 #define DCPLUSPLUS_DCPP_CLIENT_H
 
+#include "compiler.h"
+
+#include <atomic>
+
 #include "forward.h"
 
-#include "User.h"
 #include "Speaker.h"
 #include "BufferedSocketListener.h"
 #include "TimerManager.h"
 #include "ClientListener.h"
-
-#include <atomic>
+#include "OnlineUser.h"
 
 namespace dcpp {
+
+using std::atomic;
 
 /** Yes, this should probably be called a Hub */
 class Client : public Speaker<ClientListener>, public BufferedSocketListener, protected TimerManagerListener {
 public:
-	typedef Client* Ptr;
-	typedef list<Ptr> List;
-	typedef List::iterator Iter;
-
 	virtual void connect();
 	virtual void disconnect(bool graceless);
 
 	virtual void connect(const OnlineUser& user, const string& token) = 0;
 	virtual void hubMessage(const string& aMessage, bool thirdPerson = false) = 0;
 	virtual void privateMessage(const OnlineUser& user, const string& aMessage, bool thirdPerson = false) = 0;
-	virtual void sendUserCmd(const UserCommand& command, const StringMap& params) = 0;
+	virtual void sendUserCmd(const UserCommand& command, const ParamMap& params) = 0;
 	virtual void search(int aSizeMode, int64_t aSize, int aFileType, const string& aString, const string& aToken, const StringList& aExtList) = 0;
 	virtual void password(const string& pwd) = 0;
 	virtual void info(bool force) = 0;
@@ -54,37 +54,24 @@ public:
 
 	virtual void send(const AdcCommand& command) = 0;
 
-	virtual string escape(string const& str) const { return str; }
-
-	bool isConnected() const { return state != STATE_DISCONNECTED; }
-	bool isReady() const { return state != STATE_CONNECTING && state != STATE_DISCONNECTED; }
+	bool isConnected() const { return state != STATE_CONNECTING && state != STATE_DISCONNECTED; }
 	bool isSecure() const;
 	bool isTrusted() const;
 	std::string getCipherName() const;
+	vector<uint8_t> getKeyprint() const;
 
 	bool isOp() const { return getMyIdentity().isOp(); }
 
-	uint16_t getPort() const { return port; }
+	const string& getPort() const { return port; }
 	const string& getAddress() const { return address; }
 
 	const string& getIp() const { return ip; }
-	string getIpPort() const { return getIp() + ':' + Util::toString(port); }
+	string getIpPort() const { return getIp() + ':' + port; }
 	string getLocalIp() const;
 
 	void updated(const OnlineUser& aUser) { fire(ClientListener::UserUpdated(), this, aUser); }
 
-	static string getCounts() {
-		char buf[128];
-		return string(buf, snprintf(buf, sizeof(buf), "%ld/%ld/%ld",
-				counts[COUNT_NORMAL].load(), counts[COUNT_REGISTERED].load(), counts[COUNT_OP].load()));
-	}
-
-	StringMap& escapeParams(StringMap& sm) {
-		for(StringMapIter i = sm.begin(); i != sm.end(); ++i) {
-			i->second = escape(i->second);
-		}
-		return sm;
-	}
+	static string getCounts();
 
 	void reconnect();
 	void shutdown();
@@ -115,7 +102,7 @@ public:
 protected:
 	friend class ClientManager;
 	Client(const string& hubURL, char separator, bool secure_);
-	virtual ~Client() throw();
+	virtual ~Client();
 
 	enum CountType {
 		COUNT_NORMAL,
@@ -135,7 +122,7 @@ protected:
 		STATE_DISCONNECTED,	///< Nothing in particular
 	} state;
 
-	BufferedSocket* sock;
+	BufferedSocket *sock;
 
 	void updateCounts(bool aRemove);
 	void updateActivity() { lastActivity = GET_TICK(); }
@@ -146,13 +133,14 @@ protected:
 	virtual string checkNick(const string& nick) = 0;
 
 	// TimerManagerListener
-	virtual void on(Second, uint64_t aTick) throw();
+	virtual void on(Second, uint64_t aTick) noexcept;
 	// BufferedSocketListener
-	virtual void on(Connecting) throw() { fire(ClientListener::Connecting(), this); }
-	virtual void on(Connected) throw();
-	virtual void on(Line, const string& aLine) throw();
-	virtual void on(Failed, const string&) throw();
+	virtual void on(Connecting) noexcept { fire(ClientListener::Connecting(), this); }
+	virtual void on(Connected) noexcept;
+	virtual void on(Line, const string& aLine) noexcept;
+	virtual void on(Failed, const string&) noexcept;
 
+	virtual bool v4only() const = 0;
 private:
 
 	Client(const Client&);
@@ -162,7 +150,8 @@ private:
 	string address;
 	string ip;
 	string localIp;
-	uint16_t port;
+	string keyprint;
+	string port;
 	char separator;
 	bool secure;
 	CountType countType;

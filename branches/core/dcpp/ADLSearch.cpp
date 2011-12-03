@@ -22,8 +22,6 @@
  */
 
 #include "stdinc.h"
-#include "DCPlusPlus.h"
-
 #include "ADLSearch.h"
 
 #include "ClientManager.h"
@@ -31,6 +29,7 @@
 #include "LogManager.h"
 #include "QueueManager.h"
 #include "SimpleXML.h"
+#include "StringTokenizer.h"
 
 namespace dcpp {
 
@@ -143,8 +142,8 @@ private:
 	const string& s;
 };
 
-void ADLSearch::prepare(StringMap& params) {
-	boost::apply_visitor(Prepare(Util::formatParams(searchString, params, false)), v);
+void ADLSearch::prepare(ParamMap& params) {
+	boost::apply_visitor(Prepare(Util::formatParams(searchString, params)), v);
 }
 
 bool ADLSearch::matchesFile(const string& f, const string& fp, int64_t size) {
@@ -428,7 +427,7 @@ void ADLSearchManager::stepUpDirectory(DestDirList& destDirVector) {
 	}
 }
 
-void ADLSearchManager::prepareDestinationDirectories(DestDirList& destDirVector, DirectoryListing::Directory* root, StringMap& params) {
+void ADLSearchManager::prepareDestinationDirectories(DestDirList& destDirVector, DirectoryListing::Directory* root, ParamMap& params) {
 	// Load default destination directory (index = 0)
 	destDirVector.clear();
 	vector<DestDir>::iterator id = destDirVector.insert(destDirVector.end(), DestDir());
@@ -485,8 +484,8 @@ void ADLSearchManager::finalizeDestinationDirectories(DestDirList& destDirVector
 	}
 }
 
-void ADLSearchManager::matchListing(DirectoryListing& aDirList) throw() {
-	StringMap params;
+void ADLSearchManager::matchListing(DirectoryListing& aDirList) noexcept {
+	ParamMap params;
 	params["userNI"] = ClientManager::getInstance()->getNicks(aDirList.getUser())[0];
 	params["userCID"] = aDirList.getUser().user->getCID().toBase32();
 
@@ -512,6 +511,10 @@ void ADLSearchManager::matchRecurse(DestDirList &aDestList, DirectoryListing::Di
 		matchesFile(aDestList, *fileIt, aPath);
 	}
 	stepUpDirectory(aDestList);
+}
+
+string ADLSearchManager::getConfigFile() {
+	 return Util::getPath(Util::PATH_USER_CONFIG) + "ADLSearch.xml";
 }
 
 } // namespace dcpp

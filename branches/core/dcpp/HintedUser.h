@@ -16,23 +16,36 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef DCPLUSPLUS_DCPP_WINDOW_MANAGER_LISTENER_H
-#define DCPLUSPLUS_DCPP_WINDOW_MANAGER_LISTENER_H
+#ifndef DCPLUSPLUS_DCPP_HINTEDUSER_H_
+#define DCPLUSPLUS_DCPP_HINTEDUSER_H_
+
+#include <string>
 
 #include "forward.h"
+#include "User.h"
 
 namespace dcpp {
 
-class WindowManagerListener {
-public:
-	virtual ~WindowManagerListener() { }
-	template<int I>	struct X { enum { TYPE = I }; };
+using std::string;
 
-	typedef X<0> Window;
+/** User pointer associated to a hub url */
+struct HintedUser {
+	UserPtr user;
+	string hint;
 
-	virtual void on(Window, const string&, const StringMap&) throw() = 0;
+	explicit HintedUser(const UserPtr& user_, const string& hint_) : user(user_), hint(hint_) { }
+
+	bool operator==(const UserPtr& rhs) const {
+		return user == rhs;
+	}
+	bool operator==(const HintedUser& rhs) const {
+		return user == rhs.user;
+		// ignore the hint, we don't want lists with multiple instances of the same user...
+	}
+
+	operator UserPtr() const { return user; }
 };
 
-} // namespace dcpp
+}
 
-#endif // !defined(DCPLUSPLUS_DCPP_WINDOW_MANAGER_LISTENER_H)
+#endif /* HINTEDUSER_H_ */

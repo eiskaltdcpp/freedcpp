@@ -17,9 +17,8 @@
  */
 
 #include "stdinc.h"
-#include "DCPlusPlus.h"
-
 #include "SearchResult.h"
+
 #include "UploadManager.h"
 #include "Text.h"
 #include "User.h"

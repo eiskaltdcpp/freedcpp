@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2001-2011 Jacek Sieka, arnetheduck on gmail point com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,8 +19,8 @@
 #define APPNAME "DC++"
 
 // don't forget to update the .rc file as well!
-#define VERSIONSTRING "0.781"
-#define VERSIONFLOAT 0.781
+#define VERSIONSTRING "0.785"
+#define VERSIONFLOAT 0.785
 
 namespace dcpp {
 extern const string fullVersionString;

@@ -28,18 +28,14 @@
 #define SSL_SUCCESS 1
 #endif
 
-#ifdef YASSL_VERSION
-using namespace yaSSL;
-#endif
-
 namespace dcpp {
 
 class SSLSocketException : public SocketException {
 public:
 #ifdef _DEBUG
-	SSLSocketException(const string& aError) throw() : SocketException("SSLSocketException: " + aError) { }
+	SSLSocketException(const string& aError) noexcept : SocketException("SSLSocketException: " + aError) { }
 #else //_DEBUG
-	SSLSocketException(const string& aError) throw() : SocketException(aError) { }
+	SSLSocketException(const string& aError) noexcept : SocketException(aError) { }
 #endif // _DEBUG
 
 	virtual ~SSLSocketException() throw() { }
@@ -49,36 +45,35 @@ class CryptoManager;
 
 class SSLSocket : public Socket {
 public:
-	virtual ~SSLSocket() throw() {}
+	virtual ~SSLSocket() { }
 
-	virtual void accept(const Socket& listeningSocket) throw(SocketException);
-	virtual void connect(const string& aIp, uint16_t aPort) throw(SocketException);
-	virtual int read(void* aBuffer, int aBufLen) throw(SocketException);
-	virtual int write(const void* aBuffer, int aLen) throw(SocketException);
-	virtual int wait(uint32_t millis, int waitFor) throw(SocketException);
-	virtual void shutdown() throw();
-	virtual void close() throw();
+	virtual void accept(const Socket& listeningSocket);
+	virtual void connect(const string& aIp, const string& aPort);
+	virtual int read(void* aBuffer, int aBufLen);
+	virtual int write(const void* aBuffer, int aLen);
+	virtual std::pair<bool, bool> wait(uint32_t millis, bool checkRead, bool checkWrite);
+	virtual void shutdown() noexcept;
+	virtual void close() noexcept;
 
-	virtual bool isSecure() const throw() { return true; }
-	virtual bool isTrusted() const throw();
-	virtual std::string getCipherName() const throw();
-	virtual std::string getDigest() const throw();
+	virtual bool isSecure() const noexcept { return true; }
+	virtual bool isTrusted() const noexcept;
+	virtual std::string getCipherName() const noexcept;
+	virtual vector<uint8_t> getKeyprint() const noexcept;
 
 	virtual bool waitConnected(uint32_t millis);
 	virtual bool waitAccepted(uint32_t millis);
 
-
 private:
 	friend class CryptoManager;
 
-	SSLSocket(SSL_CTX* context) throw(SocketException);
+	SSLSocket(SSL_CTX* context);
 	SSLSocket(const SSLSocket&);
 	SSLSocket& operator=(const SSLSocket&);
 
 	SSL_CTX* ctx;
 	ssl::SSL ssl;
 
-	int checkSSL(int ret) throw(SocketException);
+	int checkSSL(int ret);
 	bool waitWant(int ret, uint32_t millis);
 };
 

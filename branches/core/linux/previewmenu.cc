@@ -23,6 +23,8 @@
 #include "WulforUtil.hh"
 #include <glib/gi18n.h>
 
+#include <dcpp/Util.h> ///[+]
+
 #include "previewmenu.hh"
 
 using namespace std;

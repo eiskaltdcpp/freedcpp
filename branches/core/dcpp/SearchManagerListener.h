@@ -29,7 +29,7 @@ public:
 	template<int I>	struct X { enum { TYPE = I }; };
 
 	typedef X<0> SR;
-	virtual void on(SR, const SearchResultPtr&) throw() = 0;
+	virtual void on(SR, const SearchResultPtr&) noexcept = 0;
 };
 
 } // namespace dcpp

@@ -24,17 +24,16 @@
 #ifndef DCPLUSPLUS_DCPP_A_D_L_SEARCH_H
 #define DCPLUSPLUS_DCPP_A_D_L_SEARCH_H
 
+#include <boost/regex.hpp>
+#include <boost/variant.hpp>
+
 #include "Util.h"
 
 #include "SettingsManager.h"
 
 #include "StringSearch.h"
-#include "StringTokenizer.h"
 #include "Singleton.h"
 #include "DirectoryListing.h"
-
-#include <boost/regex.hpp>
-#include <boost/variant.hpp>
 
 namespace dcpp {
 
@@ -98,7 +97,7 @@ private:
 	boost::variant<StringSearch::List, boost::regex> v;
 
 	/// Prepare search
-	void prepare(StringMap& params);
+	void prepare(ParamMap& params);
 
 	/// Search for file match
 	bool matchesFile(const string& f, const string& fp, int64_t size);
@@ -138,7 +137,7 @@ public:
 	GETSET(HintedUser, user, User)
 
 	// @remarks Used to add ADLSearch directories to an existing DirectoryListing
-	void matchListing(DirectoryListing& /*aDirList*/) throw();
+	void matchListing(DirectoryListing& /*aDirList*/) noexcept;
 
 private:
 	// @internal
@@ -151,11 +150,11 @@ private:
 	void stepUpDirectory(DestDirList& destDirVector);
 
 	// Prepare destination directory indexing
-	void prepareDestinationDirectories(DestDirList& destDirVector, DirectoryListing::Directory* root, StringMap& params);
+	void prepareDestinationDirectories(DestDirList& destDirVector, DirectoryListing::Directory* root, ParamMap& params);
 	// Finalize destination directories
 	void finalizeDestinationDirectories(DestDirList& destDirVector, DirectoryListing::Directory* root);
 
-	string getConfigFile() { return Util::getPath(Util::PATH_USER_CONFIG) + "ADLSearch.xml"; }
+	static string getConfigFile();
 };
 
 } // namespace dcpp

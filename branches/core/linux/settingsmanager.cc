@@ -120,6 +120,8 @@ WulforSettingsManager::WulforSettingsManager():
 	defaultInt.insert(IntMap::value_type("open-favorite-users", 0));
 	defaultInt.insert(IntMap::value_type("open-search-spy", 0));
 ///core 0.762]
+	defaultInt.insert(IntMap::value_type("use-oem-monofont", 0));
+///core 0.785
 	defaultInt.insert(IntMap::value_type("toolbar-position", 1));
 	defaultInt.insert(IntMap::value_type("toolbar-small", 0));
 	defaultString.insert(StringMap::value_type("magnet-choose-dir", SETTING(DOWNLOAD_DIRECTORY)));

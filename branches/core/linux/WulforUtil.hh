@@ -24,9 +24,12 @@
 
 #include <gtk/gtk.h>
 #include <dcpp/stdinc.h>
-#include <dcpp/DCPlusPlus.h>
+///[-]#include <dcpp/DCPlusPlus.h>
+#include <dcpp/typedefs.h> ///[+]
 #include <dcpp/CID.h>
 #include <dcpp/User.h>
+
+#include <dcpp/HintedUser.h> ///[+]
 
 #define C_EMPTY(x) ((x) == NULL || (x)[0] == '\0')
 
@@ -49,8 +52,10 @@ class WulforUtil
 		static std::string getHubNames(const dcpp::UserPtr& user, const std::string& hintUrl);
 		static std::string getHubNames(const dcpp::HintedUser& user) {return getHubNames(user.user->getCID(), user.hint);}
 		/** get hub address */
-		static dcpp::StringList getHubAddress(const dcpp::CID& cid, const std::string& hintUrl);
-		static dcpp::StringList getHubAddress(const dcpp::UserPtr& user, const std::string& hintUrl);
+		///static dcpp::StringList getHubAddress(const dcpp::CID& cid, const std::string& hintUrl);
+		///static dcpp::StringList getHubAddress(const dcpp::UserPtr& user, const std::string& hintUrl);
+		static dcpp::StringPairList getHubAddress(const dcpp::CID& cid, const std::string& hintUrl); ///[+]
+		static dcpp::StringPairList getHubAddress(const dcpp::UserPtr& user, const std::string& hintUrl); ///[+]
 //NOTE: core 0.762
 		static std::string getTextFromMenu(GtkMenuItem *item);
 		static std::vector<std::string>& getCharsets();

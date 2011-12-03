@@ -25,14 +25,14 @@
 
 #include <dcpp/stdinc.h>
 #include <dcpp/DCPlusPlus.h>
-#include <dcpp/UPnPManager.h>//NOTE: core 0.762
+///[-]#include <dcpp/UPnPManager.h>//NOTE: core 0.762
 
 #include "bacon-message-connection.h"
 #include "settingsmanager.hh"
 #include "wulformanager.hh"
 #include "WulforUtil.hh"
 #include "version.hh"
-#include "upnpc.hh"//NOTE: core 0.762
+///[-]#include "upnpc.hh"//NOTE: core 0.762
 #include <iostream>
 #include <signal.h>
 
@@ -93,7 +93,7 @@ int main(int argc, char *argv[])
 	// Start the DC++ client core
 	dcpp::Util::initialize();//NOTE: core 0.762
 	dcpp::startup(callBack, NULL);
-	dcpp::UPnPManager::getInstance()->addImplementation(new UPnPc());//NOTE: core 0.762
+///[-]	dcpp::UPnPManager::getInstance()->addImplementation(new UPnPc());//NOTE: core 0.762
 	dcpp::TimerManager::getInstance()->start();
 
 	g_thread_init(NULL);

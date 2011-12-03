@@ -30,7 +30,7 @@
 #include <dcpp/Upload.h>
 #include <dcpp/Download.h>
 #include <dcpp/ClientManager.h>
-#include <dcpp/UPnPManager.h>//NOTE: core 0.762
+///[-]#include <dcpp/UPnPManager.h>//NOTE: core 0.762
 #include <dcpp/version.h>
 #include "downloadqueue.hh"
 #include "favoritehubs.hh"
@@ -1078,7 +1078,8 @@ void MainWindow::setToolbarStyle_gui(int style)
 	}
 }
 
-bool MainWindow::getUserCommandLines_gui(const string &command, StringMap &ucParams)
+///bool MainWindow::getUserCommandLines_gui(const string &command, StringMap &ucParams)
+bool MainWindow::getUserCommandLines_gui(const string &command, ParamMap &ucParams)
 {
 	string name;
 	string label;
@@ -1701,16 +1702,17 @@ void MainWindow::onPreferencesClicked_gui(GtkWidget *widget, gpointer data)
 			if (SETTING(INCOMING_CONNECTIONS) == SettingsManager::INCOMING_FIREWALL_UPNP ||
 				lastConn == SettingsManager::INCOMING_FIREWALL_UPNP)
 			{
-				UPnPManager::getInstance()->close();
+				///[-]UPnPManager::getInstance()->close();
 			}
 
 			F0 *func = new F0(mw, &MainWindow::startSocket_client);
 			WulforManager::get()->dispatchClientFunc(func);
 		}
-		else if (SETTING(INCOMING_CONNECTIONS) == SettingsManager::INCOMING_FIREWALL_UPNP && !UPnPManager::getInstance()->getOpened())//NOTE: core 0.762
+///[-]		else if (SETTING(INCOMING_CONNECTIONS) == SettingsManager::INCOMING_FIREWALL_UPNP && !UPnPManager::getInstance()->getOpened())//NOTE: core 0.762
+		else if (SETTING(INCOMING_CONNECTIONS) == SettingsManager::INCOMING_FIREWALL_UPNP)//NOTE: core 0.785
 		{
 			// previous UPnP mappings had failed; try again
-			UPnPManager::getInstance()->open();
+			///[-]UPnPManager::getInstance()->open();
 		}
 
 		if (BOOLSETTING(ALWAYS_TRAY))
@@ -2054,11 +2056,11 @@ void MainWindow::startSocket_client()
 
 	if (ClientManager::getInstance()->isActive())
 	{
-		try
+		try ///[+]***debugs
 		{
 			ConnectionManager::getInstance()->listen();
 		}
-		catch (const Exception &e)
+		catch (const Exception &e) ///[+]***debugs
 		{
 			string primaryText = _("Unable to open TCP/TLS port");
 			string secondaryText = _("File transfers will not work correctly until you change settings or turn off any application that might be using the TCP/TLS port.");
@@ -2068,11 +2070,11 @@ void MainWindow::startSocket_client()
 
 		}
 
-		try
+		try ///[+]***debugs
 		{
 			SearchManager::getInstance()->listen();
 		}
-		catch (const Exception &e)
+		catch (const Exception &e) ///[+]***debugs
 		{
 			string primaryText = _("Unable to open UDP port");
 			string secondaryText = _("Searching will not work correctly until you change settings or turn off any application that might be using the UDP port.");
@@ -2083,7 +2085,8 @@ void MainWindow::startSocket_client()
 
 		// must be done after listen calls; otherwise ports won't be set
 		if (SETTING(INCOMING_CONNECTIONS) == SettingsManager::INCOMING_FIREWALL_UPNP)// NOTE: core 0.762
-			UPnPManager::getInstance()->open();
+			///[-]UPnPManager::getInstance()->open(); //NOTE: core 0.785
+			;
 	}
 
 	ClientManager::getInstance()->infoUpdated();

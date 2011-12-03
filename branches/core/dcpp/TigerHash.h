@@ -29,8 +29,11 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#if !defined(TIGER_HASH_H)
-#define TIGER_HASH_H
+#ifndef DCPLUSPLUS_DCPP_TIGER_HASH_H
+#define DCPLUSPLUS_DCPP_TIGER_HASH_H
+
+#include <cstddef>
+#include <cstdint>
 
 namespace dcpp {
 

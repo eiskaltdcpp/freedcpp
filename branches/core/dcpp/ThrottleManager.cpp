@@ -17,8 +17,6 @@
  */
 
 #include "stdinc.h"
-#include "DCPlusPlus.h"
-
 #include "ThrottleManager.h"
 
 #include "DownloadManager.h"
@@ -42,7 +40,8 @@ int ThrottleManager::read(Socket* sock, void* buffer, size_t len)
 {
 	int64_t readSize = -1;
 	size_t downs = DownloadManager::getInstance()->getDownloadCount();
-	if(!getCurThrottling() || downTokens == -1 || downs == 0)
+	auto downLimit = getDownLimit(); // avoid even intra-function races
+	if(!getCurThrottling() || downLimit == 0 || downs == 0)
 		return sock->read(buffer, len);
 
 	{
@@ -50,7 +49,7 @@ int ThrottleManager::read(Socket* sock, void* buffer, size_t len)
 
 		if(downTokens > 0)
 		{
-			int64_t slice = (getDownLimit() * 1024) / downs;
+			int64_t slice = (downLimit * 1024) / downs;
 			readSize = min(slice, min(static_cast<int64_t>(len), downTokens));
 
 			// read from socket
@@ -79,7 +78,8 @@ int ThrottleManager::write(Socket* sock, void* buffer, size_t& len)
 {
 	bool gotToken = false;
 	size_t ups = UploadManager::getInstance()->getUploadCount();
-	if(!getCurThrottling() || upTokens == -1 || ups == 0)
+	auto upLimit = getUpLimit(); // avoid even intra-function races
+	if(!getCurThrottling() || upLimit == 0 || ups == 0)
 		return sock->write(buffer, len);
 
 	{
@@ -87,7 +87,7 @@ int ThrottleManager::write(Socket* sock, void* buffer, size_t& len)
 
 		if(upTokens > 0)
 		{
-			size_t slice = (getUpLimit() * 1024) / ups;
+			size_t slice = (upLimit * 1024) / ups;
 			len = min(slice, min(len, static_cast<size_t>(upTokens)));
 			upTokens -= len;
 
@@ -146,6 +146,11 @@ int ThrottleManager::getUpLimit() {
 
 int ThrottleManager::getDownLimit() {
 	return SettingsManager::getInstance()->get(getCurSetting(SettingsManager::MAX_DOWNLOAD_SPEED_MAIN));
+}
+
+void ThrottleManager::setSetting(SettingsManager::IntSetting setting, int value) {
+	SettingsManager::getInstance()->set(setting, value);
+	ClientManager::getInstance()->infoUpdated();
 }
 
 bool ThrottleManager::getCurThrottling() {
@@ -209,17 +214,16 @@ void ThrottleManager::shutdown()
 #endif //*nix
 
 // TimerManagerListener
-void ThrottleManager::on(TimerManagerListener::Second, uint64_t /* aTick */) throw()
+void ThrottleManager::on(TimerManagerListener::Second, uint64_t /* aTick */) noexcept
 {
 	int newSlots = SettingsManager::getInstance()->get(getCurSetting(SettingsManager::SLOTS));
 	if(newSlots != SETTING(SLOTS)) {
-		SettingsManager::getInstance()->set(SettingsManager::SLOTS, newSlots);
-		ClientManager::getInstance()->infoUpdated();
+		setSetting(SettingsManager::SLOTS, newSlots);
 	}
 
 	{
 		Lock l(stateCS);
-
+		
 #ifndef _WIN32 //*nix
 
 		if (halt == 1)
@@ -243,7 +247,6 @@ void ThrottleManager::on(TimerManagerListener::Second, uint64_t /* aTick */) thr
 			// This will create slight weirdness for the read/write calls between
 			// here and the first activeWaiter-toggle below.
 			waitCS[activeWaiter = 0].lock();
-
 #ifndef _WIN32 //*nix
 
 			// lock shutdown
@@ -252,24 +255,15 @@ void ThrottleManager::on(TimerManagerListener::Second, uint64_t /* aTick */) thr
 		}
 	}
 
-	int downLimit = getDownLimit();
-	int upLimit   = getUpLimit();
-
 	// readd tokens
 	{
 		Lock l(downCS);
-		if(downLimit > 0)
-			downTokens = downLimit * 1024;
-		else
-			downTokens = -1;
+		downTokens = getDownLimit() * 1024;
 	}
 
 	{
 		Lock l(upCS);
-		if(upLimit > 0)
-			upTokens = upLimit * 1024;
-		else
-			upTokens = -1;
+		upTokens = getUpLimit() * 1024;
 	}
 
 	// let existing events drain out (fairness).

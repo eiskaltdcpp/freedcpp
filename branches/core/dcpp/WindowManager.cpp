@@ -17,11 +17,8 @@
  */
 
 #include "stdinc.h"
-#include "DCPlusPlus.h"
-
 #include "WindowManager.h"
 
-#include "WindowInfo.h"
 #include "SimpleXML.h"
 #include "ClientManager.h"
 #include "QueueManager.h"
@@ -39,29 +36,15 @@ WindowManager::WindowManager() {
 	SettingsManager::getInstance()->addListener(this);
 }
 
-WindowManager::~WindowManager() throw() {
+WindowManager::~WindowManager() {
 	SettingsManager::getInstance()->removeListener(this);
 }
 
-void WindowManager::autoOpen(bool skipHubs) {
-	Lock l(cs);
-	for(WindowInfoList::const_iterator i = list.begin(), iend = list.end(); i != iend; ++i) {
-		const string& id = i->getId();
-		if(skipHubs && id == hub())
-			continue;
-		fire(WindowManagerListener::Window(), id, i->getParams());
-	}
+Lock WindowManager::lock() {
+	return Lock(cs);
 }
 
-void WindowManager::lock() {
-	cs.lock();
-}
-
-void WindowManager::unlock() {
-	cs.unlock();
-}
-
-void WindowManager::add(const string& id, const StringMap& params) {
+void WindowManager::add(const string& id, const WindowParams& params) {
 	list.push_back(WindowInfo(id, params));
 }
 
@@ -69,12 +52,16 @@ void WindowManager::clear() {
 	list.clear();
 }
 
-void WindowManager::addRecent(const string& id, const StringMap& params) {
+const WindowManager::WindowInfoList& WindowManager::getList() {
+	return list;
+}
+
+void WindowManager::addRecent(const string& id, const WindowParams& params) {
 	Lock l(cs);
 	addRecent_(id, params, true);
 }
 
-void WindowManager::addRecent_(const string& id, const StringMap& params, bool top) {
+void WindowManager::addRecent_(const string& id, const WindowParams& params, bool top) {
 	unsigned max;
 	{
 		MaxRecentItems::const_iterator i = maxRecentItems.find(id);
@@ -109,7 +96,7 @@ void WindowManager::addRecent_(const string& id, const StringMap& params, bool t
 		infoList.push_back(info);
 }
 
-void WindowManager::updateRecent(const string& id, const StringMap& params) {
+void WindowManager::updateRecent(const string& id, const WindowParams& params) {
 	Lock l(cs);
 	RecentList::iterator ri = recent.find(id);
 	if(ri != recent.end()) {
@@ -151,14 +138,18 @@ void WindowManager::prepareSave() const {
 }
 
 void WindowManager::prepareSave(const WindowInfoList& infoList) const {
-	for(WindowInfoList::const_iterator wi = infoList.begin(), wiend = infoList.end(); wi != wiend; ++wi) {
-		StringMap::const_iterator i = wi->getParams().find(WindowInfo::cid);
-		if(i != wi->getParams().end())
-			ClientManager::getInstance()->saveUser(CID(i->second));
+	for(auto wi = infoList.cbegin(), wiend = infoList.cend(); wi != wiend; ++wi) {
+		for(auto i = wi->getParams().cbegin(), iend = wi->getParams().cend(); i != iend; ++i) {
+			auto& param = i->second;
+			if(param.empty())
+				continue;
 
-		i = wi->getParams().find(WindowInfo::fileList);
-		if(i != wi->getParams().end() && !i->second.empty())
-			QueueManager::getInstance()->noDeleteFileList(i->second);
+			if(param.isSet(WindowParam::FLAG_CID))
+				ClientManager::getInstance()->saveUser(CID(param));
+
+			if(param.isSet(WindowParam::FLAG_FILELIST))
+				QueueManager::getInstance()->noDeleteFileList(param);
+		}
 	}
 }
 
@@ -170,14 +161,26 @@ void WindowManager::parseTags(SimpleXML& xml, handler_type handler) {
 		if(id.empty())
 			continue;
 
-		StringMap params;
+		WindowParams params;
 		xml.stepIn();
+
 		while(xml.findChild("Param")) {
 			const string& id_ = xml.getChildAttrib("Id");
 			if(id_.empty())
 				continue;
-			params[id_] = xml.getChildData();
+
+			WindowParam param(xml.getChildData());
+
+			if(!xml.getBoolChildAttrib("Opt") && id_ != "Title") /// @todo "Title" check for back compat - remove later
+				param.setFlag(WindowParam::FLAG_IDENTIFIES);
+			if(xml.getBoolChildAttrib("CID"))
+				param.setFlag(WindowParam::FLAG_CID);
+			if(xml.getBoolChildAttrib("FileList"))
+				param.setFlag(WindowParam::FLAG_FILELIST);
+
+			params[id_] = param;
 		}
+
 		xml.stepOut();
 
 		(this->*handler)(id, params);
@@ -192,15 +195,24 @@ void WindowManager::addTag(SimpleXML& xml, const WindowInfo& info) const {
 
 	if(!info.getParams().empty()) {
 		xml.stepIn();
-		for(StringMap::const_iterator i = info.getParams().begin(), iend = info.getParams().end(); i != iend; ++i) {
+
+		for(auto i = info.getParams().cbegin(), iend = info.getParams().cend(); i != iend; ++i) {
 			xml.addTag("Param", i->second);
 			xml.addChildAttrib("Id", i->first);
+
+			if(!i->second.isSet(WindowParam::FLAG_IDENTIFIES))
+				xml.addChildAttrib("Opt", true);
+			if(i->second.isSet(WindowParam::FLAG_CID))
+				xml.addChildAttrib("CID", true);
+			if(i->second.isSet(WindowParam::FLAG_FILELIST))
+				xml.addChildAttrib("FileList", true);
 		}
+
 		xml.stepOut();
 	}
 }
 
-void WindowManager::on(SettingsManagerListener::Load, SimpleXML& xml) throw() {
+void WindowManager::on(SettingsManagerListener::Load, SimpleXML& xml) noexcept {
 	Lock l(cs);
 	clear();
 
@@ -221,7 +233,7 @@ void WindowManager::on(SettingsManagerListener::Load, SimpleXML& xml) throw() {
 	}
 }
 
-void WindowManager::on(SettingsManagerListener::Save, SimpleXML& xml) throw() {
+void WindowManager::on(SettingsManagerListener::Save, SimpleXML& xml) noexcept {
 	Lock l(cs);
 
 	xml.addTag("Windows");

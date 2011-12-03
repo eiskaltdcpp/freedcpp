@@ -17,10 +17,9 @@
  */
 
 #include "stdinc.h"
-#include "DCPlusPlus.h"
-
 #include "Socket.h"
 
+#include "format.h"
 #include "SettingsManager.h"
 #include "TimerManager.h"
 
@@ -31,23 +30,163 @@
 #endif
 #endif
 
+#ifndef AI_ADDRCONFIG
+#define AI_ADDRCONFIG 0
+#endif
+
+#ifndef IPV6_V6ONLY
+#ifdef _WIN32 // Mingw seems to lack this...
+#define IPV6_V6ONLY 27
+#endif
+#endif
+
 namespace dcpp {
 
-string Socket::udpServer;
-uint16_t Socket::udpPort;
+namespace {
 
-#define checkconnected() if(!isConnected()) throw SocketException(ENOTCONN))
+#ifdef _WIN32
+
+inline int getLastError() { return ::WSAGetLastError(); }
+
+template<typename F>
+inline auto check(F f, bool blockOk = false) -> decltype(f()) {
+	for(;;) {
+		auto ret = f();
+		if(ret != static_cast<decltype(ret)>(SOCKET_ERROR)) {
+			return ret;
+		}
+
+		auto error = getLastError();
+		if(blockOk && error == WSAEWOULDBLOCK) {
+			return static_cast<decltype(ret)>(-1);
+		}
+
+		if(error != EINTR) {
+			throw SocketException(error);
+		}
+	}
+}
+
+inline void setBlocking2(socket_t sock, bool block) noexcept {
+	u_long b = block ? 0 : 1;
+	ioctlsocket(sock, FIONBIO, &b);
+}
+
+#else
+
+inline int getLastError() { return errno; }
+
+template<typename F>
+inline auto check(F f, bool blockOk = false) -> decltype(f()) {
+	for(;;) {
+		auto ret = f();
+///[-]		if(ret != static_cast<decltype(ret)>(-1))) {
+		if(ret != static_cast<decltype(ret)>(-1)) {
+			return ret;
+		}
+
+		auto error = getLastError();
+		if(blockOk && (error == EWOULDBLOCK || error == ENOBUFS || error == EINPROGRESS || error == EAGAIN)) {
+			return -1;
+		}
+
+		if(error != EINTR) {
+			throw SocketException(error);
+		}
+	}
+}
+
+inline void setBlocking2(socket_t sock, bool block) noexcept {
+	int flags = fcntl(sock, F_GETFL, 0);
+	if(block) {
+		fcntl(sock, F_SETFL, flags & (~O_NONBLOCK));
+	} else {
+		fcntl(sock, F_SETFL, flags | O_NONBLOCK);
+	}
+}
+
+#endif
+
+inline int getSocketOptInt2(socket_t sock, int option) {
+	int val;
+	socklen_t len = sizeof(val);
+	check([&] { return ::getsockopt(sock, SOL_SOCKET, option, (char*)&val, &len); });
+	return val;
+}
+
+inline int setSocketOpt2(socket_t sock, int level, int option, int val) {
+	int len = sizeof(val);
+	return ::setsockopt(sock, level, option, (char*)&val, len);
+}
+
+inline bool isConnected(socket_t sock) {
+	fd_set wfd;
+	struct timeval tv = { 0 };
+
+	FD_ZERO(&wfd);
+	FD_SET(sock, &wfd);
+
+    if(::select(sock + 1, NULL, &wfd, NULL, &tv) == 1) {
+        if (getSocketOptInt2(sock, SO_ERROR) == 0) {
+            return true;
+        }
+    }
+
+	return false;
+}
+
+inline int readable(socket_t sock0, socket_t sock1) {
+	fd_set rfd;
+	struct timeval tv = { 0 };
+
+	FD_ZERO(&rfd);
+	FD_SET(sock0, &rfd);
+	FD_SET(sock1, &rfd);
+
+    if(::select(std::max(sock0, sock1) + 1, &rfd, NULL, NULL, &tv) > 0) {
+        return FD_ISSET(sock0, &rfd) ? sock0 : sock1;
+    }
+
+	return sock0;
+}
+
+}
+
+Socket::addr Socket::udpAddr;
+socklen_t Socket::udpAddrLen;
 
 #ifdef _DEBUG
 
-SocketException::SocketException(int aError) throw() {
+SocketException::SocketException(int aError) noexcept {
 	error = "SocketException: " + errorToString(aError);
 	dcdebug("Thrown: %s\n", error.c_str());
 }
 
 #else // _DEBUG
 
-SocketException::SocketException(int aError) throw() : Exception(errorToString(aError)) { }
+SocketException::SocketException(int aError) noexcept : Exception(errorToString(aError)) { }
+
+#endif
+
+#ifdef _WIN32
+
+void SocketHandle::reset(socket_t s) {
+	if(valid()) {
+		::closesocket(sock);
+	}
+
+	sock = s;
+}
+
+#else
+
+void SocketHandle::reset(socket_t s) {
+	if(valid()) {
+		::close(sock);
+	}
+
+	sock = s;
+}
 
 #endif
 
@@ -55,100 +194,158 @@ Socket::Stats Socket::stats = { 0, 0 };
 
 static const uint32_t SOCKS_TIMEOUT = 30000;
 
-string SocketException::errorToString(int aError) throw() {
+string SocketException::errorToString(int aError) noexcept {
 	string msg = Util::translateError(aError);
 	if(msg.empty()) {
 		msg = str(F_("Unknown error: 0x%1$x") % aError);
 	}
+
 	return msg;
 }
 
-void Socket::create(int aType /* = TYPE_TCP */) throw(SocketException) {
-	if(sock != INVALID_SOCKET)
-		disconnect();
+socket_t Socket::setSock(socket_t s, int af) {
+	setBlocking2(s, false);
+	setSocketOpt2(s, SOL_SOCKET, SO_REUSEADDR, 1);
 
-	switch(aType) {
-	case TYPE_TCP:
-		sock = checksocket(socket(AF_INET, SOCK_STREAM, IPPROTO_TCP));
-		break;
-	case TYPE_UDP:
-		sock = checksocket(socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP));
-		break;
-	default:
-		dcassert(0);
+
+	if(af == AF_INET) {
+		dcassert(sock4 == INVALID_SOCKET);
+		sock4 = s;
+	} else if(af == AF_INET6) {
+		dcassert(sock6 == INVALID_SOCKET);
+		setSocketOpt2(s, IPPROTO_IPV6, IPV6_V6ONLY, 1);
+		sock6 = s;
+	} else {
+		throw SocketException(str(F_("Unknown protocol %d") % af));
 	}
-	type = aType;
-	setBlocking(false);
+
+	return s;
 }
 
-void Socket::accept(const Socket& listeningSocket) throw(SocketException) {
-	if(sock != INVALID_SOCKET) {
-		disconnect();
+socket_t Socket::getSock() const {
+	if(sock6.valid()) {
+		if(sock4.valid()) {
+			if(isConnected(sock6)) {
+				dcdebug("Closing IPv4, IPv6 connected");
+				sock4.reset();
+			} else if(isConnected(sock4)) {
+				dcdebug("Closing IPv6, IPv4 connected");
+				sock6.reset();
+				return sock4;
+			}
+
+			dcdebug("Both v4 & v6 sockets valid and unconnected, returning v6...\n");
+			// TODO Neither connected - but this will become a race if the IPv4 socket connects while
+			// we're still using the IPv6 one...
+		}
+
+		return sock6;
 	}
-	sockaddr_in sock_addr;
+
+	return sock4;
+}
+
+void Socket::setBlocking(bool block) noexcept {
+	if(sock4.valid()) setBlocking2(sock4, block);
+	if(sock6.valid()) setBlocking2(sock6, block);
+}
+
+socket_t Socket::create(const addrinfo& ai) {
+	return setSock(check([&] { return ::socket(ai.ai_family, ai.ai_socktype, ai.ai_protocol); }), ai.ai_family);
+}
+
+void Socket::accept(const Socket& listeningSocket) {
+	disconnect();
+
+	addr sock_addr = { { 0 } };
 	socklen_t sz = sizeof(sock_addr);
 
-	do {
-		sock = ::accept(listeningSocket.sock, (sockaddr*)&sock_addr, &sz);
-	} while (sock == SOCKET_ERROR && getLastError() == EINTR);
-	check(sock);
+	auto sock = check([&] { return ::accept(readable(listeningSocket.sock4, listeningSocket.sock6), &sock_addr.sa, &sz); });
+	setSock(sock, sock_addr.sa.sa_family);
 
 #ifdef _WIN32
 	// Make sure we disable any inherited windows message things for this socket.
 	::WSAAsyncSelect(sock, NULL, 0, 0);
 #endif
 
-	type = TYPE_TCP;
-
-	setIp(inet_ntoa(sock_addr.sin_addr));
-	connected = true;
-	setBlocking(false);
+	setIp(resolveName(&sock_addr.sa, sz));
 }
 
+string Socket::listen(const string& port) {
+	disconnect();
 
-uint16_t Socket::bind(uint16_t aPort, const string& aIp /* = 0.0.0.0 */) throw (SocketException){
-	sockaddr_in sock_addr;
+	//auto &localIp = af == AF_INET ? getLocalIp4() : getLocalIp6();
 
-	sock_addr.sin_family = AF_INET;
-	sock_addr.sin_port = htons(aPort);
-	sock_addr.sin_addr.s_addr = inet_addr(aIp.c_str());
-	if(::bind(sock, (sockaddr *)&sock_addr, sizeof(sock_addr)) == SOCKET_ERROR) {
-		dcdebug("Bind failed, retrying with INADDR_ANY: %s\n", SocketException(getLastError()).getError().c_str());
-		sock_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-		check(::bind(sock, (sockaddr *)&sock_addr, sizeof(sock_addr)));
+//	auto ai = resolveAddr(/*localIp*/ "", port, AF_UNSPEC, AI_PASSIVE | AI_ADDRCONFIG);
+///[+
+	auto &localIp = getLocalIp4();
+	auto ai = resolveAddr(localIp, port, AF_UNSPEC, AI_PASSIVE | AI_ADDRCONFIG);
+///+]
+	uint16_t ret = 0;
+
+	// For server sockets we create both ipv4 and ipv6 if possible
+	// We use the same port for both sockets to deal with the fact that
+	// there's no way in ADC to have different ports for v4 and v6 TCP sockets
+	for(auto a = ai.get(); a; a = a->ai_next) {
+		if(!sock4.valid() && a->ai_family == AF_INET) {
+			create(*a);
+			if(ret != 0) {
+				((sockaddr_in*)a->ai_addr)->sin_port = ret;
+			}
+
+			check([&] { return ::bind(sock4, a->ai_addr, a->ai_addrlen); });
+			check([&] { return ::getsockname(sock4, a->ai_addr, (socklen_t*)&a->ai_addrlen); });
+			ret = ((sockaddr_in*)a->ai_addr)->sin_port;
+
+			if(type == TYPE_TCP) {
+				check([&] { return ::listen(sock4, 20); });
+			}
+		}
+
+		if(!sock6.valid() && a->ai_family == AF_INET6 && !v4only) {
+			create(*a);
+			if(ret != 0) {
+				((sockaddr_in6*)a->ai_addr)->sin6_port = ret;
+			}
+
+			check([&] { return ::bind(sock6, a->ai_addr, a->ai_addrlen); });
+			check([&] { return ::getsockname(sock6, a->ai_addr, (socklen_t*)&a->ai_addrlen); });
+			ret = ((sockaddr_in6*)a->ai_addr)->sin6_port;
+
+			if(type == TYPE_TCP) {
+				check([&] { return ::listen(sock6, 20); });
+			}
+		}
 	}
-	socklen_t size = sizeof(sock_addr);
-	getsockname(sock, (sockaddr*)&sock_addr, (socklen_t*)&size);
-	return ntohs(sock_addr.sin_port);
-}
 
-void Socket::listen() throw(SocketException) {
-	check(::listen(sock, 20));
-	connected = true;
-}
-
-void Socket::connect(const string& aAddr, uint16_t aPort) throw(SocketException) {
-	sockaddr_in serv_addr;
-
-	if(sock == INVALID_SOCKET) {
-		create(TYPE_TCP);
+	if(ret == 0) {
+		throw SocketException(_("Could not open port for listening"));
 	}
+	return Util::toString(ntohs(ret));
+}
 
-	string addr = resolve(aAddr);
+void Socket::connect(const string& aAddr, const string& aPort, const string& localPort) {
+	disconnect();
 
-	memset(&serv_addr, 0, sizeof(serv_addr));
-	serv_addr.sin_port = htons(aPort);
-	serv_addr.sin_family = AF_INET;
-	serv_addr.sin_addr.s_addr = inet_addr(addr.c_str());
+	// We try to connect to both IPv4 and IPv6 if available
+	auto addr = resolveAddr(aAddr, aPort);
 
-	int result;
-	do {
-		result = ::connect(sock,(sockaddr*)&serv_addr,sizeof(serv_addr));
-	} while (result < 0 && getLastError() == EINTR);
-	check(result, true);
+	for(auto ai = addr.get(); ai; ai = ai->ai_next) {
+		if((ai->ai_family == AF_INET && !sock4.valid()) ||
+			(ai->ai_family == AF_INET6 && !sock6.valid() && !v4only))
+		{
+			auto sock = create(*ai);
+			auto &localIp = ai->ai_family == AF_INET ? getLocalIp4() : getLocalIp6();
 
-	connected = true;
-	setIp(addr);
+			if(!localPort.empty() || !localIp.empty()) {
+				auto local = resolveAddr(localIp, localPort, ai->ai_family);
+				check([&] { return ::bind(sock, local->ai_addr, local->ai_addrlen); });
+			}
+
+			check([&] { return ::connect(sock, ai->ai_addr, ai->ai_addrlen); }, true);
+			setIp(aAddr);
+		}
+	}
 }
 
 namespace {
@@ -163,17 +360,16 @@ namespace {
 	}
 }
 
-void Socket::socksConnect(const string& aAddr, uint16_t aPort, uint32_t timeout) throw(SocketException) {
-
+void Socket::socksConnect(const string& aAddr, const string& aPort, uint32_t timeout) {
 	if(SETTING(SOCKS_SERVER).empty() || SETTING(SOCKS_PORT) == 0) {
 		throw SocketException(_("The socks server failed establish a connection"));
 	}
 
 	uint64_t start = GET_TICK();
 
-	connect(SETTING(SOCKS_SERVER), static_cast<uint16_t>(SETTING(SOCKS_PORT)));
+	connect(SETTING(SOCKS_SERVER), Util::toString(SETTING(SOCKS_PORT)));
 
-	if(wait(timeLeft(start, timeout), WAIT_CONNECT) != WAIT_CONNECT) {
+	if(!waitConnected(timeLeft(start, timeout))) {
 		throw SocketException(_("The socks server failed establish a connection"));
 	}
 
@@ -192,12 +388,12 @@ void Socket::socksConnect(const string& aAddr, uint16_t aPort, uint32_t timeout)
 		connStr.insert(connStr.end(), aAddr.begin(), aAddr.end());
 	} else {
 		connStr.push_back(1);		// Address type: IPv4;
-		unsigned long addr = inet_addr(resolve(aAddr).c_str());
+		unsigned long addr = inet_addr(resolve(aAddr, AF_INET).c_str());
 		uint8_t* paddr = (uint8_t*)&addr;
 		connStr.insert(connStr.end(), paddr, paddr+4);
 	}
 
-	uint16_t port = htons(aPort);
+	uint16_t port = htons(static_cast<uint16_t>(Util::toInt(aPort)));
 	uint8_t* pport = (uint8_t*)&port;
 	connStr.push_back(pport[0]);
 	connStr.push_back(pport[1]);
@@ -221,7 +417,7 @@ void Socket::socksConnect(const string& aAddr, uint16_t aPort, uint32_t timeout)
 	setIp(inet_ntoa(sock_addr));
 }
 
-void Socket::socksAuth(uint32_t timeout) throw(SocketException) {
+void Socket::socksAuth(uint32_t timeout) {
 	vector<uint8_t> connStr;
 
 	uint64_t start = GET_TICK();
@@ -276,30 +472,30 @@ void Socket::socksAuth(uint32_t timeout) throw(SocketException) {
 	}
 }
 
-int Socket::getSocketOptInt(int option) throw(SocketException) {
+int Socket::getSocketOptInt(int option) {
 	int val;
 	socklen_t len = sizeof(val);
-	check(::getsockopt(sock, SOL_SOCKET, option, (char*)&val, &len));
+	check([&] { return ::getsockopt(getSock(), SOL_SOCKET, option, (char*)&val, &len); });
 	return val;
 }
 
-void Socket::setSocketOpt(int option, int val) throw(SocketException) {
+void Socket::setSocketOpt(int option, int val) {
 	int len = sizeof(val);
-	check(::setsockopt(sock, SOL_SOCKET, option, (char*)&val, len));
+	if(sock4.valid()) {
+		check([&] { return ::setsockopt(sock4, SOL_SOCKET, option, (char*)&val, len); });
+	}
+
+	if(sock6.valid()) {
+		check([&] { return ::setsockopt(sock6, SOL_SOCKET, option, (char*)&val, len); });
+	}
 }
 
-int Socket::read(void* aBuffer, int aBufLen) throw(SocketException) {
-	int len = 0;
-
-	dcassert(type == TYPE_TCP || type == TYPE_UDP);
-	do {
-		if(type == TYPE_TCP) {
-			len = ::recv(sock, (char*)aBuffer, aBufLen, 0);
-		} else {
-			len = ::recvfrom(sock, (char*)aBuffer, aBufLen, 0, NULL, NULL);
-		}
-	} while (len < 0 && getLastError() == EINTR);
-	check(len, true);
+int Socket::read(void* aBuffer, int aBufLen) {
+	auto len = check([&] {
+		return type == TYPE_TCP
+			? ::recv(getSock(), (char*)aBuffer, aBufLen, 0)
+			: ::recvfrom(readable(sock4, sock6), (char*)aBuffer, aBufLen, 0, NULL, NULL);
+	}, true);
 
 	if(len > 0) {
 		stats.totalDown += len;
@@ -308,28 +504,27 @@ int Socket::read(void* aBuffer, int aBufLen) throw(SocketException) {
 	return len;
 }
 
-int Socket::read(void* aBuffer, int aBufLen, string &aIP) throw(SocketException) {
+int Socket::read(void* aBuffer, int aBufLen, string &aIP) {
 	dcassert(type == TYPE_UDP);
 
-	sockaddr_in remote_addr = { 0 };
+	addr remote_addr = { { 0 } };
 	socklen_t addr_length = sizeof(remote_addr);
 
-	int len;
-	do {
-		len = ::recvfrom(sock, (char*)aBuffer, aBufLen, 0, (sockaddr*)&remote_addr, &addr_length);
-	} while (len < 0 && getLastError() == EINTR);
+	auto len = check([&] {
+		return ::recvfrom(readable(sock4, sock6), (char*)aBuffer, aBufLen, 0, &remote_addr.sa, &addr_length);
+	}, true);
 
-	check(len, true);
 	if(len > 0) {
-		aIP = inet_ntoa(remote_addr.sin_addr);
+		aIP = resolveName(&remote_addr.sa, addr_length);
 		stats.totalDown += len;
 	} else {
 		aIP.clear();
 	}
+
 	return len;
 }
 
-int Socket::readAll(void* aBuffer, int aBufLen, uint32_t timeout) throw(SocketException) {
+int Socket::readAll(void* aBuffer, int aBufLen, uint32_t timeout) {
 	uint8_t* buf = (uint8_t*)aBuffer;
 	int i = 0;
 	while(i < aBufLen) {
@@ -337,7 +532,7 @@ int Socket::readAll(void* aBuffer, int aBufLen, uint32_t timeout) throw(SocketEx
 		if(j == 0) {
 			return i;
 		} else if(j == -1) {
-			if(wait(timeout, WAIT_READ) != WAIT_READ) {
+			if(!wait(timeout, true, false).first) {
 				return i;
 			}
 			continue;
@@ -348,16 +543,16 @@ int Socket::readAll(void* aBuffer, int aBufLen, uint32_t timeout) throw(SocketEx
 	return i;
 }
 
-void Socket::writeAll(const void* aBuffer, int aLen, uint32_t timeout) throw(SocketException) {
+void Socket::writeAll(const void* aBuffer, int aLen, uint32_t timeout) {
 	const uint8_t* buf = (const uint8_t*)aBuffer;
 	int pos = 0;
 	// No use sending more than this at a time...
 	int sendSize = getSocketOptInt(SO_SNDBUF);
 
 	while(pos < aLen) {
-		int i = write(buf+pos, (int)min(aLen-pos, sendSize));
+		int i = write(buf+pos, (int)std::min(aLen-pos, sendSize));
 		if(i == -1) {
-			wait(timeout, WAIT_WRITE);
+			wait(timeout, false, true);
 		} else {
 			pos+=i;
 			stats.totalUp += i;
@@ -365,13 +560,8 @@ void Socket::writeAll(const void* aBuffer, int aLen, uint32_t timeout) throw(Soc
 	}
 }
 
-int Socket::write(const void* aBuffer, int aLen) throw(SocketException) {
-	int sent;
-	do {
-		sent = ::send(sock, (const char*)aBuffer, aLen, 0);
-	} while (sent < 0 && getLastError() == EINTR);
-
-	check(sent, true);
+int Socket::write(const void* aBuffer, int aLen) {
+	auto sent = check([&] { return ::send(getSock(), (const char*)aBuffer, aLen, 0); }, true);
 	if(sent > 0) {
 		stats.totalUp += sent;
 	}
@@ -379,43 +569,30 @@ int Socket::write(const void* aBuffer, int aLen) throw(SocketException) {
 }
 
 /**
-* Sends data, will block until all data has been sent or an exception occurs
-* @param aBuffer Buffer with data
-* @param aLen Data length
-* @throw SocketExcpetion Send failed.
-*/
-void Socket::writeTo(const string& aAddr, uint16_t aPort, const void* aBuffer, int aLen, bool proxy) throw(SocketException) {
+ * Sends data, will block until all data has been sent or an exception occurs
+ * @param aBuffer Buffer with data
+ * @param aLen Data length
+ * @throw SocketExcpetion Send failed.
+ */
+void Socket::writeTo(const string& aAddr, const string& aPort, const void* aBuffer, int aLen, bool proxy) {
 	if(aLen <= 0)
 		return;
 
-	uint8_t* buf = (uint8_t*)aBuffer;
-	if(sock == INVALID_SOCKET) {
-		create(TYPE_UDP);
-	}
-
-	dcassert(type == TYPE_UDP);
-
-	sockaddr_in serv_addr;
-
-	if(aAddr.empty() || aPort == 0) {
+	if(aAddr.empty() || aPort.empty()) {
 		throw SocketException(EADDRNOTAVAIL);
 	}
 
-	memset(&serv_addr, 0, sizeof(serv_addr));
+	auto buf = (const uint8_t*)aBuffer;
 
 	int sent;
 	if(SETTING(OUTGOING_CONNECTIONS) == SettingsManager::OUTGOING_SOCKS5 && proxy) {
-		if(udpServer.empty() || udpPort == 0) {
+		if(udpAddr.sa.sa_family == 0) {
 			throw SocketException(_("Failed to set up the socks server for UDP relay (check socks address and port)"));
 		}
 
-		serv_addr.sin_port = htons(udpPort);
-		serv_addr.sin_family = AF_INET;
-		serv_addr.sin_addr.s_addr = inet_addr(udpServer.c_str());
-
-		string s = BOOLSETTING(SOCKS_RESOLVE) ? resolve(ip) : ip;
-
 		vector<uint8_t> connStr;
+
+		connStr.reserve(aLen + 24);
 
 		connStr.push_back(0);		// Reserved
 		connStr.push_back(0);		// Reserved
@@ -423,112 +600,135 @@ void Socket::writeTo(const string& aAddr, uint16_t aPort, const void* aBuffer, i
 
 		if(BOOLSETTING(SOCKS_RESOLVE)) {
 			connStr.push_back(3);
-			connStr.push_back((uint8_t)s.size());
+			connStr.push_back((uint8_t)aAddr.size());
 			connStr.insert(connStr.end(), aAddr.begin(), aAddr.end());
 		} else {
-			connStr.push_back(1);		// Address type: IPv4;
-			unsigned long addr = inet_addr(resolve(aAddr).c_str());
-			uint8_t* paddr = (uint8_t*)&addr;
-			connStr.insert(connStr.end(), paddr, paddr+4);
+			auto ai = resolveAddr(aAddr, aPort);
+
+			if(ai->ai_family == AF_INET) {
+				connStr.push_back(1);		// Address type: IPv4
+				uint8_t* paddr = (uint8_t*)&((sockaddr_in*)ai->ai_addr)->sin_addr;
+				connStr.insert(connStr.end(), paddr, paddr+4);
+			} else if(ai->ai_family == AF_INET6) {
+				connStr.push_back(4);		// Address type: IPv6
+				uint8_t* paddr = (uint8_t*)&((sockaddr_in6*)ai->ai_addr)->sin6_addr;
+				connStr.insert(connStr.end(), paddr, paddr+16);
+			}
 		}
 
 		connStr.insert(connStr.end(), buf, buf + aLen);
 
-		do {
-			sent = ::sendto(sock, (const char*)&connStr[0], connStr.size(), 0, (struct sockaddr*)&serv_addr, sizeof(serv_addr));
-		} while (sent < 0 && getLastError() == EINTR);
+		sent = check([&] { return ::sendto(udpAddr.sa.sa_family == AF_INET ? sock4 : sock6,
+			(const char*)&connStr[0], (int)connStr.size(), 0, &udpAddr.sa, udpAddrLen); });
 	} else {
-		serv_addr.sin_port = htons(aPort);
-		serv_addr.sin_family = AF_INET;
-		serv_addr.sin_addr.s_addr = inet_addr(resolve(aAddr).c_str());
-		do {
-			sent = ::sendto(sock, (const char*)aBuffer, (int)aLen, 0, (struct sockaddr*)&serv_addr, sizeof(serv_addr));
-		} while (sent < 0 && getLastError() == EINTR);
+		auto ai = resolveAddr(aAddr, aPort);
+		if((ai->ai_family == AF_INET && !sock4.valid()) || (ai->ai_family == AF_INET6 && !sock6.valid())) {
+			create(*ai);
+		}
+		sent = check([&] { return ::sendto(ai->ai_family == AF_INET ? sock4 : sock6,
+			(const char*)aBuffer, (int)aLen, 0, ai->ai_addr, ai->ai_addrlen); });
 	}
 
-	check(sent);
 	stats.totalUp += sent;
 }
 
 /**
  * Blocks until timeout is reached one of the specified conditions have been fulfilled
  * @param millis Max milliseconds to block.
- * @param waitFor WAIT_*** flags that set what we're waiting for, set to the combination of flags that
- *				  triggered the wait stop on return (==WAIT_NONE on timeout)
- * @return WAIT_*** ored together of the current state.
+ * @param checkRead Check for reading
+ * @param checkWrite Check for writing
+ * @return pair with read/write state respectively
  * @throw SocketException Select or the connection attempt failed.
  */
-int Socket::wait(uint32_t millis, int waitFor) throw(SocketException) {
-	timeval tv;
-	fd_set rfd, wfd, efd;
+std::pair<bool, bool> Socket::wait(uint32_t millis, bool checkRead, bool checkWrite) {
+	timeval tv = { millis/1000, (millis%1000)*1000 };
+	fd_set rfd, wfd;
 	fd_set *rfdp = NULL, *wfdp = NULL;
-	tv.tv_sec = millis/1000;
-	tv.tv_usec = (millis%1000)*1000;
 
-	if(waitFor & WAIT_CONNECT) {
-		dcassert(!(waitFor & WAIT_READ) && !(waitFor & WAIT_WRITE));
+	int nfds = -1;
 
-		int result;
-		do {
-			FD_ZERO(&wfd);
-			FD_ZERO(&efd);
-
-			FD_SET(sock, &wfd);
-			FD_SET(sock, &efd);
-			result = select((int)(sock+1), 0, &wfd, &efd, &tv);
-		} while (result < 0 && getLastError() == EINTR);
-		check(result);
-
-		if(FD_ISSET(sock, &wfd)) {
-			return WAIT_CONNECT;
+	if(checkRead) {
+		rfdp = &rfd;
+		FD_ZERO(rfdp);
+		if(sock4.valid()) {
+			FD_SET(sock4, &rfd);
+			nfds = std::max((int)sock4, nfds);
 		}
 
-		if(FD_ISSET(sock, &efd)) {
-			int y = 0;
-			socklen_t z = sizeof(y);
-			check(getsockopt(sock, SOL_SOCKET, SO_ERROR, (char*)&y, &z));
-
-			if(y != 0)
-				throw SocketException(y);
-			// No errors! We're connected (?)...
-			return WAIT_CONNECT;
+		if(sock6.valid()) {
+			FD_SET(sock6, &rfd);
+			nfds = std::max((int)sock6, nfds);
 		}
-		return 0;
 	}
 
-	int result;
-	do {
-		if(waitFor & WAIT_READ) {
-			dcassert(!(waitFor & WAIT_CONNECT));
-			rfdp = &rfd;
-			FD_ZERO(rfdp);
-			FD_SET(sock, rfdp);
-		}
-		if(waitFor & WAIT_WRITE) {
-			dcassert(!(waitFor & WAIT_CONNECT));
-			wfdp = &wfd;
-			FD_ZERO(wfdp);
-			FD_SET(sock, wfdp);
+	if(checkWrite) {
+		wfdp = &wfd;
+		FD_ZERO(wfdp);
+		if(sock4.valid()) {
+			FD_SET(sock4, &wfd);
+			nfds = std::max((int)sock4, nfds);
 		}
 
-		result = select((int)(sock+1), rfdp, wfdp, NULL, &tv);
-	} while (result < 0 && getLastError() == EINTR);
-	check(result);
-
-	waitFor = WAIT_NONE;
-
-	if(rfdp && FD_ISSET(sock, rfdp)) {
-		waitFor |= WAIT_READ;
-	}
-	if(wfdp && FD_ISSET(sock, wfdp)) {
-		waitFor |= WAIT_WRITE;
+		if(sock6.valid()) {
+			FD_SET(sock6, &wfd);
+			nfds = std::max((int)sock6, nfds);
+		}
 	}
 
-	return waitFor;
+	check([&] { return ::select(nfds + 1, rfdp, wfdp, NULL, &tv); });
+
+	return std::make_pair(
+		rfdp && ((sock4.valid() && FD_ISSET(sock4, rfdp)) || (sock6.valid() && FD_ISSET(sock6, rfdp))),
+		wfdp && ((sock4.valid() && FD_ISSET(sock4, wfdp)) || (sock6.valid() && FD_ISSET(sock6, wfdp))));
 }
 
 bool Socket::waitConnected(uint32_t millis) {
-	return wait(millis, Socket::WAIT_CONNECT) == WAIT_CONNECT;
+	timeval tv = { millis/1000, (millis%1000)*1000 };
+	fd_set fd;
+	FD_ZERO(&fd);
+
+	int nfds = -1;
+	if(sock4.valid()) {
+		FD_SET(sock4, &fd);
+		nfds = sock4;
+	}
+
+	if(sock6.valid()) {
+		FD_SET(sock6, &fd);
+		nfds = std::max((int)sock6, nfds);
+	}
+
+	check([&] { return ::select(nfds + 1, NULL, &fd, NULL, &tv); });
+
+	if(sock6.valid() && FD_ISSET(sock6, &fd)) {
+		int err6 = getSocketOptInt2(sock6, SO_ERROR);
+		if(err6 == 0) {
+			sock4.reset(); // We won't be needing this any more...
+			return true;
+		}
+
+		if(!sock4.valid()) {
+			throw SocketException(err6);
+		}
+
+		sock6.reset();
+	}
+
+	if(sock4.valid() && FD_ISSET(sock4, &fd)) {
+		int err4 = getSocketOptInt2(sock4, SO_ERROR);
+		if(err4 == 0) {
+			sock6.reset(); // We won't be needing this any more...
+			return true;
+		}
+
+		if(!sock6.valid()) {
+			throw SocketException(err4);
+		}
+
+		sock4.reset();
+	}
+
+	return false;
 }
 
 bool Socket::waitAccepted(uint32_t millis) {
@@ -536,75 +736,92 @@ bool Socket::waitAccepted(uint32_t millis) {
 	return true;
 }
 
-string Socket::resolve(const string& aDns) {
-#ifdef _WIN32
-	sockaddr_in sock_addr;
-
-	memset(&sock_addr, 0, sizeof(sock_addr));
-	sock_addr.sin_port = 0;
-	sock_addr.sin_family = AF_INET;
-	sock_addr.sin_addr.s_addr = inet_addr(aDns.c_str());
-
-	if (sock_addr.sin_addr.s_addr == INADDR_NONE) {   /* server address is a name or invalid */
-		hostent* host;
-		host = gethostbyname(aDns.c_str());
-		if (host == NULL) {
-			return Util::emptyString;
-		}
-		sock_addr.sin_addr.s_addr = *((uint32_t*)host->h_addr);
-		return inet_ntoa(sock_addr.sin_addr);
-	} else {
-		return aDns;
-	}
-#else
-	// POSIX doesn't guarantee the gethostbyname to be thread safe. And it may (will) return a pointer to static data.
-	string address = Util::emptyString;
+string Socket::resolve(const string& aDns, int af) {
 	addrinfo hints = { 0 };
-	addrinfo *result;
-	hints.ai_family = AF_INET;
+	hints.ai_family = af;
 
-	if (getaddrinfo(aDns.c_str(), NULL, &hints, &result) == 0) {
-		if (result->ai_addr != NULL)
-			address = inet_ntoa(((sockaddr_in*)(result->ai_addr))->sin_addr);
+	addrinfo *result = 0;
 
-		freeaddrinfo(result);
+	auto err = ::getaddrinfo(aDns.c_str(), NULL, &hints, &result);
+	if(err) {
+		throw SocketException(err);
 	}
 
-	return address;		
-#endif
+	auto ret = resolveName(result->ai_addr, result->ai_addrlen);
+	::freeaddrinfo(result);
+
+	return ret;
 }
 
-string Socket::getLocalIp() throw() {
-	if(sock == INVALID_SOCKET)
+Socket::addrinfo_p Socket::resolveAddr(const string& name, const string& port, int family, int flags) {
+
+	addrinfo hints = { 0 };
+	hints.ai_family = family;
+	hints.ai_flags = flags;
+	hints.ai_socktype = type == TYPE_TCP ? SOCK_STREAM : SOCK_DGRAM;
+	hints.ai_protocol = type;
+
+	addrinfo *result = 0;
+
+	auto err = ::getaddrinfo(name.c_str(), port.empty() ? NULL : port.c_str(), &hints, &result);
+ 
+	if(err) {
+		throw SocketException(err);
+	}
+
+	dcdebug("Resolved %s:%s to %s, next is %p\n", name.c_str(), port.c_str(),
+		resolveName(result->ai_addr, result->ai_addrlen).c_str(), result->ai_next);
+ 
+	return addrinfo_p(result, &freeaddrinfo);
+}
+
+string Socket::resolveName(const sockaddr* sa, socklen_t sa_len, int flags) {
+	char buf[1024];
+
+	auto err = ::getnameinfo(sa, sa_len, buf, sizeof(buf), NULL, 0, flags);
+	if(err) {
+		throw SocketException(err);
+	}
+
+	return string(buf);
+}
+
+string Socket::getLocalIp() noexcept {
+	if(getSock() == INVALID_SOCKET)
 		return Util::emptyString;
 
-	sockaddr_in sock_addr;
+	addr sock_addr;
 	socklen_t len = sizeof(sock_addr);
-	if(getsockname(sock, (sockaddr*)&sock_addr, &len) == 0) {
-		return inet_ntoa(sock_addr.sin_addr);
+	if(::getsockname(getSock(), &sock_addr.sa, &len) == 0) {
+		return resolveName(&sock_addr.sa, len);
 	}
+
 	return Util::emptyString;
 }
 
-uint16_t Socket::getLocalPort() throw() {
-	if(sock == INVALID_SOCKET)
+uint16_t Socket::getLocalPort() noexcept {
+	if(getSock() == INVALID_SOCKET)
 		return 0;
 
-	sockaddr_in sock_addr;
+	addr sock_addr;
 	socklen_t len = sizeof(sock_addr);
-	if(getsockname(sock, (sockaddr*)&sock_addr, &len) == 0) {
-		return ntohs(sock_addr.sin_port);
+	if(::getsockname(getSock(), &sock_addr.sa, &len) == 0) {
+		if(sock_addr.sa.sa_family == AF_INET) {
+			return ntohs(sock_addr.sai.sin_port);
+		} else if(sock_addr.sa.sa_family == AF_INET6) {
+			return ntohs(sock_addr.sai6.sin6_port);
+		}
 	}
 	return 0;
 }
 
 void Socket::socksUpdated() {
-	udpServer.clear();
-	udpPort = 0;
+	memset(&udpAddr, 0, sizeof(udpAddr));
+	udpAddrLen = sizeof(udpAddr);
 
 	if(SETTING(OUTGOING_CONNECTIONS) == SettingsManager::OUTGOING_SOCKS5) {
 		try {
-			Socket s;
+			Socket s(TYPE_TCP);
 			s.setBlocking(false);
 			s.connect(SETTING(SOCKS_SERVER), static_cast<uint16_t>(SETTING(SOCKS_PORT)));
 			s.socksAuth(SOCKS_TIMEOUT);
@@ -629,37 +846,28 @@ void Socket::socksUpdated() {
 				return;
 			}
 
-			udpPort = static_cast<uint16_t>(ntohs(*((uint16_t*)(&connStr[8]))));
-
-			in_addr serv_addr;
-
-			memset(&serv_addr, 0, sizeof(serv_addr));
-			serv_addr.s_addr = *((long*)(&connStr[4]));
-			udpServer = inet_ntoa(serv_addr);
+			udpAddr.sa.sa_family = AF_INET;
+			udpAddr.sai.sin_port = *((uint16_t*)(&connStr[8]));
+///[-] 			udpAddr.sai.sin_addr.S_un.S_addr = *((long*)(&connStr[4]));
+			udpAddr.sai.sin_addr.s_addr = *((long*)(&connStr[4]));
+			udpAddrLen = sizeof(udpAddr.sai);
 		} catch(const SocketException&) {
 			dcdebug("Socket: Failed to register with socks server\n");
 		}
 	}
 }
 
-void Socket::shutdown() throw() {
-	if(sock != INVALID_SOCKET)
-		::shutdown(sock, 2);
+void Socket::shutdown() noexcept {
+	if(sock4.valid()) ::shutdown(sock4, 2);
+	if(sock6.valid()) ::shutdown(sock6, 2);
 }
 
-void Socket::close() throw() {
-	if(sock != INVALID_SOCKET) {
-#ifdef _WIN32
-		::closesocket(sock);
-#else
-		::close(sock);
-#endif
-		connected = false;
-		sock = INVALID_SOCKET;
-	}
+void Socket::close() noexcept {
+	sock4.reset();
+	sock6.reset();
 }
 
-void Socket::disconnect() throw() {
+void Socket::disconnect() noexcept {
 	shutdown();
 	close();
 }

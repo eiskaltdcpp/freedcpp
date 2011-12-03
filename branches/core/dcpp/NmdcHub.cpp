@@ -17,8 +17,6 @@
  */
 
 #include "stdinc.h"
-#include "DCPlusPlus.h"
-
 #include "NmdcHub.h"
 
 #include "ChatMessage.h"
@@ -33,6 +31,7 @@
 #include "Socket.h"
 #include "UserCommand.h"
 #include "StringTokenizer.h"
+#include "format.h"
 
 namespace dcpp {
 
@@ -44,7 +43,7 @@ lastProtectedIPsUpdate(0)
 {
 }
 
-NmdcHub::~NmdcHub() throw() {
+NmdcHub::~NmdcHub() {
 	clearUsers();
 }
 
@@ -174,7 +173,7 @@ void NmdcHub::updateFromTag(Identity& id, const string& tag) {
 	id.set("TA", '<' + tag + '>');
 }
 
-void NmdcHub::onLine(const string& aLine) throw() {
+void NmdcHub::onLine(const string& aLine) noexcept {
 	if(aLine.length() == 0)
 		return;
 
@@ -252,7 +251,7 @@ void NmdcHub::onLine(const string& aLine) throw() {
 
 		// Filter own searches
 		if(ClientManager::getInstance()->isActive()) {
-			if(seeker == (getLocalIp() + ":" + Util::toString(SearchManager::getInstance()->getPort()))) {
+			if(seeker == getLocalIp() + ":" + SearchManager::getInstance()->getPort()) {
 				return;
 			}
 		} else {
@@ -383,7 +382,7 @@ void NmdcHub::onLine(const string& aLine) throw() {
 
 		u.getIdentity().setHub(false);
 
-		u.getIdentity().setConnection(connection);
+		u.getIdentity().set("CO", connection); 
 		i = j + 1;
 		j = param.find('$', i);
 
@@ -428,7 +427,7 @@ void NmdcHub::onLine(const string& aLine) throw() {
 		if(j == string::npos) {
 			return;
 		}
-		string server = Socket::resolve(param.substr(i, j-i));
+		string server = Socket::resolve(param.substr(i, j-i), AF_INET);
 		if(isProtectedIP(server))
 			return;
 		if(j+1 >= param.size()) {
@@ -436,7 +435,7 @@ void NmdcHub::onLine(const string& aLine) throw() {
 		}
 		string port = param.substr(j+1);
 		// For simplicity, we make the assumption that users on a hub have the same character encoding
-		ConnectionManager::getInstance()->nmdcConnect(server, (uint16_t)Util::toInt(port), getMyNick(), getHubUrl(), getEncoding());
+		ConnectionManager::getInstance()->nmdcConnect(server, port, getMyNick(), getHubUrl(), getEncoding());
 	} else if(cmd == "$RevConnectToMe") {
 		if(state != STATE_NORMAL) {
 			return;
@@ -611,7 +610,7 @@ void NmdcHub::onLine(const string& aLine) throw() {
 				if(!u)
 					continue;
 
-				u->getIdentity().setIp(it->substr(j+1));
+				u->getIdentity().setIp4(it->substr(j+1));
 				if(u->getUser() == getMyIdentity().getUser()) {
 					setMyIdentity(u->getIdentity());
 				}
@@ -707,17 +706,17 @@ void NmdcHub::onLine(const string& aLine) throw() {
 		if(!message.replyTo || !message.from) {
 			if(!message.replyTo) {
 				// Assume it's from the hub
-				OnlineUser* replyTo = &getUser(rtNick);
-				replyTo->getIdentity().setHub(true);
-				replyTo->getIdentity().setHidden(true);
-				fire(ClientListener::UserUpdated(), this, *replyTo);
+				OnlineUser& replyTo = getUser(rtNick);
+				replyTo.getIdentity().setHub(true);
+				replyTo.getIdentity().setHidden(true);
+				fire(ClientListener::UserUpdated(), this, replyTo);
 			}
 			if(!message.from) {
 				// Assume it's from the hub
-				OnlineUser* from = &getUser(fromNick);
-				from->getIdentity().setHub(true);
-				from->getIdentity().setHidden(true);
-				fire(ClientListener::UserUpdated(), this, *from);
+				OnlineUser& from = getUser(fromNick);
+				from.getIdentity().setHub(true);
+				from.getIdentity().setHidden(true);
+				fire(ClientListener::UserUpdated(), this, from);
 			}
 
 			// Update pointers just in case they've been invalidated
@@ -760,7 +759,7 @@ void NmdcHub::connectToMe(const OnlineUser& aUser) {
 	dcdebug("NmdcHub::connectToMe %s\n", aUser.getIdentity().getNick().c_str());
 	string nick = fromUtf8(aUser.getIdentity().getNick());
 	ConnectionManager::getInstance()->nmdcExpect(nick, getMyNick(), getHubUrl());
-	send("$ConnectToMe " + nick + " " + getLocalIp() + ":" + Util::toString(ConnectionManager::getInstance()->getPort()) + "|");
+	send("$ConnectToMe " + nick + " " + getLocalIp() + ":" + ConnectionManager::getInstance()->getPort() + "|");
 }
 
 void NmdcHub::revConnectToMe(const OnlineUser& aUser) {
@@ -840,7 +839,7 @@ void NmdcHub::search(int aSizeType, int64_t aSize, int aFileType, const string& 
 	}
 	string tmp2;
 	if(ClientManager::getInstance()->isActive()) {
-		tmp2 = getLocalIp() + ':' + Util::toString(SearchManager::getInstance()->getPort());
+		tmp2 = getLocalIp() + ':' + SearchManager::getInstance()->getPort();
 	} else {
 		tmp2 = "Hub:" + fromUtf8(getMyNick());
 	}
@@ -912,9 +911,9 @@ void NmdcHub::privateMessage(const OnlineUser& aUser, const string& aMessage, bo
 	}
 }
 
-void NmdcHub::sendUserCmd(const UserCommand& command, const StringMap& params) {
+void NmdcHub::sendUserCmd(const UserCommand& command, const ParamMap& params) {
 	checkstate();
-	string cmd = Util::formatParams(command.getCommand(), params, false);
+	string cmd = Util::formatParams(command.getCommand(), params, escape);
 	if(command.isChat()) {
 		if(command.getTo().empty()) {
 			hubMessage(cmd);
@@ -944,8 +943,12 @@ bool NmdcHub::isProtectedIP(const string& ip) {
 	return false;
 }
 
-void NmdcHub::on(Connected) throw() {
+void NmdcHub::on(Connected) noexcept {
 	Client::on(Connected());
+
+	if(state != STATE_PROTOCOL) {
+		return;
+	}
 
 	supportFlags = 0;
 	lastMyInfoA.clear();
@@ -955,17 +958,17 @@ void NmdcHub::on(Connected) throw() {
 	lastUpdate = 0;
 }
 
-void NmdcHub::on(Line, const string& aLine) throw() {
+void NmdcHub::on(Line, const string& aLine) noexcept {
 	Client::on(Line(), aLine);
 	onLine(aLine);
 }
 
-void NmdcHub::on(Failed, const string& aLine) throw() {
+void NmdcHub::on(Failed, const string& aLine) noexcept {
 	clearUsers();
 	Client::on(Failed(), aLine);
 }
 
-void NmdcHub::on(Second, uint64_t aTick) throw() {
+void NmdcHub::on(Second, uint64_t aTick) noexcept {
 	Client::on(Second(), aTick);
 
 	if(state == STATE_NORMAL && (aTick > (getLastActivity() + 120*1000)) ) {
@@ -973,7 +976,7 @@ void NmdcHub::on(Second, uint64_t aTick) throw() {
 	}
 }
 
-void NmdcHub::on(Minute, uint64_t aTick) throw() {
+void NmdcHub::on(Minute, uint64_t aTick) noexcept {
 	if(aTick > (lastProtectedIPsUpdate + 24*3600*1000)) {
 		protectedIPs.clear();
 
@@ -982,7 +985,7 @@ void NmdcHub::on(Minute, uint64_t aTick) throw() {
 		protectedIPs.push_back("hublista.hu");
 		protectedIPs.push_back("adcportal.com");
 		for(StringIter i = protectedIPs.begin(); i != protectedIPs.end();) {
-			*i = Socket::resolve(*i);
+			*i = Socket::resolve(*i, AF_INET);
 			if(Util::isPrivateIp(*i))
 				i = protectedIPs.erase(i);
 			else

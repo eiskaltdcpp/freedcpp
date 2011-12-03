@@ -17,12 +17,11 @@
  */
 
 #include "stdinc.h"
-#include "DCPlusPlus.h"
-
 #include "Transfer.h"
 
 #include "UserConnection.h"
 #include "ClientManager.h"
+#include "format.h"
 
 namespace dcpp {
 
@@ -73,7 +72,7 @@ double Transfer::getAverageSpeed() const {
 	return ticks > 0 ? (static_cast<double>(bytes) / ticks) * 1000.0 : 0;
 }
 
-void Transfer::getParams(const UserConnection& aSource, StringMap& params) {
+void Transfer::getParams(const UserConnection& aSource, ParamMap& params) {
 	params["userCID"] = aSource.getUser()->getCID().toBase32();
 	params["userNI"] = Util::toString(ClientManager::getInstance()->getNicks(aSource.getUser()->getCID(), aSource.getHubUrl()));
 	params["userI4"] = aSource.getRemoteIp();
@@ -81,17 +80,15 @@ void Transfer::getParams(const UserConnection& aSource, StringMap& params) {
 	if(hubNames.empty())
 		hubNames.push_back(_("Offline"));
 	params["hub"] = Util::toString(hubNames);
-	StringList hubs = ClientManager::getInstance()->getHubs(aSource.getUser()->getCID(), aSource.getHubUrl());
+	StringList hubs = ClientManager::getInstance()->getHubUrls(aSource.getUser()->getCID(), aSource.getHubUrl());
 	if(hubs.empty())
 		hubs.push_back(_("Offline"));
 	params["hubURL"] = Util::toString(hubs);
 	params["fileSI"] = Util::toString(getSize());
 	params["fileSIshort"] = Util::formatBytes(getSize());
-//	params["fileSIchunk"] = Util::toString(getTotal());
-//	params["fileSIchunkshort"] = Util::formatBytes(getTotal());
 	params["fileSIactual"] = Util::toString(getActual());
 	params["fileSIactualshort"] = Util::formatBytes(getActual());
-	params["speed"] = Util::formatBytes(getAverageSpeed()) + "/s";
+	params["speed"] = str(F_("%1%/s") % Util::formatBytes(getAverageSpeed()));
 	params["time"] = Util::formatSeconds((GET_TICK() - getStart()) / 1000);
 	params["fileTR"] = getTTH().toBase32();
 }

@@ -25,8 +25,7 @@
 #include "BufferedSocketListener.h"
 #include "BufferedSocket.h"
 #include "CriticalSection.h"
-#include "File.h"
-#include "User.h"
+#include "HintedUser.h"
 #include "AdcCommand.h"
 #include "MerkleTree.h"
 
@@ -124,8 +123,8 @@ public:
 	void setDataMode(int64_t aBytes = -1) { dcassert(socket); socket->setDataMode(aBytes); }
 	void setLineMode(size_t rollback) { dcassert(socket); socket->setLineMode(rollback); }
 
-	void connect(const string& aServer, uint16_t aPort, uint16_t localPort, const BufferedSocket::NatRoles natRole) throw(SocketException, ThreadException);
-	void accept(const Socket& aServer) throw(SocketException, ThreadException);
+	void connect(const string& aServer, const string& aPort, const string& localPort, const BufferedSocket::NatRoles natRole);
+	void accept(const Socket& aServer);
 
 	void updated() { if(socket) socket->updated(); }
 
@@ -144,6 +143,7 @@ public:
 	bool isSecure() const { return socket && socket->isSecure(); }
 	bool isTrusted() const { return socket && socket->isTrusted(); }
 	std::string getCipherName() const { return socket ? socket->getCipherName() : Util::emptyString; }
+	vector<uint8_t> getKeyprint() const { return socket ? socket->getKeyprint() : vector<uint8_t>(); }
 
 	string getRemoteIp() const { return socket->getIp(); }
 	Download* getDownload() { dcassert(isSet(FLAG_DOWNLOAD)); return download; }
@@ -185,11 +185,11 @@ private:
 	};
 
 	// We only want ConnectionManager to create this...
-	UserConnection(bool secure_) throw() : encoding(Text::systemCharset), state(STATE_UNCONNECTED),
+	UserConnection(bool secure_) noexcept : encoding(Text::systemCharset), state(STATE_UNCONNECTED),
 		lastActivity(0), speed(0), chunkSize(0), socket(0), secure(secure_), download(NULL) {
 	}
 
-	virtual ~UserConnection() throw() {
+	virtual ~UserConnection() {
 		BufferedSocket::putSocket(socket);
 	}
 
@@ -199,21 +199,18 @@ private:
 		user = aUser;
 	}
 
-	void onLine(const string& aLine) throw();
+	void onLine(const string& aLine) noexcept;
 
-	void send(const string& aString) {
-		lastActivity = GET_TICK();
-		socket->write(aString);
-	}
+	void send(const string& aString);
 
-	virtual void on(Connected) throw();
-	virtual void on(Line, const string&) throw();
-	virtual void on(Data, uint8_t* data, size_t len) throw();
-	virtual void on(BytesSent, size_t bytes, size_t actual) throw() ;
-	virtual void on(ModeChange) throw();
-	virtual void on(TransmitDone) throw();
-	virtual void on(Failed, const string&) throw();
-	virtual void on(Updated) throw();
+	virtual void on(Connected) noexcept;
+	virtual void on(Line, const string&) noexcept;
+	virtual void on(Data, uint8_t* data, size_t len) noexcept;
+	virtual void on(BytesSent, size_t bytes, size_t actual) noexcept ;
+	virtual void on(ModeChange) noexcept;
+	virtual void on(TransmitDone) noexcept;
+	virtual void on(Failed, const string&) noexcept;
+	virtual void on(Updated) noexcept;
 };
 
 } // namespace dcpp

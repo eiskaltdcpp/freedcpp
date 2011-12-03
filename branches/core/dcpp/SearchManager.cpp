@@ -17,15 +17,17 @@
  */
 
 #include "stdinc.h"
-#include "DCPlusPlus.h"
-
 #include "SearchManager.h"
-#include "UploadManager.h"
+
+#include <boost/scoped_array.hpp>
 
 #include "ClientManager.h"
-#include "ShareManager.h"
-#include "SearchResult.h"
+#include "ConnectivityManager.h"
+#include "format.h"
 #include "LogManager.h"
+#include "UploadManager.h"
+#include "SearchResult.h"
+#include "ShareManager.h"
 
 namespace dcpp {
 
@@ -45,14 +47,13 @@ const char* SearchManager::getTypeStr(int type) {
 }
 
 SearchManager::SearchManager() :
-	port(0),
 	stop(false),
 	lastSearch(GET_TICK())
 {
 
 }
 
-SearchManager::~SearchManager() throw() {
+SearchManager::~SearchManager() {
 	if(socket.get()) {
 		stop = true;
 		socket->disconnect();
@@ -86,19 +87,14 @@ void SearchManager::search(StringList& who, const string& aName, int64_t aSize /
 	}
 }
 
-void SearchManager::listen() throw(SocketException) {
-
+void SearchManager::listen() {
 	disconnect();
 
 	try {
-		socket.reset(new Socket);
-		socket->create(Socket::TYPE_UDP);
-		socket->setBlocking(true);
-		if (BOOLSETTING(AUTO_DETECT_CONNECTION)) {
-			port = socket->bind(0, Util::emptyString);
-		} else {
-			port = socket->bind(static_cast<uint16_t>(SETTING(UDP_PORT)), SETTING(BIND_ADDRESS));
-		}
+		socket.reset(new Socket(Socket::TYPE_UDP));
+		socket->setLocalIp4(CONNSETTING(BIND_ADDRESS));
+		socket->setLocalIp6(CONNSETTING(BIND_ADDRESS6));
+		port = socket->listen(Util::toString(CONNSETTING(UDP_PORT)));
 		start();
 	} catch(...) {
 		socket.reset();
@@ -106,11 +102,11 @@ void SearchManager::listen() throw(SocketException) {
 	}
 }
 
-void SearchManager::disconnect() throw() {
+void SearchManager::disconnect() noexcept {
 	if(socket.get()) {
 		stop = true;
 		socket->disconnect();
-		port = 0;
+		port.clear();
 
 		join();
 
@@ -128,8 +124,13 @@ int SearchManager::run() {
 
 	while(!stop) {
 		try {
-			while( (len = socket->read(&buf[0], BUFSIZE, remoteAddr)) > 0) {
+			if(!socket->wait(400, true, false).first) {
+				continue;
+			}
+
+			if((len = socket->read(&buf[0], BUFSIZE, remoteAddr)) > 0) {
 				onData(&buf[0], len, remoteAddr);
+				continue;
 			}
 		} catch(const SocketException& e) {
 			dcdebug("SearchManager::run Error: %s\n", e.getError().c_str());
@@ -139,9 +140,7 @@ int SearchManager::run() {
 		while(!stop) {
 			try {
 				socket->disconnect();
-				socket->create(Socket::TYPE_UDP);
-				socket->setBlocking(true);
-				socket->bind(port, SETTING(BIND_ADDRESS));
+				port = socket->listen(Util::toString(CONNSETTING(UDP_PORT)));
 				if(failed) {
 					LogManager::getInstance()->message(_("Search enabled again"));
 					failed = false;
@@ -315,9 +314,9 @@ void SearchManager::onRES(const AdcCommand& cmd, const UserPtr& from, const stri
 	if(!file.empty() && freeSlots != -1 && size != -1) {
 
 		/// @todo get the hub this was sent from, to be passed as a hint? (eg by using the token?)
-		StringList names = ClientManager::getInstance()->getHubNames(from->getCID(), Util::emptyString);
+		StringList names = ClientManager::getInstance()->getHubNames(from->getCID());
 		string hubName = names.empty() ? _("Offline") : Util::toString(names);
-		StringList hubs = ClientManager::getInstance()->getHubs(from->getCID(), Util::emptyString);
+		StringList hubs = ClientManager::getInstance()->getHubUrls(from->getCID());
 		string hub = hubs.empty() ? _("Offline") : Util::toString(hubs);
 
 		SearchResult::Types type = (file[file.length() - 1] == '\\' ? SearchResult::TYPE_DIRECTORY : SearchResult::TYPE_FILE);

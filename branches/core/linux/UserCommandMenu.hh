@@ -24,7 +24,8 @@
 
 #include <gtk/gtk.h>
 #include <dcpp/stdinc.h>
-#include <dcpp/DCPlusPlus.h>
+///[-]#include <dcpp/DCPlusPlus.h>
+#include <dcpp/typedefs.h> ///[+]
 #include "entry.hh"
 
 class UserCommandMenu : public Entry
@@ -35,7 +36,8 @@ class UserCommandMenu : public Entry
 
 		GtkWidget *getContainer() { return userCommandMenu; }
 		void addHub(const std::string &hub);
-		void addHub(const dcpp::StringList &hubs2);
+		///void addHub(const dcpp::StringList &hubs2);
+		void addHub(const dcpp::StringPairList &hubs2); ///[+]
 		void addUser(const std::string &cid);
 		void addFile(const std::string &cid, const std::string &name,
 			const int64_t &size, const std::string &tth);
@@ -50,8 +52,9 @@ class UserCommandMenu : public Entry
 		static void onUserCommandClick_gui(GtkMenuItem *item, gpointer data);
 
 		// Client functions
-		void sendUserCommand_client(std::string cid, std::string commandName, std::string hub, dcpp::StringMap params);
-
+		///void sendUserCommand_client(std::string cid, std::string commandName, std::string hub, dcpp::StringMap params);
+		void sendUserCommand_client(std::string cid, std::string commandName, std::string hub, dcpp::ParamMap params);
+		
 		GtkWidget *userCommandMenu;
 		int ctx;
 		dcpp::StringList hubs;

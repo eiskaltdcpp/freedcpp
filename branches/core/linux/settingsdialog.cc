@@ -921,7 +921,7 @@ void Settings::initAppearance_gui()
 		addOption_gui(appearanceStore, _("Show joins / parts in chat by default"), SettingsManager::SHOW_JOINS);
 		addOption_gui(appearanceStore, _("Only show joins / parts for favorite users"), SettingsManager::FAV_SHOW_JOINS);
 		addOption_gui(appearanceStore, _("Sort favorite users first"), SettingsManager::SORT_FAVUSERS_FIRST);
-		addOption_gui(appearanceStore, _("Use OEM monospaced font for chat windows"), SettingsManager::USE_OEM_MONOFONT);
+///[+] TODO 		addOption_gui(appearanceStore, _("Use OEM monospaced font for chat windows"), SettingsManager::USE_OEM_MONOFONT);
 		addOption_gui(appearanceStore, _("Use magnet split"), "use-magnet-split");
 		addOption_gui(appearanceStore, _("Use blinking status icon"), "status-icon-blink-use");
 		addOption_gui(appearanceStore, _("Use emoticons"), "emoticons-use");

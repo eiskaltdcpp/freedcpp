@@ -16,77 +16,49 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#if !defined(HTTP_CONNECTION_H)
-#define HTTP_CONNECTION_H
+#ifndef DCPLUSPLUS_DCPP_HTTP_CONNECTION_H
+#define DCPLUSPLUS_DCPP_HTTP_CONNECTION_H
 
-#include "BufferedSocket.h"
+#include "BufferedSocketListener.h"
+#include "HttpConnectionListener.h"
+#include "Speaker.h"
 
 namespace dcpp {
 
-class HttpConnection;
+using std::string;
 
-class HttpConnectionListener {
-public:
-	virtual ~HttpConnectionListener() { }
-	template<int I>	struct X { enum { TYPE = I }; };
-
-	typedef X<0> Data;
-	typedef X<1> Failed;
-	typedef X<2> Complete;
-	typedef X<3> Redirected;
-	typedef X<4> TypeNormal;
-	typedef X<5> TypeBZ2;
-	typedef X<6> Retried;
-
-	virtual void on(Data, HttpConnection*, const uint8_t*, size_t) throw() =0;
-	virtual void on(Failed, HttpConnection*, const string&) throw() { }
-	virtual void on(Complete, HttpConnection*, const string&, bool) throw() { }
-	virtual void on(Redirected, HttpConnection*, const string&) throw() { }
-	virtual void on(TypeNormal, HttpConnection*) throw() { }
-	virtual void on(TypeBZ2, HttpConnection*) throw() { }
-	virtual void on(Retried, HttpConnection*, const bool) throw() { }
-};
-
-class HttpConnection : BufferedSocketListener, public Speaker<HttpConnectionListener>
+class HttpConnection : BufferedSocketListener, public Speaker<HttpConnectionListener>, boost::noncopyable
 {
 public:
+	HttpConnection(bool coralize = true);
+	virtual ~HttpConnection();
+
 	void downloadFile(const string& aUrl);
-	HttpConnection() : ok(false), port(80), size(-1), moved302(false), coralizeState(CST_DEFAULT), socket(NULL) { }
-	virtual ~HttpConnection() throw() {
-		if(socket) {
-			socket->removeListener(this);
-			BufferedSocket::putSocket(socket);
-		}
-	}
 
 private:
-
-	HttpConnection(const HttpConnection&);
-	HttpConnection& operator=(const HttpConnection&);
+	enum CoralizeState { CST_DEFAULT, CST_CONNECTED, CST_NOCORALIZE };
 
 	string currentUrl;
 	string file;
 	string server;
 	bool ok;
-	uint16_t port;
+	string port;
 	int64_t size;
 	bool moved302;
 
-	enum CoralizeStates {CST_DEFAULT, CST_CONNECTED, CST_NOCORALIZE};
-	CoralizeStates coralizeState;
+	CoralizeState coralizeState;
 
 	BufferedSocket* socket;
 
 	// BufferedSocketListener
-	virtual void on(Connected) throw();
-	virtual void on(Line, const string&) throw();
-	virtual void on(Data, uint8_t*, size_t) throw();
-	virtual void on(ModeChange) throw();
-	virtual void on(Failed, const string&) throw();
+	void on(Connected) noexcept;
+	void on(Line, const string&) noexcept;
+	void on(Data, uint8_t*, size_t) noexcept;
+	void on(ModeChange) noexcept;
+	void on(Failed, const string&) noexcept;
 
 	void onConnected();
 	void onLine(const string& aLine);
-
 };
 
 } // namespace dcpp

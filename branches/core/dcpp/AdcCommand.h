@@ -19,8 +19,10 @@
 #ifndef DCPLUSPLUS_DCPP_ADC_COMMAND_H
 #define DCPLUSPLUS_DCPP_ADC_COMMAND_H
 
-#include "SettingsManager.h"
+#include "typedefs.h"
+
 #include "Exception.h"
+#include "Util.h"
 
 namespace dcpp {
 
@@ -107,6 +109,8 @@ public:
 	C(CMD, 'C','M','D');
 	C(NAT, 'N','A','T');
 	C(RNT, 'R','N','T');
+	C(ZON, 'Z','O','N');
+	C(ZOF, 'Z','O','F');
 #undef C
 
 	static const uint32_t HUB_SID = 0xffffffff;		// No client will have this sid
@@ -117,8 +121,8 @@ public:
 	explicit AdcCommand(uint32_t aCmd, char aType = TYPE_CLIENT);
 	explicit AdcCommand(uint32_t aCmd, const uint32_t aTarget, char aType);
 	explicit AdcCommand(Severity sev, Error err, const string& desc, char aType = TYPE_CLIENT);
-	explicit AdcCommand(const string& aLine, bool nmdc = false) throw(ParseException);
-	void parse(const string& aLine, bool nmdc = false) throw(ParseException);
+	explicit AdcCommand(const string& aLine, bool nmdc = false);
+	void parse(const string& aLine, bool nmdc = false);
 
 	uint32_t getCommand() const { return cmdInt; }
 	char getType() const { return type; }
@@ -202,10 +206,10 @@ public:
 				C(SND);
 				C(SID);
 				C(CMD);
-#ifndef DISABLE_NAT_TRAVERSAL
 				C(NAT);
 				C(RNT);
-#endif
+				C(ZON);
+				C(ZOF);
 			default:
 				dcdebug("Unknown ADC command: %.50s\n", aLine.c_str());
 				break;

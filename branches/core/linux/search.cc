@@ -27,6 +27,7 @@
 #include <dcpp/StringTokenizer.h>
 #include <dcpp/Text.h>
 #include <dcpp/UserCommand.h>
+#include <dcpp/Client.h> ///[+]
 #include "UserCommandMenu.hh"
 #include "wulformanager.hh"
 #include "WulforUtil.hh"
@@ -208,19 +209,31 @@ void Search::putValue_gui(const string &str, int64_t size, SearchManager::SizeMo
 
 void Search::initHubs_gui()
 {
-	ClientManager::getInstance()->lock();
-
-	Client::List& clients = ClientManager::getInstance()->getClients();
-
+///	ClientManager::getInstance()->lock();
+///
+///	Client::List& clients = ClientManager::getInstance()->getClients();
+///
+///	Client *client = NULL;
+///	for (Client::List::iterator it = clients.begin(); it != clients.end(); ++it)
+///	{
+///		client = *it;
+///		if (client->isConnected())
+///			addHub_gui(client->getHubName(), client->getHubUrl());
+///	}
+///
+///	ClientManager::getInstance()->unlock();
+///[+]
+	auto lock = ClientManager::getInstance()->lock();
+	const ClientManager::ClientList& clients = ClientManager::getInstance()->getClients();
+ 
 	Client *client = NULL;
-	for (Client::List::iterator it = clients.begin(); it != clients.end(); ++it)
+	for (ClientManager::ClientList::const_iterator it = clients.begin(); it != clients.end(); ++it)
 	{
 		client = *it;
 		if (client->isConnected())
 			addHub_gui(client->getHubName(), client->getHubUrl());
 	}
-
-	ClientManager::getInstance()->unlock();
+///[+]
 }
 
 void Search::addHub_gui(string name, string url)
@@ -363,8 +376,9 @@ void Search::popupMenu_gui()
 
 	if (hasTTH)
 	{
-		StringList targets;
-		QueueManager::getInstance()->getTargets(TTHValue(tth), targets);
+// 		StringList targets;
+// 		QueueManager::getInstance()->getTargets(TTHValue(tth), targets);
+		StringList targets = QueueManager::getInstance()->getTargets(TTHValue(tth)); ///[+]
 
 		if (targets.size() > static_cast<size_t>(0))
 		{

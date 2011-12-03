@@ -86,7 +86,8 @@ Hub::Hub(const string &address, const string &encoding):
 	gtk_tree_view_set_fixed_height_mode(nickView.get(), TRUE);
 
 	// Initialize the chat window
-	if (BOOLSETTING(USE_OEM_MONOFONT))
+	//if (BOOLSETTING(USE_OEM_MONOFONT))
+	if (WGETB("use-oem-monofont"))
 	{
 		PangoFontDescription *fontDesc = pango_font_description_new();
 		pango_font_description_set_family(fontDesc, "Mono");
@@ -3130,7 +3131,8 @@ void Hub::on(ClientListener::HubUpdated, Client *) throw()
 	string hubName = _("Hub: ");
 
 	if (client->getHubName().empty())
-		hubName += client->getAddress() + ":" + Util::toString(client->getPort());
+		///hubName += client->getAddress() + ":" + Util::toString(client->getPort());
+		hubName += client->getAddress() + ":" + client->getPort();
 	else
 		hubName += client->getHubName();
 
@@ -3213,7 +3215,8 @@ void Hub::on(ClientListener::Message, Client*, const ChatMessage& message) throw
 
 		if (BOOLSETTING(LOG_MAIN_CHAT))
 		{
-			StringMap params;
+///[-]			StringMap params;
+			dcpp::ParamMap params;
 			params["message"] = line;
 			client->getHubIdentity().getParams(params, "hub", false);
 			params["hubURL"] = client->getHubUrl();
@@ -3256,7 +3259,8 @@ void Hub::on(ClientListener::StatusMessage, Client *, const string &message, int
 
 		if (BOOLSETTING(LOG_STATUS_MESSAGES))
 		{
-			StringMap params;
+///[-]			StringMap params;
+			dcpp::ParamMap params;
 			client->getHubIdentity().getParams(params, "hub", FALSE);
 			params["hubURL"] = client->getHubUrl();
 			client->getMyIdentity().getParams(params, "my", TRUE);
