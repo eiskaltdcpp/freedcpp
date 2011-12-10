@@ -323,7 +323,7 @@ void FavoriteHubs::onEditEntry_gui(GtkWidget *widget, gpointer data)
 			fh->editEntry_gui(params, &iter);
 
 			typedef Func2<FavoriteHubs, string, StringMap> F2;
-			F2 *func = new F2(fh, &FavoriteHubs::editEntry_client, address_new, params);
+			F2 *func = new F2(fh, &FavoriteHubs::editEntry_client, address_old, params);
 			WulforManager::get()->dispatchClientFunc(func);
 		}
 	}
