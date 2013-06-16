@@ -1,5 +1,9 @@
 		--- freedcpp core branch ---
 
+r210: 0.34
+* Ошибка сборки.
+* Ошибка с NOTIFY_CHECK_VERSION tehnick-8@yandex.ru (Issue 75).
+
 r208: 0.33
 * Update core 0.785 revision 2657.
 

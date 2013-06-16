@@ -25,6 +25,7 @@
 #include <pthread.h>
 #include <sched.h>
 #include <sys/resource.h>
+#include <unistd.h>
 #endif
 
 #include <boost/noncopyable.hpp>
