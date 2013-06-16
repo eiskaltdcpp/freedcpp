@@ -107,8 +107,8 @@ Help(vars.GenerateHelpText(env))
 
 if not 'install' in COMMAND_LINE_TARGETS:
 #debugs
-	conf.env['CXX'] = 'g++-4.5'
-	conf.env['CC'] = 'gcc-4.5'
+#	conf.env['CXX'] = 'g++-4.5'
+#	conf.env['CC'] = 'gcc-4.5'
 
 	if not (conf.env.has_key('CXX') and conf.env['CXX']):
 		print 'CXX env variable is not set, attempting to use g++'
