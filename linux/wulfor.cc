@@ -113,9 +113,9 @@ int main(int argc, char *argv[])
 	WulforManager::stop();
 	WulforSettingsManager::deleteInstance();
 
-	std::cout << "Shutting down dcpp client..." << std::endl;
+	std::cout << _("Shutting down dcpp client...") << std::endl;
 	dcpp::shutdown();
-	std::cout << "Quit..." << std::endl;
+	std::cout << _("Quit...") << std::endl;
 
 	return 0;
 }

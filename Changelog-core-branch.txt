@@ -1,5 +1,8 @@
 		--- freedcpp core branch ---
 
+r211: 0.35
+* merging trunk r193 through r209 into core branch.
+
 r210: 0.34
 * Ошибка сборки.
 * Ошибка с NOTIFY_CHECK_VERSION tehnick-8@yandex.ru (Issue 75).

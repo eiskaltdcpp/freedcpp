@@ -785,8 +785,8 @@ void Settings::initDownloads_gui()
 		g_signal_connect(getWidget("favoriteAddButton"), "clicked", G_CALLBACK(onAddFavorite_gui), (gpointer)this);
 		g_signal_connect(getWidget("favoriteRemoveButton"), "clicked", G_CALLBACK(onRemoveFavorite_gui), (gpointer)this);
 		downloadToView.setView(GTK_TREE_VIEW(getWidget("favoriteTreeView")));
-		downloadToView.insertColumn("Favorite Name", G_TYPE_STRING, TreeView::STRING, -1);
-		downloadToView.insertColumn("Directory", G_TYPE_STRING, TreeView::STRING, -1);
+		downloadToView.insertColumn(_("Favorite Name"), G_TYPE_STRING, TreeView::STRING, -1);
+		downloadToView.insertColumn(_("Directory"), G_TYPE_STRING, TreeView::STRING, -1);
 		downloadToView.finalize();
 		downloadToStore = gtk_list_store_newv(downloadToView.getColCount(), downloadToView.getGTypes());
 		gtk_tree_view_set_model(downloadToView.get(), GTK_TREE_MODEL(downloadToStore));
@@ -799,8 +799,8 @@ void Settings::initDownloads_gui()
 		{
 			gtk_list_store_append(downloadToStore, &iter);
 			gtk_list_store_set(downloadToStore, &iter,
-				downloadToView.col("Favorite Name"), j->second.c_str(),
-				downloadToView.col("Directory"), j->first.c_str(),
+				downloadToView.col(_("Favorite Name")), j->second.c_str(),
+				downloadToView.col(_("Directory")), j->first.c_str(),
 				-1);
 		}
 	}
@@ -887,15 +887,15 @@ void Settings::initSharing_gui()
 	g_signal_connect(getWidget("pictureButton"), "clicked", G_CALLBACK(onPictureShare_gui), (gpointer)this);
 
 	shareView.setView(GTK_TREE_VIEW(getWidget("sharedTreeView")));
-	shareView.insertColumn("Virtual Name", G_TYPE_STRING, TreeView::STRING, -1);
-	shareView.insertColumn("Directory", G_TYPE_STRING, TreeView::STRING, -1);
-	shareView.insertColumn("Size", G_TYPE_STRING, TreeView::STRING, -1);
+	shareView.insertColumn(_("Virtual Name"), G_TYPE_STRING, TreeView::STRING, -1);
+	shareView.insertColumn(_("Directory"), G_TYPE_STRING, TreeView::STRING, -1);
+	shareView.insertColumn(_("Size"), G_TYPE_STRING, TreeView::STRING, -1);
 	shareView.insertHiddenColumn("Real Size", G_TYPE_INT64);
 	shareView.finalize();
 	shareStore = gtk_list_store_newv(shareView.getColCount(), shareView.getGTypes());
 	gtk_tree_view_set_model(shareView.get(), GTK_TREE_MODEL(shareStore));
 	g_object_unref(shareStore);
-	shareView.setSortColumn_gui("Size", "Real Size");
+	shareView.setSortColumn_gui(_("Size"), "Real Size");
 	g_signal_connect(shareView.get(), "button-release-event", G_CALLBACK(onShareButtonReleased_gui), (gpointer)this);
 	gtk_widget_set_sensitive(getWidget("sharedRemoveButton"), FALSE);
 
@@ -1392,18 +1392,18 @@ void Settings::initAdvanced_gui()
 
 	{ // User Commands
 		userCommandView.setView(GTK_TREE_VIEW(getWidget("userCommandTreeView")));
-		userCommandView.insertColumn("Name", G_TYPE_STRING, TreeView::STRING, -1);
-		userCommandView.insertColumn("Hub", G_TYPE_STRING, TreeView::STRING, -1);
-		userCommandView.insertColumn("Command", G_TYPE_STRING, TreeView::STRING, -1);
+		userCommandView.insertColumn(_("Name"), G_TYPE_STRING, TreeView::STRING, -1);
+		userCommandView.insertColumn(_("Hub"), G_TYPE_STRING, TreeView::STRING, -1);
+		userCommandView.insertColumn(_("Command"), G_TYPE_STRING, TreeView::STRING, -1);
 		userCommandView.finalize();
 		userCommandStore = gtk_list_store_newv(userCommandView.getColCount(), userCommandView.getGTypes());
 		gtk_tree_view_set_model(userCommandView.get(), GTK_TREE_MODEL(userCommandStore));
 		g_object_unref(userCommandStore);
 
 		// Don't allow the columns to be sorted since we use move up/down functions 
-		gtk_tree_view_column_set_sort_column_id(gtk_tree_view_get_column(userCommandView.get(), userCommandView.col("Name")), -1);
-		gtk_tree_view_column_set_sort_column_id(gtk_tree_view_get_column(userCommandView.get(), userCommandView.col("Command")), -1);
-		gtk_tree_view_column_set_sort_column_id(gtk_tree_view_get_column(userCommandView.get(), userCommandView.col("Hub")), -1);
+		gtk_tree_view_column_set_sort_column_id(gtk_tree_view_get_column(userCommandView.get(), userCommandView.col(_("Name"))), -1);
+		gtk_tree_view_column_set_sort_column_id(gtk_tree_view_get_column(userCommandView.get(), userCommandView.col(_("Command"))), -1);
+		gtk_tree_view_column_set_sort_column_id(gtk_tree_view_get_column(userCommandView.get(), userCommandView.col(_("Hub"))), -1);
 
 		gtk_window_set_transient_for(GTK_WINDOW(getWidget("commandDialog")), GTK_WINDOW(getContainer()));
 
@@ -2972,9 +2972,9 @@ void Settings::loadUserCommands_gui()
 		{
 			gtk_list_store_append(userCommandStore, &iter);
 			gtk_list_store_set(userCommandStore, &iter,
-				userCommandView.col("Name"), uc.getName().c_str(),
-				userCommandView.col("Hub"), uc.getHub().c_str(),
-				userCommandView.col("Command"), uc.getCommand().c_str(),
+				userCommandView.col(_("Name")), uc.getName().c_str(),
+				userCommandView.col(_("Hub")), uc.getHub().c_str(),
+				userCommandView.col(_("Command")), uc.getCommand().c_str(),
 				-1);
 		}
 	}
@@ -3046,9 +3046,9 @@ void Settings::saveUserCommand(UserCommand *uc)
 	}
 
 	gtk_list_store_set(userCommandStore, &iter,
-		userCommandView.col("Name"), name.c_str(),
-		userCommandView.col("Hub"), hub.c_str(),
-		userCommandView.col("Command"), command.c_str(),
+		userCommandView.col(_("Name")), name.c_str(),
+		userCommandView.col(_("Hub")), hub.c_str(),
+		userCommandView.col(_("Command")), command.c_str(),
 		-1);
 }
 
@@ -3095,6 +3095,11 @@ bool Settings::validateUserCommandInput(const string &oldName)
 			showErrorDialog(_("Command name already exists"));
 			return FALSE;
 		}
+	}
+	else if (FavoriteManager::getInstance()->findUserCommand(_("Separator"), "") != -1)
+	{
+		showErrorDialog(_("Command name already exists"));
+		return FALSE;
 	}
 
 	return TRUE;
@@ -3372,8 +3377,8 @@ void Settings::onAddFavorite_gui(GtkWidget *widget, gpointer data)
 					GtkTreeIter iter;
 					gtk_list_store_append(s->downloadToStore, &iter);
 					gtk_list_store_set(s->downloadToStore, &iter,
-						s->downloadToView.col("Favorite Name"), name.c_str(),
-						s->downloadToView.col("Directory"), path.c_str(),
+						s->downloadToView.col(_("Favorite Name")), name.c_str(),
+						s->downloadToView.col(_("Directory")), path.c_str(),
 						-1);
 				}
 				else
@@ -3393,7 +3398,7 @@ void Settings::onRemoveFavorite_gui(GtkWidget *widget, gpointer data)
 
 	if (gtk_tree_selection_get_selected(selection, NULL, &iter))
 	{
-		string path = s->downloadToView.getString(&iter, "Directory");
+		string path = s->downloadToView.getString(&iter, _("Directory"));
 		if (FavoriteManager::getInstance()->removeFavoriteDir(path))
 		{
 			gtk_list_store_remove(s->downloadToStore, &iter);
@@ -3421,9 +3426,9 @@ void Settings::addShare_gui(string path, string name, int64_t size)
 	GtkTreeIter iter;
 	gtk_list_store_append(shareStore, &iter);
 	gtk_list_store_set(shareStore, &iter,
-		shareView.col("Virtual Name"), name.c_str(),
-		shareView.col("Directory"), path.c_str(),
-		shareView.col("Size"), Util::formatBytes(size).c_str(),
+		shareView.col(_("Virtual Name")), name.c_str(),
+		shareView.col(_("Directory")), path.c_str(),
+		shareView.col(_("Size")), Util::formatBytes(size).c_str(),
 		shareView.col("Real Size"), size,
 		-1);
 }
@@ -3436,7 +3441,7 @@ void Settings::onRemoveShare_gui(GtkWidget *widget, gpointer data)
 
 	if (gtk_tree_selection_get_selected(selection, NULL, &iter))
 	{
-		string path = s->shareView.getString(&iter, "Directory");
+		string path = s->shareView.getString(&iter, _("Directory"));
 		gtk_list_store_remove(s->shareStore, &iter);
 		gtk_widget_set_sensitive(s->getWidget("sharedRemoveButton"), FALSE);
 
@@ -3490,9 +3495,9 @@ void Settings::updateShares_gui()
 
 		gtk_list_store_append(shareStore, &iter);
 		gtk_list_store_set(shareStore, &iter,
-			shareView.col("Virtual Name"), vname.c_str(),
-			shareView.col("Directory"), it->second.c_str(),
-			shareView.col("Size"), Util::formatBytes(size).c_str(),
+			shareView.col(_("Virtual Name")), vname.c_str(),
+			shareView.col(_("Directory")), it->second.c_str(),
+			shareView.col(_("Size")), Util::formatBytes(size).c_str(),
 			shareView.col("Real Size"), size,
 			-1);
 	}
@@ -3594,8 +3599,8 @@ void Settings::onUserCommandEdit_gui(GtkWidget *widget, gpointer data)
 
 	if (gtk_tree_selection_get_selected(selection, NULL, &iter))
 	{
-		string name = s->userCommandView.getString(&iter, "Name");
-		string hubStr = s->userCommandView.getString(&iter, "Hub");
+		string name = s->userCommandView.getString(&iter, _("Name"));
+		string hubStr = s->userCommandView.getString(&iter, _("Hub"));
 		int cid = FavoriteManager::getInstance()->findUserCommand(name, hubStr);
 		if (cid < 0)
 			return;
@@ -3685,8 +3690,8 @@ void Settings::onUserCommandMoveUp_gui(GtkWidget *widget, gpointer data)
 		GtkTreePath *path = gtk_tree_model_get_path(m, &current);
 		if (gtk_tree_path_prev(path) && gtk_tree_model_get_iter(m, &prev, path))
 		{
-			string name = s->userCommandView.getString(&current, "Name");
-			string hub= s->userCommandView.getString(&current, "Hub");
+			string name = s->userCommandView.getString(&current, _("Name"));
+			string hub= s->userCommandView.getString(&current, _("Hub"));
 			gtk_list_store_swap(s->userCommandStore, &current, &prev);
 
 			typedef Func3<Settings, string, string, int> F3;
@@ -3708,8 +3713,8 @@ void Settings::onUserCommandMoveDown_gui(GtkWidget *widget, gpointer data)
 		next = current;
 		if (gtk_tree_model_iter_next(GTK_TREE_MODEL(s->userCommandStore), &next))
 		{
-			string name = s->userCommandView.getString(&current, "Name");
-			string hub = s->userCommandView.getString(&current, "Hub");
+			string name = s->userCommandView.getString(&current, _("Name"));
+			string hub = s->userCommandView.getString(&current, _("Hub"));
 			gtk_list_store_swap(s->userCommandStore, &current, &next);
 
 			typedef Func3<Settings, string, string, int> F3;
@@ -3727,8 +3732,8 @@ void Settings::onUserCommandRemove_gui(GtkWidget *widget, gpointer data)
 
 	if (gtk_tree_selection_get_selected(selection, NULL, &iter))
 	{
-		string name = s->userCommandView.getString(&iter, "Name");
-		string hub = s->userCommandView.getString(&iter, "Hub");
+		string name = s->userCommandView.getString(&iter, _("Name"));
+		string hub = s->userCommandView.getString(&iter, _("Hub"));
 		gtk_list_store_remove(s->userCommandStore, &iter);
 
 		typedef Func2<Settings, string, string> F2;
@@ -3920,6 +3925,7 @@ void Settings::moveUserCommand_client(string name, string hub, int pos)
 	{
 		FavoriteManager *fm = FavoriteManager::getInstance();
 		fm->moveUserCommand(fm->findUserCommand(name, hub), pos);
+		fm->save();
 	}
 }
 
