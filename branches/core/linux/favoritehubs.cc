@@ -252,14 +252,9 @@ gboolean FavoriteHubs::onKeyReleased_gui(GtkWidget *widget, GdkEventKey *event, 
 
 		if (event->keyval == GDK_Return || event->keyval == GDK_KP_Enter)
 		{
-			GtkTreeViewColumn *column;
-			gtk_tree_view_get_cursor(fh->favoriteView.get(), NULL, &column);
-			if (column && column != gtk_tree_view_get_column(fh->favoriteView.get(), fh->favoriteView.col(_("Auto Connect"))))
-			{
-				WulforManager::get()->getMainWindow()->showHub_gui(
-					fh->favoriteView.getString(&iter, _("Address")),
-					fh->favoriteView.getString(&iter, _("Encoding")));
-			}
+			WulforManager::get()->getMainWindow()->showHub_gui(
+				fh->favoriteView.getString(&iter, _("Address")),
+				fh->favoriteView.getString(&iter, _("Encoding")));
 		}
 		else if (event->keyval == GDK_Delete || event->keyval == GDK_BackSpace)
 		{
@@ -328,7 +323,7 @@ void FavoriteHubs::onEditEntry_gui(GtkWidget *widget, gpointer data)
 			fh->editEntry_gui(params, &iter);
 
 			typedef Func2<FavoriteHubs, string, StringMap> F2;
-			F2 *func = new F2(fh, &FavoriteHubs::editEntry_client, address_new, params);
+			F2 *func = new F2(fh, &FavoriteHubs::editEntry_client, address_old, params);
 			WulforManager::get()->dispatchClientFunc(func);
 		}
 	}
@@ -901,7 +896,12 @@ void FavoriteHubs::removeEntry_client(string address)
 	FavoriteHubEntry *entry = FavoriteManager::getInstance()->getFavoriteHubEntry(address);
 
 	if (entry)
+	{
 		FavoriteManager::getInstance()->removeFavorite(entry);
+
+		const FavoriteHubEntryList &fh = FavoriteManager::getInstance()->getFavoriteHubs();
+		WulforManager::get()->getMainWindow()->updateFavoriteHubMenu_client(fh);
+	}
 }
 
 void FavoriteHubs::on(FavoriteManagerListener::FavoriteAdded, const FavoriteHubEntryPtr entry) throw()

@@ -41,9 +41,8 @@
 #include <dcpp/Text.h>
 #include "notify.hh"
 
-// fix notify 0.5, 5.1, 6.0 version
 #ifndef NOTIFY_CHECK_VERSION
-#define NOTIFY_CHECK_VERSION(x,y,z) 0
+#define NOTIFY_CHECK_VERSION(major,minor,micro) 0
 #endif
 
 using namespace std;
@@ -73,11 +72,12 @@ Notify* Notify::get()
 void Notify::init()
 {
 	notify_init(g_get_application_name());
-#if NOTIFY_CHECK_VERSION (0, 7, 0)
+
+#if NOTIFY_CHECK_VERSION(0,7,0)
 	notification = notify_notification_new("template", "template", NULL);
 #else
 	notification = notify_notification_new("template", "template", NULL, NULL);
-#endif	
+#endif
 	action = FALSE;
 }
 
