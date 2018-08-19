@@ -509,7 +509,7 @@ void BufferedSocket::shutdown() {
 
 void BufferedSocket::addTask(Tasks task, TaskData* data) {
 	dcassert(task == DISCONNECT || task == SHUTDOWN || task == UPDATED || sock.get());
-	tasks.push_back(make_pair(task, unique_ptr<TaskData>(data))); taskSem.signal();
+	tasks.push_back(make_pair(task, boost::shared_ptr<TaskData>(data))); taskSem.signal();
 }
 
 } // namespace dcpp
