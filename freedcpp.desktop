@@ -1,12 +1,13 @@
 [Desktop Entry]
-Encoding=UTF-8
 Type=Application
-Exec=freedcpp
+Exec=freedcpp %U
 Icon=freedcpp
 Terminal=false
-Categories=GTK;P2P;Network;FileTransfer;
 Name=FreeDC++
 GenericName=DC++ Client
 GenericName[ru]=Клиент DC++
 Comment=DC++ Client
 Comment[ru]=Клиент DC++
+Categories=GTK;P2P;Network;FileTransfer;
+Keywords=FileSharing;Chat;p2p;DirectConnect;ADC;DHT;
+MimeType=x-scheme-handler/magnet;x-scheme-handler/dchub;x-scheme-handler/adc;x-scheme-handler/adcs;
