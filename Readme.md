@@ -3,7 +3,7 @@
 ## Introduction
 
 FreeDC++ &ndash; DC++ client based on LinuxDC++ source code.<br/>
-See changes in [Changelog.txt](https://github.com/eiskaltdcpp/freedcpp/blob/master/Changelog.txt), [Changelog-svn.txt](https://github.com/eiskaltdcpp/freedcpp/blob/master/Changelog-svn.txt) and [commits history](https://github.com/eiskaltdcpp/freedcpp/commits/master).
+See changes in [Changelog.txt](https://github.com/eiskaltdcpp/freedcpp/blob/master/Changelog.txt) and [commits history](https://github.com/eiskaltdcpp/freedcpp/commits/master).
 
 ## License
 
