@@ -171,7 +171,7 @@ MainWindow::MainWindow():
 	gtk_about_dialog_set_email_hook((GtkAboutDialogActivateLinkFunc)onAboutDialogActivateLink_gui, (gpointer)this, NULL);
 	gtk_about_dialog_set_url_hook((GtkAboutDialogActivateLinkFunc)onAboutDialogActivateLink_gui, (gpointer)this, NULL);
 	// This has to be set in code in order to activate the link
-	gtk_about_dialog_set_website(GTK_ABOUT_DIALOG(getWidget("aboutDialog")), "http://freedcpp.googlecode.com");
+	gtk_about_dialog_set_website(GTK_ABOUT_DIALOG(getWidget("aboutDialog")), "https://github.com/eiskaltdcpp/freedcpp");
 	gtk_window_set_transient_for(GTK_WINDOW(getWidget("aboutDialog")), window);
 
 	// Set all windows to the default icon
