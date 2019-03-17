@@ -199,7 +199,7 @@ VERSION 1.0 :
   XML a bit different for SOAP.
 
 2007/11/25:
-  fixed select() call for linux
+  fixed select() call for Linux
 
 2007/11/15:
   Added -fPIC to CFLAG for better shared library code.

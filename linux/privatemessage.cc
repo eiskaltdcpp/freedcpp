@@ -42,7 +42,7 @@ PrivateMessage::PrivateMessage(const string &cid, const string &hubUrl):
 	sentAwayMessage(FALSE),
 	scrollToBottom(TRUE)
 {
-	// Intialize the chat window
+	// Initialize the chat window
 	if (SETTING(USE_OEM_MONOFONT))
 	{
 		PangoFontDescription *fontDesc = pango_font_description_new();

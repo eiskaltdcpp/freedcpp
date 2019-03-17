@@ -13,7 +13,7 @@ bsdqueue.h is a copy of the sys/queue.h of an OpenBSD system.
 
 To compile, simply run 'gmake' (could be 'make' on your system).
 Under win32, to compile with MinGW, type "mingw32make.bat".
-The compilation is known to work under linux, FreeBSD,
+The compilation is known to work under Linux, FreeBSD,
 OpenBSD, MacOS X, AmigaOS and cygwin.
 The official AmigaOS4.1 SDK was used for AmigaOS4 and GeekGadgets for AmigaOS3.
 

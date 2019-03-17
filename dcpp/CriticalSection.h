@@ -93,7 +93,7 @@ private:
 	volatile long state;
 
 #else
-	// We have to use a pthread (nonrecursive) mutex, didn't find any test_and_set on linux...
+	// We have to use a pthread (nonrecursive) mutex, didn't find any test_and_set on Linux...
 	FastCriticalSection() {
 		static pthread_mutex_t fastmtx = PTHREAD_MUTEX_INITIALIZER;
 		mtx = fastmtx;

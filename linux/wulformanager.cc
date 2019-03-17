@@ -67,7 +67,7 @@ WulforManager::WulforManager()
 {
 	abort = FALSE;
 
-	// Initialize sempahore variables
+	// Initialize semaphore variables
 	guiCondValue = 0;
 	clientCondValue = 0;
 	guiCond = g_cond_new();
