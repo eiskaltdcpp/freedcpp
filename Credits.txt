@@ -1,6 +1,7 @@
 freedcpp:
 ---------
 troll
+tehnick
 
 Contributors:
 Leliksan Floyd
