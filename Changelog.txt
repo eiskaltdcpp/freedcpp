@@ -5,6 +5,7 @@
   already exists.
 * Fix opening of hub from favorites hubs list by [Enter] key from keyboard.
 * Core: fix build with GCC 8.x.
+* Core: fix some compilation warnings in builds with GCC >= 6.x.
 * Core: add compatibility with OpenSSL >= 1.1.0.
 * Core: add support of TLS 1.2.
 * Core: remove Coral CDN support, since it's stopped running.

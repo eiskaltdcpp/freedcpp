@@ -42,14 +42,14 @@ public:
 		HIGH = THREAD_PRIORITY_ABOVE_NORMAL
 	};
 
-	Thread() throw() : threadHandle(INVALID_HANDLE_VALUE), threadId(0){ }
+	Thread() noexcept : threadHandle(INVALID_HANDLE_VALUE), threadId(0){ }
 	virtual ~Thread() {
 		if(threadHandle != INVALID_HANDLE_VALUE)
 			CloseHandle(threadHandle);
 	}
 
-	void start() throw(ThreadException);
-	void join() throw(ThreadException) {
+	void start();
+	void join() {
 		if(threadHandle == INVALID_HANDLE_VALUE) {
 			return;
 		}
@@ -59,7 +59,7 @@ public:
 		threadHandle = INVALID_HANDLE_VALUE;
 	}
 
-	void setThreadPriority(Priority p) throw() { ::SetThreadPriority(threadHandle, p); }
+	void setThreadPriority(Priority p) noexcept { ::SetThreadPriority(threadHandle, p); }
 
 	static void sleep(uint32_t millis) { ::Sleep(millis); }
 	static void yield() { ::Sleep(0); }
@@ -83,14 +83,14 @@ public:
 		NORMAL = 0,
 		HIGH = -1
 	};
-	Thread() throw() : threadHandle(0) { }
+	Thread() noexcept : threadHandle(0) { }
 	virtual ~Thread() {
 		if(threadHandle != 0) {
 			pthread_detach(threadHandle);
 		}
 	}
-	void start() throw(ThreadException);
-	void join() throw() {
+	void start();
+	void join() noexcept {
 		if (threadHandle) {
 			pthread_join(threadHandle, 0);
 			threadHandle = 0;

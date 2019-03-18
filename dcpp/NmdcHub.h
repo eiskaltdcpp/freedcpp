@@ -87,14 +87,14 @@ private:
 	StringList protectedIPs;
 
 	NmdcHub(const string& aHubURL);
-	virtual ~NmdcHub() throw();
+	virtual ~NmdcHub() noexcept;
 
 	// Dummy
 	NmdcHub(const NmdcHub&);
 	NmdcHub& operator=(const NmdcHub&);
 
 	void clearUsers();
-	void onLine(const string& aLine) throw();
+	void onLine(const string& aLine) noexcept;
 
 	OnlineUser& getUser(const string& aNick);
 	OnlineUser* findUser(const string& aNick);
@@ -120,12 +120,12 @@ private:
 	virtual string checkNick(const string& aNick);
 
 	// TimerManagerListener
-	virtual void on(Second, uint32_t aTick) throw();
-	virtual void on(Minute, uint32_t aTick) throw();
+	virtual void on(Second, uint32_t aTick) noexcept;
+	virtual void on(Minute, uint32_t aTick) noexcept;
 
-	virtual void on(Connected) throw();
-	virtual void on(Line, const string& l) throw();
-	virtual void on(Failed, const string&) throw();
+	virtual void on(Connected) noexcept;
+	virtual void on(Line, const string& l) noexcept;
+	virtual void on(Failed, const string&) noexcept;
 
 };
 

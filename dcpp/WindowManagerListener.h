@@ -30,7 +30,7 @@ public:
 
 	typedef X<0> Window;
 
-	virtual void on(Window, const string&, const StringMap&) throw() = 0;
+	virtual void on(Window, const string&, const StringMap&) noexcept = 0;
 };
 
 } // namespace dcpp

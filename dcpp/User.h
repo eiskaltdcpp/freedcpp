@@ -64,7 +64,7 @@ public:
 
 	User(const CID& aCID) : cid(aCID) { }
 
-	~User() throw() { }
+	~User() noexcept { }
 
 	const CID& getCID() const { return cid; }
 	operator const CID&() const { return cid; }

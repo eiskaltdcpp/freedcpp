@@ -55,18 +55,18 @@ private:
 	MapByUser DLByUser, ULByUser;
 
 	FinishedManager();
-	virtual ~FinishedManager() throw();
+	virtual ~FinishedManager() noexcept;
 
 	void clearDLs();
 	void clearULs();
 
 	void onComplete(Transfer* t, bool upload, bool crc32Checked = false);
 
-	virtual void on(DownloadManagerListener::Complete, Download* d) throw();
-	virtual void on(DownloadManagerListener::Failed, Download* d, const string&) throw();
+	virtual void on(DownloadManagerListener::Complete, Download* d) noexcept;
+	virtual void on(DownloadManagerListener::Failed, Download* d, const string&) noexcept;
 
-	virtual void on(UploadManagerListener::Complete, Upload* u) throw();
-	virtual void on(UploadManagerListener::Failed, Upload* u, const string&) throw();
+	virtual void on(UploadManagerListener::Complete, Upload* u) noexcept;
+	virtual void on(UploadManagerListener::Failed, Upload* u, const string&) noexcept;
 };
 
 } // namespace dcpp

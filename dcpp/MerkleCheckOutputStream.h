@@ -40,9 +40,9 @@ public:
 		cur.getLeaves().insert(cur.getLeaves().begin(), aTree.getLeaves().begin(), aTree.getLeaves().begin() + nBlocks);
 	}
 
-	virtual ~MerkleCheckOutputStream() throw() { if(managed) delete s; }
+	virtual ~MerkleCheckOutputStream() noexcept { if(managed) delete s; }
 
-	virtual size_t flush() throw(FileException) {
+	virtual size_t flush() {
 		if (bufPos != 0)
 			cur.update(buf, bufPos);
 		bufPos = 0;
@@ -57,7 +57,7 @@ public:
 		return s->flush();
 	}
 
-	void commitBytes(const void* b, size_t len) throw(FileException) {
+	void commitBytes(const void* b, size_t len) {
 		uint8_t* xb = (uint8_t*)b;
 		size_t pos = 0;
 
@@ -87,7 +87,7 @@ public:
 		}
 	}
 
-	virtual size_t write(const void* b, size_t len) throw(FileException) {
+	virtual size_t write(const void* b, size_t len) {
 		commitBytes(b, len);
 		checkTrees();
 		return s->write(b, len);
@@ -105,7 +105,7 @@ private:
 	uint8_t buf[TreeType::BASE_BLOCK_SIZE];
 	size_t bufPos;
 
-	void checkTrees() throw(FileException) {
+	void checkTrees() {
 		while(cur.getLeaves().size() > verified) {
 			if(cur.getLeaves().size() > real.getLeaves().size() ||
 				!(cur.getLeaves()[verified] == real.getLeaves()[verified]))

@@ -66,7 +66,7 @@ private:
 	MaxRecentItems maxRecentItems;
 
 	WindowManager();
-	virtual ~WindowManager() throw();
+	virtual ~WindowManager() noexcept;
 
 	inline void addRecent_(const string& id, const StringMap& params) { addRecent_(id, params, false); }
 	void addRecent_(const string& id, const StringMap& params, bool top);
@@ -77,8 +77,8 @@ private:
 	void parseTags(SimpleXML& xml, handler_type handler);
 	void addTag(SimpleXML& xml, const WindowInfo& info) const;
 
-	virtual void on(SettingsManagerListener::Load, SimpleXML& xml) throw();
-	virtual void on(SettingsManagerListener::Save, SimpleXML& xml) throw();
+	virtual void on(SettingsManagerListener::Load, SimpleXML& xml) noexcept;
+	virtual void on(SettingsManagerListener::Save, SimpleXML& xml) noexcept;
 };
 
 } // namespace dcpp

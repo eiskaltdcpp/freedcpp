@@ -79,8 +79,8 @@ public:
 		return port;
 	}
 
-	void listen() throw(SocketException);
-	void disconnect() throw();
+	void listen();
+	void disconnect() noexcept;
 	void onSearchResult(const string& aLine) {
 		onData((const uint8_t*)aLine.data(), aLine.length(), Util::emptyString);
 	}
@@ -97,7 +97,7 @@ public:
 
 private:
 
-	std::auto_ptr<Socket> socket;
+	std::unique_ptr<Socket> socket;
 	uint16_t port;
 	bool stop;
 	uint64_t lastSearch;
@@ -108,7 +108,7 @@ private:
 	static std::string normalizeWhitespace(const std::string& aString);
 	virtual int run();
 
-	virtual ~SearchManager() throw();
+	virtual ~SearchManager() noexcept;
 	void onData(const uint8_t* buf, size_t aLen, const string& address);
 };
 

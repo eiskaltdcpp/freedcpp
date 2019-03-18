@@ -209,7 +209,7 @@ if not 'install' in COMMAND_LINE_TARGETS:
 # ----------------------------------------------------------------------
 
 	# todo: remove -fpermissive and fix the errors
-	env.Append(CXXFLAGS = ['-I.', '-D_GNU_SOURCE', '-D_LARGEFILE_SOURCE', '-D_FILE_OFFSET_BITS=64', '-D_REENTRANT', '-fpermissive'])
+	env.Append(CXXFLAGS = ['-I.', '-D_GNU_SOURCE', '-D_LARGEFILE_SOURCE', '-D_FILE_OFFSET_BITS=64', '-D_REENTRANT', '-fpermissive', '-std=gnu++14'])
 
 	if os.sys.platform == 'linux2':
 		env.Append(LINKFLAGS = ['-Wl,--as-needed'])

@@ -52,7 +52,7 @@ namespace dcpp {
 
 QueueItem* QueueManager::FileQueue::add(const string& aTarget, int64_t aSize,
 						  int aFlags, QueueItem::Priority p, const string& aTempTarget,
-						  time_t aAdded, const TTHValue& root) throw(QueueException, FileException)
+						  time_t aAdded, const TTHValue& root)
 {
 	if(p == QueueItem::DEFAULT) {
 		p = QueueItem::NORMAL;
@@ -487,7 +487,7 @@ nextSearch(0)
 	File::ensureDirectory(Util::getListPath());
 }
 
-QueueManager::~QueueManager() throw() {
+QueueManager::~QueueManager() noexcept {
 	SearchManager::getInstance()->removeListener(this);
 	TimerManager::getInstance()->removeListener(this);
 	ClientManager::getInstance()->removeListener(this);
@@ -509,7 +509,7 @@ QueueManager::~QueueManager() throw() {
 	}
 }
 
-bool QueueManager::getTTH(const string& name, TTHValue& tth) throw() {
+bool QueueManager::getTTH(const string& name, TTHValue& tth) noexcept {
 	Lock l(cs);
 	QueueItem* qi = fileQueue.find(name);
 	if(qi) {
@@ -519,7 +519,7 @@ bool QueueManager::getTTH(const string& name, TTHValue& tth) throw() {
 	return false;
 }
 
-void QueueManager::on(TimerManagerListener::Minute, uint32_t aTick) throw() {
+void QueueManager::on(TimerManagerListener::Minute, uint32_t aTick) noexcept {
 	string fn;
 	string searchString;
 	bool online = false;
@@ -548,7 +548,7 @@ void QueueManager::on(TimerManagerListener::Minute, uint32_t aTick) throw() {
 	}
 }
 
-void QueueManager::addList(const HintedUser& aUser, int aFlags, const string& aInitialDir /* = Util::emptyString */) throw(QueueException, FileException) {
+void QueueManager::addList(const HintedUser& aUser, int aFlags, const string& aInitialDir /* = Util::emptyString */) {
 	add(aInitialDir, -1, TTHValue(), aUser, QueueItem::FLAG_USER_LIST | aFlags);
 }
 
@@ -558,7 +558,7 @@ string QueueManager::getListPath(const HintedUser& user) {
 	return checkTarget(Util::getListPath() + nick + user.user->getCID().toBase32(), /*checkExistence*/ false);
 }
 //NOTE: freedcpp
-void QueueManager::add(const string& aTarget, int64_t aSize, const TTHValue& root) throw(QueueException, FileException)
+void QueueManager::add(const string& aTarget, int64_t aSize, const TTHValue& root)
 {
 	// Check if we're not downloading something already in our share
 	if (BOOLSETTING(DONT_DL_ALREADY_SHARED))
@@ -616,7 +616,7 @@ void QueueManager::add(const string& aTarget, int64_t aSize, const TTHValue& roo
 }//NOTE: freedcpp
 
 void QueueManager::add(const string& aTarget, int64_t aSize, const TTHValue& root, const HintedUser& aUser,
-	int aFlags /* = 0 */, bool addBad /* = true */) throw(QueueException, FileException)
+	int aFlags /* = 0 */, bool addBad /* = true */)
 {
 	bool wantConnection = true;
 
@@ -703,7 +703,7 @@ connect:
 		ConnectionManager::getInstance()->getDownloadConnection(aUser);
 }
 
-void QueueManager::readd(const string& target, const HintedUser& aUser) throw(QueueException) {
+void QueueManager::readd(const string& target, const HintedUser& aUser) {
 	bool wantConnection = false;
 	{
 		Lock l(cs);
@@ -723,7 +723,7 @@ void QueueManager::setDirty() {
 	}
 }
 
-string QueueManager::checkTarget(const string& aTarget, bool checkExistence) throw(QueueException, FileException) {
+string QueueManager::checkTarget(const string& aTarget, bool checkExistence) {
 #ifdef _WIN32
 	if(aTarget.length() > MAX_PATH) {
 		throw QueueException(_("Target filename too long"));
@@ -753,7 +753,7 @@ string QueueManager::checkTarget(const string& aTarget, bool checkExistence) thr
 }
 
 /** Add a source to an existing queue item */
-bool QueueManager::addSource(QueueItem* qi, const HintedUser& aUser, Flags::MaskType addBad) throw(QueueException, FileException) {
+bool QueueManager::addSource(QueueItem* qi, const HintedUser& aUser, Flags::MaskType addBad) {
 	bool wantConnection = (qi->getPriority() != QueueItem::PAUSED) && !userQueue.getRunning(aUser);
 
 	if(qi->isSource(aUser)) {
@@ -784,7 +784,7 @@ bool QueueManager::addSource(QueueItem* qi, const HintedUser& aUser, Flags::Mask
 	return wantConnection;
 }
 
-void QueueManager::addDirectory(const string& aDir, const HintedUser& aUser, const string& aTarget, QueueItem::Priority p /* = QueueItem::DEFAULT */) throw() {
+void QueueManager::addDirectory(const string& aDir, const HintedUser& aUser, const string& aTarget, QueueItem::Priority p /* = QueueItem::DEFAULT */) noexcept {
 	bool needList;
 	{
 		Lock l(cs);
@@ -811,7 +811,7 @@ void QueueManager::addDirectory(const string& aDir, const HintedUser& aUser, con
 	}
 }
 
-QueueItem::Priority QueueManager::hasDownload(const UserPtr& aUser) throw() {
+QueueItem::Priority QueueManager::hasDownload(const UserPtr& aUser) noexcept {
 	Lock l(cs);
 	QueueItem* qi = userQueue.getNext(aUser, QueueItem::LOWEST);
 	if(!qi) {
@@ -826,7 +826,7 @@ typedef unordered_map<TTHValue, const DirectoryListing::File*> TTHMap;
 // Lock(cs) makes sure that there's only one thread accessing this
 static TTHMap tthMap;
 
-void buildMap(const DirectoryListing::Directory* dir) throw() {
+void buildMap(const DirectoryListing::Directory* dir) noexcept {
 	for(DirectoryListing::Directory::List::const_iterator j = dir->directories.begin(); j != dir->directories.end(); ++j) {
 		if(!(*j)->getAdls())
 			buildMap(*j);
@@ -839,7 +839,7 @@ void buildMap(const DirectoryListing::Directory* dir) throw() {
 }
 }
 
-int QueueManager::matchListing(const DirectoryListing& dl) throw() {
+int QueueManager::matchListing(const DirectoryListing& dl) noexcept {
 	int matches = 0;
 	{
 		Lock l(cs);
@@ -868,7 +868,7 @@ int QueueManager::matchListing(const DirectoryListing& dl) throw() {
 	return matches;
 }
 
-int64_t QueueManager::getPos(const string& target) throw() {
+int64_t QueueManager::getPos(const string& target) noexcept {
 	Lock l(cs);
 	QueueItem* qi = fileQueue.find(target);
 	if(qi) {
@@ -877,7 +877,7 @@ int64_t QueueManager::getPos(const string& target) throw() {
 	return -1;
 }
 
-int64_t QueueManager::getSize(const string& target) throw() {
+int64_t QueueManager::getSize(const string& target) noexcept {
 	Lock l(cs);
 	QueueItem* qi = fileQueue.find(target);
 	if(qi) {
@@ -887,7 +887,7 @@ int64_t QueueManager::getSize(const string& target) throw() {
 }
 
 
-void QueueManager::move(const string& aSource, const string& aTarget) throw() {
+void QueueManager::move(const string& aSource, const string& aTarget) noexcept {
 	string target = Util::validateFileName(aTarget);
 	if(aSource == target)
 		return;
@@ -941,7 +941,7 @@ void QueueManager::getTargets(const TTHValue& tth, StringList& sl) {
 	}
 }
 
-Download* QueueManager::getDownload(UserConnection& aSource, bool supportsTrees) throw() {
+Download* QueueManager::getDownload(UserConnection& aSource, bool supportsTrees) noexcept {
 	Lock l(cs);
 
 	UserPtr& u = aSource.getUser();
@@ -994,7 +994,7 @@ public:
 	TreeOutputStream(TigerTree& aTree) : tree(aTree), bufPos(0) {
 	}
 
-	virtual size_t write(const void* xbuf, size_t len) throw(Exception) {
+	virtual size_t write(const void* xbuf, size_t len) {
 		size_t pos = 0;
 		uint8_t* b = (uint8_t*)xbuf;
 		while(pos < len) {
@@ -1016,7 +1016,7 @@ public:
 		return len;
 	}
 
-	virtual size_t flush() throw(Exception) {
+	virtual size_t flush() {
 		return 0;
 	}
 private:
@@ -1125,7 +1125,7 @@ void QueueManager::rechecked(QueueItem* qi) {
 	setDirty();
 }
 
-void QueueManager::putDownload(Download* aDownload, bool finished) throw() {
+void QueueManager::putDownload(Download* aDownload, bool finished) noexcept {
 	HintedUserList getConn;
  	string fl_fname;
 	HintedUser fl_user(UserPtr(), Util::emptyString);
@@ -1295,7 +1295,7 @@ void QueueManager::recheck(const string& aTarget) {
 	rechecker.add(aTarget);
 }
 
-void QueueManager::remove(const string& aTarget) throw() {
+void QueueManager::remove(const string& aTarget) noexcept {
 	UserList x;
 	{
 		Lock l(cs);
@@ -1336,7 +1336,7 @@ void QueueManager::remove(const string& aTarget) throw() {
 	}
 }
 
-void QueueManager::removeSource(const string& aTarget, const UserPtr& aUser, int reason, bool removeConn /* = true */) throw() {
+void QueueManager::removeSource(const string& aTarget, const UserPtr& aUser, int reason, bool removeConn /* = true */) noexcept {
 	bool isRunning = false;
 	bool removeCompletely = false;
 	{
@@ -1397,7 +1397,7 @@ int64_t QueueManager::getQueued(const UserPtr& aUser) const {
 	return userQueue.getQueued(aUser);
 }
 
-void QueueManager::removeSource(const UserPtr& aUser, int reason) throw() {
+void QueueManager::removeSource(const UserPtr& aUser, int reason) noexcept {
 	// @todo remove from finished items
 	bool isRunning = false;
 	string removeRunning;
@@ -1439,7 +1439,7 @@ void QueueManager::removeSource(const UserPtr& aUser, int reason) throw() {
 	}
 }
 
-void QueueManager::setPriority(const string& aTarget, QueueItem::Priority p) throw() {
+void QueueManager::setPriority(const string& aTarget, QueueItem::Priority p) noexcept {
 	HintedUserList getConn;
 
 	{
@@ -1462,7 +1462,7 @@ void QueueManager::setPriority(const string& aTarget, QueueItem::Priority p) thr
 	}
 }
 
-void QueueManager::saveQueue(bool force) throw() {
+void QueueManager::saveQueue(bool force) noexcept {
 	if(!dirty && !force)
 		return;
 
@@ -1563,7 +1563,7 @@ private:
 	bool inDownloads;
 };
 
-void QueueManager::loadQueue() throw() {
+void QueueManager::loadQueue() noexcept {
 	try {
 		QueueLoader l;
 		Util::migrate(getQueueFile());
@@ -1693,7 +1693,7 @@ void QueueManager::noDeleteFileList(const string& path) {
 }
 
 // SearchManagerListener
-void QueueManager::on(SearchManagerListener::SR, const SearchResultPtr& sr) throw() {
+void QueueManager::on(SearchManagerListener::SR, const SearchResultPtr& sr) noexcept {
 	bool added = false;
 	bool wantConnection = false;
 
@@ -1734,7 +1734,7 @@ void QueueManager::on(SearchManagerListener::SR, const SearchResultPtr& sr) thro
 }
 
 // ClientManagerListener
-void QueueManager::on(ClientManagerListener::UserConnected, const UserPtr& aUser) throw() {
+void QueueManager::on(ClientManagerListener::UserConnected, const UserPtr& aUser) noexcept {
 	bool hasDown = false;
 	{
 		Lock l(cs);
@@ -1755,7 +1755,7 @@ void QueueManager::on(ClientManagerListener::UserConnected, const UserPtr& aUser
 	}
 }
 
-void QueueManager::on(ClientManagerListener::UserDisconnected, const UserPtr& aUser) throw() {
+void QueueManager::on(ClientManagerListener::UserDisconnected, const UserPtr& aUser) noexcept {
 	Lock l(cs);
 	for(int i = 0; i < QueueItem::LAST; ++i) {
 		QueueItem::UserListIter j = userQueue.getList(i).find(aUser);
@@ -1766,7 +1766,7 @@ void QueueManager::on(ClientManagerListener::UserDisconnected, const UserPtr& aU
 	}
 }
 
-void QueueManager::on(TimerManagerListener::Second, uint32_t aTick) throw() {
+void QueueManager::on(TimerManagerListener::Second, uint32_t aTick) noexcept {
 	if(dirty && ((lastSave + 10000) < aTick)) {
 		saveQueue();
 	}

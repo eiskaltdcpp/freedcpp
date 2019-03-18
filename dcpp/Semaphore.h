@@ -30,18 +30,18 @@ class Semaphore
 {
 #ifdef _WIN32
 public:
-	Semaphore() throw() {
+	Semaphore() noexcept {
 		h = CreateSemaphore(NULL, 0, MAXLONG, NULL);
 	}
 
-	void signal() throw() {
+	void signal() noexcept {
 		ReleaseSemaphore(h, 1, NULL);
 	}
 
-	bool wait() throw() { return WaitForSingleObject(h, INFINITE) == WAIT_OBJECT_0; }
-	bool wait(uint32_t millis) throw() { return WaitForSingleObject(h, millis) == WAIT_OBJECT_0; }
+	bool wait() noexcept { return WaitForSingleObject(h, INFINITE) == WAIT_OBJECT_0; }
+	bool wait(uint32_t millis) noexcept { return WaitForSingleObject(h, millis) == WAIT_OBJECT_0; }
 
-	~Semaphore() throw() {
+	~Semaphore() noexcept {
 		CloseHandle(h);
 	}
 
@@ -49,15 +49,15 @@ private:
 	HANDLE h;
 #else
 public:
-	Semaphore() throw() : count(0) { pthread_cond_init(&cond, NULL); }
-	~Semaphore() throw() { pthread_cond_destroy(&cond); }
-	void signal() throw() {
+	Semaphore() noexcept : count(0) { pthread_cond_init(&cond, NULL); }
+	~Semaphore() noexcept { pthread_cond_destroy(&cond); }
+	void signal() noexcept {
 		Lock l(cs);
 		count++;
 		pthread_cond_signal(&cond);
 	}
 
-	bool wait() throw() {
+	bool wait() noexcept {
 		Lock l(cs);
 		if(count == 0) {
 			pthread_cond_wait(&cond, &cs.getMutex());
@@ -65,7 +65,7 @@ public:
 		count--;
 		return true;
 	}
-	bool wait(uint32_t millis) throw() {
+	bool wait(uint32_t millis) noexcept {
 		Lock l(cs);
 		if(count == 0) {
 			timeval timev;

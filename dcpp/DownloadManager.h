@@ -69,7 +69,7 @@ private:
 	void noSlots(UserConnection* aSource);
 
 	void logDownload(UserConnection* aSource, Download* d);
-	uint32_t calcCrc32(const string& file) throw(FileException);
+	uint32_t calcCrc32(const string& file);
 	bool checkSfv(UserConnection* aSource, Download* d);
 	int64_t getResumePos(const string& file, const TigerTree& tt, int64_t startPos);
 
@@ -78,7 +78,7 @@ private:
 	friend class Singleton<DownloadManager>;
 
 	DownloadManager();
-	virtual ~DownloadManager() throw();
+	virtual ~DownloadManager() noexcept;
 
 	void checkDownloads(UserConnection* aConn);
 	void startData(UserConnection* aSource, int64_t start, int64_t newSize, bool z);
@@ -87,18 +87,18 @@ private:
 	void onFailed(UserConnection* aSource, const string& aError);
 
 	// UserConnectionListener
-	virtual void on(Data, UserConnection*, const uint8_t*, size_t) throw();
-	virtual void on(Failed, UserConnection* aSource, const string& aError) throw() { onFailed(aSource, aError); }
-	virtual void on(ProtocolError, UserConnection* aSource, const string& aError) throw() { onFailed(aSource, aError); }
-	virtual void on(MaxedOut, UserConnection*) throw();
-	virtual	void on(FileNotAvailable, UserConnection*) throw();
-	virtual void on(Updated, UserConnection*) throw();
+	virtual void on(Data, UserConnection*, const uint8_t*, size_t) noexcept;
+	virtual void on(Failed, UserConnection* aSource, const string& aError) noexcept { onFailed(aSource, aError); }
+	virtual void on(ProtocolError, UserConnection* aSource, const string& aError) noexcept { onFailed(aSource, aError); }
+	virtual void on(MaxedOut, UserConnection*) noexcept;
+	virtual	void on(FileNotAvailable, UserConnection*) noexcept;
+	virtual void on(Updated, UserConnection*) noexcept;
 
-	virtual void on(AdcCommand::SND, UserConnection*, const AdcCommand&) throw();
-	virtual void on(AdcCommand::STA, UserConnection*, const AdcCommand&) throw();
+	virtual void on(AdcCommand::SND, UserConnection*, const AdcCommand&) noexcept;
+	virtual void on(AdcCommand::STA, UserConnection*, const AdcCommand&) noexcept;
 
 	// TimerManagerListener
-	virtual void on(TimerManagerListener::Second, uint32_t aTick) throw();
+	virtual void on(TimerManagerListener::Second, uint32_t aTick) noexcept;
 };
 
 } // namespace dcpp

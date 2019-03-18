@@ -163,11 +163,11 @@ CryptoManager::CryptoManager()
 CryptoManager::~CryptoManager() {
 }
 
-bool CryptoManager::TLSOk() const throw() {
+bool CryptoManager::TLSOk() const noexcept {
 	return BOOLSETTING(USE_TLS) && certsLoaded;
 }
 
-void CryptoManager::generateCertificate() throw(CryptoException) {
+void CryptoManager::generateCertificate() {
 	// Generate certificate using OpenSSL
 	if(SETTING(TLS_PRIVATE_KEY_FILE).empty()) {
 		throw CryptoException(_("No private key file chosen"));
@@ -234,7 +234,7 @@ void CryptoManager::generateCertificate() throw(CryptoException) {
 	}
 }
 
-void CryptoManager::loadCertificates() throw() {
+void CryptoManager::loadCertificates() noexcept {
 	if(!BOOLSETTING(USE_TLS) || !clientContext || !clientVerContext || !serverContext || !serverVerContext)
 		return;
 
@@ -311,7 +311,7 @@ void CryptoManager::loadCertificates() throw() {
 	certsLoaded = true;
 }
 
-bool CryptoManager::checkCertificate() throw() {
+bool CryptoManager::checkCertificate() noexcept {
 	FILE* f = fopen(SETTING(TLS_CERTIFICATE_FILE).c_str(), "r");
 	if(!f) {
 		return false;
@@ -362,15 +362,15 @@ bool CryptoManager::checkCertificate() throw() {
 	return true;
 }
 
-SSLSocket* CryptoManager::getClientSocket(bool allowUntrusted) throw(SocketException) {
+SSLSocket* CryptoManager::getClientSocket(bool allowUntrusted) {
 	return new SSLSocket(allowUntrusted ? clientContext : clientVerContext);
 }
-SSLSocket* CryptoManager::getServerSocket(bool allowUntrusted) throw(SocketException) {
+SSLSocket* CryptoManager::getServerSocket(bool allowUntrusted) {
 	return new SSLSocket(allowUntrusted ? serverContext : serverVerContext);
 }
 
 
-void CryptoManager::decodeBZ2(const uint8_t* is, size_t sz, string& os) throw (CryptoException) {
+void CryptoManager::decodeBZ2(const uint8_t* is, size_t sz, string& os) {
 	bz_stream bs = { 0 };
 
 	if(BZ2_bzDecompressInit(&bs, 0, 0) != BZ_OK)

@@ -46,7 +46,7 @@ Client::Client(const string& hubURL, char separator_, bool secure_) :
 	TimerManager::getInstance()->addListener(this);
 }
 
-Client::~Client() throw() {
+Client::~Client() noexcept {
 	dcassert(!sock);
 
 	// In case we were deleted before we Failed
@@ -125,7 +125,7 @@ void Client::send(const char* aMessage, size_t aLen) {
 	sock->write(aMessage, aLen);
 }
 
-void Client::on(Connected) throw() {
+void Client::on(Connected) noexcept {
 	updateActivity();
 	ip = sock->getIp();
 	localIp = sock->getLocalIp();
@@ -133,7 +133,7 @@ void Client::on(Connected) throw() {
 	state = STATE_PROTOCOL;
 }
 
-void Client::on(Failed, const string& aLine) throw() {
+void Client::on(Failed, const string& aLine) noexcept {
 	state = STATE_DISCONNECTED;
 	FavoriteManager::getInstance()->removeUserCommand(getHubUrl());
 	sock->removeListener(this);
@@ -200,11 +200,11 @@ string Client::getLocalIp() const {
 	return localIp;
 }
 
-void Client::on(Line, const string& /*aLine*/) throw() {
+void Client::on(Line, const string& /*aLine*/) noexcept {
 	updateActivity();
 }
 
-void Client::on(Second, uint32_t aTick) throw() {
+void Client::on(Second, uint32_t aTick) noexcept {
 	if(state == STATE_DISCONNECTED && getAutoReconnect() && (aTick > (getLastActivity() + getReconnDelay() * 1000)) ) {
 		// Try to reconnect...
 		connect();

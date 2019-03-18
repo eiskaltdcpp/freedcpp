@@ -35,7 +35,7 @@ public:
 	BitInputStream(const uint8_t* aStream, size_t aStart, size_t aEnd) : bitPos(aStart*8), endPos(aEnd*8), is(aStream) { }
 	~BitInputStream() { }
 
-	bool get() throw(BitStreamException) {
+	bool get() {
 		if(bitPos > endPos) {
 			throw BitStreamException(_("Request to seek beyond the end of data"));
 		}

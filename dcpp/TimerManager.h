@@ -39,8 +39,8 @@ public:
 	typedef X<1> Minute;
 
 	// We expect everyone to implement this...
-	virtual void on(Second, uint32_t) throw() { }
-	virtual void on(Minute, uint32_t) throw() { }
+	virtual void on(Second, uint32_t) noexcept { }
+	virtual void on(Minute, uint32_t) noexcept { }
 };
 
 class TimerManager : public Speaker<TimerManagerListener>, public Singleton<TimerManager>, public Thread
@@ -64,7 +64,7 @@ private:
 #endif
 	}
 
-	virtual ~TimerManager() throw() {
+	virtual ~TimerManager() noexcept {
 		dcassert(listeners.empty());
 		shutdown();
 	}

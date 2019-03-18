@@ -28,7 +28,7 @@ pthread_mutex_t Thread::mtx = PTHREAD_MUTEX_INITIALIZER;
 #endif
 
 #ifdef _WIN32
-void Thread::start() throw(ThreadException) {
+void Thread::start() {
 	join();
 	if( (threadHandle = CreateThread(NULL, 0, &starter, this, 0, &threadId)) == NULL) {
 		throw ThreadException(_("Unable to create thread"));
@@ -36,7 +36,7 @@ void Thread::start() throw(ThreadException) {
 }
 
 #else
-void Thread::start() throw(ThreadException) {
+void Thread::start() {
 	join();
 	if(pthread_create(&threadHandle, NULL, &starter, this) != 0) {
 		throw ThreadException(_("Unable to create thread"));

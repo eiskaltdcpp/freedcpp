@@ -52,7 +52,7 @@ SearchManager::SearchManager() :
 
 }
 
-SearchManager::~SearchManager() throw() {
+SearchManager::~SearchManager() noexcept {
 	if(socket.get()) {
 		stop = true;
 		socket->disconnect();
@@ -86,7 +86,7 @@ void SearchManager::search(StringList& who, const string& aName, int64_t aSize /
 	}
 }
 
-void SearchManager::listen() throw(SocketException) {
+void SearchManager::listen() {
 
 	disconnect();
 
@@ -103,7 +103,7 @@ void SearchManager::listen() throw(SocketException) {
 	}
 }
 
-void SearchManager::disconnect() throw() {
+void SearchManager::disconnect() noexcept {
 	if(socket.get()) {
 		stop = true;
 		socket->disconnect();

@@ -29,11 +29,11 @@ class Speaker {
 	typedef typename ListenerList::iterator ListenerIter;
 
 public:
-	Speaker() throw() { }
-	virtual ~Speaker() throw() { }
+	Speaker() noexcept { }
+	virtual ~Speaker() noexcept { }
 
 	template<typename T0>
-	void fire(T0 type) throw() {
+	void fire(T0 type) noexcept {
 		Lock l(listenerCS);
 		tmp = listeners;
 		for(ListenerIter i=tmp.begin(); i != tmp.end(); ++i ) {
@@ -42,7 +42,7 @@ public:
 	}
 
 	template<typename T0, class T1>
-	void fire(T0 type, const T1& p1) throw() {
+	void fire(T0 type, const T1& p1) noexcept {
 		Lock l(listenerCS);
 		tmp = listeners;
 		for(ListenerIter i=tmp.begin(); i != tmp.end(); ++i ) {
@@ -50,7 +50,7 @@ public:
 		}
 	}
 	template<typename T0, class T1>
-	void fire(T0 type, T1& p1) throw() {
+	void fire(T0 type, T1& p1) noexcept {
 		Lock l(listenerCS);
 		tmp = listeners;
 		for(ListenerIter i=tmp.begin(); i != tmp.end(); ++i ) {
@@ -59,7 +59,7 @@ public:
 	}
 
 	template<typename T0, class T1, class T2>
-	void fire(T0 type, const T1& p1, const T2& p2) throw() {
+	void fire(T0 type, const T1& p1, const T2& p2) noexcept {
 		Lock l(listenerCS);
 		tmp = listeners;
 		for(ListenerIter i=tmp.begin(); i != tmp.end(); ++i ) {
@@ -68,7 +68,7 @@ public:
 	}
 
 	template<typename T0, class T1, class T2, class T3>
-	void fire(T0 type, const T1& p1, const T2& p2, const T3& p3) throw() {
+	void fire(T0 type, const T1& p1, const T2& p2, const T3& p3) noexcept {
 		Lock l(listenerCS);
 		tmp = listeners;
 		for(ListenerIter i=tmp.begin(); i != tmp.end(); ++i ) {
@@ -77,7 +77,7 @@ public:
 	}
 
 	template<typename T0, class T1, class T2, class T3, class T4>
-	void fire(T0 type, const T1& p1, const T2& p2, const T3& p3, const T4& p4) throw() {
+	void fire(T0 type, const T1& p1, const T2& p2, const T3& p3, const T4& p4) noexcept {
 		Lock l(listenerCS);
 		tmp = listeners;
 		for(ListenerIter i=tmp.begin(); i != tmp.end(); ++i ) {
@@ -86,7 +86,7 @@ public:
 	}
 
 	template<typename T0, class T1, class T2, class T3, class T4, class T5>
-	void fire(T0 type, const T1& p1, const T2& p2, const T3& p3, const T4& p4, const T5& p5) throw() {
+	void fire(T0 type, const T1& p1, const T2& p2, const T3& p3, const T4& p4, const T5& p5) noexcept {
 		Lock l(listenerCS);
 		tmp = listeners;
 		for(ListenerIter i=tmp.begin(); i != tmp.end(); ++i ) {
@@ -95,7 +95,7 @@ public:
 	}
 
 	template<typename T0, class T1, class T2, class T3, class T4, class T5, class T6>
-	void fire(T0 type, const T1& p1, const T2& p2, const T3& p3, const T4& p4, const T5& p5, const T6& p6) throw() {
+	void fire(T0 type, const T1& p1, const T2& p2, const T3& p3, const T4& p4, const T5& p5, const T6& p6) noexcept {
 		Lock l(listenerCS);
 		tmp = listeners;
 		for(ListenerIter i=tmp.begin(); i != tmp.end(); ++i ) {

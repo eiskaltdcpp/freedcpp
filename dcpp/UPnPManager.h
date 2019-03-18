@@ -53,7 +53,7 @@ private:
 	bool opened;
 
 	UPnPManager() : opened(false) { }
-	virtual ~UPnPManager() throw() { join(); }
+	virtual ~UPnPManager() noexcept { join(); }
 
 	int run();
 

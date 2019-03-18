@@ -44,7 +44,7 @@ lastProtectedIPsUpdate(0)
 {
 }
 
-NmdcHub::~NmdcHub() throw() {
+NmdcHub::~NmdcHub() noexcept {
 	clearUsers();
 }
 
@@ -174,7 +174,7 @@ void NmdcHub::updateFromTag(Identity& id, const string& tag) {
 	id.set("TA", '<' + tag + '>');
 }
 
-void NmdcHub::onLine(const string& aLine) throw() {
+void NmdcHub::onLine(const string& aLine) noexcept {
 	if(aLine.length() == 0)
 		return;
 
@@ -947,7 +947,7 @@ bool NmdcHub::isProtectedIP(const string& ip) {
 	return false;
 }
 
-void NmdcHub::on(Connected) throw() {
+void NmdcHub::on(Connected) noexcept {
 	Client::on(Connected());
 
 	supportFlags = 0;
@@ -958,17 +958,17 @@ void NmdcHub::on(Connected) throw() {
 	lastUpdate = 0;
 }
 
-void NmdcHub::on(Line, const string& aLine) throw() {
+void NmdcHub::on(Line, const string& aLine) noexcept {
 	Client::on(Line(), aLine);
 	onLine(aLine);
 }
 
-void NmdcHub::on(Failed, const string& aLine) throw() {
+void NmdcHub::on(Failed, const string& aLine) noexcept {
 	clearUsers();
 	Client::on(Failed(), aLine);
 }
 
-void NmdcHub::on(Second, uint32_t aTick) throw() {
+void NmdcHub::on(Second, uint32_t aTick) noexcept {
 	Client::on(Second(), aTick);
 
 	if(state == STATE_NORMAL && (aTick > (getLastActivity() + 120*1000)) ) {
@@ -976,7 +976,7 @@ void NmdcHub::on(Second, uint32_t aTick) throw() {
 	}
 }
 
-void NmdcHub::on(Minute, uint32_t aTick) throw() {
+void NmdcHub::on(Minute, uint32_t aTick) noexcept {
 	if(aTick > (lastProtectedIPsUpdate + 24*3600*1000)) {
 		protectedIPs.clear();
 

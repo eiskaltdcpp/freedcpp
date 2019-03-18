@@ -63,8 +63,8 @@ public:
 	void search(StringList& who, int aSizeMode, int64_t aSize, int aFileType, const string& aString, const string& aToken, const StringList& aExtList);
 	void infoUpdated();
 
-	UserPtr getUser(const string& aNick, const string& aHubUrl) throw();
-	UserPtr getUser(const CID& cid) throw();
+	UserPtr getUser(const string& aNick, const string& aHubUrl) noexcept;
+	UserPtr getUser(const CID& cid) noexcept;
 
 	string findHub(const string& ipPort) const;
 	string findHubEncoding(const string& aUrl) const;
@@ -73,11 +73,11 @@ public:
 	* @param priv discard any user that doesn't match the hint.
 	* @return OnlineUser* found by CID and hint; might be only by CID if priv is false.
 	*/
-	OnlineUser* findOnlineUser(const CID& cid, const string& hintUrl, bool priv) throw();
+	OnlineUser* findOnlineUser(const CID& cid, const string& hintUrl, bool priv) noexcept;
 
-	UserPtr findUser(const string& aNick, const string& aHubUrl) const throw() { return findUser(makeCid(aNick, aHubUrl)); }
-	UserPtr findUser(const CID& cid) const throw();
-	UserPtr findLegacyUser(const string& aNick) const throw();
+	UserPtr findUser(const string& aNick, const string& aHubUrl) const noexcept { return findUser(makeCid(aNick, aHubUrl)); }
+	UserPtr findUser(const CID& cid) const noexcept;
+	UserPtr findLegacyUser(const string& aNick) const noexcept;
 
 	bool isOnline(const UserPtr& aUser) const {
 		Lock l(cs);
@@ -87,10 +87,10 @@ public:
 	bool isOp(const UserPtr& aUser, const string& aHubUrl) const;
 
 	/** Constructs a synthetic, hopefully unique CID */
-	CID makeCid(const string& nick, const string& hubUrl) const throw();
+	CID makeCid(const string& nick, const string& hubUrl) const noexcept;
 
-	void putOnline(OnlineUser* ou) throw();
-	void putOffline(OnlineUser* ou, bool disconnect = false) throw();
+	void putOnline(OnlineUser* ou) noexcept;
+	void putOffline(OnlineUser* ou, bool disconnect = false) noexcept;
 
 	UserPtr& getMe();
 
@@ -102,8 +102,8 @@ public:
 
 	bool isActive() { return SETTING(INCOMING_CONNECTIONS) != SettingsManager::INCOMING_FIREWALL_PASSIVE; }
 
-	void lock() throw() { cs.enter(); }
-	void unlock() throw() { cs.leave(); }
+	void lock() noexcept { cs.enter(); }
+	void unlock() noexcept { cs.leave(); }
 
 	Client::List& getClients() { return clients; }
 
@@ -149,14 +149,14 @@ private:
 		TimerManager::getInstance()->addListener(this);
 	}
 
-	virtual ~ClientManager() throw() {
+	virtual ~ClientManager() noexcept {
 		TimerManager::getInstance()->removeListener(this);
 	}
 
-	void updateNick(const OnlineUser& user) throw();
+	void updateNick(const OnlineUser& user) noexcept;
 
 	/// @return OnlineUser* found by CID and hint; discard any user that doesn't match the hint.
-	OnlineUser* findOnlineUser_hint(const CID& cid, const string& hintUrl) throw() {
+	OnlineUser* findOnlineUser_hint(const CID& cid, const string& hintUrl) noexcept {
 		OnlinePair p;
 		return findOnlineUser_hint(cid, hintUrl, p);
 	}
@@ -164,22 +164,22 @@ private:
 	* @param p OnlinePair of all the users found by CID, even those who don't match the hint.
 	* @return OnlineUser* found by CID and hint; discard any user that doesn't match the hint.
 	*/
-	OnlineUser* findOnlineUser_hint(const CID& cid, const string& hintUrl, OnlinePair& p) throw();
+	OnlineUser* findOnlineUser_hint(const CID& cid, const string& hintUrl, OnlinePair& p) noexcept;
 
 	string getUsersFile() const { return Util::getPath(Util::PATH_USER_LOCAL) + "Users.xml"; }
 
 	// ClientListener
-	virtual void on(Connected, Client* c) throw();
-	virtual void on(UserUpdated, Client*, const OnlineUser& user) throw();
-	virtual void on(UsersUpdated, Client* c, const OnlineUserList&) throw();
-	virtual void on(Failed, Client*, const string&) throw();
-	virtual void on(HubUpdated, Client* c) throw();
-	virtual void on(HubUserCommand, Client*, int, int, const string&, const string&) throw();
+	virtual void on(Connected, Client* c) noexcept;
+	virtual void on(UserUpdated, Client*, const OnlineUser& user) noexcept;
+	virtual void on(UsersUpdated, Client* c, const OnlineUserList&) noexcept;
+	virtual void on(Failed, Client*, const string&) noexcept;
+	virtual void on(HubUpdated, Client* c) noexcept;
+	virtual void on(HubUserCommand, Client*, int, int, const string&, const string&) noexcept;
 	virtual void on(NmdcSearch, Client* aClient, const string& aSeeker, int aSearchType, int64_t aSize,
-		int aFileType, const string& aString) throw();
-	virtual void on(AdcSearch, Client* c, const AdcCommand& adc, const CID& from) throw();
+		int aFileType, const string& aString) noexcept;
+	virtual void on(AdcSearch, Client* c, const AdcCommand& adc, const CID& from) noexcept;
 	// TimerManagerListener
-	virtual void on(TimerManagerListener::Minute, uint32_t aTick) throw();
+	virtual void on(TimerManagerListener::Minute, uint32_t aTick) noexcept;
 };
 
 } // namespace dcpp

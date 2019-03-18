@@ -45,7 +45,7 @@ public:
 		typedef vector<Ptr> List;
 		typedef List::iterator Iter;
 
-		File(Directory* aDir, const string& aName, int64_t aSize, const string& aTTH) throw() :
+		File(Directory* aDir, const string& aName, int64_t aSize, const string& aTTH) noexcept :
 			name(aName), size(aSize), parent(aDir), tthRoot(aTTH), adls(false)
 		{
 		}
@@ -128,7 +128,7 @@ public:
 	DirectoryListing(const HintedUser& aUser);
 	~DirectoryListing();
 
-	void loadFile(const string& name) throw(Exception);
+	void loadFile(const string& name);
 
 	string updateXML(const std::string&);
 	string loadXML(InputStream& xml, bool updating);

@@ -34,10 +34,10 @@ class StringSearch {
 public:
 	typedef vector<StringSearch> List;
 
-	explicit StringSearch(const string& aPattern) throw() : pattern(Text::toLower(aPattern)) {
+	explicit StringSearch(const string& aPattern) noexcept : pattern(Text::toLower(aPattern)) {
 		initDelta1();
 	}
-	StringSearch(const StringSearch& rhs) throw() : pattern(rhs.pattern) {
+	StringSearch(const StringSearch& rhs) noexcept : pattern(rhs.pattern) {
 		memcpy(delta1, rhs.delta1, sizeof(delta1));
 	}
 	const StringSearch& operator=(const StringSearch& rhs) {
@@ -56,7 +56,7 @@ public:
 	const string& getPattern() const { return pattern; }
 
 	/** Match a text against the pattern */
-	bool match(const string& aText) const throw() {
+	bool match(const string& aText) const noexcept {
 
 		// Lower-case representation of UTF-8 string, since we no longer have that 1 char = 1 byte...
 		string lower;

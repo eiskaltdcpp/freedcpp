@@ -36,7 +36,7 @@ FinishedManager::FinishedManager() {
 	UploadManager::getInstance()->addListener(this);
 }
 
-FinishedManager::~FinishedManager() throw() {
+FinishedManager::~FinishedManager() noexcept {
 	DownloadManager::getInstance()->removeListener(this);
 	UploadManager::getInstance()->removeListener(this);
 
@@ -186,20 +186,20 @@ void FinishedManager::onComplete(Transfer* t, bool upload, bool crc32Checked) {
 	}
 }
 
-void FinishedManager::on(DownloadManagerListener::Complete, Download* d) throw() {
+void FinishedManager::on(DownloadManagerListener::Complete, Download* d) noexcept {
 	onComplete(d, false, d->isSet(Download::FLAG_CRC32_OK));
 }
 
-void FinishedManager::on(DownloadManagerListener::Failed, Download* d, const string&) throw() {
+void FinishedManager::on(DownloadManagerListener::Failed, Download* d, const string&) noexcept {
 	if(d->getPos() > 0)
 		onComplete(d, false, d->isSet(Download::FLAG_CRC32_OK));
 }
 
-void FinishedManager::on(UploadManagerListener::Complete, Upload* u) throw() {
+void FinishedManager::on(UploadManagerListener::Complete, Upload* u) noexcept {
 	onComplete(u, true);
 }
 
-void FinishedManager::on(UploadManagerListener::Failed, Upload* u, const string&) throw() {
+void FinishedManager::on(UploadManagerListener::Failed, Upload* u, const string&) noexcept {
 	if(u->getPos() > 0)
 		onComplete(u, true);
 }

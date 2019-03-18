@@ -41,16 +41,16 @@ public:
 	const string& getPk() { return pk; }
 	bool isExtended(const string& aLock) { return strncmp(aLock.c_str(), "EXTENDEDPROTOCOL", 16) == 0; }
 
-	void decodeBZ2(const uint8_t* is, size_t sz, string& os) throw(CryptoException);
+	void decodeBZ2(const uint8_t* is, size_t sz, string& os);
 
-	SSLSocket* getClientSocket(bool allowUntrusted) throw(SocketException);
-	SSLSocket* getServerSocket(bool allowUntrusted) throw(SocketException);
+	SSLSocket* getClientSocket(bool allowUntrusted);
+	SSLSocket* getServerSocket(bool allowUntrusted);
 
-	void loadCertificates() throw();
-	void generateCertificate() throw(CryptoException);
-	bool checkCertificate() throw();
+	void loadCertificates() noexcept;
+	void generateCertificate();
+	bool checkCertificate() noexcept;
 
-	bool TLSOk() const throw();
+	bool TLSOk() const noexcept;
 private:
 
 	friend class Singleton<CryptoManager>;

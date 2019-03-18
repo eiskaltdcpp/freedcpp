@@ -111,7 +111,7 @@ public:
 protected:
 	friend class ClientManager;
 	Client(const string& hubURL, char separator, bool secure_);
-	virtual ~Client() throw();
+	virtual ~Client() noexcept;
 	struct Counts {
 		Counts(long n = 0, long r = 0, long o = 0) : normal(n), registered(r), op(o) { }
 		volatile long normal;
@@ -143,12 +143,12 @@ protected:
 	virtual string checkNick(const string& nick) = 0;
 
 	// TimerManagerListener
-	virtual void on(Second, uint32_t aTick) throw();
+	virtual void on(Second, uint32_t aTick) noexcept;
 	// BufferedSocketListener
-	virtual void on(Connecting) throw() { fire(ClientListener::Connecting(), this); }
-	virtual void on(Connected) throw();
-	virtual void on(Line, const string& aLine) throw();
-	virtual void on(Failed, const string&) throw();
+	virtual void on(Connecting) noexcept { fire(ClientListener::Connecting(), this); }
+	virtual void on(Connected) noexcept;
+	virtual void on(Line, const string& aLine) noexcept;
+	virtual void on(Failed, const string&) noexcept;
 
 private:
 

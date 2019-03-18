@@ -33,14 +33,14 @@ uint16_t Socket::udpPort;
 
 #ifdef _DEBUG
 
-SocketException::SocketException(int aError) throw() {
+SocketException::SocketException(int aError) noexcept {
 	error = "SocketException: " + errorToString(aError);
 	dcdebug("Thrown: %s\n", error.c_str());
 }
 
 #else // _DEBUG
 
-SocketException::SocketException(int aError) throw() : Exception(errorToString(aError)) { }
+SocketException::SocketException(int aError) noexcept : Exception(errorToString(aError)) { }
 
 #endif
 
@@ -48,7 +48,7 @@ Socket::Stats Socket::stats = { 0, 0 };
 
 static const uint32_t SOCKS_TIMEOUT = 30000;
 
-string SocketException::errorToString(int aError) throw() {
+string SocketException::errorToString(int aError) noexcept {
 	string msg = Util::translateError(aError);
 	if(msg.empty()) {
 		msg = str(F_("Unknown error: 0x%1$x") % aError);
@@ -56,7 +56,7 @@ string SocketException::errorToString(int aError) throw() {
 	return msg;
 }
 
-void Socket::create(int aType /* = TYPE_TCP */) throw(SocketException) {
+void Socket::create(int aType /* = TYPE_TCP */) {
 	if(sock != INVALID_SOCKET)
 		disconnect();
 
@@ -74,7 +74,7 @@ void Socket::create(int aType /* = TYPE_TCP */) throw(SocketException) {
 	setBlocking(false);
 }
 
-void Socket::accept(const Socket& listeningSocket) throw(SocketException) {
+void Socket::accept(const Socket& listeningSocket) {
 	if(sock != INVALID_SOCKET) {
 		disconnect();
 	}
@@ -99,7 +99,7 @@ void Socket::accept(const Socket& listeningSocket) throw(SocketException) {
 }
 
 
-uint16_t Socket::bind(uint16_t aPort, const string& aIp /* = 0.0.0.0 */) throw (SocketException){
+uint16_t Socket::bind(uint16_t aPort, const string& aIp /* = 0.0.0.0 */){
 	sockaddr_in sock_addr;
 
 	sock_addr.sin_family = AF_INET;
@@ -115,12 +115,12 @@ uint16_t Socket::bind(uint16_t aPort, const string& aIp /* = 0.0.0.0 */) throw (
 	return ntohs(sock_addr.sin_port);
 }
 
-void Socket::listen() throw(SocketException) {
+void Socket::listen() {
 	check(::listen(sock, 20));
 	connected = true;
 }
 
-void Socket::connect(const string& aAddr, uint16_t aPort) throw(SocketException) {
+void Socket::connect(const string& aAddr, uint16_t aPort) {
 	sockaddr_in serv_addr;
 
 	if(sock == INVALID_SOCKET) {
@@ -156,7 +156,7 @@ namespace {
 	}
 }
 
-void Socket::socksConnect(const string& aAddr, uint16_t aPort, uint32_t timeout) throw(SocketException) {
+void Socket::socksConnect(const string& aAddr, uint16_t aPort, uint32_t timeout) {
 
 	if(SETTING(SOCKS_SERVER).empty() || SETTING(SOCKS_PORT) == 0) {
 		throw SocketException(_("The socks server failed establish a connection"));
@@ -214,7 +214,7 @@ void Socket::socksConnect(const string& aAddr, uint16_t aPort, uint32_t timeout)
 	setIp(inet_ntoa(sock_addr));
 }
 
-void Socket::socksAuth(uint32_t timeout) throw(SocketException) {
+void Socket::socksAuth(uint32_t timeout) {
 	vector<uint8_t> connStr;
 
 	uint64_t start = GET_TICK();
@@ -269,19 +269,19 @@ void Socket::socksAuth(uint32_t timeout) throw(SocketException) {
 	}
 }
 
-int Socket::getSocketOptInt(int option) throw(SocketException) {
+int Socket::getSocketOptInt(int option) {
 	int val;
 	socklen_t len = sizeof(val);
 	check(::getsockopt(sock, SOL_SOCKET, option, (char*)&val, &len));
 	return val;
 }
 
-void Socket::setSocketOpt(int option, int val) throw(SocketException) {
+void Socket::setSocketOpt(int option, int val) {
 	int len = sizeof(val);
 	check(::setsockopt(sock, SOL_SOCKET, option, (char*)&val, len));
 }
 
-int Socket::read(void* aBuffer, int aBufLen) throw(SocketException) {
+int Socket::read(void* aBuffer, int aBufLen) {
 	int len = 0;
 
 	dcassert(type == TYPE_TCP || type == TYPE_UDP);
@@ -301,7 +301,7 @@ int Socket::read(void* aBuffer, int aBufLen) throw(SocketException) {
 	return len;
 }
 
-int Socket::read(void* aBuffer, int aBufLen, string &aIP) throw(SocketException) {
+int Socket::read(void* aBuffer, int aBufLen, string &aIP) {
 	dcassert(type == TYPE_UDP);
 
 	sockaddr_in remote_addr = { 0 };
@@ -322,7 +322,7 @@ int Socket::read(void* aBuffer, int aBufLen, string &aIP) throw(SocketException)
 	return len;
 }
 
-int Socket::readAll(void* aBuffer, int aBufLen, uint32_t timeout) throw(SocketException) {
+int Socket::readAll(void* aBuffer, int aBufLen, uint32_t timeout) {
 	uint8_t* buf = (uint8_t*)aBuffer;
 	int i = 0;
 	while(i < aBufLen) {
@@ -341,7 +341,7 @@ int Socket::readAll(void* aBuffer, int aBufLen, uint32_t timeout) throw(SocketEx
 	return i;
 }
 
-void Socket::writeAll(const void* aBuffer, int aLen, uint32_t timeout) throw(SocketException) {
+void Socket::writeAll(const void* aBuffer, int aLen, uint32_t timeout) {
 	const uint8_t* buf = (const uint8_t*)aBuffer;
 	int pos = 0;
 	// No use sending more than this at a time...
@@ -358,7 +358,7 @@ void Socket::writeAll(const void* aBuffer, int aLen, uint32_t timeout) throw(Soc
 	}
 }
 
-int Socket::write(const void* aBuffer, int aLen) throw(SocketException) {
+int Socket::write(const void* aBuffer, int aLen) {
 	int sent;
 	do {
 		sent = ::send(sock, (const char*)aBuffer, aLen, 0);
@@ -377,7 +377,7 @@ int Socket::write(const void* aBuffer, int aLen) throw(SocketException) {
 * @param aLen Data length
 * @throw SocketExcpetion Send failed.
 */
-void Socket::writeTo(const string& aAddr, uint16_t aPort, const void* aBuffer, int aLen, bool proxy) throw(SocketException) {
+void Socket::writeTo(const string& aAddr, uint16_t aPort, const void* aBuffer, int aLen, bool proxy) {
 	if(aLen <= 0)
 		return;
 
@@ -451,7 +451,7 @@ void Socket::writeTo(const string& aAddr, uint16_t aPort, const void* aBuffer, i
  * @return WAIT_*** ored together of the current state.
  * @throw SocketException Select or the connection attempt failed.
  */
-int Socket::wait(uint32_t millis, int waitFor) throw(SocketException) {
+int Socket::wait(uint32_t millis, int waitFor) {
 	timeval tv;
 	fd_set rfd, wfd, efd;
 	fd_set *rfdp = NULL, *wfdp = NULL;
@@ -567,7 +567,7 @@ string Socket::resolve(const string& aDns) {
 #endif
 }
 
-string Socket::getLocalIp() throw() {
+string Socket::getLocalIp() noexcept {
 	if(sock == INVALID_SOCKET)
 		return Util::emptyString;
 
@@ -579,7 +579,7 @@ string Socket::getLocalIp() throw() {
 	return Util::emptyString;
 }
 
-uint16_t Socket::getLocalPort() throw() {
+uint16_t Socket::getLocalPort() noexcept {
 	if(sock == INVALID_SOCKET)
 		return 0;
 
@@ -635,12 +635,12 @@ void Socket::socksUpdated() {
 	}
 }
 
-void Socket::shutdown() throw() {
+void Socket::shutdown() noexcept {
 	if(sock != INVALID_SOCKET)
 		::shutdown(sock, 2);
 }
 
-void Socket::close() throw() {
+void Socket::close() noexcept {
 	if(sock != INVALID_SOCKET) {
 #ifdef _WIN32
 		::closesocket(sock);
@@ -652,7 +652,7 @@ void Socket::close() throw() {
 	}
 }
 
-void Socket::disconnect() throw() {
+void Socket::disconnect() noexcept {
 	shutdown();
 	close();
 }
