@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2019 Boris Pek <tehnick-8@yandex.ru>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,8 +39,9 @@ Client::Client(const string& hubURL, char separator_, bool secure_) :
 	hubUrl(hubURL), port(0), separator(separator_),
 	secure(secure_), countType(COUNT_UNCOUNTED)
 {
-	string file;
-	Util::decodeUrl(hubURL, address, port, file);
+	string file, tport, proto, query, fragment;
+	Util::decodeUrl(hubURL, proto, address, tport, file, query, fragment);
+	port = static_cast<uint16_t>(Util::toInt(tport));
 
 	TimerManager::getInstance()->addListener(this);
 }

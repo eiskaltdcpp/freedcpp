@@ -41,7 +41,7 @@ public:
 	
 	virtual void on(DownloadStarting, const string&) throw() { }
 	virtual void on(DownloadFailed, const string&) throw() { }
-	virtual void on(DownloadFinished, const string&, bool) throw() { }
+	virtual void on(DownloadFinished, const string&) throw() { }
 	virtual void on(FavoriteAdded, const FavoriteHubEntryPtr) throw() { }
 	virtual void on(FavoriteRemoved, const FavoriteHubEntryPtr) throw() { }
 	virtual void on(UserAdded, const FavoriteUser&) throw() { }

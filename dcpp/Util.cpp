@@ -81,22 +81,22 @@ static string getDownloadsPath(const string& def) {
 	static HINSTANCE shell32 = NULL;
 
 	if(!shell32) {
-	    shell32 = ::LoadLibrary(_T("Shell32.dll"));
-	    if(shell32)
-	    {
-	    	getKnownFolderPath = (_SHGetKnownFolderPath)::GetProcAddress(shell32, "SHGetKnownFolderPath");
+		shell32 = ::LoadLibrary(_T("Shell32.dll"));
+		if(shell32)
+		{
+			getKnownFolderPath = (_SHGetKnownFolderPath)::GetProcAddress(shell32, "SHGetKnownFolderPath");
 
-	    	if(getKnownFolderPath) {
-	    		 PWSTR path = NULL;
-	             // Defined in KnownFolders.h.
-	             static GUID downloads = {0x374de290, 0x123f, 0x4565, {0x91, 0x64, 0x39, 0xc4, 0x92, 0x5e, 0x46, 0x7b}};
-	    		 if(getKnownFolderPath(downloads, 0, NULL, &path) == S_OK) {
-	    			 string ret = Text::fromT(path) + "\\";
-	    			 ::CoTaskMemFree(path);
-	    			 return ret;
-	    		 }
-	    	}
-	    }
+			if(getKnownFolderPath) {
+				 PWSTR path = NULL;
+				 // Defined in KnownFolders.h.
+				 static GUID downloads = {0x374de290, 0x123f, 0x4565, {0x91, 0x64, 0x39, 0xc4, 0x92, 0x5e, 0x46, 0x7b}};
+				 if(getKnownFolderPath(downloads, 0, NULL, &path) == S_OK) {
+					 string ret = Text::fromT(path) + "\\";
+					 ::CoTaskMemFree(path);
+					 return ret;
+				 }
+			}
+		}
 	}
 
 	return def + "Downloads\\";
@@ -403,52 +403,114 @@ string Util::getShortTimeString(time_t t) {
 	return Text::toUtf8(buf);
 }
 
+void Util::sanitizeUrl(string& url) {
+	// Trim spaces and special characters
+	static const std::array<char, 7> special_chars = { ' ', '<', '>', '"', '\t', '\r', '\n' };
+	for(const auto &ch : special_chars) {
+		while(url[0] == ch)
+			url.erase(0, 1);
+		while(url[url.length() - 1] == ch) {
+			url.erase(url.length()-1);
+		}
+	}
+}
+
 /**
  * Decodes a URL the best it can...
  * Default ports:
  * http:// -> port 80
  * dchub:// -> port 411
  */
-void Util::decodeUrl(const string& url, string& aServer, uint16_t& aPort, string& aFile) {
-	// First, check for a protocol: xxxx://
-	string::size_type i = 0, j, k;
+void Util::decodeUrl(const string& url, string& protocol, string& host, string& port, string& path, string& query, string& fragment) {
+	auto fragmentEnd = url.size();
+	auto fragmentStart = url.rfind('#');
 
-	aServer = emptyString;
-	aFile = emptyString;
-
-	if( (j=url.find("://", i)) != string::npos) {
-		// Protocol found
-		string protocol = url.substr(0, j);
-		i = j + 3;
-
-		if(protocol == "http") {
-			aPort = 80;
-		} else if(protocol == "dchub") {
-			aPort = 411;
-		}
-	}
-
-	if( (j=url.find('/', i)) != string::npos) {
-		// We have a filename...
-		aFile = url.substr(j);
-	}
-
-	if( (k=url.find(':', i)) != string::npos) {
-		// Port
-		if(j == string::npos) {
-			aPort = static_cast<uint16_t>(Util::toInt(url.substr(k+1)));
-		} else if(k < j) {
-			aPort = static_cast<uint16_t>(Util::toInt(url.substr(k+1, j-k-1)));
-		}
+	size_t queryEnd;
+	if(fragmentStart == string::npos) {
+		queryEnd = fragmentStart = fragmentEnd;
 	} else {
-		k = j;
+		dcdebug("f");
+		queryEnd = fragmentStart;
+		fragmentStart++;
 	}
 
-	if(k == string::npos) {
-		aServer = url.substr(i);
-		if(i==0) aPort = 411;
-	} else
-		aServer = url.substr(i, k-i);
+	auto queryStart = url.rfind('?', queryEnd);
+	size_t fileEnd;
+
+	if(queryStart == string::npos) {
+		fileEnd = queryStart = queryEnd;
+	} else {
+		dcdebug("q");
+		fileEnd = queryStart;
+		queryStart++;
+	}
+
+	auto protoStart = 0;
+	auto protoEnd = url.find("://", protoStart);
+
+	auto authorityStart = protoEnd == string::npos ? protoStart : protoEnd + 3;
+	auto authorityEnd = url.find_first_of("/#?", authorityStart);
+
+	size_t fileStart;
+	if(authorityEnd == string::npos) {
+		authorityEnd = fileStart = fileEnd;
+	} else {
+		dcdebug("a");
+		fileStart = authorityEnd;
+	}
+
+	protocol = (protoEnd == string::npos ? Util::emptyString : url.substr(protoStart, protoEnd - protoStart));
+
+	if(authorityEnd > authorityStart) {
+		dcdebug("x");
+		size_t portStart = string::npos;
+		if(url[authorityStart] == '[') {
+			// IPv6?
+			auto hostEnd = url.find(']');
+			if(hostEnd == string::npos) {
+				return;
+			}
+
+			host = url.substr(authorityStart + 1, hostEnd - authorityStart - 1);
+			if(hostEnd + 1 < url.size() && url[hostEnd + 1] == ':') {
+				portStart = hostEnd + 2;
+			}
+		} else {
+			size_t hostEnd;
+			portStart = url.find(':', authorityStart);
+			if(portStart != string::npos && portStart > authorityEnd) {
+				portStart = string::npos;
+			}
+
+			if(portStart == string::npos) {
+				hostEnd = authorityEnd;
+			} else {
+				hostEnd = portStart;
+				portStart++;
+			}
+
+			dcdebug("h");
+			host = url.substr(authorityStart, hostEnd - authorityStart);
+		}
+
+		if(portStart == string::npos) {
+			if(protocol == "http") {
+				port = "80";
+			} else if(protocol == "https") {
+				port = "443";
+			} else if(protocol == "dchub"  || protocol.empty()) {
+				port = "411";
+			}
+		} else {
+			dcdebug("p");
+			port = url.substr(portStart, authorityEnd - portStart);
+		}
+	}
+
+	dcdebug("\n");
+	path = url.substr(fileStart, fileEnd - fileStart);
+	query = url.substr(queryStart, queryEnd - queryStart);
+	fragment = url.substr(fragmentStart, fragmentEnd - fragmentStart);
 }
 
 string Util::getAwayMessage() {

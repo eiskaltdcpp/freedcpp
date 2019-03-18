@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2019 Boris Pek <tehnick-8@yandex.ru>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -656,11 +657,15 @@ void FavoriteManager::setHubList(int aHubList) {
 
 void FavoriteManager::refresh(bool forceDownload /* = false */) {
 	StringList sl = getHubLists();
-	if(sl.empty())
+	if(sl.empty()) {
+		fire(FavoriteManagerListener::DownloadFailed(), Util::emptyString);
 		return;
+	}
+
 	publicListServer = sl[(lastServer) % sl.size()];
-	if(Util::strnicmp(publicListServer.c_str(), "http://", 7) != 0) {
+	if(Util::findSubString(publicListServer, "http://") != 0 && Util::findSubString(publicListServer, "https://") != 0) {
 		lastServer++;
+		fire(FavoriteManagerListener::DownloadFailed(), str(F_("Invalid URL: %1%") % Util::addBrackets(publicListServer)));
 		return;
 	}
 
@@ -677,10 +682,10 @@ void FavoriteManager::refresh(bool forceDownload /* = false */) {
 			try {
 				File cached(path, File::READ, File::OPEN);
 				downloadBuf = cached.read();
-				char buf[20];
+				char dateBuf[20];
 				time_t fd = cached.getLastModified();
-				if (strftime(buf, 20, "%x", localtime(&fd))) {
-					fileDate = string(buf);
+				if (strftime(dateBuf, 20, "%x", localtime(&fd))) {
+					fileDate = string(dateBuf);
 				}
 			} catch(const FileException&) {
 				downloadBuf = Util::emptyString;
@@ -767,7 +772,7 @@ void FavoriteManager::on(Failed, HttpConnection*, const string& aLine) throw() {
 		fire(FavoriteManagerListener::DownloadFailed(), aLine);
 	}
 }
-void FavoriteManager::on(Complete, HttpConnection*, const string& aLine, bool fromCoral) throw() {
+void FavoriteManager::on(Complete, HttpConnection*, const string& aLine) throw() {
 	bool parseSuccess;
 
 	c->removeListener(this);
@@ -776,7 +781,7 @@ void FavoriteManager::on(Complete, HttpConnection*, const string& aLine, bool fr
 	}	
 	running = false;
 	if(useHttp && parseSuccess) {
-		fire(FavoriteManagerListener::DownloadFinished(), aLine, fromCoral);
+		fire(FavoriteManagerListener::DownloadFinished(), aLine);
 	}
 }
 void FavoriteManager::on(Redirected, HttpConnection*, const string& aLine) throw() {

@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2019 Boris Pek <tehnick-8@yandex.ru>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -459,9 +460,9 @@ void ClientManager::on(NmdcSearch, Client* aClient, const string& aSeeker, int a
 
 		} else {
 			try {
-				string ip, file;
-				uint16_t port = 0;
-				Util::decodeUrl(aSeeker, ip, port, file);
+				string ip, file, tport, proto, query, fragment;
+				Util::decodeUrl(aSeeker, proto, ip, tport, file, query, fragment);
+				uint16_t port = static_cast<uint16_t>(Util::toInt(tport));
 				ip = Socket::resolve(ip);
 				if(static_cast<NmdcHub*>(aClient)->isProtectedIP(ip))
 					return;

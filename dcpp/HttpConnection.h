@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2001-2010 Jacek Sieka, arnetheduck on gmail point com
+ * Copyright (C) 2019 Boris Pek <tehnick-8@yandex.ru>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,77 +17,66 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#if !defined(HTTP_CONNECTION_H)
-#define HTTP_CONNECTION_H
+#pragma once
 
 #include "BufferedSocket.h"
+#include "HttpConnectionListener.h"
+#include "Speaker.h"
+#include "Util.h"
+
+#include <boost/noncopyable.hpp>
 
 namespace dcpp {
 
+using std::string;
 class HttpConnection;
 
-class HttpConnectionListener {
-public:
-	virtual ~HttpConnectionListener() { }
-	template<int I>	struct X { enum { TYPE = I }; };
-
-	typedef X<0> Data;
-	typedef X<1> Failed;
-	typedef X<2> Complete;
-	typedef X<3> Redirected;
-	typedef X<4> TypeNormal;
-	typedef X<5> TypeBZ2;
-
-	virtual void on(Data, HttpConnection*, const uint8_t*, size_t) throw() =0;
-	virtual void on(Failed, HttpConnection*, const string&) throw() { }
-	virtual void on(Complete, HttpConnection*, const string&, bool) throw() { }
-	virtual void on(Redirected, HttpConnection*, const string&) throw() { }
-	virtual void on(TypeNormal, HttpConnection*) throw() { }
-	virtual void on(TypeBZ2, HttpConnection*) throw() { }
-};
-
-class HttpConnection : BufferedSocketListener, public Speaker<HttpConnectionListener>
+class HttpConnection : BufferedSocketListener, public Speaker<HttpConnectionListener>, private boost::noncopyable
 {
 public:
+	HttpConnection(const string& aUserAgent = Util::emptyString);
+	virtual ~HttpConnection();
+
 	void downloadFile(const string& aUrl);
-	HttpConnection() : ok(false), port(80), size(-1), moved302(false), coralizeState(CST_DEFAULT), socket(NULL) { }
-	virtual ~HttpConnection() throw() {
-		if(socket) {
-			socket->removeListener(this);
-			BufferedSocket::putSocket(socket);
-		}
-	}
+	void postData(const string& aUrl, const StringMap& aData);
+
+	const string& getMimeType() const { return mimeType; }
+
+	int64_t getSize() const { return size; }
+	int64_t getDone() const { return done; }
 
 private:
-
-	HttpConnection(const HttpConnection&);
-	HttpConnection& operator=(const HttpConnection&);
+	enum RequestType { TYPE_GET, TYPE_POST };
+	enum ConnectionStates { CONN_UNKNOWN, CONN_OK, CONN_FAILED, CONN_MOVED, CONN_CHUNKED };
 
 	string currentUrl;
+	string userAgent;
+	string method;
 	string file;
 	string server;
-	bool ok;
-	uint16_t port;
-	int64_t size;
-	bool moved302;
+	string port;
 
-	enum CoralizeStates {CST_DEFAULT, CST_CONNECTED, CST_NOCORALIZE};
-	CoralizeStates coralizeState;
+	string requestBody;
+
+	string mimeType;
+	int64_t size;
+	int64_t done;
+
+	ConnectionStates connState;
+	RequestType connType;
 
 	BufferedSocket* socket;
 
+	void prepareRequest(RequestType type);
+	void abortRequest(bool disconnect);
+
 	// BufferedSocketListener
-	virtual void on(Connected) throw();
-	virtual void on(Line, const string&) throw();
-	virtual void on(Data, uint8_t*, size_t) throw();
-	virtual void on(ModeChange) throw();
-	virtual void on(Failed, const string&) throw();
-
-	void onConnected();
-	void onLine(const string& aLine);
-
+	void on(Connected) noexcept;
+	void on(Line, const string&) noexcept;
+	void on(Data, uint8_t*, size_t) noexcept;
+	void on(ModeChange) noexcept;
+	void on(Failed, const string&) noexcept;
 };
 
 } // namespace dcpp
 
-#endif // !defined(HTTP_CONNECTION_H)
