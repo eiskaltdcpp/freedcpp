@@ -25,8 +25,8 @@
 #include "upnpc.hh"
 
 #include <miniupnpc/miniupnpc.h>
-#include <miniupnpc/miniwget.h>
 #include <miniupnpc/upnpcommands.h>
+#include <miniupnpc/upnperrors.h>
 #include <dcpp/Util.h>
 
 static UPNPUrls urls;
@@ -37,7 +37,8 @@ using namespace dcpp;
 
 bool UPnPc::init()
 {
-	UPNPDev *devices = upnpDiscover(2000, 0, 0, 0);
+	UPNPDev *devices = upnpDiscover(3000, 0, 0, 0, 0, 2, 0);
+
 	if (!devices)
 		return false;
 
@@ -55,20 +56,7 @@ bool UPnPc::init()
 	if (!device)
 		device = devices; /* defaulting to first device */
 
-	bool ret = false;
-
-	int descXMLsize = 0;
-	char *descXML = reinterpret_cast<char*>(miniwget(device->descURL, &descXMLsize));
-	if (descXML)
-	{
-		memset(&urls, 0, sizeof(UPNPUrls));
-		memset(&data, 0, sizeof(IGDdatas));
-		parserootdesc(descXML, descXMLsize, &data);
-		delete descXML;
-
-		GetUPNPUrls(&urls, &data, device->descURL);
-		ret = true;
-	}
+	bool ret = UPNP_GetValidIGD(devices, &urls, &data, 0, 0);
 
 	freeUPNPDevlist(devices);
 
@@ -79,7 +67,7 @@ bool UPnPc::add(const unsigned short port, const UPnP::Protocol protocol, const 
 {
 	const string port_ = Util::toString(port);
 	return UPNP_AddPortMapping(urls.controlURL, data.first.servicetype, port_.c_str(), port_.c_str(),
-		Util::getLocalIp().c_str(), description.c_str(), protocols[protocol], 0) == UPNPCOMMAND_SUCCESS;
+		Util::getLocalIp().c_str(), description.c_str(), protocols[protocol], 0, 0) == UPNPCOMMAND_SUCCESS;
 }
 
 bool UPnPc::remove(const unsigned short port, const UPnP::Protocol protocol)
