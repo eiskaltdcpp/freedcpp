@@ -37,7 +37,11 @@ using namespace dcpp;
 
 bool UPnPc::init()
 {
+#if (MINIUPNPC_API_VERSION >= 14)
 	UPNPDev *devices = upnpDiscover(3000, 0, 0, 0, 0, 2, 0);
+#else
+	UPNPDev *devices = upnpDiscover(3000, 0, 0, 0, 0, 0);
+#endif
 
 	if (!devices)
 		return false;
