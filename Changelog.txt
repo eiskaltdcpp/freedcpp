@@ -1,4 +1,4 @@
---- 0.1.0 2019-xx-xx ---
+--- 0.1.0 2019-03-21 ---
 * Old project on Google Code is dead. Passive development of this project will
   be continued at new location: https://github.com/eiskaltdcpp/freedcpp
 * Fix segfault when user is trying to register user command which name is

@@ -20,5 +20,5 @@
  */
 
 #define GUI_PACKAGE "freedcpp"
-#define GUI_VERSION_STRING "0.0.5"
-#define GUI_VERSION_BUILD_STRING "19"
+#define GUI_VERSION_STRING "0.1.0"
+#define GUI_VERSION_BUILD_STRING "0"
