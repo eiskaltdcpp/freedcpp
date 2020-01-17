@@ -26,8 +26,8 @@ Dependencies
 * zlib
 * libbz2
 * libssl
-* libgnome
-* libnotify >= 0.4.1
+* libcanberra
+* libnotify
 * libboost
 * libminiupnpc
 

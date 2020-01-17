@@ -43,7 +43,7 @@ Import('env')
 # We don't want to add these CFLAGS globally so we copy the env
 env = env.Clone()
 env.ParseConfig('pkg-config --cflags libglade-2.0')
-env.ParseConfig('pkg-config --cflags libgnome-2.0')
+env.ParseConfig('pkg-config --cflags libcanberra-gtk')
 
 # Build the gui_files
 obj_files = env.Object(gui_files)

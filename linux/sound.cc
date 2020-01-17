@@ -19,7 +19,7 @@
  * using OpenSSL with this program is allowed.
  */
 
-#include <libgnome/gnome-sound.h>
+#include <canberra-gtk.h>
 #include "settingsmanager.hh"
 #include <dcpp/Text.h>
 #include "sound.hh"
@@ -28,6 +28,8 @@ using namespace std;
 using namespace dcpp;
 
 Sound *Sound::pSound = NULL;
+
+ca_context *context;
 
 void Sound::start()
 {
@@ -50,8 +52,8 @@ Sound* Sound::get()
 
 void Sound::sound_init()
 {
-	gnome_sound_init(NULL);
-	dcdebug("Sound::sound_init: Esound connection %d...\n", gnome_sound_connection_get());
+	int res = ca_context_create(&context);
+	dcdebug("Sound::sound_init: connection %d...\n", res);
 }
 
 void Sound::playSound(TypeSound sound)
@@ -121,10 +123,10 @@ void Sound::playSound(TypeSound sound)
 
 void Sound::playSound(const string &target)
 {
-	gnome_sound_play(Text::fromUtf8(target).c_str());
+	ca_context_play(context, 1,CA_PROP_MEDIA_FILENAME, target.c_str(), NULL);
 }
 
 void Sound::sound_finalize()
 {
-	gnome_sound_shutdown();
+	ca_context_destroy(context);
 }

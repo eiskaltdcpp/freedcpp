@@ -134,8 +134,8 @@ if not 'install' in COMMAND_LINE_TARGETS:
 		print '\tNote: You might have the lib but not the headers'
 		Exit(1)
 
-	if not conf.CheckPKG('libgnome-2.0 >= 2.0'):
-		print '\tlibgnome >= 2.0 not found.'
+	if not conf.CheckPKG('libcanberra-gtk >= 0.30'):
+		print '\tlibcanberra-gtk >= 0.30 not found.'
 		print '\tNote: You might have the lib but not the headers'
 		Exit(1)
 
@@ -246,7 +246,7 @@ if not 'install' in COMMAND_LINE_TARGETS:
 		env.Append(CXXFLAGS = '-D_DATADIR=\'\"' + env['PREFIX'] + '/share' + '\"\'')
 
 	env.ParseConfig('pkg-config --libs libglade-2.0')
-	env.ParseConfig('pkg-config --libs libgnome-2.0')
+	env.ParseConfig('pkg-config --libs libcanberra-gtk')
 	env.ParseConfig('pkg-config --libs libnotify')
 	env.ParseConfig('pkg-config --libs gthread-2.0')
 
