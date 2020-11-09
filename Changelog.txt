@@ -1,5 +1,7 @@
---- 0.1.2 2020-xx-xx ---
+--- 0.1.2 2020-11-10 ---
 * Port SConstruct to python 3.x.
+* Fix spelling errors.
+* Add manual page.
 
 --- 0.1.1 2020-01-17 ---
 * Rewrite sound notification system from libgnome to libcanberra.
