@@ -456,7 +456,7 @@
       </widget>
     </child>
     <child>
-      <widget class="GtkMenuItem" id="limitimgCommandItem">
+      <widget class="GtkMenuItem" id="limitingCommandItem">
         <property name="visible">True</property>
         <property name="tooltip" translatable="yes">Set download limit image</property>
         <property name="label">/limg</property>
