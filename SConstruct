@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import os
-import commands
+import subprocess
 import string
 import glob
 
@@ -33,15 +33,15 @@ def CheckPKG(context, name):
 
 def CheckCXXVersion(context, name, major, minor):
 	context.Message('Checking for %s >= %d.%d...' % (name, major, minor))
-	ret = commands.getoutput('%s -dumpversion' % name)
+	ret = subprocess.getoutput('%s -dumpversion' % name)
 
 	retval = 0
 	try:
-		if ((string.atoi(ret[0]) == major and string.atoi(ret[2]) >= minor)
-		or (string.atoi(ret[0]) > major)):
+		if ((int(ret[0]) == major and int(ret[2]) >= minor)
+		or (int(ret[0]) > major) or (int(ret) > major)):
 			retval = 1
 	except ValueError:
-		print "No C++ compiler found!"
+		print("No C++ compiler found!")
 
 	context.Result(retval)
 	return retval
@@ -82,19 +82,19 @@ conf = Configure(env,
 	conf_dir = 'build/sconf',
 	log_file = 'build/sconf/config.log')
 
-if os.environ.has_key('CXX'):
+if 'CXX' in os.environ:
 	conf.env['CXX'] = os.environ['CXX']
 
-if os.environ.has_key('CC'):
+if 'CC' in os.environ:
 	conf.env['CC'] = os.environ['CC']
 
-if os.environ.has_key('CXXFLAGS'):
+if 'CXXFLAGS' in os.environ:
 	conf.env['CPPFLAGS'] = conf.env['CXXFLAGS'] = os.environ['CXXFLAGS'].split()
 
-if os.environ.has_key('LDFLAGS'):
+if 'LDFLAGS' in os.environ:
 	conf.env['LINKFLAGS'] = os.environ['LDFLAGS'].split()
 
-if os.environ.has_key('CFLAGS'):
+if 'CFLAGS' in os.environ:
 	conf.env['CFLAGS'] = os.environ['CFLAGS'].split()
 
 env.SConsignFile('build/sconf/.sconsign')
@@ -107,46 +107,46 @@ Help(vars.GenerateHelpText(env))
 
 if not 'install' in COMMAND_LINE_TARGETS:
 
-	if not (conf.env.has_key('CXX') and conf.env['CXX']):
-		print 'CXX env variable is not set, attempting to use g++'
+	if not ('CXX' in conf.env and conf.env['CXX']):
+		print('CXX env variable is not set, attempting to use g++')
 		conf.env['CXX'] = 'g++'
 
 	if not conf.CheckCXXVersion(env['CXX'], 4, 1):
-		print 'Compiler version check failed. g++ 4.1 or later is needed'
+		print('Compiler version check failed. g++ 4.1 or later is needed')
 		Exit(1)
 
 	if not conf.CheckPKGConfig():
-		print '\tpkg-config not found.'
+		print('\tpkg-config not found.')
 		Exit(1)
 
 	if not conf.CheckPKG('gtk+-2.0 >= 2.10'):
-		print '\tgtk+ >= 2.10 not found.'
-		print '\tNote: You might have the lib but not the headers'
+		print('\tgtk+ >= 2.10 not found.')
+		print('\tNote: You might have the lib but not the headers')
 		Exit(1)
 
 	if not conf.CheckPKG('gthread-2.0 >= 2.4'):
-		print '\tgthread >= 2.4 not found.'
-		print '\tNote: You might have the lib but not the headers'
+		print('\tgthread >= 2.4 not found.')
+		print('\tNote: You might have the lib but not the headers')
 		Exit(1)
 
 	if not conf.CheckPKG('libglade-2.0 >= 2.4'):
-		print '\tlibglade-2.0 >= 2.4 not found.'
-		print '\tNote: You might have the lib but not the headers'
+		print('\tlibglade-2.0 >= 2.4 not found.')
+		print('\tNote: You might have the lib but not the headers')
 		Exit(1)
 
 	if not conf.CheckPKG('libcanberra-gtk >= 0.30'):
-		print '\tlibcanberra-gtk >= 0.30 not found.'
-		print '\tNote: You might have the lib but not the headers'
+		print('\tlibcanberra-gtk >= 0.30 not found.')
+		print('\tNote: You might have the lib but not the headers')
 		Exit(1)
 
 	if not conf.CheckPKG('libnotify >= 0.4.1'):
-		print '\tlibnotify >= 0.4.1 not found.'
-		print '\tNote: You might have the lib but not the headers'
+		print('\tlibnotify >= 0.4.1 not found.')
+		print('\tNote: You might have the lib but not the headers')
 		Exit(1)
 	
 	if not conf.CheckCXXHeader('boost/version.hpp', '<>'):
-		print '\tboost not found.'
-		print '\tNote: You might have the lib but not the headers'
+		print('\tboost not found.')
+		print('\tNote: You might have the lib but not the headers')
 		Exit(1)
 
 	if not conf.CheckHeader('time.h'):
@@ -159,34 +159,34 @@ if not 'install' in COMMAND_LINE_TARGETS:
 		Exit(1)
 
 	if not conf.CheckLibWithHeader('pthread', 'pthread.h', 'c'):
-		print '\tpthread library not found'
-		print '\tNote: You might have the lib but not the headers'
+		print('\tpthread library not found')
+		print('\tNote: You might have the lib but not the headers')
 		Exit(1)
 
 	if not conf.CheckLibWithHeader('z', 'zlib.h', 'c'):
-		print '\tz library (gzip/z compression) not found'
-		print '\tNote: You might have the lib but not the headers'
+		print('\tz library (gzip/z compression) not found')
+		print('\tNote: You might have the lib but not the headers')
 		Exit(1)
 
 	if not conf.CheckLibWithHeader('bz2', 'bzlib.h', 'c'):
-		print '\tbz2 library (bz2 compression) not found'
-		print '\tNote: You might have the lib but not the headers'
+		print('\tbz2 library (bz2 compression) not found')
+		print('\tNote: You might have the lib but not the headers')
 		Exit(1)
 
 	# This needs to be before ssl check on *BSD systems
 	if not conf.CheckLib('crypto'):
-		print '\tcrypto library not found'
-		print '\tNote: This library may be a part of libssl on your system'
+		print('\tcrypto library not found')
+		print('\tNote: This library may be a part of libssl on your system')
 		Exit(1)
 
 	if not conf.CheckLibWithHeader('ssl', 'openssl/ssl.h', 'c'):
-		print '\tOpenSSL library (libssl) not found'
-		print '\tNote: You might have the lib but not the headers'
+		print('\tOpenSSL library (libssl) not found')
+		print('\tNote: You might have the lib but not the headers')
 		Exit(1)
 
 	# Needed for XFlush(). Headers shouldn't be needed since we include gdk/gdkx.h
 	if not conf.CheckLib('X11'):
-		print '\tX11 library not found'
+		print('\tX11 library not found')
 		Exit(1)
 
 	if not conf.CheckHeader('iconv.h'):
@@ -221,28 +221,28 @@ if not 'install' in COMMAND_LINE_TARGETS:
 		env['ICONV_CONST'] = 'const'
 		env.Append(LINKFLAGS = ['-lsocket', '-lnsl'])
 
-	if env.has_key('ICONV_CONST') and env['ICONV_CONST']:
+	if 'ICONV_CONST' in env and env['ICONV_CONST']:
 		env.Append(CXXFLAGS = '-DICONV_CONST=' + env['ICONV_CONST'])
 
-	if env.has_key('HAVE_IFADDRS_H'):
+	if 'HAVE_IFADDRS_H' in env:
 		env.Append(CXXFLAGS = '-DHAVE_IFADDRS_H')
 
-	if env.has_key('debug') and env['debug']:
+	if 'debug' in env and env['debug']:
 		env.Append(CXXFLAGS = ['-g', '-ggdb', '-D_DEBUG', '-Wall'])
 		env.Append(LINKFLAGS = ['-g', '-ggdb' '-Wall'])
 		BUILD_PATH = BUILD_PATH + 'debug/'
 
-	elif env.has_key('release') and env['release']:
+	elif 'release' in env and env['release']:
 		env.Append(CXXFLAGS = ['-O3', '-fomit-frame-pointer', '-DNDEBUG'])
 		BUILD_PATH = BUILD_PATH + 'release/'
 
 	else: BUILD_PATH = BUILD_PATH + 'default/'
 
-	if env.has_key('profile') and env['profile']:
+	if 'profile' in env and env['profile']:
 		env.Append(CXXFLAGS = '-pg')
 		env.Append(LINKFLAGS= '-pg')
 
-	if env.has_key('PREFIX') and env['PREFIX']:
+	if 'PREFIX' in env and env['PREFIX']:
 		env.Append(CXXFLAGS = '-D_DATADIR=\'\"' + env['PREFIX'] + '/share' + '\"\'')
 
 	env.ParseConfig('pkg-config --libs libglade-2.0')
