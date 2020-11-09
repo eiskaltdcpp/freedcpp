@@ -5,6 +5,10 @@ import os
 import subprocess
 import string
 import glob
+import sys
+
+if sys.version_info.major <= 2:
+	import commands
 
 EnsureSConsVersion(1, 2)
 
@@ -33,7 +37,10 @@ def CheckPKG(context, name):
 
 def CheckCXXVersion(context, name, major, minor):
 	context.Message('Checking for %s >= %d.%d...' % (name, major, minor))
-	ret = subprocess.getoutput('%s -dumpversion' % name)
+	if sys.version_info.major <= 2:
+		ret = commands.getoutput('%s -dumpversion' % name)
+	else:
+		ret = subprocess.getoutput('%s -dumpversion' % name)
 
 	retval = 0
 	try:
