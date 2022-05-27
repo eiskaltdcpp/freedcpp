@@ -1,6 +1,6 @@
 # FreeDC++ &ndash; file sharing program using Direct Connect protocols
 
-Website: http://freedcpp.narod.ru (outdated)
+Website: http://freedcpp.narod.ru (outdated)<br/>
 Sources: https://github.com/eiskaltdcpp/freedcpp
 
 ## License
